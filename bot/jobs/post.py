@@ -26,6 +26,10 @@ def process_submissions(channel, subreddit, submissions):
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
 
+    if now.hour > config.quite_hours.start and now.hour < config.quite_jours.end:
+        # don't post anything
+        return
+
     # PSEUDOCODE
     for channel in channels:
         if not channel.enabled:
