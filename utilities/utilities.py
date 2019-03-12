@@ -14,7 +14,7 @@ def html_escape(string):
     return escape(string)
 
 
-def now(string=False, timezone_aware=True, utc=False):
+def now(string=False, timezone_aware=False, utc=True):
     """Return a datetime object or a string
 
     :param string: True -> returns current datetime as a string (default format), str -> use the passed string as format
