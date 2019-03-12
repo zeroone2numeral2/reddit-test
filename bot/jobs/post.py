@@ -7,7 +7,9 @@ from pprint import pprint
 from utilities import u
 from database.models import Channel
 from database.models import Subreddit
+from database.models import Post
 from reddit import reddit
+from reddit import SubmissionObject
 from bot import Jobs
 from ..jobregistration import RUNNERS
 from config import config
@@ -16,12 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 def process_submissions(channel, subreddit, submissions):
-    for sub in submissions:
-        submission = SubmissionObject(sub)
-        if submission.duplicate():
+    for submission in submissions:
+        logger.info('checking submission: %s...', submission.id)
+        if Post.already_posted(subreddit, submission.id):
+            logger.info('...submission %s has already been posted', submission.id)
             continue
         else:
-            return submission
+            logger.info('...submission %s has NOT been posted yet, we will post this one', submission.id)
+            return SubmissionObject(submission, channel)
 
 
 # @Jobs.add(RUNNERS.run_daily, time=datetime.time(hour=4, minute=0))
@@ -67,8 +71,15 @@ def check_posts(bot, job):
 
             submission = process_submissions(channel, subreddit, submissions)
             if not submission:
+                logger.info('no submission returned, continuing to next subreddit/channel...')
                 continue
 
-            sent_message = submission.send(channel)  # also saves last post datetime of the channel database object
-            submission.save_latest_posted_submission_dt()
-            post.create(sent_message, subreddit, submission)
+            sent_message = submission.post(bot)
+            if sent_message:
+                Post.create(
+                    submission_id=submission.submission.id,
+                    subreddit=subreddit,
+                    channel=channel,
+                    message_id=sent_message.message_id,
+                    posted_at=u.now(string=False)
+                )

@@ -1,5 +1,6 @@
 import praw
 
+from .submission import SubmissionObject
 from config import config
 
 

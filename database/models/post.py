@@ -27,3 +27,11 @@ class Post(peewee.Model):
             self.subreddit_id,
             self.channel.channel_id
         )
+
+    @classmethod
+    def already_posted(cls, subreddit, submission_id):
+        try:
+            return bool(cls.get(cls.subreddit == subreddit, cls.submission_id == submission_id))
+        except peewee.DoesNotExist:
+            return False
+
