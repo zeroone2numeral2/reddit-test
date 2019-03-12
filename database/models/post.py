@@ -3,11 +3,12 @@ from playhouse.shortcuts import model_to_dict
 
 from ..database import db
 from .channel import Channel
+from .subreddit import Subreddit
 
 
 class Post(peewee.Model):
     submission_id = peewee.CharField(null=False)
-    subreddit_id = peewee.CharField(null=False)
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts')
     channel = peewee.ForeignKeyField(Channel, backref='posts')
     message_id = peewee.IntegerField(null=False)
     posted_at = peewee.DateTimeField(null=False)
@@ -15,7 +16,7 @@ class Post(peewee.Model):
     class Meta:
         table_name = 'posts'
         database = db
-        primary_key = peewee.CompositeKey('submission_id', 'subreddit_id')
+        primary_key = peewee.CompositeKey('submission_id', 'subreddit')
         indexes = (
             (('submission_id', 'subreddit_id', 'channel'), True),
         )

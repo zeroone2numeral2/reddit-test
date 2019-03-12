@@ -1,0 +1,24 @@
+[telegram]
+token = ""
+admins = []
+
+[praw]
+client_id = "0ri3963pR-qmog"
+client_secret = "aM5f4s7KyxaHoI3Y1sUkiSx5tjk"
+user_agent = "test script by -"
+
+[sqlite]
+filename = "redditmirror.sqlite"
+
+[logging]
+config = "logging.json"
+path = "logs/redditmirror.log"
+
+[submissions]
+default_max_frequency = 25 # minutes
+default_sorting = "hot"
+
+[quite_hours]
+from = 23
+to = 9
+timezone = ""
