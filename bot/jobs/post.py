@@ -18,11 +18,7 @@ def process_submissions(channel, subreddit, submissions):
         if subreddit_submission_already_posted:
             continue
         else:
-            sent_message = post_submission(submission, channel.images, channel.template)
-            submission.save_latest_posted_submission_dt()
-            channel.save_latest_post_datetime()
-            post.create(sent_message, subreddit, submission)
-            return
+            return submission
 
 
 @Jobs.add(RUNNERS.run_daily, time=datetime.time(hour=4, minute=0))
@@ -42,4 +38,11 @@ def check_posts(bot, job):
 
             submissions = get_submissions(subreddit.name, limit=50)
 
-            process_submissions(channel, subreddit, submissions)
+            submission_to_post = process_submissions(channel, subreddit, submissions)
+            if not submission_to_post:
+                continue
+
+            sent_message = post_submission(submission, channel.images, channel.template)
+            submission.save_latest_posted_submission_dt()
+            channel.save_latest_post_datetime()
+            post.create(sent_message, subreddit, submission)
