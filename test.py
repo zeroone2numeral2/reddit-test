@@ -6,10 +6,11 @@ reddit = praw.Reddit(client_id='0ri3963pR-qmog',
                      user_agent='test script by -')
 
 
-for submission in reddit.subreddit('anime').hot(limit=10):
+for submission in reddit.subreddit('dbz').hot(limit=10):
     #"""
-    print('subreddit_id:', submission.subreddit_id)
-    print('subreddit:', submission.subreddit_name_prefixed)
+    print('submisson id:', submission.id)
+    print('subreddit_ id:', submission.subreddit_id)
+    print('subreddit: r/{}'.format(submission.subreddit))
     print('submission title:', submission.title)
     print('stickied:', submission.stickied)
     print('created at:', submission.created)
