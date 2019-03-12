@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 def process_submissions(channel, subreddit, submissions):
     for sub in submissions:
-        if subreddit_submission_already_posted:
+        submission = SubmissionObject(sub)
+        if submission.duplicate():
             continue
         else:
             return submission
@@ -42,11 +43,10 @@ def check_posts(bot, job):
 
             submissions = get_submissions(subreddit.name, limit=50)
 
-            submission_to_post = process_submissions(channel, subreddit, submissions)
-            if not submission_to_post:
+            submission = process_submissions(channel, subreddit, submissions)
+            if not submission:
                 continue
 
-            sent_message = post_submission(submission, channel.images, channel.template)
+            sent_message = submission.send(channel)  # also saves last post datetime of the channel database object
             submission.save_latest_posted_submission_dt()
-            channel.save_latest_post_datetime()
             post.create(sent_message, subreddit, submission)
