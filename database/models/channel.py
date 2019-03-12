@@ -11,6 +11,7 @@ class Channel(peewee.Model):
     template = peewee.CharField(null=True)
     send_images = peewee.BooleanField(default=False)
     added = peewee.DateTimeField(null=False)
+    enabled = peewee.BooleanField(default=True)
 
     class Meta:
         table_name = 'channels'
