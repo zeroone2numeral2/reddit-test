@@ -6,6 +6,7 @@ admins = []
 client_id = "0ri3963pR-qmog"
 client_secret = "aM5f4s7KyxaHoI3Y1sUkiSx5tjk"
 user_agent = "test script by -"
+submissions_limit = 25
 
 [sqlite]
 filename = "redditmirror.sqlite"
@@ -19,6 +20,7 @@ default_max_frequency = 25 # minutes
 default_sorting = "hot"
 
 [quite_hours]
-from = 23
-to = 9
+enabled = true
+start = 23
+end = 9
 timezone = ""
