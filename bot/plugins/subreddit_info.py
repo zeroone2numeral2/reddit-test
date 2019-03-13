@@ -34,8 +34,5 @@ def sub_info(bot, update, args):
         update.message.reply_text('No "{}" in the database'.format(subreddit_name))
         return
 
-    subreddit_dict = model_to_dict(subreddit)
-
-    text = '\n'.join('{}: {}'.format(k, v) for k, v in subreddit_dict.items())
-
-    update.message.reply_text('<code>{}</code>'.format(u.escape(text)), parse_mode=ParseMode.HTML)
+    text = u.model_dict(subreddit, plain_formatted_string=True)
+    update.message.reply_text(text, parse_mode=ParseMode.HTML)

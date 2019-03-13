@@ -25,7 +25,7 @@ config = "logging.json"
 filepath = "logs/redditmirror.log"
 
 [submissions]
-default_max_frequency = 25 # minutes
+default_max_frequency = 33 # minutes
 default_sorting = "hot"
 
 [quiet_hours]
