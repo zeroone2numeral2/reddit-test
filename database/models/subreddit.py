@@ -20,7 +20,7 @@ DATETIME_ORMATS = [
 class Subreddit(peewee.Model):
     subreddit_id = peewee.CharField(primary_key=True, index=True)
     name = peewee.CharField(null=False, default=0)
-    channel = peewee.ForeignKeyField(Channel, backref='posts')
+    channel = peewee.ForeignKeyField(Channel, backref='posts', on_delete='NO ACTION')
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
     last_posted_submission_dt = peewee.DateTimeField(null=True)
     sorting = peewee.CharField(default=config.submissions.default_sorting)

@@ -35,7 +35,7 @@ def on_addsub_command(bot, update, args, user_data):
 
     subreddit_name = args[0]
 
-    clean_name = re.search(VALID_SUB_REGEX, subreddit_name, re.I)
+    clean_name = u.normalize_sub_name(subreddit_name)
     if not clean_name:
         update.message.reply_text('"{}" is not a valid subreddit name'.format(subreddit_name))
         return ConversationHandler.END

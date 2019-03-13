@@ -1,7 +1,10 @@
+import logging
 from functools import wraps
 from utilities import u
 
 from config import config
+
+logger = logging.getLogger(__name__)
 
 
 def restricted(func):
@@ -22,6 +25,7 @@ def failwithmessage(func):
         try:
             return func(bot, update, *args, **kwargs)
         except Exception as e:
+            logger.error('error during handler execution: %s', str(e), exc_info=True)
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
