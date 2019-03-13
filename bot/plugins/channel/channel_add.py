@@ -10,12 +10,15 @@ from telegram.error import TelegramError
 
 from database.models import Channel
 from bot import Plugins
+from utilities import d
 
 logger = logging.getLogger(__name__)
 
 FORWARD_MESSAGE = range(1)
 
 
+@d.restricted
+@d.failwithmessage
 def on_addchannel_command(bot, update):
     logger.info('/addchannel command')
 
@@ -24,6 +27,8 @@ def on_addchannel_command(bot, update):
     return FORWARD_MESSAGE
 
 
+@d.restricted
+@d.failwithmessage
 def on_forwarded_message(bot, update):
     logger.info('adding channel: forwarded message OK')
 
@@ -53,6 +58,8 @@ def on_forwarded_message(bot, update):
     return ConversationHandler.END
 
 
+@d.restricted
+@d.failwithmessage
 def on_non_forwarded_message(bot, update):
     logger.info('adding channel: forwarded message NOT OK: not forwarded')
     update.message.reply_text('I need a forwarded message, try again or /cancel')
@@ -60,6 +67,8 @@ def on_non_forwarded_message(bot, update):
     return FORWARD_MESSAGE
 
 
+@d.restricted
+@d.failwithmessage
 def on_cancel(bot, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted')

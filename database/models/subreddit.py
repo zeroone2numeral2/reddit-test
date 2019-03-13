@@ -1,8 +1,9 @@
 import peewee
 from playhouse.shortcuts import model_to_dict
 
-from ..database import db
+from database import db
 from .channel import Channel
+from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
 
@@ -23,14 +24,16 @@ class Subreddit(peewee.Model):
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
     last_posted_submission_dt = peewee.DateTimeField(null=True)
     sorting = peewee.CharField(default=config.submissions.default_sorting)
-    min_score = peewee.IntegerField(null=True)
     added = peewee.DateTimeField(default=u.now)
     enabled = peewee.BooleanField(default=True)
-    template = peewee.CharField(null=True)
+    template = peewee.CharField(null=True, default=DEFAULT_TEMPLATE)
     send_images = peewee.BooleanField(default=True)
     images_as_file = peewee.BooleanField(default=False)
-    images_only = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
+    # FILTERS
+    ignore_stickied = peewee.BooleanField(default=False)
+    images_only = peewee.BooleanField(default=False)
+    min_score = peewee.IntegerField(null=True)
 
     class Meta:
         table_name = 'subreddits'
@@ -53,3 +56,13 @@ class Subreddit(peewee.Model):
     @classmethod
     def set_field(cls, field, value):
         setattr(cls, field, value)
+
+    @classmethod
+    def list_with_channel(cls):
+        return_list = list()
+        
+        subs = (
+            cls.select(cls.name, cls.channel)
+        )
+        
+        return [sub for sub in subs]

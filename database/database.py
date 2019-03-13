@@ -1,16 +1,8 @@
 import logging
 
-from database import db
-from .models import Channel
-from .models import Subreddit
-from .models import Post
+from .models import create_tables
 
 logger = logging.getLogger(__name__)
-
-
-def create_tables():
-    with db:
-        db.create_tables([Channel, Subreddit, Post])
 
 
 logger.info('initializing database...')

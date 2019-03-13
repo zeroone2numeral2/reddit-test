@@ -7,11 +7,14 @@ from telegram import ParseMode
 from database.models import Subreddit
 from bot import Plugins
 from utilities import u
+from utilities import d
 
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['sub'], pass_args=True)
+@Plugins.add(CommandHandler, command=['sub', 'subinfo'], pass_args=True)
+@d.restricted
+@d.failwithmessage
 def sub_info(bot, update, args):
     logger.info('/sub command (args: %s)', args)
 

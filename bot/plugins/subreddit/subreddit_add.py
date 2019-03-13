@@ -9,13 +9,14 @@ from telegram.ext import Filters
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram import ParseMode
-from prawcore.exceptions import Redirect
 
 from bot.markups import Keyboard
 from database.models import Channel
 from database.models import Subreddit
 from bot import Plugins
 from reddit import reddit
+from utilities import u
+from utilities import d
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ CHANNEL_SELECT = range(1)
 VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 
+@d.restricted
+@d.failwithmessage
 def on_addsub_command(bot, update, args, user_data):
     logger.info('/addsub command, args: %s', str(args))
     if not args:
@@ -32,20 +35,19 @@ def on_addsub_command(bot, update, args, user_data):
 
     subreddit_name = args[0]
 
-    match = re.search(VALID_SUB_REGEX, subreddit_name, re.I)
-    if not match:
+    clean_name = re.search(VALID_SUB_REGEX, subreddit_name, re.I)
+    if not clean_name:
         update.message.reply_text('"{}" is not a valid subreddit name'.format(subreddit_name))
         return ConversationHandler.END
 
-    subreddit_name = match.group(1)
+    subreddit_name = clean_name
 
-    try:
-        for submission in reddit.subreddit(subreddit_name).new(limit=1):
-            subreddit_name = submission.subreddit  # save teh correct name
-    except Redirect as e:
-        logger.error('non existing subreddit: %s', str(e))
-        update.message.reply_text('"{}" does not seem to exist'.format(subreddit_name))
+    if not reddit.subreddit_exists(subreddit_name):
+        logger.info('non existing subreddit: %s', subreddit_name)
+        update.message.reply_text('"r/{}" does not seem to exist'.format(subreddit_name))
         return ConversationHandler.END
+    else:
+        subreddit_name = reddit.subreddit_exists(subreddit_name)  # also returns the correct name
 
     if Subreddit.fetch(subreddit_name):
         update.message.reply_text('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name),
@@ -65,10 +67,12 @@ def on_addsub_command(bot, update, args, user_data):
     return CHANNEL_SELECT
 
 
+@d.restricted
+@d.failwithmessage
 def on_channel_selected(bot, update, user_data):
     logger.info('channel selected: %s', update.message.text)
 
-    channel_id = int(re.search(r'(\d+)\.\s.+', update.message.text).group(1)) * -1
+    channel_id = u.expand_channel_id(update.message.text)
     channel = Channel.get(channel_id == channel_id)
 
     subreddit_name = user_data.pop('name')
@@ -87,11 +91,13 @@ def on_channel_selected(bot, update, user_data):
         name=subreddit_name
     )
 
-    update.message.reply_text('{} saved (channel: {})'.format(subreddit_name, channel.title), reply_markup=Keyboard.REMOVE)
+    update.message.reply_text('r/{} saved (channel: {})'.format(subreddit_name, channel.title), reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
 
+@d.restricted
+@d.failwithmessage
 def on_cancel(bot, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)

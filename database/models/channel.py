@@ -1,7 +1,7 @@
 import peewee
 from playhouse.shortcuts import model_to_dict
 
-from ..database import db
+from database import db
 from utilities import u
 
 
@@ -53,7 +53,8 @@ class Channel(peewee.Model):
 
         return_list = list()
         for channel in all_channels:
-            return_list.append('{}. {}'.format(channel.channel_id * -1, channel.title))
+            channel_id = str(channel.channel_id).replace('-100', '')
+            return_list.append('{}. {}'.format(channel_id, channel.title))
 
         return return_list
 

@@ -6,7 +6,7 @@ reddit = praw.Reddit(client_id='0ri3963pR-qmog',
                      user_agent='test script by -')
 
 
-for submission in reddit.subreddit('me_irl').hot(limit=1):
+for submission in reddit.subreddit('cursedimages').hot(limit=1):
     #"""
     print('submisson id:', submission.id)
     print('subreddit_ id:', submission.subreddit_id)

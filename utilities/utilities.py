@@ -9,6 +9,7 @@ from playhouse.shortcuts import model_to_dict
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
+VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 timezone = pytz.timezone('Europe/Rome')
 
@@ -55,3 +56,15 @@ def model_dict(model_instance, plain_formatted_string=False):
         text = '\n'.join('{}: {}'.format(k, v) for k, v in model_instance_dict.items())
         text = '<code>{}</code>'.format(escape(text))
         return text
+
+
+def normalize_sub_name(name):
+    match = re.search(VALID_SUB_REGEX, name, re.I)
+    if not match:
+        return None
+    else:
+        return match.group(1)
+
+
+def expand_channel_id(channel_id_str):
+    return int('100' + re.search(r'(\d+)\.\s.+', channel_id_str).group(1)) * -1

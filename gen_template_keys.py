@@ -1,11 +1,15 @@
-from reddit import Sender
 from reddit import reddit
+from reddit import Sender
+
+
+class subreddit:
+    sorting = 'hot'
 
 
 def main():
     print('getting one submission...')
     for submission in reddit.subreddit('all').hot(limit=1):
-        sender = Sender(None, None, None, submission)
+        sender = Sender(None, None, subreddit, submission)
 
         with open('template_keys.txt', 'w+') as f:
             print('writing file...')

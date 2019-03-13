@@ -5,16 +5,11 @@ from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 
+from database.models import Post
+from const import DEFAULT_TEMPLATE
 from utilities import u
 
 logger = logging.getLogger(__name__)
-
-
-DEFAULT_TEMPLATE = """\
-<b>{title_escaped}</b>
-
-<i>{sorting} • u/{author} • {elapsed_smart} • score: {score_dotted}</i>
-#{subreddit} • {thread_or_urls} ({num_comments_dotted})"""
 
 
 KEY_MAPPER_DICT = dict(
@@ -30,6 +25,8 @@ class Sender(dict):
         self._submission = submission
         self._channel = channel
         self._subreddit = subreddit
+
+        self._sent_message = None
 
         self._submission.is_image = False
         if self._submission.url.endswith(('.jpg', '.png')):
@@ -119,11 +116,11 @@ class Sender(dict):
 
         if self._submission.is_image and self._subreddit.send_images:
             logger.info('post is an image: using send_photo()')
-            sent_message = self._send_image(self._submission.url, text, send_text_fallback=True)
+            self._sent_message = self._send_image(self._submission.url, text, send_text_fallback=True)
         else:
-            sent_message = self._send_text(text)
+            self._sent_message = self._send_text(text)
 
-        return sent_message
+        return self._sent_message
 
     def _send_text(self, text):
         return self._bot.send_message(
@@ -135,17 +132,36 @@ class Sender(dict):
 
     def _send_image(self, image_url, caption, send_text_fallback=True):
         try:
-            return self._bot.send_photo(
+            self._sent_message = self._bot.send_photo(
                 self._channel.channel_id,
                 image_url,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
                 timeout=360
             )
+            return self._sent_message
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error when sending photo: %s', e.message)
             if send_text_fallback:
-                self._send_text(caption)
+                return self._send_text(caption)
+    
+    def register_post(self):
+        Post.create(
+            submission_id=self._submission.id,
+            subreddit=self._subreddit,
+            channel=self._channel,
+            message_id=self._sent_message.message_id if self._sent_message else None,
+            posted_at=u.now() if self._sent_message else None
+        )
+    
+    def test_filters(self):
+        if self._subreddit.ignore_stickied and self._submission.stickied:
+            return False
+        elif self._subreddit.images_only and not self.is_image:
+            return False
+        else:
+            return True
+        
 
 
 

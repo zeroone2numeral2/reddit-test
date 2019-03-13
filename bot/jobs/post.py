@@ -42,7 +42,8 @@ def process_submissions(subreddit):
             logger.info('...submission %s has already been posted', submission.id)
             continue
         else:
-            logger.info('...submission %s has NOT been posted yet, we will post this one', submission.id)
+            logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks', submission.id)
+            
             return submission
 
 
@@ -97,6 +98,12 @@ def check_posts(bot, job):
                 continue
 
             sender = Sender(bot, channel, subreddit, submission)
+            
+            if not sender.test_filters():
+                logger.info('submission did not pass filters, marking it as processed...')
+                sender.register_post()
+                logger.info('continuing to next subreddit...')
+                continue
 
             try:
                 sent_message = sender.post()
@@ -108,14 +115,8 @@ def check_posts(bot, job):
                 continue
 
             if sent_message:
-                logger.info('creating Post row..')
-                Post.create(
-                    submission_id=sender.submission.id,
-                    subreddit=subreddit,
-                    channel=channel,
-                    message_id=sent_message.message_id,
-                    posted_at=u.now(string=False)
-                )
+                logger.info('creating Post row...')
+                sender.register_post()
 
                 logger.info('updating Subreddit last post datetime...')
                 subreddit.last_posted_submission_dt = u.now()

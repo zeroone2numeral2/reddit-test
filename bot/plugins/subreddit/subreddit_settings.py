@@ -8,11 +8,14 @@ from telegram import ParseMode
 from database.models import Subreddit
 from bot import Plugins
 from utilities import u
+from utilities import d
 
 logger = logging.getLogger(__name__)
 
 
 @Plugins.add(CommandHandler, command=['setting', 'set'], pass_args=True)
+@d.restricted
+@d.failwithmessage
 def sub_settings(bot, update, args):
     logger.info('/setting command (args: %s)', args)
 
@@ -50,7 +53,10 @@ def sub_settings(bot, update, args):
     elif value in ('false', 'False'):
         logger.info('value is False')
         value = False
-    logger.info('value after true/false check: %s', value)
+    elif value in ('none', 'None'):
+        logger.info('value is None')
+        value = None
+    logger.info('value after true/false/none check: %s', value)
 
     try:
         setattr(subreddit, setting, value)
