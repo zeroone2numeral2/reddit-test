@@ -26,7 +26,7 @@ filepath = "logs/redditmirror.log"
 
 [submissions]
 default_max_frequency = 25 # minutes
-default_sorting = "top"
+default_sorting = "hot"
 
 [quiet_hours]
 enabled = true

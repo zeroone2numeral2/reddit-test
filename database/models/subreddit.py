@@ -46,7 +46,7 @@ class Subreddit(peewee.Model):
     @classmethod
     def fetch(cls, name):
         try:
-            return cls.get(cls.name == name)
+            return cls.get(cls.name ** name)
         except peewee.DoesNotExist:
             return None
 
