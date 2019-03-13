@@ -1,0 +1,5 @@
+logs/
+.idea/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

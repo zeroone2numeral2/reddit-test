@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 DEFAULT_TEMPLATE = """\
-[#{subreddit}] <b>{title_escaped}</b>
+<b>{title_escaped}</b>
 
 <i>u/{author} • {elapsed_smart} • score: {score}</i>
-<a href="{url}">content</a> • <a href="{permalink}">comments</a> ({num_comments})"""
+#{subreddit} • <a href="{url}">content</a> • <a href="{permalink}">comments</a> ({num_comments})"""
 
 
 KEY_MAPPER_DICT = dict(
@@ -84,6 +84,10 @@ class Sender(dict):
     @property
     def submission_dict(self):
         return self._submission_dict
+
+    @property
+    def template_keys(self):
+        return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str))]
 
     def __getitem__(self, item):
         return self._submission_dict[item]
