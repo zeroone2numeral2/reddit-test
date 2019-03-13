@@ -1,4 +1,5 @@
 import logging
+import re
 from html import escape
 import datetime
 import pytz
@@ -38,3 +39,7 @@ def now(string=False, timezone_aware=False, utc=True):
         return now.strftime(string)
     else:
         return now
+
+
+def dotted(number):
+    return re.sub('(\d)(?=(\d{3})+(?!\d))', r'\1.', '{}'.format(number))

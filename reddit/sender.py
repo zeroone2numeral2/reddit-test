@@ -13,33 +13,45 @@ logger = logging.getLogger(__name__)
 DEFAULT_TEMPLATE = """\
 <b>{title_escaped}</b>
 
-<i>u/{author} • {elapsed_smart} • score: {score}</i>
-#{subreddit} • <a href="{url}">content</a> • <a href="{permalink}">comments</a> ({num_comments})"""
+<i>{sorting} • u/{author} • {elapsed_smart} • score: {score_dotted}</i>
+#{subreddit} • {thread_or_urls} ({num_comments_dotted})"""
 
 
 KEY_MAPPER_DICT = dict(
-    permalink=lambda x: 'https://www.reddit.com/{}'.format(x),
     created_utc=lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp),
     created=lambda timestamp: datetime.datetime.fromtimestamp(timestamp)
 )
 
 
 class Sender(dict):
-    def __init__(self, bot, channel, submission):
+    def __init__(self, bot, channel, subreddit, submission):
         super(Sender, self).__init__()
         self._bot = bot
         self._submission = submission
-        # self.__dict__ = self._submission
-
         self._channel = channel
+        self._subreddit = subreddit
 
         self._submission.is_image = False
         if self._submission.url.endswith(('.jpg', '.png')):
             self._submission.is_image = True
 
-        self._submission.textual = False
+        self._submission.sorting = self._subreddit.sorting or 'hot'
+
+        # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
+        # and "comments" inline urls
+        self._submission.permalink = 'https://www.reddit.com{}'.format(self._submission.permalink)
         if self._submission.permalink == self._submission.url:
             self._submission.textual = True
+            self._submission.thread_or_urls = '<a href="">thread</a>'.format(self._submission.permalink)
+        else:
+            self._submission.textual = False
+            self._submission.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
+                self._submission.url,
+                self._submission.permalink
+            )
+
+        self._submission.score_dotted = u.dotted(self._submission.score or 0)
+        self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
 
         self._submission.text = None
         self._submission.text_32 = None
@@ -97,14 +109,15 @@ class Sender(dict):
         return self._submission_dict[item]
 
     def post(self):
-        template = self._channel.template
+        template = self._subreddit.template
         if not template:
             logger.info('no template: using the default one')
             template = DEFAULT_TEMPLATE
 
         text = template.format(**self._submission_dict)
+        # logger.info('post text: %s', text)
 
-        if self._submission.is_image and self._channel.send_images:
+        if self._submission.is_image and self._subreddit.send_images:
             logger.info('post is an image: using send_photo()')
             sent_message = self._send_image(self._submission.url, text, send_text_fallback=True)
         else:
@@ -117,7 +130,7 @@ class Sender(dict):
             self._channel.channel_id,
             text,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=not self._channel.webpage_preview
+            disable_web_page_preview=not self._subreddit.webpage_preview
         )
 
     def _send_image(self, image_url, caption, send_text_fallback=True):

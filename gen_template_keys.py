@@ -5,7 +5,7 @@ from reddit import reddit
 def main():
     print('getting one submission...')
     for submission in reddit.subreddit('all').hot(limit=1):
-        sender = Sender(None, None, submission)
+        sender = Sender(None, None, None, submission)
 
         with open('template_keys.txt', 'w+') as f:
             print('writing file...')

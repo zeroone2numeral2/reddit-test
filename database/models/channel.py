@@ -8,12 +8,7 @@ class Channel(peewee.Model):
     channel_id = peewee.IntegerField(primary_key=True, index=True)
     title = peewee.CharField(null=False)
     username = peewee.CharField(null=True)
-    template = peewee.CharField(null=True)
-    send_images = peewee.BooleanField(default=True)
-    # images_only = peewee.BooleanField(default=False)
-    webpage_preview = peewee.BooleanField(default=True)
     added = peewee.DateTimeField(null=False)
-    enabled = peewee.BooleanField(default=True)
 
     class Meta:
         table_name = 'channels'

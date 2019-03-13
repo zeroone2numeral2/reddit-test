@@ -96,7 +96,7 @@ def check_posts(bot, job):
                 logger.info('no submission returned, continuing to next subreddit/channel...')
                 continue
 
-            sender = Sender(bot, channel, submission)
+            sender = Sender(bot, channel, subreddit, submission)
 
             try:
                 sent_message = sender.post()
