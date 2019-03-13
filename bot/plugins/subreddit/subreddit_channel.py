@@ -2,11 +2,8 @@ import logging
 
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
-from telegram.ext import RegexHandler
 from telegram.ext import CommandHandler
 from telegram.ext import Filters
-from telegram.error import BadRequest
-from telegram.error import TelegramError
 
 from database.models import Channel
 from database.models import Subreddit
