@@ -47,7 +47,7 @@ def process_submissions(subreddit):
 
 
 # @Jobs.add(RUNNERS.run_daily, time=datetime.time(hour=4, minute=0))
-@Jobs.add(RUNNERS.run_repeating, interval=15*60, first=0)
+@Jobs.add(RUNNERS.run_repeating, interval=5*60, first=0)
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
 
@@ -64,6 +64,7 @@ def check_posts(bot, job):
     )
     for channel in channels:
         logger.info('processing channel %d (%s)', channel.channel_id, channel.title)
+        # logger.info('(channel: %s)', str(channel.to_dict()))
 
         subreddits = (
             Subreddit.select()
@@ -73,9 +74,10 @@ def check_posts(bot, job):
         for subreddit in subreddits:
             logger.info('channel %d: processing subreddit %s (r/%s)', channel.channel_id, subreddit.subreddit_id,
                         subreddit.name)
+            # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
 
             if subreddit.last_posted_submission_dt:
-                logger.info('elapsed time (last post -- now): %s -- %s', u.now(string=True),
+                logger.info('elapsed time (now -- last post): %s -- %s', u.now(string=True),
                             subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M'))
                 elapsed_time_minutes = (u.now(string=False) - subreddit.last_posted_submission_dt).seconds / 60
             else:

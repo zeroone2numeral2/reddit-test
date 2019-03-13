@@ -89,6 +89,10 @@ class Sender(dict):
     def template_keys(self):
         return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str))]
 
+    @property
+    def is_image(self):
+        return self._submission.is_image
+
     def __getitem__(self, item):
         return self._submission_dict[item]
 
