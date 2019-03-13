@@ -96,7 +96,7 @@ class Sender(dict):
 
     @property
     def template_keys(self):
-        return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str))]
+        return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str, int))]
 
     @property
     def is_image(self):

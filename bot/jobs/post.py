@@ -55,8 +55,8 @@ def check_posts(bot, job):
     now = u.now(string=False)
 
     if config.quiet_hours.enabled and (now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end):
-        logger.info('Quite hours (%d - %d): do not do anything (current hour: %d)',
-                    config.quite_hours.start, config.quite_hours.end, now.hour)
+        logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                    config.quiet_hours.start, config.quiet_hours.end, now.hour)
         return
 
     channels = (

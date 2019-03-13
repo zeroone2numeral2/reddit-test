@@ -29,7 +29,7 @@ default_max_frequency = 33 # minutes
 default_sorting = "hot"
 
 [quiet_hours]
-enabled = true
-start = 23
-end = 9
+enabled = false
+start = 22 # in UTC. Rome: UTC + 1
+end = 7 # in UTC. Rome: UTC + 1
 timezone = ""
