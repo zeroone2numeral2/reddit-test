@@ -1,15 +1,7 @@
 import logging
 import re
-from pprint import pformat
 
-from playhouse.shortcuts import model_to_dict
-from telegram.ext import ConversationHandler
-from telegram.ext import MessageHandler
-from telegram.ext import RegexHandler
 from telegram.ext import CommandHandler
-from telegram.ext import Filters
-from telegram.error import BadRequest
-from telegram.error import TelegramError
 from telegram import ParseMode
 
 from database.models import Subreddit
