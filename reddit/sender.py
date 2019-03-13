@@ -42,7 +42,7 @@ class Sender(dict):
         self._submission.permalink = 'https://www.reddit.com{}'.format(self._submission.permalink)
         if self._submission.permalink == self._submission.url:
             self._submission.textual = True
-            self._submission.thread_or_urls = '<a href="">thread</a>'.format(self._submission.permalink)
+            self._submission.thread_or_urls = '<a href="{}">thread</a>'.format(self._submission.permalink)
         else:
             self._submission.textual = False
             self._submission.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(

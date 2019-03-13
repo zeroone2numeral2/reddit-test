@@ -42,3 +42,14 @@ class Subreddit(peewee.Model):
     @classmethod
     def to_dict(cls):
         return model_to_dict(cls)
+
+    @classmethod
+    def fetch(cls, name):
+        try:
+            return cls.get(cls.name == name)
+        except peewee.DoesNotExist:
+            return None
+
+    @classmethod
+    def set_field(cls, field, value):
+        setattr(cls, field, value)
