@@ -30,3 +30,14 @@ def failwithmessage(func):
             update.message.reply_html(text)
 
     return wrapped
+
+
+def logerrors(func):
+    @wraps(func)
+    def wrapped(bot, job, *args, **kwargs):
+        try:
+            return func(bot, job, *args, **kwargs)
+        except Exception as e:
+            logger.error('error during job execution: %s', str(e), exc_info=True)
+
+    return wrapped

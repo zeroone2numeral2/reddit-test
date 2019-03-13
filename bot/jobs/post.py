@@ -8,6 +8,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from utilities import u
+from utilities import d
 from database.models import Channel
 from database.models import Subreddit
 from database.models import Post
@@ -49,6 +50,7 @@ def process_submissions(subreddit):
 
 # @Jobs.add(RUNNERS.run_daily, time=datetime.time(hour=4, minute=0))
 @Jobs.add(RUNNERS.run_repeating, interval=5*60, first=0)
+@d.logerrors
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
 
