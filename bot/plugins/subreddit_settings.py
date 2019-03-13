@@ -60,4 +60,4 @@ def sub_settings(bot, update, args):
         update.message.reply_text('Error while setting the property: {}'.format(str(e)))
         return
 
-    update.message.reply_text('Done')
+    update.message.reply_text('Done (to check: <code>/sub {}</code>)'.format(subreddit_name), parse_mode=ParseMode.HTML)
