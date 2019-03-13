@@ -36,6 +36,9 @@
         },
         "peewee": {
             "level": "DEBUG"
+        },
+        "prawcore": {
+            "level": "DEBUG"
         }
     },
     "formatters": {

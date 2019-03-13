@@ -1,4 +1,0 @@
-[#{subreddit}] <b>{title}</b>
-
-{from} at {created_utc} • score: {score} (<i>{sorting}</i>)
-<a href="{url}">content</a> • <a href="{permalink}">comments</a> ({num_comments})

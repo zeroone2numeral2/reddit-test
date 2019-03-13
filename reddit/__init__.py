@@ -1,6 +1,7 @@
 import praw
 
-from .submission import SubmissionObject
+from .sender import Sender
+from .sortings import Sorting
 from config import config
 
 

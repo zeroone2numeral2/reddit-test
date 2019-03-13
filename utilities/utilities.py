@@ -24,7 +24,7 @@ def now(string=False, timezone_aware=False, utc=True):
     """
 
     if utc:
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.utcnow()
     elif timezone_aware:
         now = timezone.localize(datetime.datetime.now())
     else:

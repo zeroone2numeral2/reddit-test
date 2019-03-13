@@ -1,6 +1,15 @@
 [telegram]
-token = ""
+workers = 1
+token = "285333393:AAHgZ709BfncOxdbTt9mj2JGfqyx_ptqhwo"
 admins = []
+
+[plugins]
+dir = "bot/plugins"
+manifest = "manifest"
+
+[jobs]
+dir = "bot/jobs"
+manifest = "manifest"
 
 [praw]
 client_id = "0ri3963pR-qmog"
@@ -13,13 +22,13 @@ filename = "redditmirror.sqlite"
 
 [logging]
 config = "logging.json"
-path = "logs/redditmirror.log"
+filepath = "logs/redditmirror.log"
 
 [submissions]
 default_max_frequency = 25 # minutes
-default_sorting = "hot"
+default_sorting = "top"
 
-[quite_hours]
+[quiet_hours]
 enabled = true
 start = 23
 end = 9

@@ -9,7 +9,7 @@ class Channel(peewee.Model):
     title = peewee.CharField(null=False)
     username = peewee.CharField(null=True)
     template = peewee.CharField(null=True)
-    send_images = peewee.BooleanField(default=False)
+    send_images = peewee.BooleanField(default=True)
     webpage_preview = peewee.BooleanField(default=True)
     added = peewee.DateTimeField(null=False)
     enabled = peewee.BooleanField(default=True)

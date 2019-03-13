@@ -14,7 +14,7 @@ for submission in reddit.subreddit('dbz').hot(limit=10):
     print('submission title:', submission.title)
     print('stickied:', submission.stickied)
     print('created at:', submission.created)
-    print('created at 8UTC):', submission.created_utc)
+    print('created at (UTC):', submission.created_utc)
     print('from: u/{}'.format(submission.author))
     print('permalink:', 'https://reddit.com/{}'.format(submission.permalink))
     print('shortlink:', submission.shortlink)
@@ -27,6 +27,7 @@ for submission in reddit.subreddit('dbz').hot(limit=10):
     print('score:', submission.score)
     print('media:', submission.media)
     print('ups:', submission.ups, 'downs:', submission.downs)
+    print('text:', submission.selftext)
     try:
         if submission.spoiler:
             pprint('submission preview:', submission.preview)
