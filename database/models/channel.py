@@ -44,3 +44,16 @@ class Channel(peewee.Model):
         channel.title = chat.title
         channel.username = channel.username
         channel.save()
+
+    @classmethod
+    def get_list(cls):
+        all_channels = (
+            cls.select()
+        )
+
+        return_list = list()
+        for channel in all_channels:
+            return_list.append('{}. {}'.format(channel.channel_id * -1, channel.title))
+
+        return return_list
+
