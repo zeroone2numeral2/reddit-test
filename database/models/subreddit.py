@@ -30,3 +30,7 @@ class Subreddit(peewee.Model):
 
     def __repr__(self):
         return '<Subreddit {}: {}>'.format(self.subreddit_id, self.name)
+
+    @classmethod
+    def to_dict(cls):
+        return model_to_dict(cls)

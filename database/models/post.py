@@ -35,3 +35,7 @@ class Post(peewee.Model):
         except peewee.DoesNotExist:
             return False
 
+    @classmethod
+    def to_dict(cls):
+        return model_to_dict(cls)
+
