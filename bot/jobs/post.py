@@ -1,7 +1,5 @@
 import logging
 import time
-import datetime
-from collections import namedtuple
 from pprint import pprint
 
 from telegram.error import BadRequest
@@ -9,7 +7,6 @@ from telegram.error import TelegramError
 
 from utilities import u
 from utilities import d
-from database.models import Channel
 from database.models import Subreddit
 from database.models import Post
 from reddit import reddit
@@ -48,8 +45,57 @@ def process_submissions(subreddit):
             return submission
 
 
-# @Jobs.add(RUNNERS.run_daily, time=datetime.time(hour=4, minute=0))
-@Jobs.add(RUNNERS.run_repeating, interval=5*60, first=0)
+def process_subreddit(subreddit, bot):
+    logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+    # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
+
+    if subreddit.last_posted_submission_dt:
+        logger.info('elapsed time (now -- last post): %s -- %s', u.now(string=True),
+                    subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M'))
+        elapsed_time_minutes = (u.now() - subreddit.last_posted_submission_dt).seconds / 60
+    else:
+        logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
+        elapsed_time_minutes = 9999999
+
+    if subreddit.last_posted_submission_dt and elapsed_time_minutes < subreddit.max_frequency:
+        logger.info(
+            'elapsed time is lower than max_frequency (%d minutes), continuing to next subreddit...',
+            subreddit.max_frequency
+        )
+        return
+
+    submission = process_submissions(subreddit)
+    if not submission:
+        logger.info('no submission returned, continuing to next subreddit/channel...')
+        return
+
+    sender = Sender(bot, subreddit.channel, subreddit, submission)
+
+    if not sender.test_filters():
+        logger.info('submission did not pass filters, marking it as processed...')
+        sender.register_post()
+        logger.info('continuing to next subreddit...')
+        return
+
+    try:
+        sent_message = sender.post()
+    except (BadRequest, TelegramError) as e:
+        logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+        return
+    except Exception as e:
+        logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+        return
+
+    if sent_message:
+        logger.info('creating Post row...')
+        sender.register_post()
+
+        logger.info('updating Subreddit last post datetime...')
+        subreddit.last_posted_submission_dt = u.now()
+        subreddit.save()
+
+
+@Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0)
 @d.logerrors
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
@@ -61,65 +107,16 @@ def check_posts(bot, job):
                     config.quiet_hours.start, config.quiet_hours.end, now.hour)
         return
 
-    channels = (
-        Channel.select()
-        #.where(Channel.enabled == True)
+    subreddits = (
+        Subreddit.select()
     )
-    for channel in channels:
-        logger.info('processing channel %d (%s)', channel.channel_id, channel.title)
-        # logger.info('(channel: %s)', str(channel.to_dict()))
 
-        subreddits = (
-            Subreddit.select()
-            .where(Subreddit.channel == channel)
-        )
+    for subreddit in subreddits:
+        try:
+            process_subreddit(subreddit, bot)
+        except Exception as e:
+            logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
 
-        for subreddit in subreddits:
-            logger.info('channel %d: processing subreddit %s (r/%s)', channel.channel_id, subreddit.subreddit_id,
-                        subreddit.name)
-            # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
+        time.sleep(1)
 
-            if subreddit.last_posted_submission_dt:
-                logger.info('elapsed time (now -- last post): %s -- %s', u.now(string=True),
-                            subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M'))
-                elapsed_time_minutes = (u.now(string=False) - subreddit.last_posted_submission_dt).seconds / 60
-            else:
-                logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
-
-
-            if subreddit.last_posted_submission_dt and elapsed_time_minutes < subreddit.max_frequency:
-                logger.info(
-                    'elapsed time is lower than max_frequency (%d minutes), continuing to next subreddit...',
-                    subreddit.max_frequency
-                )
-                continue
-
-            submission = process_submissions(subreddit)
-            if not submission:
-                logger.info('no submission returned, continuing to next subreddit/channel...')
-                continue
-
-            sender = Sender(bot, channel, subreddit, submission)
-            
-            if not sender.test_filters():
-                logger.info('submission did not pass filters, marking it as processed...')
-                sender.register_post()
-                logger.info('continuing to next subreddit...')
-                continue
-
-            try:
-                sent_message = sender.post()
-            except (BadRequest, TelegramError) as e:
-                logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-                continue
-            except Exception as e:
-                logger.error('generic error while posting the message: %s', str(e), exc_info=True)
-                continue
-
-            if sent_message:
-                logger.info('creating Post row...')
-                sender.register_post()
-
-                logger.info('updating Subreddit last post datetime...')
-                subreddit.last_posted_submission_dt = u.now()
-                subreddit.save()
+    logger.info('job ended at %s', u.now(string=True))
