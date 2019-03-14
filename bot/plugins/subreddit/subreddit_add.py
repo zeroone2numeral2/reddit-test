@@ -70,7 +70,8 @@ def on_channel_selected(bot, update, user_data):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
-    channel = Channel.get(channel_id == channel_id)
+    logger.info('channel_id: %d', channel_id)
+    channel = Channel.get(Channel.channel_id == channel_id)
 
     subreddit_name = user_data.pop('name')
 

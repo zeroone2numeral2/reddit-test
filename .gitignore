@@ -1,6 +1,8 @@
+venv/
 logs/*.log.*
 logs/*.log
 .idea/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+*.pyc
