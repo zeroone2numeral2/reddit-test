@@ -32,7 +32,7 @@ def sub_settings(bot, update, args):
         return
 
     # use the remaining text portion
-    value = re.search(r'^\/\w+\s+[\w-]{3,22}\s+\w+\s+(.+)$', update.message.text, re.I).group(1)
+    value = re.search(r'^\/\w+\s+[\w-]{3,22}\s+\w+\s+((?:.|\s)+)$', update.message.text, re.I).group(1)
     logger.info('value: %s', value)
 
     subreddit = Subreddit.fetch(subreddit_name)
