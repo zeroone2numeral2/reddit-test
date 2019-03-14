@@ -73,9 +73,9 @@ class Sender(dict):
 
         # "n hours ago" if hours > 0, else "n minutes ago"
         if self._submission.elapsed_hours > 0:
-            self._submission.elapsed_smart = '{} hours ago'.format(int(self._submission.elapsed_hours))
+            self._submission.elapsed_smart = '{} hours'.format(int(self._submission.elapsed_hours))
         else:
-            self._submission.elapsed_smart = '{} minutes ago'.format(int(self._submission.elapsed_minutes))
+            self._submission.elapsed_smart = '{} minutes'.format(int(self._submission.elapsed_minutes))
 
         self._submission_dict = dict()
 
