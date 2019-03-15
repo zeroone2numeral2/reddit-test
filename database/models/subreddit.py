@@ -58,11 +58,11 @@ class Subreddit(peewee.Model):
         setattr(cls, field, value)
 
     @classmethod
-    def list_with_channel(cls):
+    def get_list(cls):
         return_list = list()
         
         subs = (
-            cls.select(cls.name, cls.channel)
+            cls.select()
         )
         
         return [sub for sub in subs]

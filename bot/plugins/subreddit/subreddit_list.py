@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def subs_list(bot, update):
     logger.info('/subs command')
 
-    subreddits = Subreddit.list_with_channel()
+    subreddits = Subreddit.get_list()
     if not subreddits:
         update.message.reply_text('The list is empty')
         return
@@ -29,6 +29,7 @@ def subs_list(bot, update):
             string += ' ({})'.format(sub.channel.title)
         else:
             string += ' (no channel)'
+        string += ' freq: {}\''.format(sub.max_frequency)
         strings.append(string)
 
     update.message.reply_text('\n'.join(strings), parse_mode=ParseMode.HTML)
