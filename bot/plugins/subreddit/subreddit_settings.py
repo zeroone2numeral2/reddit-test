@@ -26,6 +26,7 @@ def sub_settings(bot, update, args):
 
     # use the first two args values
     subreddit_name, setting = args[:2]
+    setting = setting.lower()
     logger.info('subreddit_name, setting: %s, %s', subreddit_name, setting)
     if not re.search(r'(?:\/?r\/?)?[\w-]{3,22}', subreddit_name, re.I):
         update.message.reply_text('"{}" is not a valid subreddit name'.format(subreddit_name))
@@ -66,7 +67,6 @@ def sub_settings(bot, update, args):
         update.message.reply_text('Error while setting the property: {}'.format(str(e)))
         return
 
-    update.message.reply_text('Done:', parse_mode=ParseMode.HTML)
+    new_value = getattr(subreddit, setting)
 
-    text = u.model_dict(subreddit, plain_formatted_string=True)
-    update.message.reply_text(text, parse_mode=ParseMode.HTML)
+    update.message.reply_html('Done\n<code>{}</code>: {}'.format(setting, new_value))
