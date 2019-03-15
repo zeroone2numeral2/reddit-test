@@ -54,7 +54,7 @@ def on_channel_selected(bot, update, user_data):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
-    channel = Channel.get(channel_id == channel_id)
+    channel = Channel.get(Channel.channel_id == channel_id)
 
     subreddit = user_data.pop('subreddit_peewee_obj')
     subreddit.channel = channel
