@@ -34,17 +34,18 @@ class Sender(dict):
 
         self._submission.sorting = self._subreddit.sorting or 'hot'
 
+        self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
+
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
-        self._submission.permalink = 'https://www.reddit.com{}'.format(self._submission.permalink)
-        if self._submission.permalink == self._submission.url:
+        if self._submission.comments_url == self._submission.url:
             self._submission.textual = True
-            self._submission.thread_or_urls = '<a href="{}">thread</a>'.format(self._submission.permalink)
+            self._submission.thread_or_urls = '<a href="{}">thread</a>'.format(self._submission.comments_url)
         else:
             self._submission.textual = False
             self._submission.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
                 self._submission.url,
-                self._submission.permalink
+                self._submission.comments_url
             )
 
         self._submission.score_dotted = u.dotted(self._submission.score or 0)
