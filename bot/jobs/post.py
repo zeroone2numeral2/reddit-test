@@ -95,7 +95,7 @@ def process_subreddit(subreddit, bot):
         subreddit.save()
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0)
+@Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0, name='posts_job')
 @d.logerrors
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))

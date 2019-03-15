@@ -17,6 +17,7 @@ HELP_STRING = """\
 "false", "False" will be converted to `False`, "none", "None" will be converted to `None`
 /delsub `[subreddit name]`: delete the subreddit from the database
 /ph: list template's placeholders
+/force: force the main job execution
 """
 
 
