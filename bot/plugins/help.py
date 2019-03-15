@@ -8,7 +8,7 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 HELP_STRING = """\
-/addchannel: register a channel
+/addchannel: register a channel (if already saved: updates its info)
 /addsub `[subreddit name]`: register a subreddit
 /setchannel `[subreddit name]`: change a subreddit's channel
 /subs: list subreddits
