@@ -31,7 +31,7 @@ class Subreddit(peewee.Model):
     images_as_file = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
     # FILTERS
-    ignore_stickied = peewee.BooleanField(default=False)
+    ignore_stickied = peewee.BooleanField(default=True)
     images_only = peewee.BooleanField(default=False)
     min_score = peewee.IntegerField(null=True)
 
