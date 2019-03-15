@@ -2,6 +2,7 @@ import logging
 import time
 from pprint import pprint
 
+from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 
@@ -116,6 +117,8 @@ def check_posts(bot, job):
             process_subreddit(subreddit, bot)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
+            text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
+            bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         time.sleep(1)
 
