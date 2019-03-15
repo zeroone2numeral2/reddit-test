@@ -68,3 +68,19 @@ def normalize_sub_name(name):
 
 def expand_channel_id(channel_id_str):
     return int('100' + re.search(r'(\d+)\.\s.+', channel_id_str).group(1)) * -1
+
+
+def pretty_minutes(n):
+    if n < 60:
+        return '{}m'.format(n)
+
+    hours = int(n / 60)
+    minutes = n % 60
+
+    string = '{}h'.format(hours)
+
+    if minutes != 0:
+        minutes_str = str(minutes) if minutes > 10 else '0' + str(minutes)
+        string += '{}m'.format(minutes_str)
+
+    return string
