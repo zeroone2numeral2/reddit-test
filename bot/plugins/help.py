@@ -18,6 +18,7 @@ HELP_STRING = """\
 /delsub `[subreddit name]`: delete the subreddit from the database
 /ph: list template's placeholders
 /force: force the main job execution
+/d `[subreddit name] [hot|top|new]`: get the last 25 submission from teh subreddit, sorted by hot/top/new
 """
 
 

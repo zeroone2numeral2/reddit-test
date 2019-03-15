@@ -23,19 +23,7 @@ logger = logging.getLogger(__name__)
 def process_submissions(subreddit):
     logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
-    iterator = reddit.subreddit(subreddit.name).hot
-    args = []
-    kwargs = dict(limit=config.praw.submissions_limit)
-
-    if subreddit.sorting == Sorting.TOP:
-        iterator = reddit.subreddit(subreddit.name).top
-        args = [Sorting.timeframe.DAY]
-    elif subreddit.sorting == Sorting.NEW:
-        iterator = reddit.subreddit(subreddit.name).new
-
-    # logger.info('fetched submissions: %d', len(list(submissions)))
-
-    for submission in iterator(*args, **kwargs):
+    for submission in reddit.iter_submissions(subreddit.name, subreddit.sorting.lower()):
         logger.info('checking submission: %s...', submission.id)
         if Post.already_posted(subreddit, submission.id):
             logger.info('...submission %s has already been posted', submission.id)

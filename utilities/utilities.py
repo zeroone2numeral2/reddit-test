@@ -84,3 +84,20 @@ def pretty_minutes(n):
         string += '{}m'.format(minutes_str)
 
     return string
+
+
+def elapsed_time_smart(seconds):
+    elapsed_minutes = seconds / 60
+    elapsed_hours = elapsed_minutes / 60
+
+    # "n hours ago" if hours > 0, else "n minutes ago"
+    if elapsed_hours >= 1:
+        string = '{} hour'.format(int(elapsed_hours))
+        if elapsed_hours >= 2:
+            string += 's'
+    else:
+        string = '{} minute'.format(int(elapsed_minutes))
+        if elapsed_minutes >= 2:
+            string += 's'
+
+    return string
