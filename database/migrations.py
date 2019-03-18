@@ -25,10 +25,11 @@ def main(db_filepath):
 
     try:
         migrate(
-            # 18/03/2019
+            # 18/03/2019 pt. 1
             migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
             migrator.add_column('subreddits', 'limit', limit),
             migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then),
+            # 18/03/2019 pt. 2
             migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than'),
         )
     except (peewee.DatabaseError, sqlite3.DatabaseError):
