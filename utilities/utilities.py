@@ -53,7 +53,7 @@ def model_dict(model_instance, plain_formatted_string=False):
     if not plain_formatted_string:
         return model_instance
     else:
-        text = '\n'.join('<code>{}</code>: {}'.format(escape(k), escape(v)) for k, v in model_instance_dict.items())
+        text = '\n'.join('<code>{}</code>: {}'.format(escape(k), escape(str(v))) for k, v in model_instance_dict.items())
         return text
 
 
