@@ -36,7 +36,7 @@ class Subreddit(peewee.Model):
     ignore_stickied = peewee.BooleanField(default=True)
     images_only = peewee.BooleanField(default=False)
     min_score = peewee.IntegerField(null=True)
-    ignore_if_newer_then = peewee.IntegerField(null=True)
+    ignore_if_newer_than = peewee.IntegerField(null=True)
 
     class Meta:
         table_name = 'subreddits'
