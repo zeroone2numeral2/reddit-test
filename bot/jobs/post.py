@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def ignore_because_quiet_hours(subreddit):
     if subreddit.follow_quiet_hours is not None and subreddit.follow_quiet_hours == False:
+        # if follow_quiet_hours is None: use the default (the sub follow quiet hours rules)
         logger.info('r/%s does not follow quite hours: process submissions', subreddit.name)
         return False
 
