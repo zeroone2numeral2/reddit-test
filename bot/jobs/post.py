@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 def process_submissions(subreddit):
     logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
-    for submission in reddit.iter_submissions(subreddit.name, subreddit.sorting.lower()):
+    limit = subreddit.limit or config.praw.submissions_limit
+    for submission in reddit.iter_submissions(subreddit.name, subreddit.sorting.lower(), limit=limit):
         logger.info('checking submission: %s...', submission.id)
         if Post.already_posted(subreddit, submission.id):
             logger.info('...submission %s has already been posted', submission.id)
