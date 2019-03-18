@@ -20,6 +20,21 @@ from config import config
 logger = logging.getLogger(__name__)
 
 
+def ignore_because_quiet_hours(subreddit):
+    if subreddit.follow_quiet_hours is not None and subreddit.follow_quiet_hours == False:
+        logger.info('r/%s does not follow quite hours: process submissions', subreddit.name)
+        return False
+
+    now = u.now(string=False)
+
+    if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
+        logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                    config.quiet_hours.start, config.quiet_hours.end, now.hour)
+        return True
+    else:
+        return False
+
+
 def process_submissions(subreddit):
     logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
@@ -38,6 +53,9 @@ def process_submissions(subreddit):
 def process_subreddit(subreddit, bot):
     logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
     # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
+
+    if ignore_because_quiet_hours(subreddit):
+        return
 
     if subreddit.last_posted_submission_dt:
         logger.info('elapsed time (now -- last post): %s -- %s', u.now(string=True),
@@ -89,13 +107,6 @@ def process_subreddit(subreddit, bot):
 @d.logerrors
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
-
-    now = u.now(string=False)
-
-    if config.quiet_hours.enabled and (now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end):
-        logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                    config.quiet_hours.start, config.quiet_hours.end, now.hour)
-        return
 
     subreddits = (
         Subreddit.select()
