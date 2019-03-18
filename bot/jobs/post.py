@@ -21,19 +21,22 @@ logger = logging.getLogger(__name__)
 
 
 def ignore_because_quiet_hours(subreddit):
-    if subreddit.follow_quiet_hours is not None and subreddit.follow_quiet_hours == False:
-        # if follow_quiet_hours is None: use the default (the sub follow quiet hours rules)
-        logger.info('r/%s does not follow quite hours: process submissions', subreddit.name)
+    if subreddit.follow_quiet_hours is None:
+        subreddit.follow_quiet_hours = True
+        subreddit.save()
+
+    if not subreddit.follow_quiet_hours:
+        logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
         return False
-
-    now = u.now(string=False)
-
-    if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
-        logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                    config.quiet_hours.start, config.quiet_hours.end, now.hour)
-        return True
     else:
-        return False
+        now = u.now(string=False)
+
+        if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
+            logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                        config.quiet_hours.start, config.quiet_hours.end, now.hour)
+            return True
+        else:
+            return False
 
 
 def process_submissions(subreddit):
