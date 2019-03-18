@@ -30,10 +30,13 @@ class Subreddit(peewee.Model):
     send_images = peewee.BooleanField(default=True)
     images_as_file = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
+    follow_quiet_hours = peewee.BooleanField(null=True, default=True)
+    limit = peewee.IntegerField(null=True, default=config.praw.submissions_limit)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     images_only = peewee.BooleanField(default=False)
     min_score = peewee.IntegerField(null=True)
+    ignore_if_newer_then = peewee.IntegerField(null=True)
 
     class Meta:
         table_name = 'subreddits'
