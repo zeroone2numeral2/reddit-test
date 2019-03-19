@@ -6,12 +6,13 @@ reddit = praw.Reddit(client_id='0ri3963pR-qmog',
                      user_agent='test script by -')
 
 
-for submission in reddit.subreddit('cursedimages').hot(limit=1):
+for submission in reddit.subreddit('anime').hot(limit=10):
     #"""
     print('submisson id:', submission.id)
     print('subreddit_ id:', submission.subreddit_id)
     print('subreddit: r/{}'.format(submission.subreddit))
     print('submission title:', submission.title)
+    print('flair:', submission.link_flair_text)
     print('stickied:', submission.stickied)
     print('created at:', submission.created)
     print('created at (UTC):', submission.created_utc)
@@ -27,7 +28,7 @@ for submission in reddit.subreddit('cursedimages').hot(limit=1):
     print('score:', submission.score)
     print('media:', submission.media)
     print('ups:', submission.ups, 'downs:', submission.downs)
-    print('text:', submission.selftext)
+    # print('text:', submission.selftext)
     try:
         if submission.spoiler:
             pprint('submission preview:', submission.preview)

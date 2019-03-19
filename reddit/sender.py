@@ -32,6 +32,12 @@ class Sender(dict):
         if self._submission.url.endswith(('.jpg', '.png')):
             self._submission.is_image = True
 
+        self._submission.flair_with_space = ''
+        if self._submission.link_flair_text is not None:
+            self._submission.flair_with_space = '[{}] '.format(self._submission.link_flair_text)
+
+        self._submission.nsfw = self._submission.over_18
+
         self._submission.sorting = self._subreddit.sorting or 'hot'
 
         self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
