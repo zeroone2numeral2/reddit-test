@@ -32,7 +32,7 @@ def subs_debug(bot, update, args):
     text = 'Sub id: <code>{}</code>\n'.format(submissions[0]['subreddit_id'])
     for sub in submissions:
         try:
-            Post.get(Post.submission_id == sub['id'], Post.submission_id == sub['subreddit_id'])
+            Post.get(Post.submission_id == sub['id'], Post.subreddit_id == sub['subreddit_id'])
             posted = 'posted'
         except DoesNotExist:
             posted = 'not posted'
