@@ -21,6 +21,7 @@ HELP_STRING = """\
 /d `[subreddit name] [hot|top|new]`: get the last 25 submission from teh subreddit, sorted by hot/top/new
 /getconfig: see config values
 /log: get the log file
+/db: get the database file
 """
 
 

@@ -28,3 +28,13 @@ def getlog_command(bot, update):
 
     with open(os.path.normpath(config.logging.filepath), 'rb') as f:
         update.message.reply_document(f)
+
+
+@Plugins.add(CommandHandler, command=['getdb', 'db'])
+@d.restricted
+@d.failwithmessage
+def getdb_command(bot, update):
+    logger.info('/getdb command')
+
+    with open(os.path.normpath(config.sqlite.filename), 'rb') as f:
+        update.message.reply_document(f)
