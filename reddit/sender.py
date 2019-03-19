@@ -160,8 +160,10 @@ class Sender(dict):
     
     def test_filters(self):
         if self._subreddit.ignore_stickied and self._submission.stickied:
+            logger.info('tests failed: sticked submission')
             return False
         elif self._subreddit.images_only and not self.is_image:
+            logger.info('tests failed: subreddit is images only and not an image')
             return False
         else:
             return True
