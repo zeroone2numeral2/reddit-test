@@ -6,3 +6,4 @@ logs/*.log
 *.sqlite-shm
 *.sqlite-wal
 *.pyc
+config.toml

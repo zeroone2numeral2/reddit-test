@@ -1,0 +1,36 @@
+[telegram]
+workers = 1
+token = ""
+log = -1001141547703
+admins = [23646077]
+
+[plugins]
+dir = "bot/plugins"
+manifest = "manifest"
+
+[jobs]
+dir = "bot/jobs"
+manifest = "manifest"
+
+[praw]
+client_id = ""
+client_secret = ""
+user_agent = ""
+submissions_limit = 25
+
+[sqlite]
+filename = "redditmirror.sqlite"
+
+[logging]
+config = "logging.json"
+filepath = "logs/redditmirror.log"
+
+[submissions]
+default_max_frequency = 115 # minutes (one post every two hours)
+default_sorting = "hot"
+
+[quiet_hours]
+enabled = true
+start = 22 # in UTC. Rome: UTC + 1
+end = 7 # in UTC. Rome: UTC + 1
+timezone = ""
