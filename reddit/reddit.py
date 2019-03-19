@@ -25,6 +25,8 @@ class Reddit(praw.Reddit):
             created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
 
             result.append(dict(
+                subreddit_id=submission.subreddit_id,
+                id=submission.id,
                 title_escaped=u.escape(submission.title),
                 score_dotted=u.dotted(submission.score or 0),
                 elapsed_smart=u.elapsed_time_smart((u.now() - created_utc_dt).seconds)
