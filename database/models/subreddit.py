@@ -66,6 +66,7 @@ class Subreddit(peewee.Model):
         
         subs = (
             cls.select()
+            .order_by(cls.name)
         )
         
         return [sub for sub in subs]
