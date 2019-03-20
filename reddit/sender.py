@@ -136,7 +136,7 @@ class Sender(dict):
         text = template.format(**self._submission_dict)
         # logger.info('post text: %s', text)
 
-        if self._s.media_type == MediaType.IMAGE and self._subreddit.send_images:
+        if self._s.media_type == MediaType.IMAGE and self._subreddit.send_medias:
             logger.info('post is an image: using send_photo()')
             self._sent_message = self._send_image(self._s.media_url, text)
         else:

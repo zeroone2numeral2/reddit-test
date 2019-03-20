@@ -39,17 +39,21 @@ def main(db_filepath):
             migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then)
         ],
         [
-            '20190318 pt. 2',
+            '20190318 pt. 2 (rename ignore_if_newer_then to ignore_if_newer_than)',
             migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than')
         ],
         [
-            '20190320 pt. 1',
+            '20190320 pt. 1 (add quiet_hours start/end)',
             migrator.add_column('subreddits', 'quiet_hours_start', quiet_hours_start),
             migrator.add_column('subreddits', 'quiet_hours_end', quiet_hours_end)
         ],
         [
-            '20190320 pt. 2',
+            '20190320 pt. 2 (add allow_nsfw)',
             migrator.add_column('subreddits', 'allow_nsfw', allow_nsfw)
+        ],
+        [
+            '20190320 pt. 3 (rename send_images to send_medias)',
+            migrator.rename_column('subreddits', 'send_images', 'send_medias')
         ]
     ]
 

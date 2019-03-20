@@ -27,7 +27,7 @@ class Subreddit(peewee.Model):
     added = peewee.DateTimeField(default=u.now)
     enabled = peewee.BooleanField(default=True)
     template = peewee.CharField(null=True, default=DEFAULT_TEMPLATE)
-    send_images = peewee.BooleanField(default=True)
+    send_medias = peewee.BooleanField(default=True)
     images_as_file = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
     follow_quiet_hours = peewee.BooleanField(null=True, default=True)
