@@ -51,7 +51,7 @@ def process_submissions(subreddit):
         else:
             logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks', submission.id)
             
-            return submission
+            yield submission
 
 
 def process_subreddit(subreddit, bot):
@@ -75,18 +75,19 @@ def process_subreddit(subreddit, bot):
             subreddit.max_frequency
         )
         return
-
-    submission = process_submissions(subreddit)
+    
+    submission, sender = None, None
+    for submission in process_submissions(subreddit):
+        sender = Sender(bot, subreddit.channel, subreddit, submission)
+        if sender.test_filters():
+            logger.info('submission passed filters')
+            break
+        else:
+            logger.info('submission di NOT pass filters, continuing to next one...')
+            continue
+        
     if not submission:
-        logger.info('no submission returned, continuing to next subreddit/channel...')
-        return
-
-    sender = Sender(bot, subreddit.channel, subreddit, submission)
-
-    if not sender.test_filters():
-        logger.info('submission did not pass filters, marking it as processed...')
-        sender.register_post()
-        logger.info('continuing to next subreddit...')
+        logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return
 
     try:

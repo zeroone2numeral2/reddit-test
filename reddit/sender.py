@@ -163,7 +163,15 @@ class Sender(dict):
             logger.info('tests failed: sticked submission')
             return False
         elif self._subreddit.images_only and not self.is_image:
-            logger.info('tests failed: subreddit is images only and not an image')
+            logger.info('tests failed: subreddit is not an image')
+            return False
+        elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._submission.score:
+            logger.info('tests failed: not enough upvotes (%d/%d)', self._submission.score, self._subreddit.min_score)
+            return False
+        elif self._subreddit.ignore_if_newer_than \
+                and isinstance(self._subreddit.ignore_if_newer_than, datetime.datetime) \
+                and ((u.now() - self._submission.created_utc).seconds / 60) < self._subreddit.ignore_if_newer_than:
+            logger.info('tests failed: too new (submitted: %s)', self._submission.created_utc_formatted)
             return False
         else:
             return True
