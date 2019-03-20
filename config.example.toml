@@ -34,3 +34,7 @@ enabled = true
 start = 22 # in UTC. Rome: UTC + 1
 end = 7 # in UTC. Rome: UTC + 1
 timezone = ""
+
+[imgur]
+id = "0a9a0e9ec81b35e"
+secret = "d866c9c64893558a76d8724b20323522b5757072"

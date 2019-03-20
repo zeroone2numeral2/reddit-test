@@ -3,3 +3,4 @@ praw
 pytz
 peewee
 toml
+imgurpython

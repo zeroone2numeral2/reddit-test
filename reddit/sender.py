@@ -1,5 +1,6 @@
 import logging
 import datetime
+import re
 
 from telegram import ParseMode
 from telegram.error import BadRequest
@@ -19,6 +20,10 @@ KEY_MAPPER_DICT = dict(
 )
 
 
+class ImagesWebsites:
+    IMGUR = 'imgur'
+
+
 class Sender(dict):
     def __init__(self, bot, channel, subreddit, submission):
         super(Sender, self).__init__()
@@ -30,7 +35,11 @@ class Sender(dict):
         self._sent_message = None
 
         self._submission.is_image = False
+        self._image_website = None
         if self._submission.url.endswith(('.jpg', '.png')):
+            self._submission.is_image = True
+        elif self._is_hidden_image():
+            # check if the url is an url to an image even if it doesn't end with jpg/png
             self._submission.is_image = True
 
         self._submission.flair_with_space = ''
@@ -149,6 +158,15 @@ class Sender(dict):
             logger.error('Telegram error when sending photo: %s', e.message)
             if send_text_fallback:
                 return self._send_text(caption)
+    
+    def _is_hidden_image(self):
+        # imgur
+        if self._submission.domain == 'imgur.com' and \
+                re.search(r'imgur.com(?:/a)/\w+', self._submission.url, re.I):
+            self._image_website = ImagesWebsites.IMGUR
+            return True
+        
+        return False
     
     def register_post(self):
         Post.create(
