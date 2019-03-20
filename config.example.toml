@@ -30,10 +30,8 @@ default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
 
 [quiet_hours]
-enabled = true
 start = 22 # in UTC. Rome: UTC + 1
 end = 7 # in UTC. Rome: UTC + 1
-timezone = ""
 
 [imgur]
 id = "0a9a0e9ec81b35e"
