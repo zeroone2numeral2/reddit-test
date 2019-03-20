@@ -11,11 +11,11 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['delsub'], pass_args=True)
+@Plugins.add(CommandHandler, command=['remsub'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 def delete_sub(bot, update, args):
-    logger.info('/delsub command (args: %s)', args)
+    logger.info('/remsub command (args: %s)', args)
 
     subreddit_name = args[0]
 
