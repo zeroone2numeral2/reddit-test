@@ -160,15 +160,6 @@ class Sender(dict):
             if send_text_fallback:
                 return self._send_text(caption)
     
-    def _is_hidden_image(self):
-        # imgur
-        if self._submission.domain == 'imgur.com' and \
-                re.search(r'imgur.com(?:/a)/\w+', self._submission.url, re.I):
-            self._image_website = ImagesWebsites.IMGUR
-            return True
-        
-        return False
-    
     def register_post(self):
         Post.create(
             submission_id=self._submission.id,
