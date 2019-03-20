@@ -69,4 +69,4 @@ def sub_settings(bot, update, args):
 
     new_value = getattr(subreddit, setting)
 
-    update.message.reply_html('Done\n<code>{}</code>: {}'.format(setting, u.escape(new_value)))
+    update.message.reply_html('Done\n<code>{}</code>: {}'.format(setting, u.escape(str(new_value))))
