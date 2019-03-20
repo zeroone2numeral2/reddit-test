@@ -2,6 +2,7 @@ import logging
 import argparse
 import sys
 import os
+import re
 
 import peewee
 import sqlite3
@@ -26,30 +27,42 @@ def main(db_filepath):
     follow_quiet_hours = peewee.BooleanField(null=True, default=True)
     limit = peewee.IntegerField(null=True, default=25)
     ignore_if_newer_then = peewee.IntegerField(null=True)
+    quiet_hours_start = peewee.IntegerField(null=True)
+    quiet_hours_end = peewee.IntegerField(null=True)
 
-
-    migrations = {
-        '20190318pt1': [
+    migrations = [
+        [
+            '20190318pt1',
             migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
             migrator.add_column('subreddits', 'limit', limit),
             migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then)
         ],
-        '20190318pt2': [
+        [
+            '20190318pt2',
             migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than')
+        ],
+        [
+            '20190320',
+            migrator.add_column('subreddits', 'quiet_hours_start', quiet_hours_start),
+            migrator.add_column('subreddits', 'quiet_hours_end', quiet_hours_end)
         ]
-    }
+    ]
 
     print('Available migrations:')
-    for migration_desc, _ in migrations.items():
-        print('- {}'.format(migration_desc))
+    i = 0
+    for migration in migrations:
+        print('  {}. {}'.format(i, migration[0]))
+        i += 1
 
     selected_key = ''
-    while not migrations.get(selected_key, None):
+    while not re.search(r'^\d+$', selected_key):
         selected_key = input('Select a migration: ')
-        if not migrations.get(selected_key, None):
-            print('Migration "{}" is not valid'.format(selected_key))
+    
+    if int(selected_key) > len(migrations) - 1:
+        print('Bad index selected')
+        sys.exit(1)
 
-    migrations_list = migrations[selected_key]
+    migrations_list = migrations[int(selected_key)][1:]
 
     logger.info('Starting migration....')
 
