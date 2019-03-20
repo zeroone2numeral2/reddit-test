@@ -11,7 +11,9 @@ def restricted(func):
     @wraps(func)
     def wrapped(bot, update, *args, **kwargs):
         if update.effective_user.id not in config.telegram.admins:
-            update.message.reply_text("You can't use this command")
+            if update.effective_chat.id > 0:
+                # only answer in private
+                update.message.reply_text("You can't use this command")
             return
 
         return func(bot, update, *args, **kwargs)
