@@ -29,22 +29,27 @@ def main(db_filepath):
     ignore_if_newer_then = peewee.IntegerField(null=True)
     quiet_hours_start = peewee.IntegerField(null=True)
     quiet_hours_end = peewee.IntegerField(null=True)
+    allow_nsfw = peewee.BooleanField(default=True, null=True)
 
     migrations = [
         [
-            '20190318pt1',
+            '20190318 pt. 1',
             migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
             migrator.add_column('subreddits', 'limit', limit),
             migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then)
         ],
         [
-            '20190318pt2',
+            '20190318 pt. 2',
             migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than')
         ],
         [
-            '20190320',
+            '20190320 pt. 1',
             migrator.add_column('subreddits', 'quiet_hours_start', quiet_hours_start),
             migrator.add_column('subreddits', 'quiet_hours_end', quiet_hours_end)
+        ],
+        [
+            '20190320 pt. 2',
+            migrator.add_column('subreddits', 'allow_nsfw', allow_nsfw)
         ]
     ]
 
