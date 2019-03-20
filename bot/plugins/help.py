@@ -16,6 +16,7 @@ HELP_STRING = """\
 /set `[subreddit name] [setting] [value]`: set "setting" to "value". "true", "True" will be converted to `True`, \
 "false", "False" will be converted to `False`, "none", "None" will be converted to `None`
 /delsub `[subreddit name]`: delete the subreddit from the database
+/remchannel: remove a channel
 /ph: list template's placeholders
 /force: force the main job execution
 /d `[subreddit name] [hot|top|new]`: get the last 25 submission from teh subreddit, sorted by hot/top/new

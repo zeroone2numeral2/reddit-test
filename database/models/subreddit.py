@@ -70,3 +70,11 @@ class Subreddit(peewee.Model):
         )
         
         return [sub for sub in subs]
+    
+    @classmethod
+    def subreddit_with_channel(cls, channel):
+        try:
+            cls.get(cls.channel == channel)
+            return True
+        except peewee.DoesNotExist:
+            return False
