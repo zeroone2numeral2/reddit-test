@@ -15,9 +15,6 @@ class Ignored(peewee.Model):
     class Meta:
         table_name = 'ignored'
         database = db
-        indexes = (
-            (('submission_id', 'subreddit_id'), True),
-        )
 
     def __repr__(self):
         return '<Ignored: submission id {}, subreddit id {}>'.format(self.submission_id, self.subreddit_id)
