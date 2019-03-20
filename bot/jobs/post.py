@@ -83,6 +83,7 @@ def process_subreddit(subreddit, bot):
             logger.info('submission passed filters')
             break
         else:
+            sender.register_ignored()
             logger.info('submission di NOT pass filters, continuing to next one...')
             continue
         

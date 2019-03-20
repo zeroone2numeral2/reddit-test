@@ -6,6 +6,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from database.models import Post
+from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u
 
@@ -156,6 +157,13 @@ class Sender(dict):
             channel=self._channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
             posted_at=u.now() if self._sent_message else None
+        )
+    
+    def register_ignored(self):
+        Ignored.create(
+            submission_id=self._submission.id,
+            subreddit=self._subreddit,
+            ignored_at=u.now() if self._sent_message else None
         )
     
     def test_filters(self):
