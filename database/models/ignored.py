@@ -6,6 +6,7 @@ from .subreddit import Subreddit
 
 
 class Ignored(peewee.Model):
+    id = peewee.IntegerField(primary_key=True)
     submission_id = peewee.CharField(null=False)
     subreddit = peewee.ForeignKeyField(Subreddit, backref='ignored')
     ignored_at = peewee.DateTimeField(null=True)
@@ -14,7 +15,6 @@ class Ignored(peewee.Model):
     class Meta:
         table_name = 'ignored'
         database = db
-        primary_key = peewee.CompositeKey('submission_id', 'subreddit')
         indexes = (
             (('submission_id', 'subreddit_id'), True),
         )
