@@ -5,13 +5,12 @@ from peewee import DoesNotExist
 
 from bot import Plugins
 from database.models import Post
+from database.models import Ignored
 from reddit import reddit
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger(__name__)
-
-SUBMISSION_FORMATTED = '• ((({elapsed_smart}/{score_dotted}))) <b>{title_escaped}</b>'
 
 
 @Plugins.add(CommandHandler, command=['d'], pass_args=True)
@@ -36,6 +35,10 @@ def subs_debug(bot, update, args):
             posted = 'posted'
         except DoesNotExist:
             posted = 'not posted'
+            # if the submission has not been posted, check if it has been ignored
+            if Ignored.ignored(sub['id'], sub['subreddit_id']):
+                posted = 'ignored'
+            
 
         text += '\n• (((<code>{id}</code>/{elapsed_smart}/{score_dotted}/{posted}))) <b>{title_escaped}</b>'.format(**sub, posted=posted)
 

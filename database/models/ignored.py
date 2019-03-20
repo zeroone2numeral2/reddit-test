@@ -23,6 +23,11 @@ class Ignored(peewee.Model):
         return '<Ignored: submission id {}, subreddit id {}>'.format(self.submission_id, self.subreddit_id)
 
     @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def ignored(cls, submission_id, subreddit_id):
+        try:
+            cls.get(cls.submission_id == submission_id, cls.subreddit_id == subreddit_id)
+            return True
+        except peewee.DoesNotExist:
+            return False
+    
 
