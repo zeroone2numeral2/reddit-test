@@ -50,6 +50,10 @@ def main(db_filepath):
         [
             '20190320 pt. 2',
             migrator.add_column('subreddits', 'allow_nsfw', allow_nsfw)
+        ],
+        [
+            '20190320 pt. 3',
+            migrator.drop_constraint('ignored', 'unique')
         ]
     ]
 
