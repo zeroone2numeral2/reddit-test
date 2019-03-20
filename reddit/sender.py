@@ -194,6 +194,9 @@ class Sender(dict):
         elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._submission.score:
             logger.info('tests failed: not enough upvotes (%d/%d)', self._submission.score, self._subreddit.min_score)
             return False
+        elif self._subreddit.allow_nsfw is not None and self._subreddit.allow_nsfw == False and self._submission.over_18:
+            logger.info('tests failed: submission is NSFW')
+            return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, datetime.datetime) \
                 and ((u.now() - self._submission.created_utc).seconds / 60) < self._subreddit.ignore_if_newer_than:

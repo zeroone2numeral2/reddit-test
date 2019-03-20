@@ -39,6 +39,7 @@ class Subreddit(peewee.Model):
     images_only = peewee.BooleanField(default=False)
     min_score = peewee.IntegerField(null=True)
     ignore_if_newer_than = peewee.IntegerField(null=True)
+    allow_nsfw = peewee.BooleanField(default=True, null=True)
 
     class Meta:
         table_name = 'subreddits'
