@@ -6,7 +6,7 @@ reddit = praw.Reddit(client_id='0ri3963pR-qmog',
                      user_agent='test script by -')
 
 
-for submission in reddit.subreddit('linuxmasterrace').hot(limit=10):
+for submission in reddit.subreddit('anime').hot(limit=15):
     #"""
     print('submisson id:', submission.id)
     print('subreddit_ id:', submission.subreddit_id)
@@ -20,7 +20,6 @@ for submission in reddit.subreddit('linuxmasterrace').hot(limit=10):
     print('permalink:', 'https://reddit.com/{}'.format(submission.permalink))
     print('shortlink:', submission.shortlink)
     print('url:', submission.url)
-    print('media:', submission.media)
     print('domain:', submission.domain)
     print('num_comments:', submission.num_comments)
     print('over_18:', submission.over_18)
@@ -34,7 +33,7 @@ for submission in reddit.subreddit('linuxmasterrace').hot(limit=10):
         if submission.spoiler:
             pprint('submission preview:', submission.preview)
         else:
-            print(submission.preview)
+            print('submission preview:', submission.preview)
     except AttributeError:
         print('No submission.preview')
     print()

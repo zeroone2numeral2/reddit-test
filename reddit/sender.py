@@ -6,13 +6,16 @@ from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 
+from .downloaders import Imgur
 from database.models import Post
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u
+from config import config
 
 logger = logging.getLogger(__name__)
 
+imgur = Imgur(config.imgur.id, config.imgur.secret)
 
 KEY_MAPPER_DICT = dict(
     created_utc=lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp),
@@ -35,22 +38,28 @@ class Sender(dict):
         self._sent_message = None
 
         self._submission.is_image = False
-        self._image_website = None
+        self._submission.flair_with_space = ''
+        self._submission.nsfw = self._submission.over_18
+        self._submission.sorting = self._subreddit.sorting or 'hot'
+        self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
+        self._submission.score_dotted = u.dotted(self._submission.score or 0)
+        self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
+        self._submission.text = None
+        self._submission.text_32 = None
+        self._submission.text_160 = None
+        self._submission.text_200 = None
+        self._submission.text_256 = None
+
         if self._submission.url.endswith(('.jpg', '.png')):
             self._submission.is_image = True
-        elif self._is_hidden_image():
-            # check if the url is an url to an image even if it doesn't end with jpg/png
+            self._submission.image_url = self._submission.url
+        elif re.search(r'.+imgur.com/\w+$', self._submission.url, re.I):
+            # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             self._submission.is_image = True
+            self._submission.image_url = imgur.get_url(re.search(r'.+imgur.com/(\w+)$', self._submission.url, re.I).group(1))
 
-        self._submission.flair_with_space = ''
         if self._submission.link_flair_text is not None:
             self._submission.flair_with_space = '[{}] '.format(self._submission.link_flair_text)
-
-        self._submission.nsfw = self._submission.over_18
-
-        self._submission.sorting = self._subreddit.sorting or 'hot'
-
-        self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
@@ -64,14 +73,6 @@ class Sender(dict):
                 self._submission.comments_url
             )
 
-        self._submission.score_dotted = u.dotted(self._submission.score or 0)
-        self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
-
-        self._submission.text = None
-        self._submission.text_32 = None
-        self._submission.text_160 = None
-        self._submission.text_200 = None
-        self._submission.text_256 = None
         if self._submission.selftext:
             self._submission.text = self._submission.selftext
             self._submission.text_32 = self._submission.selftext[:32]
@@ -130,7 +131,7 @@ class Sender(dict):
 
         if self._submission.is_image and self._subreddit.send_images:
             logger.info('post is an image: using send_photo()')
-            self._sent_message = self._send_image(self._submission.url, text, send_text_fallback=True)
+            self._sent_message = self._send_image(self._submission.image_url, text, send_text_fallback=True)
         else:
             self._sent_message = self._send_text(text)
 
