@@ -114,6 +114,7 @@ def check_posts(bot, job):
 
     subreddits = (
         Subreddit.select()
+        .where(Subreddit.enabled == True)
     )
 
     for subreddit in subreddits:
