@@ -6,7 +6,7 @@ reddit = praw.Reddit(client_id='0ri3963pR-qmog',
                      user_agent='test script by -')
 
 
-for submission in reddit.subreddit('anime').hot(limit=15):
+for submission in reddit.subreddit('sharedbpm').hot(limit=15):
     #"""
     print('submisson id:', submission.id)
     print('subreddit_ id:', submission.subreddit_id)
@@ -26,6 +26,7 @@ for submission in reddit.subreddit('anime').hot(limit=15):
     print('spoiler:', submission.spoiler)
     print('thumbnail:', submission.thumbnail)
     print('score:', submission.score)
+    print('is_video:', submission.is_video)
     print('media:', submission.media)
     print('ups:', submission.ups, 'downs:', submission.downs)
     # print('text:', submission.selftext)

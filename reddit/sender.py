@@ -27,6 +27,13 @@ class ImagesWebsites:
     IMGUR = 'imgur'
 
 
+class MediaType:
+    NONE = None
+    IMAGE = 'image'
+    GIF = 'gif'
+    VIDEO = 'video'
+
+
 class Sender(dict):
     def __init__(self, bot, channel, subreddit, submission):
         super(Sender, self).__init__()
@@ -38,6 +45,7 @@ class Sender(dict):
         self._sent_message = None
 
         self._s.is_image = False
+        self._s.media_type = MediaType.NONE
         self._s.flair_with_space = ''
         self._s.nsfw = self._s.over_18
         self._s.sorting = self._subreddit.sorting or 'hot'
@@ -51,12 +59,15 @@ class Sender(dict):
         self._s.text_256 = None
 
         if self._s.url.endswith(('.jpg', '.png')):
-            self._s.is_image = True
-            self._s.image_url = self._s.url
+            self._s.media_type = MediaType.IMAGE
+            self._s.media_url = self._s.url
         elif re.search(r'.+imgur.com/\w+$', self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
-            self._s.is_image = True
-            self._s.image_url = imgur.get_url(re.search(r'.+imgur.com/(\w+)$', self._s.url, re.I).group(1))
+            self._s.media_type = MediaType.IMAGE
+            self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/(\w+)$', self._s.url, re.I).group(1))
+        elif self._s.is_video and self._s.media.get('reddit_video', None):
+            self._s.media_type = MediaType.VIDEO
+            self._s.media_url = self._s.media['reddit_video']['fallback_url']
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
@@ -113,10 +124,6 @@ class Sender(dict):
     def template_keys(self):
         return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str, int))]
 
-    @property
-    def is_image(self):
-        return self._s.is_image
-
     def __getitem__(self, item):
         return self._submission_dict[item]
 
@@ -129,9 +136,9 @@ class Sender(dict):
         text = template.format(**self._submission_dict)
         # logger.info('post text: %s', text)
 
-        if self._s.is_image and self._subreddit.send_images:
+        if self._s.media_type == MediaType.IMAGE and self._subreddit.send_images:
             logger.info('post is an image: using send_photo()')
-            self._sent_message = self._send_image(self._s.image_url, text, send_text_fallback=True)
+            self._sent_message = self._send_image(self._s.media_url, text)
         else:
             self._sent_message = self._send_text(text)
 
@@ -157,6 +164,23 @@ class Sender(dict):
             return self._sent_message
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error when sending photo: %s', e.message)
+            if send_text_fallback:
+                return self._send_text(caption)
+
+    def _send_video(self, video_url, caption, send_text_fallback=True):
+        # check video size (see reddit2telegram)
+        # download video
+        try:
+            self._sent_message = self._bot.send_video(
+                self._channel.channel_id,
+                video_url,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                timeout=360
+            )
+            return self._sent_message
+        except (BadRequest, TelegramError) as e:
+            logger.error('Telegram error when sending video: %s', e.message)
             if send_text_fallback:
                 return self._send_text(caption)
     
