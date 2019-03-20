@@ -1,6 +1,7 @@
 import logging
 import datetime
 import re
+from urllib.parse import urlparse
 
 from telegram import ParseMode
 from telegram.error import BadRequest
@@ -52,6 +53,7 @@ class Sender(dict):
         self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
         self._s.score_dotted = u.dotted(self._s.score or 0)
         self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
+        self._s.domain_parsed = urlparse(self._s.url).loc
         self._s.text = None
         self._s.text_32 = None
         self._s.text_160 = None
@@ -61,10 +63,10 @@ class Sender(dict):
         if self._s.url.endswith(('.jpg', '.png')):
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
-        elif re.search(r'.+imgur.com/\w+$', self._s.url, re.I):
+        elif re.search(r'.+imgur.com/[a-zA-Z]+$', self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             self._s.media_type = MediaType.IMAGE
-            self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/(\w+)$', self._s.url, re.I).group(1))
+            self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/([a-zA-Z]+)$', self._s.url, re.I).group(1))
         elif self._s.is_video and self._s.media.get('reddit_video', None):
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
