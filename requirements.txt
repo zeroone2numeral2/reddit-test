@@ -3,4 +3,5 @@ praw
 pytz
 peewee
 toml
+requests
 imgurpython

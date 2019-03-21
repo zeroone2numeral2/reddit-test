@@ -1,8 +1,11 @@
-import logging
+import os
 import re
-from html import escape
-import datetime
 import pytz
+import logging
+import datetime
+from html import escape
+
+import requests
 
 from playhouse.shortcuts import model_to_dict
 
@@ -100,3 +103,27 @@ def elapsed_time_smart(seconds):
             string += 's'
 
     return string
+
+
+def human_readable_size(size, precision=2):
+    suffixes = ['b', 'kb', 'mb', 'gb', 'tb']
+    suffix_index = 0
+    while size > 1024 and suffix_index < 4:
+        suffix_index += 1  # increment the index of the suffix
+        size = size / 1024.0  # apply the division
+
+    return '%.*f %s' % (precision, size, suffixes[suffix_index])
+
+
+def download_file_stream(url, file_path=None, chunk_size=1024):
+    # https://stackoverflow.com/a/16696317
+
+    r = requests.get(url, stream=True)
+
+    with open(file_path, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=chunk_size):
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
+                # f.flush() commented by recommendation from J.F.Sebastian
+
+    return file_path

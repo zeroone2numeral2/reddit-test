@@ -8,6 +8,8 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from .downloaders import Imgur
+from .downloaders import VReddit
+from .downloaders import FileTooBig
 from database.models import Post
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
@@ -33,6 +35,7 @@ class MediaType:
     IMAGE = 'image'
     GIF = 'gif'
     VIDEO = 'video'
+    VREDDIT = 'vreddit'
 
 
 class Sender(dict):
@@ -67,8 +70,8 @@ class Sender(dict):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/([a-zA-Z]+)$', self._s.url, re.I).group(1))
-        elif self._s.is_video and self._s.media.get('reddit_video', None):
-            self._s.media_type = MediaType.VIDEO
+        elif self._s.is_video and 'reddit_video' in self._s.media:
+            self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
 
         if self._s.link_flair_text is not None:
@@ -139,8 +142,11 @@ class Sender(dict):
         # logger.info('post text: %s', text)
 
         if self._s.media_type == MediaType.IMAGE and self._subreddit.send_medias:
-            logger.info('post is an image: using send_photo()')
+            logger.info('post is an image: using _send_image()')
             self._sent_message = self._send_image(self._s.media_url, text)
+        elif self._s.media_type == MediaType.VREDDIT and self._subreddit.send_medias:
+            logger.info('post is a vreddit: using _send_vreddit()')
+            self._sent_message = self._send_vreddit(self._s.media_url, text)
         else:
             self._sent_message = self._send_text(text)
 
@@ -166,6 +172,30 @@ class Sender(dict):
             return self._sent_message
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error when sending photo: %s', e.message)
+            if send_text_fallback:
+                return self._send_text(caption)
+
+    def _send_vreddit(self, url, caption, send_text_fallback=True):
+        vreddit = VReddit(url)
+        try:
+            vreddit.download()
+        except FileTooBig:
+            logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
+            vreddit.remove()
+            if send_text_fallback:
+                return self._send_text(caption)
+
+        try:
+            self._sent_message = self._bot.send_video(
+                self._channel.channel_id,
+                vreddit.file_path,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                timeout=360
+            )
+            return self._sent_message
+        except (BadRequest, TelegramError) as e:
+            logger.error('Telegram error when sending video: %s', e.message)
             if send_text_fallback:
                 return self._send_text(caption)
 
