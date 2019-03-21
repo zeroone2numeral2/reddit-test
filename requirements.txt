@@ -4,4 +4,5 @@ pytz
 peewee
 toml
 requests
+Pillow
 imgurpython
