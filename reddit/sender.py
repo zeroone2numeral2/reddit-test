@@ -64,6 +64,7 @@ class Sender(dict):
         self._s.text_200 = None
         self._s.text_256 = None
         self._s.video_size = (None, None)
+        self._s.video_duration = 0
 
         if self._s.url.endswith(('.jpg', '.png')):
             self._s.media_type = MediaType.IMAGE
@@ -76,9 +77,10 @@ class Sender(dict):
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
             self._s.video_size = (
-                self._s.media['reddit_video']['fallback_url']['height'],
-                self._s.media['reddit_video']['fallback_url']['width']
+                self._s.media['reddit_video']['height'],
+                self._s.media['reddit_video']['width']
             )
+            self._s.video_duration = self._s.media['reddit_video']['duration']
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
@@ -198,15 +200,15 @@ class Sender(dict):
             if send_text_fallback:
                 return self._send_text(caption)
 
-        thumb_file = None
+        thumb_file, thumbnail_path = None, None
         if self._s.thumbnail:
             thumbnail_path = u.download_file_stream(self._s.thumbnail, os.path.join('downloads', 'thumb_{}.jpg'.format(self._s.id)))
             thumbnail_path = u.resize_thumbnail(thumbnail_path)
-            with open(thumbnail_path, 'rb') as f:
-                thumb_file = f
+            thumb_file = open(thumbnail_path, 'rb')
 
         try:
             with open(file_path, 'rb') as f:
+                logger.info('uploading video...')
                 self._sent_message = self._bot.send_video(
                     self._channel.channel_id,
                     f,
@@ -215,10 +217,17 @@ class Sender(dict):
                     thumb=thumb_file,
                     height=self._s.video_size[0],
                     width=self._s.video_size[1],
+                    duration=self._s.video_duration,
+                    supports_streaming=True,
                     timeout=360
                 )
+
+            thumb_file.close()
+
             logger.info('removing downloaded files...')
             vreddit.remove()
+            u.remove_file_safe(thumbnail_path)
+
             return self._sent_message
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error when sending video: %s', e.message)

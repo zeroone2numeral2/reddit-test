@@ -153,3 +153,10 @@ def resize_thumbnail(image_path):
 
     return image_path
 
+
+def remove_file_safe(file_path):
+    try:
+        os.remove(file_path)
+    except:
+        pass
+
