@@ -1,11 +1,13 @@
 import os
 import re
 import pytz
+import math
 import logging
 import datetime
 from html import escape
 
 import requests
+from PIL import Image
 
 from playhouse.shortcuts import model_to_dict
 
@@ -127,3 +129,27 @@ def download_file_stream(url, file_path=None, chunk_size=1024):
                 # f.flush() commented by recommendation from J.F.Sebastian
 
     return file_path
+
+
+def resize_thumbnail(image_path):
+    if not image_path:
+        raise FileNotFoundError
+
+    image = Image.open(image_path)
+
+    if image.size[0] < 91 and image.size[1] < 91:
+        sizes = image.size
+    else:
+        i = 0 if image.size[0] > image.size[1] else 1  # index of the largest dimension
+        new = [None, None]
+        new[i] = 90
+        rateo = 90 / image.size[i]
+        new[1 if i == 0 else 0] = int(math.floor(image.size[1 if i == 0 else 0] * round(rateo, 4)))
+
+        sizes = tuple(new)
+
+    image = image.resize(sizes, Image.ANTIALIAS)
+    image.save(image_path)
+
+    return image_path
+

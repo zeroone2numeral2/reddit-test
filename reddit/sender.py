@@ -1,3 +1,4 @@
+import os
 import logging
 import datetime
 import re
@@ -62,6 +63,7 @@ class Sender(dict):
         self._s.text_160 = None
         self._s.text_200 = None
         self._s.text_256 = None
+        self._s.video_size = (None, None)
 
         if self._s.url.endswith(('.jpg', '.png')):
             self._s.media_type = MediaType.IMAGE
@@ -73,6 +75,10 @@ class Sender(dict):
         elif self._s.is_video and 'reddit_video' in self._s.media:
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
+            self._s.video_size = (
+                self._s.media['reddit_video']['fallback_url']['height'],
+                self._s.media['reddit_video']['fallback_url']['width']
+            )
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
@@ -192,6 +198,13 @@ class Sender(dict):
             if send_text_fallback:
                 return self._send_text(caption)
 
+        thumb_file = None
+        if self._s.thumbnail:
+            thumbnail_path = u.download_file_stream(self._s.thumbnail, os.path.join('downloads', 'thumb_{}.jpg'.format(self._s.id)))
+            thumbnail_path = u.resize_thumbnail(thumbnail_path)
+            with open(thumbnail_path, 'rb') as f:
+                thumb_file = f
+
         try:
             with open(file_path, 'rb') as f:
                 self._sent_message = self._bot.send_video(
@@ -199,6 +212,9 @@ class Sender(dict):
                     f,
                     caption=caption,
                     parse_mode=ParseMode.HTML,
+                    thumb=thumb_file,
+                    height=self._s.video_size[0],
+                    width=self._s.video_size[1],
                     timeout=360
                 )
             logger.info('removing downloaded files...')
