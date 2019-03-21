@@ -101,8 +101,11 @@ def process_subreddit(subreddit, bot):
         return
 
     if sent_message:
-        logger.info('creating Post row...')
-        sender.register_post()
+        if not subreddit.test:
+            logger.info('creating Post row...')
+            sender.register_post()
+        else:
+            logger.info('not creating Post row: r/%s is a testing subreddit', subreddit.name)
 
         logger.info('updating Subreddit last post datetime...')
         subreddit.last_posted_submission_dt = u.now()

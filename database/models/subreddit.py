@@ -34,6 +34,7 @@ class Subreddit(peewee.Model):
     limit = peewee.IntegerField(null=True, default=config.praw.submissions_limit)
     quiet_hours_start = peewee.IntegerField(null=True, default=config.quiet_hours.start)
     quiet_hours_end = peewee.IntegerField(null=True, default=config.quiet_hours.end)
+    test = peewee.BooleanField(default=False)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     images_only = peewee.BooleanField(default=False)
