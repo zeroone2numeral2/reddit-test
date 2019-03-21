@@ -1,6 +1,7 @@
 [telegram]
 workers = 1
-token = ""
+token = "725730806:AAHi73QEEXhxOaMQFRLqQXbItsILGbzHZ34" # @redditmirrorbot
+#token = "285333393:AAEvoP_Q7BdnvGAjgMW5JZoyeuo0jKvV3Cc" # @janembabot
 log = -1001141547703
 admins = [23646077]
 
@@ -36,3 +37,7 @@ end = 7 # in UTC. Rome: UTC + 1
 [imgur]
 id = "0a9a0e9ec81b35e"
 secret = "d866c9c64893558a76d8724b20323522b5757072"
+
+[ffmpeg]
+cmd_path = "ffmpeg"
+cmd_path_windows = "ffmpeg.exe" # needs the .exe binary file in the main project directory

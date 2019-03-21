@@ -1,10 +1,25 @@
-venv/
+# config
+config.toml
+
+# logs
 logs/*.log.*
 logs/*.log
+
+# project
 .idea/
+
+# sqlite
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# python
+venv/
 *.pyc
-config.toml
+
+# downloaded files
 *.mp4
+*.mp3
+
+# binaries
+ffmpeg.exe

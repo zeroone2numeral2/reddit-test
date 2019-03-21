@@ -201,6 +201,7 @@ class Sender(dict):
                     parse_mode=ParseMode.HTML,
                     timeout=360
                 )
+            logger.info('removing downloaded files...')
             vreddit.remove()
             return self._sent_message
         except (BadRequest, TelegramError) as e:

@@ -5,9 +5,12 @@ import subprocess
 
 from reddit.downloaders import Downloader
 from utilities import u
+from config import config
 
-FFMPEG_COMMAND = 'ffmpeg -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
-FFMPEG_COMMAND_WIN = 'ffmpeg.exe -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
+if os.name == 'nt':  # windows: we expect ffmpeg to be in the main directory of the project
+    FFMPEG_COMMAND = config.ffmpeg.cmd_path_windows + ' -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
+else:
+    FFMPEG_COMMAND = config.ffmpeg.cmd_path + ' -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
 
 
 class VReddit(Downloader):
@@ -45,7 +48,7 @@ class VReddit(Downloader):
         return self._audio_path
 
     def merge(self):
-        cmd = FFMPEG_COMMAND_WIN.format(
+        cmd = FFMPEG_COMMAND.format(
             video=self._file_path,
             audio=self._audio_path,
             output=self._merged_path
