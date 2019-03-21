@@ -1,7 +1,7 @@
 [telegram]
 workers = 1
-token = "725730806:AAHi73QEEXhxOaMQFRLqQXbItsILGbzHZ34" # @redditmirrorbot
-#token = "285333393:AAEvoP_Q7BdnvGAjgMW5JZoyeuo0jKvV3Cc" # @janembabot
+#token = "725730806:AAHi73QEEXhxOaMQFRLqQXbItsILGbzHZ34" # @redditmirrorbot
+token = "285333393:AAEvoP_Q7BdnvGAjgMW5JZoyeuo0jKvV3Cc" # @janembabot
 log = -1001141547703
 admins = [23646077]
 

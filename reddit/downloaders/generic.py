@@ -24,6 +24,10 @@ class Downloader:
             self._size_readable = u.human_readable_size(self._size)
 
     @property
+    def url(self):
+        return self._url
+
+    @property
     def file_path(self):
         return self._file_path
 
@@ -43,7 +47,7 @@ class Downloader:
 
         return True
 
-    def download(self, identifier=random.randint(1, 10000)):
+    def download(self):
         self.check_size()
 
         u.download_file_stream(self._url, self._file_path)

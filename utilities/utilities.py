@@ -12,7 +12,7 @@ from playhouse.shortcuts import model_to_dict
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
-VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
+VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 
 timezone = pytz.timezone('Europe/Rome')
 

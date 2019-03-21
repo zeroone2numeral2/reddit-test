@@ -1,7 +1,13 @@
 import os
+import re
 import random
+import subprocess
 
 from reddit.downloaders import Downloader
+from utilities import u
+
+FFMPEG_COMMAND = 'ffmpeg -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
+FFMPEG_COMMAND_WIN = 'ffmpeg.exe -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output}'
 
 
 class VReddit(Downloader):
@@ -9,5 +15,44 @@ class VReddit(Downloader):
         Downloader.__init__(self, url, identifier)
         self._file_path = os.path.join('downloads', '{}.mp4'.format(identifier))
 
+        self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
+        self._size_audio = 0
+        self._audio_path = os.path.join('downloads', '{}.mp3'.format(identifier))
+        self._merged_path = self._file_path.replace('.mp4', '_merged.mp4')
+
+    @property
+    def audio_path(self):
+        return self._audio_path
+
     def __repr__(self):
-        return '<VReddit {} ({})>'.format(self._url, self._size_readable)
+        return '<VReddit {} - {}>'.format(self._url, self._url_audio)
+
+    def remove(self):
+        try:
+            os.remove(self._file_path)
+            os.remove(self._audio_path)
+            os.remove(self._merged_path)
+        except FileNotFoundError:
+            pass
+
+    def download_audio(self):
+        u.download_file_stream(self._url_audio, self._audio_path)
+
+        # get the size if we weren't able to do that via headers
+        if not self._size_audio:
+            self._size_audio = os.path.getsize(self._audio_path)
+
+        return self._audio_path
+
+    def merge(self):
+        cmd = FFMPEG_COMMAND_WIN.format(
+            video=self._file_path,
+            audio=self._audio_path,
+            output=self._merged_path
+        )
+
+        devnull = open(os.devnull, 'w')
+
+        subprocess.call(cmd, shell=True, stdout=devnull, stderr=devnull)
+
+        return self._merged_path

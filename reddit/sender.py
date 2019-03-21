@@ -56,7 +56,7 @@ class Sender(dict):
         self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
         self._s.score_dotted = u.dotted(self._s.score or 0)
         self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
-        self._s.domain_parsed = urlparse(self._s.url).loc
+        self._s.domain_parsed = urlparse(self._s.url).netloc
         self._s.text = None
         self._s.text_32 = None
         self._s.text_160 = None
@@ -177,8 +177,15 @@ class Sender(dict):
 
     def _send_vreddit(self, url, caption, send_text_fallback=True):
         vreddit = VReddit(url)
+        file_path = vreddit.file_path
         try:
+            logger.info('downloading video...')
             vreddit.download()
+            logger.info('downloading audio...')
+            vreddit.download_audio()
+            logger.info('merging video with audio...')
+            file_path = vreddit.merge()
+            logger.info('...merging ended')
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
             vreddit.remove()
@@ -186,13 +193,15 @@ class Sender(dict):
                 return self._send_text(caption)
 
         try:
-            self._sent_message = self._bot.send_video(
-                self._channel.channel_id,
-                vreddit.file_path,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                timeout=360
-            )
+            with open(file_path, 'rb') as f:
+                self._sent_message = self._bot.send_video(
+                    self._channel.channel_id,
+                    f,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    timeout=360
+                )
+            vreddit.remove()
             return self._sent_message
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error when sending video: %s', e.message)
