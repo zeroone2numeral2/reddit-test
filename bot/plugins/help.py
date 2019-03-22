@@ -15,6 +15,7 @@ HELP_STRING = """\
 /sub `[subreddit name]`: database row of that subreddit
 /set `[subreddit name] [setting] [value]`: set "setting" to "value". "true", "True" will be converted to `True`, \
 "false", "False" will be converted to `False`, "none", "None" will be converted to `None`
+/get `[subreddit name] [setting]`: get the value of that setting
 /remsub `[subreddit name]`: delete the subreddit from the database
 /remchannel: remove a channel
 /ph: list template's placeholders
