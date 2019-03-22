@@ -14,13 +14,13 @@ else:
 
 
 class VReddit(Downloader):
-    def __init__(self, url, identifier=random.randint(1, 10000)):
-        Downloader.__init__(self, url, identifier)
-        self._file_path = os.path.join('downloads', '{}.mp4'.format(identifier))
+    def __init__(self, url, *args, **kwargs):
+        Downloader.__init__(self, url, *args, **kwargs)
+        self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
 
         self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
         self._size_audio = 0
-        self._audio_path = os.path.join('downloads', '{}.mp3'.format(identifier))
+        self._audio_path = os.path.join('downloads', '{}.mp3'.format(self._identifier))
         self._merged_path = self._file_path.replace('.mp4', '_merged.mp4')
 
     @property

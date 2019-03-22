@@ -17,8 +17,8 @@ u.load_logging_config(config.logging.config, config.logging.filepath)
 
 
 IGNORE_SUBMISSIONS = [
-    'b3zaqd',  # vreddit with sound
-    'b3z78n',  # direct mp4 url
+    #'b3zaqd',  # vreddit with sound
+    #'b3z78n',  # direct mp4 url
 ]
 
 

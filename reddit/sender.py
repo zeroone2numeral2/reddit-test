@@ -11,6 +11,7 @@ from telegram.error import TelegramError
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
+from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from database.models import Post
 from database.models import Ignored
@@ -38,6 +39,7 @@ class MediaType:
     GIF = 'gif'
     VIDEO = 'video'
     VREDDIT = 'vreddit'
+    GFYCAT = 'gfycat'
 
 
 class Sender(dict):
@@ -74,7 +76,7 @@ class Sender(dict):
         if self._s.url.endswith('.gifv'):
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
-            self._s.media_url = self._s.url
+            self._s.media_url = self._s.url.replace('.gifv', '.mp4')
         elif re.search(r'imgur\.com/[a-zA-Z1-9]+$', self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             imgur_direct_url = imgur.get_url(re.search(r'imgur\.com/([a-zA-Z1-9]+)$', self._s.url, re.I).group(1))
@@ -89,9 +91,17 @@ class Sender(dict):
                 self._s.media_type = MediaType.GIF
                 logger.debug('replacing ".gifv" with ".mp4"')
                 self._s.media_url = imgur_direct_url.replace('.gifv', '.mp4')
+                logger.debug('new media_url: %s', self._s.media_url)
+            elif imgur_direct_url.endswith('.mp4'):
+                self._s.media_type = MediaType.GIF
+                self._s.media_url = imgur_direct_url
         elif self._s.url.endswith('.mp4'):
             logger.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
+            self._s.media_url = self._s.url
+        elif 'gfycat.com' in self._s.domain_parsed:
+            logger.debug('url is a gfycat')
+            self._s.media_type = MediaType.GFYCAT
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
             logger.debug('url is a vreddit')
@@ -185,6 +195,9 @@ class Sender(dict):
                 elif self._s.media_type == MediaType.GIF:
                     logger.info('post is a gif: using _send_gif()')
                     self._sent_message = self._send_gif(self._s.media_url, text)
+                elif self._s.media_type == MediaType.GFYCAT:
+                    logger.info('post is a gfycat: using _send_gfycat()')
+                    self._sent_message = self._send_gfycat(self._s.media_url, text)
                 
                 return self._sent_message
             except Exception as e:
@@ -204,6 +217,8 @@ class Sender(dict):
         )
 
     def _send_image(self, image_url, caption):
+        logger.info('image url: %s', image_url)
+
         self._sent_message = self._bot.send_photo(
             self._subreddit.channel.channel_id,
             image_url,
@@ -214,7 +229,9 @@ class Sender(dict):
         return self._sent_message
 
     def _send_vreddit(self, url, caption):
-        vreddit = VReddit(url)
+        logger.info('vreddit url: %s', url)
+
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail)
         file_path = vreddit.file_path
         try:
             logger.info('downloading video/audio and merging them...')
@@ -225,14 +242,7 @@ class Sender(dict):
             vreddit.remove()
             raise FileTooBig
 
-        thumb_file, thumbnail_path = None, None
-        if self._s.thumbnail:
-            thumbnail_path = u.download_file_stream(
-                self._s.thumbnail,
-                file_path=os.path.join('downloads', 'thumb_{}.jpg'.format(self._s.id))
-            )
-            thumbnail_path = u.resize_thumbnail(thumbnail_path)
-            thumb_file = open(thumbnail_path, 'rb')
+        vreddit.download_thumbnail()
 
         with open(file_path, 'rb') as f:
             logger.info('uploading video...')
@@ -241,7 +251,7 @@ class Sender(dict):
                 f,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
-                thumb=thumb_file,
+                thumb=vreddit.get_thumbnail_bo(),
                 height=self._s.video_size[0],
                 width=self._s.video_size[1],
                 duration=self._s.video_duration,
@@ -249,15 +259,14 @@ class Sender(dict):
                 timeout=360
             )
 
-        thumb_file.close()
-
         logger.info('removing downloaded files...')
         vreddit.remove()
-        u.remove_file_safe(thumbnail_path)
 
         return self._sent_message
 
     def _send_video(self, url, caption, send_text_fallback=True):
+        logger.info('video url: %s', url)
+
         video = Downloader(url)
         try:
             logger.info('downloading video...')
@@ -269,8 +278,7 @@ class Sender(dict):
             
             raise FileTooBig
         
-        thumb_path = 'assets/video_thumb.png'  # generic thumbnail
-        thumb_file = open(os.path.normpath(thumb_path), 'rb')
+        video.thumbnail_path = 'assets/video_thumb.png'  # generic thumbnail
         
         logger.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
@@ -278,7 +286,7 @@ class Sender(dict):
                 self._subreddit.channel.channel_id,
                 f,
                 caption=caption,
-                thumb=thumb_file,
+                thumb=video.get_thumbnail_bo(),
                 height=None,
                 width=None,
                 duration=None,
@@ -288,7 +296,6 @@ class Sender(dict):
             )
         logger.debug('...upload completed')
 
-        thumb_file.close()
         logger.info('removing downloaded files...')
         video.remove()
         # DO NOT DELETE THE GENERIC THUMBNAIL FILE
@@ -296,6 +303,8 @@ class Sender(dict):
         return self._sent_message
     
     def _send_gif(self, url, caption):
+        logger.info('gif url: %s', url)
+
         return self._bot.send_animation(
             self._subreddit.channel.channel_id,
             url,
@@ -303,6 +312,27 @@ class Sender(dict):
             parse_mode=ParseMode.HTML,
             timeout=360
         )
+
+    def _send_gfycat(self, url, caption):
+        gfycat = Gfycat(url)
+        logger.info('gfycat url: %s', gfycat.url)
+
+        gfycat.download_thumbnail()
+
+        sent_message = self._bot.send_video(
+            self._subreddit.channel.channel_id,
+            gfycat.url,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            width=gfycat.sizes[0],
+            height=gfycat.sizes[1],
+            thumb=gfycat.get_thumbnail_bo(),
+            timeout=360
+        )
+
+        gfycat.remove()
+
+        return sent_message
     
     def register_post(self):
         Post.create(

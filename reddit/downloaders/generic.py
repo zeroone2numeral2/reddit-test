@@ -12,11 +12,15 @@ class FileTooBig(Exception):
 
 
 class Downloader:
-    def __init__(self, url, identifier=random.randint(1, 10000)):
+    def __init__(self, url, thumbnail_url='', identifier=random.randint(1, 10000)):
         self._url = url
-        self._file_path = os.path.join('downloads', '{}.mp4'.format(identifier))
+        self._identifier = identifier
+        self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
         self._size = 0
         self._size_readable = '0 b'
+        self._thumbnail_url = thumbnail_url
+        self._thumbnail_path = ''
+        self._thumbnail_bo = None
 
         headers = requests.head(url).headers
         if 'Content-Type' in headers:
@@ -34,6 +38,18 @@ class Downloader:
     @property
     def size_readable(self):
         return self._size_readable
+
+    @property
+    def thumbnail_path(self):
+        return self._thumbnail_path
+
+    @thumbnail_path.setter
+    def thumbnail_path(self, path):
+        self._thumbnail_path = path
+
+    @property
+    def thumbnail_url(self):
+        return self._thumbnail_url
 
     def __repr__(self):
         return '<Downloaded content {} ({})>'.format(self._url, self._size_readable)
@@ -61,8 +77,31 @@ class Downloader:
 
         return self._file_path
 
+    def download_thumbnail(self):
+        if not self._thumbnail_url:
+            return None
+
+        thumbnail_path = u.download_file_stream(
+            self._thumbnail_url,
+            file_path=os.path.join('downloads', 'thumb_{}.jpg'.format(self._identifier))
+        )
+        self._thumbnail_path = u.resize_thumbnail(thumbnail_path)
+
+        return True
+
+    def get_thumbnail_bo(self):
+        self._thumbnail_bo = open(self._thumbnail_path, 'rb')
+
+        return self._thumbnail_bo
+
     def remove(self):
         try:
+            self._thumbnail_bo.close()
+        except:
+            pass
+
+        try:
             os.remove(self._file_path)
+            os.remove(self._thumbnail_path)
         except FileNotFoundError:
             pass
