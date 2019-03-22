@@ -94,7 +94,7 @@ class Downloader:
 
         return self._thumbnail_bo
 
-    def remove(self):
+    def remove(self, keep_thumbnail=False):
         try:
             self._thumbnail_bo.close()
         except:
@@ -102,6 +102,7 @@ class Downloader:
 
         try:
             os.remove(self._file_path)
-            os.remove(self._thumbnail_path)
+            if not keep_thumbnail:
+                os.remove(self._thumbnail_path)
         except FileNotFoundError:
             pass

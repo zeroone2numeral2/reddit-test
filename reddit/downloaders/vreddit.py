@@ -30,11 +30,18 @@ class VReddit(Downloader):
     def __repr__(self):
         return '<VReddit {} - {}>'.format(self._url, self._url_audio)
 
-    def remove(self):
+    def remove(self, keep_thumbnail=False):
+        try:
+            self._thumbnail_bo.close()
+        except:
+            pass
+
         try:
             os.remove(self._file_path)
             os.remove(self._audio_path)
             os.remove(self._merged_path)
+            if not keep_thumbnail:
+                os.remove(self._thumbnail_path)
         except FileNotFoundError:
             pass
 

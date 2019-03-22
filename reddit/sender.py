@@ -274,7 +274,7 @@ class Sender(dict):
             logger.info('...download ended')
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', video.size_readable)
-            video.remove()
+            video.remove(keep_thumbnail=True)
             
             raise FileTooBig
         
@@ -297,7 +297,7 @@ class Sender(dict):
         logger.debug('...upload completed')
 
         logger.info('removing downloaded files...')
-        video.remove()
+        video.remove(keep_thumbnail=True)
         # DO NOT DELETE THE GENERIC THUMBNAIL FILE
         
         return self._sent_message
