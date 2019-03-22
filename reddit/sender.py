@@ -293,11 +293,6 @@ class Sender(dict):
         return self._sent_message
     
     def _send_gif(self, url, caption):
-        if url.endswith('.gifv'):
-            logger.info('replacing ".gifv" with ".mp4"')
-            url = url.replace('.gifv', '.mp4')
-        
-        logger.info('%s', url)
         return self._bot.send_animation(
             self._subreddit.channel.channel_id,
             url,
