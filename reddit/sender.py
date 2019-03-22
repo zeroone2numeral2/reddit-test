@@ -65,18 +65,36 @@ class Sender(dict):
         self._s.text_256 = None
         self._s.video_size = (None, None)
         self._s.video_duration = 0
-
+        
+        # this whole shit should have its own method
         if self._s.url.endswith(('.jpg', '.png')):
+            logger.debug('url is a jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
-        elif re.search(r'.+imgur.com/[a-zA-Z]+$', self._s.url, re.I):
+        if self._s.url.endswith('.gifv'):
+            logger.debug('url is a gifv: submission is an GIF')
+            self._s.media_type = MediaType.GIF
+            self._s.media_url = self._s.url
+        elif re.search(r'imgur\.com/[a-zA-Z1-9]+$', self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
-            self._s.media_type = MediaType.IMAGE
-            self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/([a-zA-Z]+)$', self._s.url, re.I).group(1))
+            imgur_direct_url = imgur.get_url(re.search(r'imgur\.com/([a-zA-Z1-9]+)$', self._s.url, re.I).group(1))
+            logger.debug('imgur direct url: %s', imgur_direct_url)
+            # also make sure the url is of an image
+            if imgur_direct_url.endswith(('.jpg', '.png')):
+                logger.debug('url is an Imgur non-direct url to an image: submission is an image')
+                self._s.media_type = MediaType.IMAGE
+                self._s.media_url = imgur_direct_url
+            elif imgur_direct_url.endswith('.gifv'):
+                logger.debug('url is an Imgur non-direct url to a gifv: submission is a GIF')
+                self._s.media_type = MediaType.GIF
+                logger.debug('replacing ".gifv" with ".mp4"')
+                self._s.media_url = imgur_direct_url.replace('.gifv', '.mp4')
         elif self._s.url.endswith('.mp4'):
+            logger.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
+            logger.debug('url is a vreddit')
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
             self._s.video_size = (
@@ -153,6 +171,7 @@ class Sender(dict):
         # logger.info('post text: %s', text)
         
         if self._s.media_type and self._subreddit.send_medias:
+            logger.info('post is a media, sending it as media...')
             try:
                 if self._s.media_type == MediaType.IMAGE:
                     logger.info('post is an image: using _send_image()')
@@ -160,12 +179,18 @@ class Sender(dict):
                 elif self._s.media_type == MediaType.VREDDIT:
                     logger.info('post is a vreddit: using _send_vreddit()')
                     self._sent_message = self._send_vreddit(self._s.media_url, text)
+                elif self._s.media_type == MediaType.VIDEO:
+                    logger.info('post is a video: using _send_video()')
+                    self._sent_message = self._send_video(self._s.media_url, text)
+                elif self._s.media_type == MediaType.GIF:
+                    logger.info('post is a gif: using _send_gif()')
+                    self._sent_message = self._send_gif(self._s.media_url, text)
                 
                 return self._sent_message
             except Exception as e:
                 logger.error('exeption during the sending of a media, sending as text', exc_info=True)
         
-        logger.info('submission is textual -or- send_medias is false -or- sending media failed: posting a text')
+        logger.info('submission is textual -or- send_medias is false -or- sending media failed: posting a text...')
         self._sent_message = self._send_text(text)
 
         return self._sent_message
@@ -193,7 +218,7 @@ class Sender(dict):
         file_path = vreddit.file_path
         try:
             logger.info('downloading video/audio and merging them...')
-            vreddit.download_and_merge()
+            file_path = vreddit.download_and_merge()
             logger.info('...merging ended')
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
@@ -244,6 +269,7 @@ class Sender(dict):
         thumb_path = 'assets/video_thumb.png'  # generic thumbnail
         thumb_file = open(os.path.normpath(thumb_path), 'rb')
         
+        logger.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
             self._sent_message = self._bot.send_video(
                 self._subreddit.channel.channel_id,
@@ -254,15 +280,31 @@ class Sender(dict):
                 width=None,
                 duration=None,
                 parse_mode=ParseMode.HTML,
+                supports_streaming=True,
                 timeout=360
             )
+        logger.debug('...upload completed')
 
         thumb_file.close()
         logger.info('removing downloaded files...')
         video.remove()
-        u.remove_file_safe(thumb_path)
+        # DO NOT DELETE THE GENERIC THUMBNAIL FILE
         
         return self._sent_message
+    
+    def _send_gif(self, url, caption):
+        if url.endswith('.gifv'):
+            logger.info('replacing ".gifv" with ".mp4"')
+            url = url.replace('.gifv', '.mp4')
+        
+        logger.info('%s', url)
+        return self._bot.send_animation(
+            self._subreddit.channel.channel_id,
+            url,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            timeout=360
+        )
     
     def register_post(self):
         Post.create(

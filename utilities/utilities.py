@@ -2,7 +2,9 @@ import os
 import re
 import pytz
 import math
+import json
 import logging
+import logging.config
 import datetime
 from html import escape
 
@@ -17,6 +19,13 @@ DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 
 timezone = pytz.timezone('Europe/Rome')
+
+
+def load_logging_config(file_path, logfile):
+    with open(file_path, 'r') as f:
+        logging_config = json.load(f)
+    logging_config['handlers']['file']['filename'] = logfile
+    logging.config.dictConfig(logging_config)
 
 
 def html_escape(string):
@@ -50,7 +59,7 @@ def now(string=False, timezone_aware=False, utc=True):
 
 
 def dotted(number):
-    return re.sub('(\d)(?=(\d{3})+(?!\d))', r'\1.', '{}'.format(number))
+    return re.sub(r'(\d)(?=(\d{3})+(?!\d))', r'\1.', '{}'.format(number))
 
 
 def model_dict(model_instance, plain_formatted_string=False):
