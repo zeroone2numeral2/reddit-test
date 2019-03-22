@@ -9,6 +9,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from .downloaders import Imgur
+from .downloaders import Downloader
 from .downloaders import VReddit
 from .downloaders import FileTooBig
 from database.models import Post
@@ -73,6 +74,9 @@ class Sender(dict):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = imgur.get_url(re.search(r'.+imgur.com/([a-zA-Z]+)$', self._s.url, re.I).group(1))
+        elif self._s.url.endswith('.mp4'):
+            self._s.media_type = MediaType.VIDEO
+            self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
@@ -148,15 +152,22 @@ class Sender(dict):
 
         text = template.format(**self._submission_dict)
         # logger.info('post text: %s', text)
-
-        if self._s.media_type == MediaType.IMAGE and self._subreddit.send_medias:
-            logger.info('post is an image: using _send_image()')
-            self._sent_message = self._send_image(self._s.media_url, text)
-        elif self._s.media_type == MediaType.VREDDIT and self._subreddit.send_medias:
-            logger.info('post is a vreddit: using _send_vreddit()')
-            self._sent_message = self._send_vreddit(self._s.media_url, text)
-        else:
-            self._sent_message = self._send_text(text)
+        
+        if self._s.media_type and self._subreddit.send_medias:
+            try:
+                if self._s.media_type == MediaType.IMAGE:
+                    logger.info('post is an image: using _send_image()')
+                    self._sent_message = self._send_image(self._s.media_url, text)
+                elif self._s.media_type == MediaType.VREDDIT:
+                    logger.info('post is a vreddit: using _send_vreddit()')
+                    self._sent_message = self._send_vreddit(self._s.media_url, text)
+                
+                return self._sent_message
+            except Exception as e:
+                logger.error('exeption during the sending of a media, sending as text', exc_info=True)
+        
+        logger.info('submission is textual -or- send_medias is false -or- sending media failed: posting a text')
+        self._sent_message = self._send_text(text)
 
         return self._sent_message
 
@@ -168,37 +179,27 @@ class Sender(dict):
             disable_web_page_preview=not self._subreddit.webpage_preview
         )
 
-    def _send_image(self, image_url, caption, send_text_fallback=True):
-        try:
-            self._sent_message = self._bot.send_photo(
-                self._channel.channel_id,
-                image_url,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                timeout=360
-            )
-            return self._sent_message
-        except (BadRequest, TelegramError) as e:
-            logger.error('Telegram error when sending photo: %s', e.message)
-            if send_text_fallback:
-                return self._send_text(caption)
+    def _send_image(self, image_url, caption):
+        self._sent_message = self._bot.send_photo(
+            self._channel.channel_id,
+            image_url,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            timeout=360
+        )
+        return self._sent_message
 
-    def _send_vreddit(self, url, caption, send_text_fallback=True):
+    def _send_vreddit(self, url, caption):
         vreddit = VReddit(url)
         file_path = vreddit.file_path
         try:
-            logger.info('downloading video...')
-            vreddit.download()
-            logger.info('downloading audio...')
-            vreddit.download_audio()
-            logger.info('merging video with audio...')
-            file_path = vreddit.merge()
+            logger.info('downloading video/audio and merging them...')
+            vreddit.download_and_merge()
             logger.info('...merging ended')
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
             vreddit.remove()
-            if send_text_fallback:
-                return self._send_text(caption)
+            raise FileTooBig
 
         thumb_file, thumbnail_path = None, None
         if self._s.thumbnail:
@@ -206,50 +207,63 @@ class Sender(dict):
             thumbnail_path = u.resize_thumbnail(thumbnail_path)
             thumb_file = open(thumbnail_path, 'rb')
 
-        try:
-            with open(file_path, 'rb') as f:
-                logger.info('uploading video...')
-                self._sent_message = self._bot.send_video(
-                    self._channel.channel_id,
-                    f,
-                    caption=caption,
-                    parse_mode=ParseMode.HTML,
-                    thumb=thumb_file,
-                    height=self._s.video_size[0],
-                    width=self._s.video_size[1],
-                    duration=self._s.video_duration,
-                    supports_streaming=True,
-                    timeout=360
-                )
-
-            thumb_file.close()
-
-            logger.info('removing downloaded files...')
-            vreddit.remove()
-            u.remove_file_safe(thumbnail_path)
-
-            return self._sent_message
-        except (BadRequest, TelegramError) as e:
-            logger.error('Telegram error when sending video: %s', e.message)
-            if send_text_fallback:
-                return self._send_text(caption)
-
-    def _send_video(self, video_url, caption, send_text_fallback=True):
-        # check video size (see reddit2telegram)
-        # download video
-        try:
+        with open(file_path, 'rb') as f:
+            logger.info('uploading video...')
             self._sent_message = self._bot.send_video(
                 self._channel.channel_id,
-                video_url,
+                f,
                 caption=caption,
+                parse_mode=ParseMode.HTML,
+                thumb=thumb_file,
+                height=self._s.video_size[0],
+                width=self._s.video_size[1],
+                duration=self._s.video_duration,
+                supports_streaming=True,
+                timeout=360
+            )
+
+        thumb_file.close()
+
+        logger.info('removing downloaded files...')
+        vreddit.remove()
+        u.remove_file_safe(thumbnail_path)
+
+        return self._sent_message
+
+    def _send_video(self, url, caption, send_text_fallback=True):
+        video = Downloader(url)
+        try:
+            logger.info('downloading video...')
+            video.download()
+            logger.info('...download ended')
+        except FileTooBig:
+            logger.info('video is too big to be sent (%s), removing file and sending text...', video.size_readable)
+            video.remove()
+            
+            raise FileTooBig
+        
+        thumb_path = 'assets/video_thumb.png'  # generic thumbnail
+        thumb_file = open(os.path.normpath(thumb_path), 'rb')
+        
+        with open(video.file_path, 'rb') as f:
+            self._sent_message = self._bot.send_video(
+                self._channel.channel_id,
+                f,
+                caption=caption,
+                thumb=thumb_file,
+                height=None,
+                width=None,
+                duration=None,
                 parse_mode=ParseMode.HTML,
                 timeout=360
             )
-            return self._sent_message
-        except (BadRequest, TelegramError) as e:
-            logger.error('Telegram error when sending video: %s', e.message)
-            if send_text_fallback:
-                return self._send_text(caption)
+
+        thumb_file.close()
+        logger.info('removing downloaded files...')
+        video.remove()
+        u.remove_file_safe(thumb_path)
+        
+        return self._sent_message
     
     def register_post(self):
         Post.create(

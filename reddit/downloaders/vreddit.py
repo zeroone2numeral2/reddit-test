@@ -59,3 +59,8 @@ class VReddit(Downloader):
         subprocess.call(cmd, shell=True, stdout=devnull, stderr=devnull)
 
         return self._merged_path
+    
+    def download_and_merge(self):
+        self.download()
+        self.download_audio()
+        return self.merge()
