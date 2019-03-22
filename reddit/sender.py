@@ -41,11 +41,10 @@ class MediaType:
 
 
 class Sender(dict):
-    def __init__(self, bot, channel, subreddit, submission):
+    def __init__(self, bot, subreddit, submission):
         super(Sender, self).__init__()
         self._bot = bot
         self._s = submission
-        self._channel = channel
         self._subreddit = subreddit
 
         self._sent_message = None
@@ -173,7 +172,7 @@ class Sender(dict):
 
     def _send_text(self, text):
         return self._bot.send_message(
-            self._channel.channel_id,
+            self._subreddit.channel.channel_id,
             text,
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=not self._subreddit.webpage_preview
@@ -181,7 +180,7 @@ class Sender(dict):
 
     def _send_image(self, image_url, caption):
         self._sent_message = self._bot.send_photo(
-            self._channel.channel_id,
+            self._subreddit.channel.channel_id,
             image_url,
             caption=caption,
             parse_mode=ParseMode.HTML,
@@ -210,7 +209,7 @@ class Sender(dict):
         with open(file_path, 'rb') as f:
             logger.info('uploading video...')
             self._sent_message = self._bot.send_video(
-                self._channel.channel_id,
+                self._subreddit.channel.channel_id,
                 f,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
@@ -247,7 +246,7 @@ class Sender(dict):
         
         with open(video.file_path, 'rb') as f:
             self._sent_message = self._bot.send_video(
-                self._channel.channel_id,
+                self._subreddit.channel.channel_id,
                 f,
                 caption=caption,
                 thumb=thumb_file,
@@ -269,7 +268,7 @@ class Sender(dict):
         Post.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,
-            channel=self._channel,
+            channel=self._subreddit.channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
             posted_at=u.now() if self._sent_message else None
         )

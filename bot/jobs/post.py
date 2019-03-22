@@ -78,7 +78,7 @@ def process_subreddit(subreddit, bot):
     
     submission, sender = None, None
     for submission in process_submissions(subreddit):
-        sender = Sender(bot, subreddit.channel, subreddit, submission)
+        sender = Sender(bot, subreddit, submission)
         if sender.test_filters():
             logger.info('submission passed filters')
             break
