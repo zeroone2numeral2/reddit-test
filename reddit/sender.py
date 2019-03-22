@@ -227,7 +227,10 @@ class Sender(dict):
 
         thumb_file, thumbnail_path = None, None
         if self._s.thumbnail:
-            thumbnail_path = u.download_file_stream(self._s.thumbnail, os.path.join('downloads', 'thumb_{}.jpg'.format(self._s.id)))
+            thumbnail_path = u.download_file_stream(
+                self._s.thumbnail,
+                file_path=os.path.join('downloads', 'thumb_{}.jpg'.format(self._s.id))
+            )
             thumbnail_path = u.resize_thumbnail(thumbnail_path)
             thumb_file = open(thumbnail_path, 'rb')
 
