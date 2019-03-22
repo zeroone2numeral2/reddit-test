@@ -33,65 +33,37 @@ def main(db_filepath):
     test = peewee.BooleanField(default=False)
 
     migrations = [
-        [
-            '20190318 pt. 1',
-            migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
-            migrator.add_column('subreddits', 'limit', limit),
-            migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then)
-        ],
-        [
-            '20190318 pt. 2 (rename ignore_if_newer_then to ignore_if_newer_than)',
-            migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than')
-        ],
-        [
-            '20190320 pt. 1 (add quiet_hours start/end)',
-            migrator.add_column('subreddits', 'quiet_hours_start', quiet_hours_start),
-            migrator.add_column('subreddits', 'quiet_hours_end', quiet_hours_end)
-        ],
-        [
-            '20190320 pt. 2 (add allow_nsfw)',
-            migrator.add_column('subreddits', 'allow_nsfw', allow_nsfw)
-        ],
-        [
-            '20190320 pt. 3 (rename send_images to send_medias)',
-            migrator.rename_column('subreddits', 'send_images', 'send_medias')
-        ],
-        [
-            '20190321 (add test to Subreddit)',
-            migrator.add_column('subreddits', 'test', test)
-        ]
+        # 20190318 pt. 1
+        migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
+        migrator.add_column('subreddits', 'limit', limit),
+        migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then),
+        # 20190318 pt. 2 (rename ignore_if_newer_then to ignore_if_newer_than)
+        migrator.rename_column('subreddits', 'ignore_if_newer_then', 'ignore_if_newer_than'),
+        # 20190320 pt. 1 (add quiet_hours start/end)
+        migrator.add_column('subreddits', 'quiet_hours_start', quiet_hours_start),
+        migrator.add_column('subreddits', 'quiet_hours_end', quiet_hours_end),
+        # 20190320 pt. 2 (add allow_nsfw)
+        migrator.add_column('subreddits', 'allow_nsfw', allow_nsfw),
+        # 20190320 pt. 3 (rename send_images to send_medias)
+        migrator.rename_column('subreddits', 'send_images', 'send_medias'),
+        # 20190321 (add test to Subreddit)
+        migrator.add_column('subreddits', 'test', test)
     ]
 
-    print('Available migrations:')
-    i = 0
-    for migration in migrations:
-        print('  {}. {}'.format(i, migration[0]))
-        i += 1
-
-    selected_key = ''
-    while not re.search(r'^\d+$', selected_key):
-        selected_key = input('Select a migration: ')
-    
-    if int(selected_key) > len(migrations) - 1:
-        print('Bad index selected')
-        sys.exit(1)
-
-    migrations_list = migrations[int(selected_key)][1:]
-
     logger.info('Starting migration....')
-
-    try:
-        migrate(*migrations_list)
-    except sqlite3.DatabaseError as e:
-        print('database file {} is encrypted or is not a database'.format(db_filepath))
-        print('sqlite3.DatabaseError:', str(e))
-        sys.exit(1)
-    except peewee.DatabaseError as e:
-        print('peewee.DatabaseError:', str(e))
-        sys.exit(1)
-    except ValueError as e:
-        print('ValueError:', str(e))
-        sys.exit(1)
+    for migration in migrations:
+        try:
+            migrate(migration)
+        except sqlite3.DatabaseError as e:
+            print('database file {} is encrypted or is not a database'.format(db_filepath))
+            print('sqlite3.DatabaseError:', str(e))
+            sys.exit(1)
+        except peewee.DatabaseError as e:
+            logger.info('peewee.DatabaseError: %s', str(e))
+            continue
+        except ValueError as e:
+            logger.info('ValueError: %s', str(e))
+            continue
 
     logger.info('...migration completed')
 
