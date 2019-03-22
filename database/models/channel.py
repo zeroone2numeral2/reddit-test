@@ -1,15 +1,16 @@
+import datetime
+
 import peewee
 from playhouse.shortcuts import model_to_dict
 
 from database import db
-from utilities import u
 
 
 class Channel(peewee.Model):
     channel_id = peewee.IntegerField(primary_key=True, index=True)
     title = peewee.CharField(null=False)
     username = peewee.CharField(null=True)
-    added = peewee.DateTimeField(default=u.now)
+    added = peewee.DateTimeField(default=datetime.datetime.utcnow)
 
     class Meta:
         table_name = 'channels'

@@ -169,3 +169,6 @@ def remove_file_safe(file_path):
     except:
         pass
 
+
+def is_valid_sub_name(name):
+    return bool(re.search('(?:/?r/)?[\w-]{3,20}', name, re.I))

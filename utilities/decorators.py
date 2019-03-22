@@ -1,7 +1,8 @@
 import logging
 from functools import wraps
-from utilities import u
 
+from database.models import Subreddit
+from utilities import u
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -41,5 +42,22 @@ def logerrors(func):
             return func(bot, job, *args, **kwargs)
         except Exception as e:
             logger.error('error during job execution: %s', str(e), exc_info=True)
+
+    return wrapped
+
+
+def knownsubreddit(func):
+    @wraps(func)
+    def wrapped(bot, update, *args, **kwargs):
+        if 'args' in kwargs:
+            sub_name = kwargs['args'][0]
+            if not u.is_valid_sub_name(sub_name):
+                update.message.reply_text('r/{} is not a valid subreddit name'.format(sub_name.lower()))
+                return
+            elif not Subreddit.fetch(sub_name):
+                update.message.reply_text('No r/{} in the database'.format(sub_name.lower()))
+                return
+
+        return func(bot, update, *args, **kwargs)
 
     return wrapped

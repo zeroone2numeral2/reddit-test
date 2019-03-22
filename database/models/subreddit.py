@@ -1,10 +1,11 @@
+import datetime
+
 import peewee
 from playhouse.shortcuts import model_to_dict
 
 from database import db
 from .channel import Channel
 from const import DEFAULT_TEMPLATE
-from utilities import u
 from config import config
 
 
@@ -24,7 +25,7 @@ class Subreddit(peewee.Model):
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
     last_posted_submission_dt = peewee.DateTimeField(null=True)
     sorting = peewee.CharField(default=config.submissions.default_sorting)
-    added = peewee.DateTimeField(default=u.now)
+    added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     enabled = peewee.BooleanField(default=True)
     template = peewee.CharField(null=True, default=DEFAULT_TEMPLATE)
     send_medias = peewee.BooleanField(default=True)
