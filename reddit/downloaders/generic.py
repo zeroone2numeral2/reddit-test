@@ -14,7 +14,7 @@ class FileTooBig(Exception):
 class Downloader:
     def __init__(self, url, identifier=random.randint(1, 10000)):
         self._url = url
-        self._file_path = '{}.mp4'.format(identifier)
+        self._file_path = os.path.join('downloads', '{}.mp4'.format(identifier))
         self._size = 0
         self._size_readable = '0 b'
 
