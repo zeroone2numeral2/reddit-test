@@ -11,6 +11,7 @@ from telegram.error import TelegramError
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
+from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from database.models import Post
@@ -201,7 +202,7 @@ class Sender(dict):
                 
                 return self._sent_message
             except Exception as e:
-                logger.error('exeption during the sending of a media, sending as text', exc_info=True)
+                logger.error('exeption during the sending of a media, sending as text. Error:', exc_info=True)
         
         logger.info('submission is textual -or- send_medias is false -or- sending media failed: posting a text...')
         self._sent_message = self._send_text(text)
@@ -231,8 +232,9 @@ class Sender(dict):
     def _send_vreddit(self, url, caption):
         logger.info('vreddit url: %s', url)
 
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id)
         file_path = vreddit.file_path
+        logger.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
         try:
             logger.info('downloading video/audio and merging them...')
             file_path = vreddit.download_and_merge()
@@ -241,6 +243,10 @@ class Sender(dict):
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
             vreddit.remove()
             raise FileTooBig
+        except FfmpegTimeoutError:
+            logger.info('ffmpeg timeout error during the merging of video/audio')
+            vreddit.remove()
+            raise FfmpegTimeoutError
 
         vreddit.download_thumbnail()
 
@@ -267,7 +273,8 @@ class Sender(dict):
     def _send_video(self, url, caption, send_text_fallback=True):
         logger.info('video url: %s', url)
 
-        video = Downloader(url)
+        video = Downloader(url, identifier=self._s.id)
+        logger.info('video path: %s', video.file_path)
         try:
             logger.info('downloading video...')
             video.download()
