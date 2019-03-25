@@ -1,4 +1,5 @@
 import logging
+import re
 from pprint import pformat
 import os
 
@@ -20,13 +21,18 @@ def getconfig_command(bot, update):
     update.message.reply_html('<code>{}</code>'.format(pformat(config)))
 
 
-@Plugins.add(CommandHandler, command=['getlog', 'log'])
+@Plugins.add(CommandHandler, command=['getlog', 'log'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def getlog_command(bot, update):
+def getlog_command(bot, update, args):
     logger.info('/getlog command')
 
-    with open(os.path.normpath(config.logging.filepath), 'rb') as f:
+    file_path = config.logging.filepath
+    if args and re.search(r'^\d+$', args[0], re.I):
+        log_file_num = args[0]
+        file_path = file_path.replace('.log', '.log.{}'.format(log_file_num))
+
+    with open(os.path.normpath(file_path), 'rb') as f:
         update.message.reply_document(f)
 
 
