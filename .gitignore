@@ -2,8 +2,8 @@
 config.toml
 
 # logs
-logs/*.log.*
-logs/*.log
+*.log.*
+*.log
 
 # project
 .idea/

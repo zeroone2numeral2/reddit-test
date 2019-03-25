@@ -203,8 +203,10 @@ class Sender(dict):
                 return self._sent_message
             except Exception as e:
                 logger.error('exeption during the sending of a media, sending as text. Error:', exc_info=True)
+        else:
+            logger.info('post is NOT a media, sending it as text')
         
-        logger.info('submission is textual -or- send_medias is false -or- sending media failed: posting a text...')
+        logger.info('posting a text...')
         self._sent_message = self._send_text(text)
 
         return self._sent_message
