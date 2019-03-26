@@ -26,4 +26,4 @@ venv/
 ffmpeg.exe
 
 # tests
-test/generic.py
+tests/generic.py
