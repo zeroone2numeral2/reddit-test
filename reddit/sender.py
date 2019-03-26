@@ -250,6 +250,7 @@ class Sender(dict):
             vreddit.remove()
             raise FfmpegTimeoutError
 
+        logger.info('downloading thumbnail from url: %s', vreddit.thumbnail_url)
         vreddit.download_thumbnail()
 
         with open(file_path, 'rb') as f:
