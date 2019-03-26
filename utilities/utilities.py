@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
+STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
 timezone = pytz.timezone('Europe/Rome')
 
@@ -172,3 +173,16 @@ def remove_file_safe(file_path):
 
 def is_valid_sub_name(name):
     return bool(re.search('(?:/?r/)?[\w-]{3,20}', name, re.I))
+
+
+def string_to_minutes(string):
+    match = STRING_TO_MINUTES_REGEX.search(string)
+    if match:
+        hours, minutes = match.group('hours', 'minutes')
+        sum_minutes = 0
+        if hours:
+            sum_minutes += int(hours) * 60
+        if minutes:
+            sum_minutes += int(minutes)
+
+        return sum_minutes if sum_minutes > 0 else None

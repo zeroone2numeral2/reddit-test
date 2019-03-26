@@ -24,3 +24,6 @@ venv/
 
 # binaries
 ffmpeg.exe
+
+# tests
+test/generic.py
