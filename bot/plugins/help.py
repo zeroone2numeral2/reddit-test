@@ -24,6 +24,8 @@ HELP_STRING = """\
 /getconfig: see config values
 /log: get the log file. Pass a number as argument if you want to get an archived log file
 /db: get the database file
+/utc: get current UTC time
+/remdl: delete all the files in the downloads directory
 """
 
 
