@@ -67,5 +67,5 @@ def sub_settings(bot, update, args):
     update.message.reply_html('Done\n<code>{setting}</code>: {new_value}\n\nValue type: {input_type}'.format(
         setting=setting,
         new_value=u.escape(str(new_value)),
-        input_type=str(type(value))
+        input_type=u.escape(str(type(value)))
     ))
