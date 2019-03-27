@@ -108,7 +108,6 @@ class Sender(dict):
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
             logger.debug('url is a vreddit')
-            print(self._s.media['reddit_video'])
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
             self._s.video_size = (
