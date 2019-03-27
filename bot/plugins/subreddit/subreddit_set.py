@@ -3,7 +3,6 @@ import re
 
 from playhouse.shortcuts import model_to_dict
 from telegram.ext import CommandHandler
-from telegram import ParseMode
 
 from database.models import Subreddit
 from bot import Plugins
@@ -50,7 +49,10 @@ def sub_settings(bot, update, args):
     elif value in ('none', 'None'):
         logger.info('value is None')
         value = None
-    logger.info('value after true/false/none check: %s', value)
+    elif re.search(r'^\d+$', value, re.I):
+        logger.info('value is int')
+        value = int(value)
+    logger.info('value after true/false/none/int check: %s', value)
 
     try:
         setattr(subreddit, setting, value)
@@ -62,4 +64,8 @@ def sub_settings(bot, update, args):
 
     new_value = getattr(subreddit, setting)
 
-    update.message.reply_html('Done\n<code>{}</code>: {}'.format(setting, u.escape(str(new_value))))
+    update.message.reply_html('Done\n<code>{setting}</code>: {new_value}\n\nValue type: {input_type}'.format(
+        setting=setting,
+        new_value=u.escape(str(new_value)),
+        input_type=str(type(value))
+    ))
