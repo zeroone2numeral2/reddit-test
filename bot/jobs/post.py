@@ -121,6 +121,9 @@ def process_subreddit(subreddit, bot):
         logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return
 
+    logger.info('submission url: %s', sender.submission.url)
+    logger.info('submission title: %s', sender.submission.title)
+
     try:
         sent_message = sender.post()
     except (BadRequest, TelegramError) as e:
