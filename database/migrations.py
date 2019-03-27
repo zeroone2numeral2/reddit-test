@@ -56,7 +56,9 @@ def main(db_filepath):
     logger.info('Starting migration....')
     for migration in migrations:
         try:
+            logger.info('executing single migration...')
             migrate(migration)
+            logger.info('...single migration executed')
         except sqlite3.DatabaseError as e:
             print('database file {} is encrypted or is not a database'.format(db_filepath))
             print('sqlite3.DatabaseError:', str(e))
@@ -68,7 +70,7 @@ def main(db_filepath):
             logger.info('ValueError: %s', str(e))
             continue
 
-    logger.info('...migration completed')
+    logger.info('<migration completed>')
 
 
 if __name__ == '__main__':
