@@ -27,8 +27,9 @@ class VReddit(Downloader):
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
 
         self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
-        self._size_audio = 0
+        self._audio_size = 0
         self._audio_path = os.path.join('downloads', '{}.mp3'.format(self._identifier))
+        self._video_path = self._file_path
         self._merged_path = self._file_path.replace('.mp4', '_merged.mp4')
 
     @property
@@ -38,6 +39,10 @@ class VReddit(Downloader):
     @property
     def merged_path(self):
         return self._merged_path
+
+    @property
+    def url_audio(self):
+        return self._url_audio
 
     def __repr__(self):
         return '<VReddit {} - {}>'.format(self._url, self._url_audio)
@@ -67,9 +72,7 @@ class VReddit(Downloader):
     def download_audio(self):
         u.download_file_stream(self._url_audio, self._audio_path)
 
-        # get the size if we weren't able to do that via headers
-        if not self._size_audio:
-            self._size_audio = os.path.getsize(self._audio_path)
+        self._audio_size = os.path.getsize(self._audio_path)
 
         return self._audio_path
 
@@ -125,7 +128,10 @@ class VReddit(Downloader):
 
         return self._merged_path
     
-    def download_and_merge(self):
+    def download_and_merge(self, skip_audio=False):
         self.download()
-        self.download_audio()
-        return self.merge()
+        if not skip_audio:
+            self.download_audio()
+            return self.merge()  # return the merged video/audio path if we didn't skip the audio
+        else:
+            return self._file_path  # return the downloaded video path if we have skipped thye audio

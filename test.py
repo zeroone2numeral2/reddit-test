@@ -37,7 +37,7 @@ def main():
         logger.info('')
         logger.info('')
         logger.info('')
-        logger.info('TITLE: %s (%s)', submission.title, submission.id)
+        logger.info('TITLE: %s (%s) (%s)', submission.title, submission.id, submission.url)
         
         sender = Sender(bot, rtest, submission)
         

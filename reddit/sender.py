@@ -100,12 +100,15 @@ class Sender(dict):
             logger.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
+        # elif re.search(r'i\.reddit\.com/[a-zA-Z1-9]+\.gif$', self._s.url, re.I):
+            # logger.debug('reddit gif url: %s', self._s.url)
         elif 'gfycat.com' in self._s.domain_parsed:
             logger.debug('url is a gfycat')
             self._s.media_type = MediaType.GFYCAT
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
             logger.debug('url is a vreddit')
+            print(self._s.media['reddit_video'])
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
             self._s.video_size = (
@@ -113,6 +116,7 @@ class Sender(dict):
                 self._s.media['reddit_video']['width']
             )
             self._s.video_duration = self._s.media['reddit_video']['duration']
+            self._s.is_gif = self._s.media['reddit_video'].get('is_gif', False)  # some v.reddit might not have audio
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
@@ -235,12 +239,20 @@ class Sender(dict):
         logger.info('vreddit url: %s', url)
 
         vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id)
+        logger.info('vreddit video url: %s', vreddit.url)
+        logger.info('vreddit audio url: %s', vreddit.url_audio)
+
+        if self._s.is_gif:
+            logger.info('[1/2] vreddit is a GIF (does not have an audio): we will NOT try to download the audio and merge audio and video')
+            logger.info('[2/2] the following logs will mention the merged audio/video, but we are now just handling the video')
+
         file_path = vreddit.file_path
         logger.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
         try:
             logger.info('downloading video/audio and merging them...')
-            file_path = vreddit.download_and_merge()
+            file_path = vreddit.download_and_merge(skip_audio=True if self._s.is_gif else False)
             logger.info('...merging ended')
+            logger.info('file path of the video we will send: %s', file_path)
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
             vreddit.remove()
