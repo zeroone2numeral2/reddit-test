@@ -31,6 +31,7 @@ def main(db_filepath):
     quiet_hours_end = peewee.IntegerField(null=True)
     allow_nsfw = peewee.BooleanField(default=True, null=True)
     test = peewee.BooleanField(default=False)
+    quiet_hours_demultiplier = peewee.IntegerField(null=True, default=0)
 
     migrations = [
         # 20190318 pt. 1
@@ -47,7 +48,9 @@ def main(db_filepath):
         # 20190320 pt. 3 (rename send_images to send_medias)
         migrator.rename_column('subreddits', 'send_images', 'send_medias'),
         # 20190321 (add test to Subreddit)
-        migrator.add_column('subreddits', 'test', test)
+        migrator.add_column('subreddits', 'test', test),
+        # 20190327 (add quiet_hours_demultiplier to Subreddit)
+        migrator.add_column('subreddits', 'quiet_hours_demultiplier', quiet_hours_demultiplier)
     ]
 
     logger.info('Starting migration....')
