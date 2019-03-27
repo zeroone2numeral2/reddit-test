@@ -17,16 +17,20 @@ u.load_logging_config(config.logging.config, config.logging.filepath)
 
 
 IGNORE_SUBMISSIONS = [
-    #'b3zaqd',  # vreddit with sound
-    #'b3z78n',  # direct mp4 url
+    'b3zaqd',  # vreddit with sound
+    'b3z78n',  # direct mp4 url
+    'b581fm'  # large vreddit
 ]
 
 
 def main():
     logger.info('starting...')
-    rtest = Subreddit.get(Subreddit.name == 'ricardo_test')
+    rtest = Subreddit.fetch(SUB_NAME)
+    if not rtest:
+        print(SUB_NAME, 'not in db')
+        return
     
-    for submission in reddit.iter_submissions(SUB_NAME, 'hot', limit=100):
+    for submission in reddit.iter_submissions(SUB_NAME, 'hot', limit=10):
         if submission.id in IGNORE_SUBMISSIONS:
             continue
         

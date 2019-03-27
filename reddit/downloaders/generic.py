@@ -22,6 +22,10 @@ class Downloader:
         self._thumbnail_path = ''
         self._thumbnail_bo = None
 
+        if self._thumbnail_url == 'nsfw':
+            self._thumbnail_url = 'https://t3.ftcdn.net/jpg/01/77/29/28' \
+                                  '/240_F_177292812_asUGEDiieLfHjKx9DxTBI50vsS9iZwi0.jpg '
+
         headers = requests.head(url).headers
         if 'Content-Type' in headers:
             self._size = int(headers.get('content-length', 0))

@@ -23,7 +23,12 @@ class Gfycat(Downloader):
             self._width = r_json['gfyItem']['width']
             self._height = r_json['gfyItem']['height']
             self._thumbnail_url = r_json['gfyItem']['thumb100PosterUrl']
+            self._duration = int(r_json['gfyItem']['numFrames'] / r_json['gfyItem']['frameRate'])
 
     @property
     def sizes(self):
         return self._width, self._height
+
+    @property
+    def duration(self):
+        return self._duration

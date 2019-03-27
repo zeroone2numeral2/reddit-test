@@ -337,6 +337,7 @@ class Sender(dict):
             width=gfycat.sizes[0],
             height=gfycat.sizes[1],
             thumb=gfycat.get_thumbnail_bo(),
+            duration=gfycat.duration,
             timeout=360
         )
 
