@@ -149,6 +149,7 @@ def process_subreddit(subreddit, bot):
 @d.logerrors
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
+    job_start_dt = u.now()
 
     subreddits = (
         Subreddit.select()
@@ -165,4 +166,5 @@ def check_posts(bot, job):
 
         time.sleep(1)
 
-    logger.info('job ended at %s', u.now(string=True))
+    job_end_dt = u.now()
+    logger.info('job ended at %s (elapsed seconds: %d)', u.now(string=True), (job_end_dt - job_start_dt).seconds)
