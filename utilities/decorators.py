@@ -7,6 +7,8 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
+READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
+
 
 def restricted(func):
     @wraps(func)
@@ -59,5 +61,26 @@ def knownsubreddit(func):
                 return
 
         return func(bot, update, *args, **kwargs)
+
+    return wrapped
+
+
+def log_start_end_dt(func):
+    @wraps(func)
+    def wrapped(bot, job, *args, **kwargs):
+        job_start_dt = u.now()
+        logger.info('%s job started at %s', job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
+
+        job_result = func(bot, job, *args, **kwargs)
+
+        job_end_dt = u.now()
+        logger.info(
+            '%s job ended at %s (elapsed seconds: %d)',
+            job.name,
+            job_start_dt.strftime(READABLE_TIME_FORMAT),
+            (job_end_dt - job_start_dt).seconds
+        )
+
+        return job_result
 
     return wrapped

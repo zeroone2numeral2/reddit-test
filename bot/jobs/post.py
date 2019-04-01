@@ -147,9 +147,9 @@ def process_subreddit(subreddit, bot):
 
 @Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0, name='posts_job')
 @d.logerrors
+@d.log_start_end_dt
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
-    job_start_dt = u.now()
 
     subreddits = (
         Subreddit.select()
@@ -165,6 +165,3 @@ def check_posts(bot, job):
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         time.sleep(1)
-
-    job_end_dt = u.now()
-    logger.info('job ended at %s (elapsed seconds: %d)', u.now(string=True), (job_end_dt - job_start_dt).seconds)
