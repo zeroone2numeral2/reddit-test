@@ -2,7 +2,7 @@
 
 ```bash
 cd database
-python3 migrations.py -db ../redditmirrot.sqlite
+python3 migrations.py -db ../redditmirror.sqlite
 ```
 
 ### FFMPEG
