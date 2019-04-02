@@ -5,7 +5,7 @@ from playhouse.shortcuts import model_to_dict
 
 from database import db
 from .channel import Channel
-from const import DEFAULT_TEMPLATE
+from const import *
 from config import config
 
 
@@ -43,6 +43,12 @@ class Subreddit(peewee.Model):
     min_score = peewee.IntegerField(null=True)
     ignore_if_newer_than = peewee.IntegerField(null=True)
     allow_nsfw = peewee.BooleanField(default=True, null=True)
+    # RESUME FIELDS
+    enabled_resume = peewee.BooleanField(default=False)
+    hour = peewee.IntegerField(default=22)
+    frequency = peewee.CharField(default='day')
+    number_of_posts = peewee.IntegerField(default=3)
+    resume_template = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
 
     class Meta:
         table_name = 'subreddits'

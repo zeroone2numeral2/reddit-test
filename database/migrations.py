@@ -32,6 +32,11 @@ def main(db_filepath):
     allow_nsfw = peewee.BooleanField(default=True, null=True)
     test = peewee.BooleanField(default=False)
     quiet_hours_demultiplier = peewee.IntegerField(null=True, default=0)
+    enabled_resume = peewee.BooleanField(default=False)
+    hour = peewee.IntegerField(default=22)
+    frequency = peewee.CharField(default='day')
+    number_of_posts = peewee.IntegerField(default=3)
+    resume_template = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -50,7 +55,13 @@ def main(db_filepath):
         # 20190321 (add test to Subreddit)
         migrator.add_column('subreddits', 'test', test),
         # 20190327 (add quiet_hours_demultiplier to Subreddit)
-        migrator.add_column('subreddits', 'quiet_hours_demultiplier', quiet_hours_demultiplier)
+        migrator.add_column('subreddits', 'quiet_hours_demultiplier', quiet_hours_demultiplier),
+        # 20190402 (resume job)
+        migrator.add_column('subreddits', 'enabled_resume', enabled_resume),
+        migrator.add_column('subreddits', 'hour', hour),
+        migrator.add_column('subreddits', 'frequency', frequency),
+        migrator.add_column('subreddits', 'number_of_posts', number_of_posts),
+        migrator.add_column('subreddits', 'resume_template', resume_template)
     ]
 
     logger.info('Starting migration....')
