@@ -47,3 +47,7 @@ class Reddit(praw.Reddit):
 
         for submission in iterator(*args, **kwargs):
             yield submission
+
+    def iter_top(self, name, limit, period='day'):
+        for submission in self.subreddit(name).top(period, limit=limit):
+            yield submission

@@ -15,6 +15,7 @@ from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from database.models import Post
+from database.models import PostResume
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u
@@ -358,6 +359,15 @@ class Sender(dict):
     
     def register_post(self):
         Post.create(
+            submission_id=self._s.id,
+            subreddit=self._subreddit,
+            channel=self._subreddit.channel,
+            message_id=self._sent_message.message_id if self._sent_message else None,
+            posted_at=u.now() if self._sent_message else None
+        )
+
+    def register_post_resume(self):
+        PostResume.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,

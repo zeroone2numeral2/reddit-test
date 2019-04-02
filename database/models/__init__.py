@@ -3,6 +3,7 @@ import logging
 from .channel import Channel
 from .subreddit import Subreddit
 from .post import Post
+from .post_resume import PostResume
 from .ignored import Ignored
 
 from database import db
