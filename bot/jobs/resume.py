@@ -1,5 +1,6 @@
 import logging
 import time
+import datetime
 from pprint import pprint
 
 from telegram import ParseMode
@@ -12,7 +13,7 @@ from database.models import Subreddit
 from database.models import PostResume
 from reddit import reddit
 from reddit import Sorting
-from reddit import Sender
+from reddit import SenderResume
 from bot import Jobs
 from ..jobregistration import RUNNERS
 from config import config
@@ -26,7 +27,7 @@ def process_submissions(subreddit, bot):
     logger.info('fetching submissions')
 
     i = 0
-    for submission in reddit.iter_top(subreddit.name, subreddit.frequency, limit=15):
+    for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.frequency):
         logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if PostResume.already_posted(subreddit, submission.id):
             logger.info('...submission %s has already been posted', submission.id)
@@ -35,9 +36,10 @@ def process_submissions(subreddit, bot):
             logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
                         submission.id)
 
-            sender = Sender(bot, subreddit, submission)
+            sender = SenderResume(bot, subreddit, submission)
             if not sender.test_filters():
                 # do not return the object if it doesn't pass the filters
+                logger.info('submission DID NOT pass the filters. continuing to the next submission...')
                 continue
 
             yield sender
@@ -48,11 +50,31 @@ def process_submissions(subreddit, bot):
 
 
 def process_subreddit(subreddit, bot):
-    logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+    logger.info('processing subreddit %s (r/%s) (frequency: %s)', subreddit.subreddit_id, subreddit.name, subreddit.frequency)
 
+    now = u.now()
+    weekday = datetime.datetime.today().weekday()
+    if subreddit.frequency == 'week' and not (weekday == subreddit.weekday and subreddit.hour == now.hour):
+        logger.info(
+            'ignoring because -> subreddit.weekday != weekday (%d != %d) and subreddit.hour != current hour (%d != %d)',
+            subreddit.weekday,
+            weekday,
+            subreddit.hour,
+            now.hour
+        )
+        return
+    elif subreddit.frequency == 'day' and now.hour != subreddit.hour:
+        logger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
+        return
+
+    annoucement_posted = False
     for sender in process_submissions(subreddit, bot):
         logger.info('submission url: %s', sender.submission.url)
         logger.info('submission title: %s', sender.submission.title)
+
+        if not annoucement_posted:
+            sender.post_resume_announcement()
+            annoucement_posted = True
 
         try:
             sent_message = sender.post()
@@ -66,12 +88,14 @@ def process_subreddit(subreddit, bot):
         if sent_message:
             if not subreddit.test:
                 logger.info('creating PostResume row...')
-                sender.register_post_resume()
+                sender.register_post()
             else:
                 logger.info('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
 
+        time.sleep(1)
 
-@Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0, name='resume_job')
+
+@Jobs.add(RUNNERS.run_repeating, interval=10*50, first=0, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
 def check_daily_resume(bot, job):

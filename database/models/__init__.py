@@ -13,4 +13,4 @@ logger = logging.getLogger(__name__)
 
 def create_tables():
     with db:
-        db.create_tables([Channel, Subreddit, Post, Ignored])
+        db.create_tables([Channel, Subreddit, Post, Ignored, PostResume])

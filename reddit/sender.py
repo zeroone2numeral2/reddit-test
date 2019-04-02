@@ -153,13 +153,7 @@ class Sender(dict):
         self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
 
         self._submission_dict = dict()
-
-        for key in dir(self._s):
-            val = getattr(submission, key)
-            self._submission_dict[key] = val
-            if KEY_MAPPER_DICT.get(key, None):
-                # replace the key in the dict of the mapping object edits that value
-                self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
+        self.gen_submission_dict()
 
     @property
     def submission(self):
@@ -175,6 +169,16 @@ class Sender(dict):
 
     def __getitem__(self, item):
         return self._submission_dict[item]
+
+    def gen_submission_dict(self):
+        self._submission_dict = dict()
+
+        for key in dir(self._s):
+            val = getattr(self._s, key)
+            self._submission_dict[key] = val
+            if KEY_MAPPER_DICT.get(key, None):
+                # replace the key in the dict of the mapping object edits that value
+                self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
 
     def post(self):
         template = self._subreddit.template
@@ -359,15 +363,6 @@ class Sender(dict):
     
     def register_post(self):
         Post.create(
-            submission_id=self._s.id,
-            subreddit=self._subreddit,
-            channel=self._subreddit.channel,
-            message_id=self._sent_message.message_id if self._sent_message else None,
-            posted_at=u.now() if self._sent_message else None
-        )
-
-    def register_post_resume(self):
-        PostResume.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,

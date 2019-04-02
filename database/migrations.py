@@ -2,7 +2,6 @@ import logging
 import argparse
 import sys
 import os
-import re
 
 import peewee
 import sqlite3
@@ -34,6 +33,7 @@ def main(db_filepath):
     quiet_hours_demultiplier = peewee.IntegerField(null=True, default=0)
     enabled_resume = peewee.BooleanField(default=False)
     hour = peewee.IntegerField(default=22)
+    weekday = peewee.IntegerField(default=5)
     frequency = peewee.CharField(default='day')
     number_of_posts = peewee.IntegerField(default=3)
     resume_template = peewee.CharField(null=True)
@@ -59,6 +59,7 @@ def main(db_filepath):
         # 20190402 (resume job)
         migrator.add_column('subreddits', 'enabled_resume', enabled_resume),
         migrator.add_column('subreddits', 'hour', hour),
+        migrator.add_column('subreddits', 'weekday', weekday),
         migrator.add_column('subreddits', 'frequency', frequency),
         migrator.add_column('subreddits', 'number_of_posts', number_of_posts),
         migrator.add_column('subreddits', 'resume_template', resume_template)
