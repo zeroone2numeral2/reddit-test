@@ -10,6 +10,7 @@ from utilities import u
 from utilities import d
 from database.models import Subreddit
 from database.models import Post
+from database import db
 from reddit import reddit
 from reddit import Sorting
 from reddit import Sender
@@ -148,6 +149,7 @@ def process_subreddit(subreddit, bot):
 @Jobs.add(RUNNERS.run_repeating, interval=10*60, first=0, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
+@db.atomic('IMMEDIATE')
 def check_posts(bot, job):
     logger.info('job started at %s', u.now(string=True))
 

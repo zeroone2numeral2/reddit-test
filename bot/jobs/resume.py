@@ -11,6 +11,7 @@ from utilities import u
 from utilities import d
 from database.models import Subreddit
 from database.models import PostResume
+from database import db
 from reddit import reddit
 from reddit import Sorting
 from reddit import SenderResume
@@ -98,6 +99,7 @@ def process_subreddit(subreddit, bot):
 #@Jobs.add(RUNNERS.run_repeating, interval=50*60, first=0, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
+@db.atomic('IMMEDIATE')
 def check_daily_resume(bot, job):
     subreddits = (
         Subreddit.select()
