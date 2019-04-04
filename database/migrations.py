@@ -11,12 +11,6 @@ logging.basicConfig(format='[%(asctime)s][%(name)s] %(message)s', level=logging.
 logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 
-MIGRATIONS = list(
-    (
-        '20191803pt1',
-    )
-)
-
 
 def main(database_path):
     db = peewee.SqliteDatabase(database_path, pragmas={'journal_mode': 'wal'})
