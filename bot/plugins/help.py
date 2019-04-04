@@ -32,7 +32,7 @@ HELP_STRING = """\
 @Plugins.add(CommandHandler, command=['start', 'help'])
 @d.restricted
 @d.failwithmessage
-def subs_list(bot, update):
+def subs_list(_, update):
     logger.info('/help command')
     
     update.message.reply_markdown(HELP_STRING)

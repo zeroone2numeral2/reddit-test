@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def sub_info(bot, update, args):
+def sub_info(_, update, args):
     logger.info('/sub command (args: %s)', args)
 
     subreddit_name = args[0]

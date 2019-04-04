@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @Plugins.add(CommandHandler, command=['getconfig'])
 @d.restricted
 @d.failwithmessage
-def getconfig_command(bot, update):
+def getconfig_command(_, update):
     logger.info('/getconfig command')
 
     update.message.reply_html('<code>{}</code>'.format(pformat(config)))
@@ -25,7 +25,7 @@ def getconfig_command(bot, update):
 @Plugins.add(CommandHandler, command=['getlog', 'log'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def getlog_command(bot, update, args):
+def getlog_command(_, update, args):
     logger.info('/getlog command')
 
     file_path = config.logging.filepath
@@ -40,7 +40,7 @@ def getlog_command(bot, update, args):
 @Plugins.add(CommandHandler, command=['getdb', 'db'])
 @d.restricted
 @d.failwithmessage
-def getdb_command(bot, update):
+def getdb_command(_, update):
     logger.info('/getdb command')
 
     with open(os.path.normpath(config.sqlite.filename), 'rb') as f:
@@ -50,7 +50,7 @@ def getdb_command(bot, update):
 @Plugins.add(CommandHandler, command=['utc'])
 @d.restricted
 @d.failwithmessage
-def utc_command(bot, update):
+def utc_command(_, update):
     logger.info('/utc command')
 
     update.message.reply_text(u.now(string=True))
@@ -59,7 +59,7 @@ def utc_command(bot, update):
 @Plugins.add(CommandHandler, command=['remdl'])
 @d.restricted
 @d.failwithmessage
-def remdl_command(bot, update):
+def remdl_command(_, update):
     logger.info('/remdl command')
 
     files = [f for f in os.listdir('downloads') if f != '.gitkeep']

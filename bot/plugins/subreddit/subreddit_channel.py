@@ -19,7 +19,7 @@ CHANNEL_SELECT = range(1)
 
 @d.restricted
 @d.failwithmessage
-def on_set_channel_command(bot, update, args, user_data):
+def on_set_channel_command(_, update, args, user_data):
     logger.info('/subchannel command, args: %s', args)
     
     if not args:
@@ -49,7 +49,7 @@ def on_set_channel_command(bot, update, args, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected(bot, update, user_data):
+def on_channel_selected(_, update, user_data):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -66,7 +66,7 @@ def on_channel_selected(bot, update, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(bot, update):
+def on_cancel(_, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
@@ -75,7 +75,7 @@ def on_cancel(bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected_incorrect(bot, update):
+def on_channel_selected_incorrect(_, update):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 

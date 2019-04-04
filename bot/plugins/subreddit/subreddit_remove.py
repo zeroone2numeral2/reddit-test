@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def delete_sub(bot, update, args):
+def delete_sub(_, update, args):
     logger.info('/remsub command (args: %s)', args)
 
     subreddit_name = args[0]

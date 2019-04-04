@@ -205,7 +205,7 @@ class Sender(dict):
                     self._sent_message = self._send_gfycat(self._s.media_url, text)
                 
                 return self._sent_message
-            except Exception as e:
+            except Exception:
                 logger.error('exeption during the sending of a media, sending as text. Error:', exc_info=True)
         else:
             logger.info('post is NOT a media, sending it as text')
@@ -285,7 +285,7 @@ class Sender(dict):
 
         return self._sent_message
 
-    def _send_video(self, url, caption, send_text_fallback=True):
+    def _send_video(self, url, caption):
         logger.info('video url: %s', url)
 
         video = Downloader(url, identifier=self._s.id)

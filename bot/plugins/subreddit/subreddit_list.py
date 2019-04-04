@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @Plugins.add(CommandHandler, command=['subs', 'list'])
 @d.restricted
 @d.failwithmessage
-def subs_list(bot, update):
+def subs_list(_, update):
     logger.info('/subs command')
 
     subreddits = Subreddit.get_list()

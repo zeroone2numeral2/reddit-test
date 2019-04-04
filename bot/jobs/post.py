@@ -148,7 +148,7 @@ def process_subreddit(subreddit, bot):
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
-def check_posts(bot, job):
+def check_posts(bot, _):
     logger.info('job started at %s', u.now(string=True))
 
     subreddits = (

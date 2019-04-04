@@ -114,7 +114,7 @@ def process_subreddit(subreddit, bot):
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
-def check_daily_resume(bot, job):
+def check_daily_resume(bot, _):
     subreddits = (
         Subreddit.select()
         .where(Subreddit.enabled_resume == True)

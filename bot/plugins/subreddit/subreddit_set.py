@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def sub_settings(bot, update, args):
+def sub_settings(_, update, args):
     logger.info('/set command (args: %s)', args)
 
     if len(args) < 3:

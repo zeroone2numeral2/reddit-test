@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @Plugins.add(CommandHandler, command=['d'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def subs_debug(bot, update, args):
+def subs_debug(_, update, args):
     logger.info('/d command')
 
     if len(args) < 2:

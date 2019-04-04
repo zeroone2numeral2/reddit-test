@@ -23,7 +23,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 @d.restricted
 @d.failwithmessage
-def on_addsub_command(bot, update, args, user_data):
+def on_addsub_command(_, update, args, user_data):
     logger.info('/addsub command, args: %s', str(args))
     if not args:
         update.message.reply_text('Usage: /addsub [sub name]')
@@ -65,7 +65,7 @@ def on_addsub_command(bot, update, args, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected(bot, update, user_data):
+def on_channel_selected(_, update, user_data):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -95,7 +95,7 @@ def on_channel_selected(bot, update, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(bot, update):
+def on_cancel(_, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
