@@ -1,5 +1,4 @@
 import peewee
-from playhouse.shortcuts import model_to_dict
 
 from database import db
 from .subreddit import Subreddit

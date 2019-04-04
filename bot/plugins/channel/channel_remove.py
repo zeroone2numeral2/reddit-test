@@ -21,7 +21,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 @d.restricted
 @d.failwithmessage
-def on_remchannel_command(bot, update):
+def on_remchannel_command(_, update):
     logger.info('/remchannel command')
 
     channels_list = Channel.get_list()
@@ -37,7 +37,7 @@ def on_remchannel_command(bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected(bot, update):
+def on_channel_selected(_, update):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -60,7 +60,7 @@ def on_channel_selected(bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(bot, update):
+def on_cancel(_, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 

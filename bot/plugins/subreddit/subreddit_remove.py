@@ -5,7 +5,6 @@ from telegram import ParseMode
 
 from database.models import Subreddit
 from bot import Plugins
-from utilities import u
 from utilities import d
 
 logger = logging.getLogger(__name__)

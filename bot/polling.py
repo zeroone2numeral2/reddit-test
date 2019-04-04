@@ -1,6 +1,6 @@
 import logging
 
-import database.database
+import database.database  # we need it to initialize the package as soon as possible
 from .updater import updater
 from .pluginregistration import Plugins
 from .jobregistration import Jobs

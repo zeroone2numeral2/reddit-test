@@ -1,6 +1,4 @@
 import re
-import random
-from pprint import pprint
 
 import requests
 

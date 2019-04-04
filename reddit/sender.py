@@ -1,12 +1,9 @@
-import os
 import logging
 import datetime
 import re
 from urllib.parse import urlparse
 
 from telegram import ParseMode
-from telegram.error import BadRequest
-from telegram.error import TelegramError
 
 from .downloaders import Imgur
 from .downloaders import Downloader
@@ -15,7 +12,6 @@ from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from database.models import Post
-from database.models import PostResume
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u

@@ -1,6 +1,5 @@
 import logging
 import time
-from pprint import pprint
 
 from telegram import ParseMode
 from telegram.error import BadRequest
@@ -12,7 +11,6 @@ from database.models import Subreddit
 from database.models import Post
 from database import db
 from reddit import reddit
-from reddit import Sorting
 from reddit import Sender
 from bot import Jobs
 from ..jobregistration import RUNNERS

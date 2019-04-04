@@ -7,7 +7,6 @@ from bot import Plugins
 from database.models import Post
 from database.models import Ignored
 from reddit import reddit
-from utilities import u
 from utilities import d
 
 logger = logging.getLogger(__name__)

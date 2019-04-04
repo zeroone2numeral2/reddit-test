@@ -1,5 +1,6 @@
 import logging
 
+# noinspection PyPackageRequirements
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
@@ -18,7 +19,7 @@ FORWARD_MESSAGE = range(1)
 
 @d.restricted
 @d.failwithmessage
-def on_addchannel_command(bot, update):
+def on_addchannel_command(_, update):
     logger.info('/addchannel command')
 
     update.message.reply_text('Forward me a message from the channel you want to add, or /cancel')
@@ -59,7 +60,7 @@ def on_forwarded_message(bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_non_forwarded_message(bot, update):
+def on_non_forwarded_message(_, update):
     logger.info('adding channel: forwarded message NOT OK: not forwarded')
     update.message.reply_text('I need a forwarded message, try again or /cancel')
 
@@ -68,7 +69,7 @@ def on_non_forwarded_message(bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(bot, update):
+def on_cancel(_, update):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted')
 

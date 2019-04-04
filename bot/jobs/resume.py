@@ -13,7 +13,6 @@ from database.models import Subreddit
 from database.models import PostResume
 from database import db
 from reddit import reddit
-from reddit import Sorting
 from reddit import SenderResume
 from bot import Jobs
 from ..jobregistration import RUNNERS

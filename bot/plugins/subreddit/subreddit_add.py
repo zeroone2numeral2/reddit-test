@@ -1,5 +1,4 @@
 import logging
-import re
 
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler

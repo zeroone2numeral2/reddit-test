@@ -7,7 +7,6 @@ from telegram.ext import Filters
 
 from database.models import Channel
 from database.models import Subreddit
-from reddit import reddit
 from bot import Plugins
 from bot.markups import Keyboard
 from utilities import u

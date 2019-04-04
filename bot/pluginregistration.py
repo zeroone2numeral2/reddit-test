@@ -2,7 +2,6 @@ import logging
 from importlib import import_module
 
 from telegram.ext import Handler
-from telegram.ext import ConversationHandler
 
 from .updater import dispatcher
 from .registration import Registration
