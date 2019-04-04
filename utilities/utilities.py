@@ -7,6 +7,7 @@ import logging
 import logging.config
 import datetime
 from html import escape
+from collections import OrderedDict
 
 import requests
 from PIL import Image
@@ -65,6 +66,7 @@ def dotted(number):
 
 def model_dict(model_instance, plain_formatted_string=False):
     model_instance_dict = model_to_dict(model_instance)
+    model_instance_dict = OrderedDict(sorted(model_instance_dict.items()))
     if not plain_formatted_string:
         return model_instance
     else:
