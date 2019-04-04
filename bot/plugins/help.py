@@ -26,6 +26,7 @@ HELP_STRING = """\
 /db: get the database file
 /utc: get current UTC time
 /remdl: delete all the files in the downloads directory
+/jobs: get the list of subreddits and their enabled jobs
 """
 
 

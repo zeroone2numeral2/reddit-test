@@ -90,3 +90,12 @@ class Subreddit(peewee.Model):
             return True
         except peewee.DoesNotExist:
             return False
+
+    @classmethod
+    def subreddits_with_jobs(cls):
+        subs = (
+            cls.select()
+            .order_by(cls.name)
+        )
+
+        return [(sub.name, sub.enabled, sub.enabled_resume) for sub in subs]
