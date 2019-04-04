@@ -18,8 +18,8 @@ MIGRATIONS = list(
 )
 
 
-def main(db_filepath):
-    db = peewee.SqliteDatabase(db_filepath, pragmas={'journal_mode': 'wal'})
+def main(database_path):
+    db = peewee.SqliteDatabase(database_path, pragmas={'journal_mode': 'wal'})
 
     migrator = SqliteMigrator(db)
 
@@ -75,7 +75,7 @@ def main(db_filepath):
             migrate(migration)
             logger.info('...single migration executed')
         except sqlite3.DatabaseError as e:
-            print('database file {} is encrypted or is not a database'.format(db_filepath))
+            print('database file {} is encrypted or is not a database'.format(database_path))
             print('sqlite3.DatabaseError:', str(e))
             sys.exit(1)
         except peewee.DatabaseError as e:
