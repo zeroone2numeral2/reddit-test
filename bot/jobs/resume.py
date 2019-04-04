@@ -68,6 +68,17 @@ def process_subreddit(subreddit, bot):
         logger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
         return
 
+    elapsed_seconds = 0
+    if subreddit.resume_last_posted_submission_dt:
+        elapsed_seconds = (now - subreddit.last_posted_submission_dt).seconds
+
+    if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
+        logger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
+        return
+    elif subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'week' and elapsed_seconds < 60*60*24):
+        logger.info('ignoring subreddit because frequency is "week" and latest has been less than a day ago')
+        return
+
     annoucement_posted = False
     for sender in process_submissions(subreddit, bot):
         logger.info('submission url: %s', sender.submission.url)
@@ -92,6 +103,10 @@ def process_subreddit(subreddit, bot):
                 sender.register_post()
             else:
                 logger.info('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
+
+            logger.info('updating Subreddit last *resume* post datetime...')
+            subreddit.resume_last_posted_submission_dt = u.now()
+            subreddit.save()
 
         time.sleep(1)
 

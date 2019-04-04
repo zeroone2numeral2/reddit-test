@@ -37,6 +37,7 @@ def main(db_filepath):
     frequency = peewee.CharField(default='day')
     number_of_posts = peewee.IntegerField(default=3)
     resume_template = peewee.CharField(null=True)
+    resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -62,7 +63,9 @@ def main(db_filepath):
         migrator.add_column('subreddits', 'weekday', weekday),
         migrator.add_column('subreddits', 'frequency', frequency),
         migrator.add_column('subreddits', 'number_of_posts', number_of_posts),
-        migrator.add_column('subreddits', 'resume_template', resume_template)
+        migrator.add_column('subreddits', 'resume_template', resume_template),
+        # 20190404 (resume_last_posted_submission_dt)
+        migrator.add_column('subreddits', 'resume_last_posted_submission_dt', resume_last_posted_submission_dt),
     ]
 
     logger.info('Starting migration....')
