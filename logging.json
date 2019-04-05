@@ -13,7 +13,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 524288,
-            "backupCount": 50
+            "backupCount": 500
         }
     },
     "loggers": {
