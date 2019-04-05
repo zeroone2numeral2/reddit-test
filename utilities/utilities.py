@@ -86,18 +86,39 @@ def expand_channel_id(channel_id_str):
     return int('100' + re.search(r'(\d+)\.\s.+', channel_id_str).group(1)) * -1
 
 
-def pretty_minutes(n):
-    if n < 60:
-        return '{}m'.format(n)
+def pretty_minutes(n_minutes):
+    if n_minutes < 60:
+        return '{}m'.format(n_minutes)
 
-    hours = int(n / 60)
-    minutes = n % 60
+    hours = int(n_minutes / 60)
+    minutes = n_minutes % 60
 
     string = '{}h'.format(hours)
 
     if minutes != 0:
         minutes_str = str(minutes) if minutes > 10 else '0' + str(minutes)
         string += '{}m'.format(minutes_str)
+
+    return string
+
+
+def pretty_seconds(n_seconds):
+    if n_seconds < 60:
+        return '{}s'.format(n_seconds)
+
+    hours = int(n_seconds / 3600)
+    minutes = int(n_seconds / 60) % 60
+    seconds = n_seconds % 60
+
+    string = ''
+    if hours:
+        string += '{}h '.format(hours)
+
+    if minutes != 0 or (hours and seconds):
+        string += '{}m '.format(minutes)
+
+    if seconds or (minutes == 0 and hours == 0):
+        string += '{}s'.format(seconds)
 
     return string
 

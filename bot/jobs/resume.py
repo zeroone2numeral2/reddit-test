@@ -71,6 +71,8 @@ def process_subreddit(subreddit, bot):
     if subreddit.resume_last_posted_submission_dt:
         elapsed_seconds = (now - subreddit.last_posted_submission_dt).seconds
 
+    logger.info('elapsed seconds from the last resume post: %d seconds (%s)', elapsed_seconds, u.pretty_seconds(elapsed_seconds))
+
     if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
         logger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
         return
