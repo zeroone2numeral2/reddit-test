@@ -14,13 +14,13 @@ dir = "bot/jobs"
 manifest = "manifest"
 
 [praw]
-client_id = ""
-client_secret = ""
-user_agent = ""
+client_id = "0ri3963pR-qmog"
+client_secret = "aM5f4s7KyxaHoI3Y1sUkiSx5tjk"
+user_agent = "test script by -"
 submissions_limit = 25
 
 [sqlite]
-filename = "redditmirror.sqlite"
+filename = "db.sqlite"
 
 [logging]
 config = "logging.json"
