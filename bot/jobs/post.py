@@ -7,7 +7,6 @@ from telegram.error import TelegramError
 
 from utilities import u
 from utilities import d
-from utilities.logging import get_subreddit_logger
 from database.models import Subreddit
 from database.models import Post
 from database import db
