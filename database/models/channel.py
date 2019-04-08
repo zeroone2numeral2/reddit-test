@@ -50,6 +50,7 @@ class Channel(peewee.Model):
     def get_list(cls):
         all_channels = (
             cls.select()
+            .order_by(cls.title)
         )
 
         return_list = list()
