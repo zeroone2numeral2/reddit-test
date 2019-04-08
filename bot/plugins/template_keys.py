@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 from telegram.ext import CommandHandler
 
@@ -33,6 +34,8 @@ def subs_list(bot, update):
         if key not in ('STR_FIELD',):
             val = getattr(sender.submission, key)
             template_kv[key] = str(type(val))
+
+    template_kv = OrderedDict(sorted(template_kv.items()))
     
     placeholders = ['<code>{}</code> {}'.format(key.strip(), u.html_escape(val)) for key, val in template_kv.items()]
     update.message.reply_html('\n'.join(placeholders))
