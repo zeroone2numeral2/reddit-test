@@ -12,7 +12,21 @@
             "formatter": "standard",
             "level": "DEBUG",
             "encoding": "utf8",
-            "maxBytes": 524288,
+            "maxBytes": 1048576,
+            "backupCount": 500
+        },
+        "subreddit_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "subreddit",
+            "level": "DEBUG"
+        },
+        "subreddit_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "subreddit",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/redditmirror.log",
             "backupCount": 500
         }
     },
@@ -46,7 +60,10 @@
             "format": "[%(name)s][%(levelname)s] >>> %(message)s"
         },
         "standard": {
-            "format": "[%(asctime)s][%(name)s][%(levelname)s] >>> %(message)s"
+            "format": "[%(asctime)s][%(name)s:%(lineno)d][%(levelname)s] >>> %(message)s"
+        },
+        "subreddit": {
+            "format": "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] >>> %(message)s"
         }
     }
 }

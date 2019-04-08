@@ -2,8 +2,6 @@ import os
 import re
 import pytz
 import math
-import json
-import logging
 import logging.config
 import datetime
 from html import escape
@@ -21,13 +19,6 @@ VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
 timezone = pytz.timezone('Europe/Rome')
-
-
-def load_logging_config(file_path, logfile):
-    with open(file_path, 'r') as f:
-        logging_config = json.load(f)
-    logging_config['handlers']['file']['filename'] = logfile
-    logging.config.dictConfig(logging_config)
 
 
 def html_escape(string):

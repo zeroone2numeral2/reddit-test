@@ -7,6 +7,7 @@ from telegram.error import TelegramError
 
 from utilities import u
 from utilities import d
+from utilities.logging import get_subreddit_logger
 from database.models import Subreddit
 from database.models import Post
 from database import db
@@ -19,19 +20,23 @@ from config import config
 logger = logging.getLogger(__name__)
 
 
+class Log:
+    logger = logger
+
+
 def ignore_because_quiet_hours(subreddit):
     if subreddit.follow_quiet_hours is None:
         subreddit.follow_quiet_hours = True
         subreddit.save()
 
     if not subreddit.follow_quiet_hours:
-        logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
+        Log.logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
         return False
     else:
         now = u.now(string=False)
 
         if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
-            logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+            Log.logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
                         config.quiet_hours.start, config.quiet_hours.end, now.hour)
             return True
         else:
@@ -46,39 +51,39 @@ def calculate_quiet_hours_demultiplier(subreddit):
     now = u.now(string=False)
 
     if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
-        logger.info(
+        Log.logger.info(
             'We are in the quiet hours timeframe (%d - %d UTC): use subreddit\'s demultiplier (current hour UTC: %d)',
             config.quiet_hours.start,
             config.quiet_hours.end, now.hour
         )
         return subreddit.quiet_hours_demultiplier
     else:
-        logger.info('We are not into the quiet hours timeframe: frequency multiplier is 1')
+        Log.logger.info('We are not into the quiet hours timeframe: frequency multiplier is 1')
         return 1
 
 
 def process_submissions(subreddit):
-    logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
+    Log.logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
     limit = subreddit.limit or config.praw.submissions_limit
     for submission in reddit.iter_submissions(subreddit.name, subreddit.sorting.lower(), limit=limit):
-        logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
+        Log.logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if Post.already_posted(subreddit, submission.id):
-            logger.info('...submission %s has already been posted', submission.id)
+            Log.logger.info('...submission %s has already been posted', submission.id)
             continue
         else:
-            logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks', submission.id)
+            Log.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks', submission.id)
             
             yield submission
 
 
 def process_subreddit(subreddit, bot):
-    logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
-    # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
+    Log.logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+    # Log.logger.info('(subreddit: %s)', str(subreddit.to_dict()))
 
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        Log.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
         return
 
     # we increase the max_frequency of the value set for the subreddit, so we can decrease the posting frequency
@@ -87,18 +92,18 @@ def process_subreddit(subreddit, bot):
     calculated_max_frequency = subreddit.max_frequency * quiet_hours_demultiplier
 
     if subreddit.last_posted_submission_dt:
-        logger.info(
+        Log.logger.info(
             'elapsed time (now -- last post): %s -- %s',
             u.now(string=True),
             subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
         )
         elapsed_time_minutes = (u.now() - subreddit.last_posted_submission_dt).seconds / 60
     else:
-        logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
+        Log.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
         elapsed_time_minutes = 9999999
 
     if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
-        logger.info(
+        Log.logger.info(
             'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
             subreddit.max_frequency,
             quiet_hours_demultiplier
@@ -109,37 +114,37 @@ def process_subreddit(subreddit, bot):
     for submission in process_submissions(subreddit):
         sender = Sender(bot, subreddit, submission)
         if sender.test_filters():
-            logger.info('submission passed filters')
+            Log.logger.info('submission passed filters')
             break
         else:
             sender.register_ignored()
-            logger.info('submission di NOT pass filters, continuing to next one...')
+            Log.logger.info('submission di NOT pass filters, continuing to next one...')
             continue
         
     if not submission:
-        logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
+        Log.logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return
 
-    logger.info('submission url: %s', sender.submission.url)
-    logger.info('submission title: %s', sender.submission.title)
+    Log.logger.info('submission url: %s', sender.submission.url)
+    Log.logger.info('submission title: %s', sender.submission.title)
 
     try:
         sent_message = sender.post()
     except (BadRequest, TelegramError) as e:
-        logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+        Log.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
         return
     except Exception as e:
-        logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+        Log.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
         return
 
     if sent_message:
         if not subreddit.test:
-            logger.info('creating Post row...')
+            Log.logger.info('creating Post row...')
             sender.register_post()
         else:
-            logger.info('not creating Post row: r/%s is a testing subreddit', subreddit.name)
+            Log.logger.info('not creating Post row: r/%s is a testing subreddit', subreddit.name)
 
-        logger.info('updating Subreddit last post datetime...')
+        Log.logger.info('updating Subreddit last post datetime...')
         subreddit.last_posted_submission_dt = u.now()
         subreddit.save()
 
@@ -149,7 +154,8 @@ def process_subreddit(subreddit, bot):
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
 def check_posts(bot, _):
-    logger.info('job started at %s', u.now(string=True))
+    Log.logger = logging.getLogger(__name__)
+    Log.logger.info('job started at %s', u.now(string=True))
 
     subreddits = (
         Subreddit.select()
@@ -160,7 +166,7 @@ def check_posts(bot, _):
         try:
             process_subreddit(subreddit, bot)
         except Exception as e:
-            logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
+            Log.logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 

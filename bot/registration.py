@@ -22,7 +22,7 @@ class Registration:
             with open(manifest_path, 'r') as f:
                 manifest_str = f.read()
         except FileNotFoundError:
-            logger.info('manifest "%s" not found', manifest_path)
+            logger.info('manifest "%s" not found', os.path.normpath(manifest_path))
             return
 
         if not manifest_str.strip():
