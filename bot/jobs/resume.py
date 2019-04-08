@@ -69,7 +69,7 @@ def process_subreddit(subreddit, bot):
 
     elapsed_seconds = 0
     if subreddit.resume_last_posted_submission_dt:
-        elapsed_seconds = (now - subreddit.last_posted_submission_dt).seconds
+        elapsed_seconds = (now - subreddit.resume_last_posted_submission_dt).seconds
 
     logger.info('elapsed seconds from the last resume post: %d seconds (%s)', elapsed_seconds, u.pretty_seconds(elapsed_seconds))
 
