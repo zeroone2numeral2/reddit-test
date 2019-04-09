@@ -13,6 +13,10 @@ manifest = "manifest"
 dir = "bot/jobs"
 manifest = "manifest"
 
+[jobs_frequency] # in minutes
+post = 10
+resume = 50
+
 [praw]
 client_id = "0ri3963pR-qmog"
 client_secret = "aM5f4s7KyxaHoI3Y1sUkiSx5tjk"
@@ -31,8 +35,8 @@ default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
 
 [quiet_hours]
-start = 22 # in UTC. Rome: UTC + 1
-end = 7 # in UTC. Rome: UTC + 1
+start = 21 # in UTC. Rome: UTC + 1/2
+end = 6 # in UTC. Rome: UTC + 1/2
 
 [imgur]
 id = "0a9a0e9ec81b35e"

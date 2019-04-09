@@ -112,7 +112,7 @@ def process_subreddit(subreddit, bot):
         time.sleep(1)
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=50*60, first=0, name='resume_job')
+@Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.resume * 60, first=0, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
