@@ -187,6 +187,8 @@ def resize_thumbnail(image_path):
         sizes = tuple(new)
 
     image = image.resize(sizes, Image.ANTIALIAS)
+    image = image.convert('RGB')  # avoid RGBA (png) images to raise an exception because they cannot be saved as JPG
+
     image.save(image_path)
 
     return image_path

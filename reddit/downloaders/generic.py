@@ -1,6 +1,5 @@
 import os
 import random
-from shutil import copy2
 
 import requests
 
@@ -91,11 +90,7 @@ class Downloader:
             file_path=os.path.join('downloads', 'thumb_{}.jpg'.format(self._identifier))
         )
         if resize:
-            try:
-                self._thumbnail_path = u.resize_thumbnail(self._thumbnail_path)
-            except OSError:
-                # corrupted download. Logs proved that sometimes the downloaded image can't be opened for some reasons
-                copy2('assets/video_thumb.jpg', self._thumbnail_path)
+            self._thumbnail_path = u.resize_thumbnail(self._thumbnail_path)
 
         return True
 
