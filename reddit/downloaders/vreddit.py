@@ -7,6 +7,8 @@ from reddit.downloaders import Downloader
 from utilities import u
 from config import config
 
+
+TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 FFMPEG_COMMAND_ARGS = ' -i {video} -i {audio} -c:v copy -c:a aac -strict experimental {output} -y'
 
 if os.name == 'nt':  # windows: we expect ffmpeg to be in the main directory of the project
@@ -96,13 +98,13 @@ class VReddit(Downloader):
         sp = subprocess.Popen(cmd, shell=True, stdout=stdout_file, stderr=stderr_file)
         try:
             ffmpeg_start = u.now()
-            logger.debug('ffmpeg command execution started: %s', u.now(string=True))
+            logger.debug('ffmpeg command execution started: %s', u.now(string=TIME_FORMAT))
 
             sp.communicate(timeout=timeout)
 
             ffmpeg_end = u.now()
             ffmpeg_elapsed_seconds = (ffmpeg_end - ffmpeg_start).seconds
-            logger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=True), ffmpeg_elapsed_seconds)
+            logger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
 
         except subprocess.TimeoutExpired:
             logger.error(
