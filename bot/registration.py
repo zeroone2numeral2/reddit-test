@@ -50,7 +50,7 @@ class Registration:
         # try to load plugins from manifest file
         manifest_modules = cls._load_manifest(os.path.join(callbacks_dir, manifest_file))
         if manifest_modules:
-            # costruisci path import base della cartella dei plugins/jobs
+            # build the base import path of the plugins/jobs directory
             target_dir_path = os.path.splitext(callbacks_dir)[0]
             target_dir_import_path_list = list()
             while target_dir_path:
@@ -60,7 +60,7 @@ class Registration:
 
             for module, callbacks in manifest_modules:
                 import_path = base_import_path + module
-                # se la lista delle callbacks è vuota, importa tutte le callback nel modulo
+                # if the callbacks list is empty, import all the callbacks in the module
                 valid_handlers = cls._fetch_valid_callbacks(
                     import_path,
                     callbacks_whitelist=callbacks if callbacks else None
@@ -68,7 +68,7 @@ class Registration:
                 if valid_handlers:
                     cls.list.extend(valid_handlers)
         else:
-            # nessun manifest: carica tutti i moduli disponibili in ordine alfabetico
+            # no manifest: load every module available in alphabetial order
             for path in sorted(Path(callbacks_dir).rglob('*.py')):
                 file_path = os.path.splitext(str(path))[0]
                 import_path = []

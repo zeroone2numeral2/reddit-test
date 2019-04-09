@@ -35,7 +35,7 @@ class Jobs(Registration):
             names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
             # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
             for name in names_list:
-                jobs_tuple_list = getattr(module, name)  # lista perchè @Plugin.add() genera una lista (stack di decorators)
+                jobs_tuple_list = getattr(module, name)  # it's a list because @Plugin.add() generates a list (a stack of decorators)
                 if isinstance(jobs_tuple_list, list):
                     for job_tuple in jobs_tuple_list:
                         if isinstance(job_tuple, Job):
@@ -53,9 +53,9 @@ class Jobs(Registration):
         def decorator(func):
             return_list = list()
             if isinstance(func, list):
-                # in caso vengano usati più decorator @Jobs.add() alla stessa funzione
+                # in case multiple @Jobs.add() decorators are used on the same callback function
                 return_list.extend(func)
-                func = func[0].callback  # ricava la callback, è la stessa per ogni elemento nella lista
+                func = func[0].callback  # get the callback, it's the same for every item in the list
 
             logger.debug('converting function <%s> to job "%s" (decorators stack depth: %d)', func.__name__, runner, len(return_list))
 

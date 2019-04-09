@@ -22,7 +22,7 @@ class Plugins(Registration):
             for name in names_list:
                 handlers_list = getattr(module, name)  # lista perchè @Plugin.add() genera una lista (stack di decorators)
                 if isinstance(handlers_list, list):
-                    # filtra elementi lista che non sono una tupla di lunghezza 2, altrimenti il loop crasha
+                    # filter out list items that are not a tuple of length 2, otherwise the loop will crash
                     handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
                     for handler, group in handlers_list:
                         if isinstance(handler, Handler) and isinstance(group, int):
@@ -42,12 +42,12 @@ class Plugins(Registration):
         def decorator(func):
             return_list = list()
             if isinstance(func, list):
-                # in caso vengano usati più decorator @Plugins.add() alla stessa funzione
+                # we use a list to support stacking of @Plugins.add() on the same callback function
                 return_list.extend(func)
 
-                # func[0] è il primo elemento della lista, func[0][0] è il primo elemento della tupla (ovvero
-                # un'istanza di un handler)
-                func = func[0][0].callback  # ricava la callback, è la stessa per ogni elemento nella lista
+                # func[0] is the first list item, func[0][0] if the first tuple item (that is,
+                # an instance of an handler)
+                func = func[0][0].callback  # get the callback, it's the same for every item in the list
 
             logger.debug('converting function <%s> to %s (decorators stack depth: %d)', func.__name__, handler.__name__, len(return_list))
 
