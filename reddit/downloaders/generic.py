@@ -1,5 +1,6 @@
 import os
 import random
+from shutil import copy2
 
 import requests
 
@@ -81,15 +82,20 @@ class Downloader:
 
         return self._file_path
 
-    def download_thumbnail(self):
+    def download_thumbnail(self, resize=True):
         if not self._thumbnail_url:
             return None
 
-        thumbnail_path = u.download_file_stream(
+        self._thumbnail_path = u.download_file(
             self._thumbnail_url,
             file_path=os.path.join('downloads', 'thumb_{}.jpg'.format(self._identifier))
         )
-        self._thumbnail_path = u.resize_thumbnail(thumbnail_path)
+        if resize:
+            try:
+                self._thumbnail_path = u.resize_thumbnail(self._thumbnail_path)
+            except OSError:
+                # corrupted download. Logs proved that sometimes the downloaded image can't be opened for some reasons
+                copy2('assets/video_thumb.jpg', self._thumbnail_path)
 
         return True
 

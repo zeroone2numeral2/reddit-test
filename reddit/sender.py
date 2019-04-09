@@ -264,6 +264,7 @@ class Sender(dict):
 
         logger.info('downloading thumbnail from url: %s', vreddit.thumbnail_url)
         vreddit.download_thumbnail()
+        logger.info('thumbnail path: %s', vreddit.thumbnail_path)
 
         with open(file_path, 'rb') as f:
             logger.info('uploading video...')

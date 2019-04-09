@@ -1,5 +1,7 @@
 import os
 import re
+import urllib.request as urllib
+
 import pytz
 import math
 import logging.config
@@ -151,6 +153,18 @@ def download_file_stream(url, file_path=None, chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 # f.flush() commented by recommendation from J.F.Sebastian
+
+    return file_path
+
+
+def download_file(url, file_path):
+    try:
+        dloaded_file = urllib.urlopen(url)
+        with open(file_path, 'wb') as output:
+            output.write(dloaded_file.read())
+    except Exception as e:
+        logger.info('execption while downloading thumb: %s', str(e), exc_info=True)
+        return None
 
     return file_path
 
