@@ -11,7 +11,7 @@ class Registration:
 
     @staticmethod
     def fetch_valid_callbacks(import_path, callbacks_whitelist=None):
-        raise NotImplementedError  # questa deve essere sovrascritta
+        raise NotImplementedError  # must be overridden
 
     @staticmethod
     def load_manifest(manifest_path):
@@ -22,7 +22,7 @@ class Registration:
             with open(manifest_path, 'r') as f:
                 manifest_str = f.read()
         except FileNotFoundError:
-            logger.info('manifest "%s" not found', os.path.normpath(manifest_path))
+            logger.debug('manifest <%s> not found', os.path.normpath(manifest_path))
             return
 
         if not manifest_str.strip():
@@ -33,16 +33,16 @@ class Registration:
 
         handlers_list = list()
         for line in manifest_lines:
-            line = re.sub(r'(?:\s+)?#.*(?:\n|$)', '', line)  # rimuovi commenti dalla riga
-            if line.strip():  # ignora righe con spazi vuoti
+            line = re.sub(r'(?:\s+)?#.*(?:\n|$)', '', line)  # remove comments from the line
+            if line.strip():  # ignore empty lines
                 items = line.split()
-                handlers_list.append((items[0], items[1:]))  # tupla: (modulo_da_importare, [lista_callback])
+                handlers_list.append((items[0], items[1:]))  # tuple: (module_to_import, [callbacks_list])
 
         return handlers_list
 
     @classmethod
     def load(cls, callbacks_dir, manifest_file=''):
-        # prova a caricare plugins dal manifest
+        # try to load plugins from manifest file
         manifest_modules = cls.load_manifest(os.path.join(callbacks_dir, manifest_file))
         if manifest_modules:
             # costruisci path import base della cartella dei plugins/jobs

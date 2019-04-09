@@ -27,7 +27,7 @@ class Plugins(Registration):
                     handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
                     for handler, group in handlers_list:
                         if isinstance(handler, Handler) and isinstance(group, int):
-                            logger.info('handler %s.%s(%s) will be loaded in group %d', import_path, type(handler).__name__, name, group)
+                            logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path, type(handler).__name__, name, group)
                             valid_handlers.append((handler, group))
                         else:
                             logger.info('handler %s.%s(%s) skipped because not instance of Handler', import_path, type(handler).__name__,
@@ -49,7 +49,7 @@ class Plugins(Registration):
                 # un'istanza di un handler)
                 func = func[0][0].callback  # ricava la callback, è la stessa per ogni elemento nella lista
 
-            logger.info('converting function "%s" to %s (decorators stack depth: %d)', func.__name__, handler.__name__, len(return_list))
+            logger.debug('converting function <%s> to %s (decorators stack depth: %d)', func.__name__, handler.__name__, len(return_list))
 
             ptb_handler = handler(callback=func, *args, **kwargs)
             return_list.append((ptb_handler, group))
@@ -63,7 +63,7 @@ class Plugins(Registration):
         def decorator(dummy_func):
             return_list = list()
 
-            logger.info('adding to cls.list ConversationHandler "%s" in group %d', dummy_func.__name__, group)
+            logger.debug('adding to cls.list ConversationHandler "%s" in group %d', dummy_func.__name__, group)
 
             return_list.append((conv_handler, group))
 
