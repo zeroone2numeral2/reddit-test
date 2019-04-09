@@ -33,18 +33,18 @@ class Jobs(Registration):
         try:
             module = import_module(import_path)
             names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
-            # logger.info('functions to test from %s: %s', import_path, ', '.join(names_list))
+            # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
             for name in names_list:
                 jobs_tuple_list = getattr(module, name)  # lista perchè @Plugin.add() genera una lista (stack di decorators)
                 if isinstance(jobs_tuple_list, list):
                     for job_tuple in jobs_tuple_list:
                         if isinstance(job_tuple, Job):
-                            logger.info('job %s.%s will be loaded', import_path, job_tuple.callback.__name__)
+                            logger.debug('job %s.%s will be loaded', import_path, job_tuple.callback.__name__)
                             valid_jobs.append(job_tuple)
                         else:
-                            logger.info('job %s.%s skipped because not an instance of Job', import_path, type(job_tuple).__name__)
+                            logger.debug('function %s.%s skipped because not an instance of Job', import_path, type(job_tuple).__name__)
         except Exception as e:
-            logger.error('error while loading jobs from %s: %s', import_path, str(e), exc_info=False)
+            logger.warning('error while loading jobs from %s: %s', import_path, str(e), exc_info=False)
 
         return valid_jobs
 
@@ -57,7 +57,7 @@ class Jobs(Registration):
                 return_list.extend(func)
                 func = func[0].callback  # ricava la callback, è la stessa per ogni elemento nella lista
 
-            logger.info('converting function "%s" to job "%s" (decorators stack depth: %d)', func.__name__, runner, len(return_list))
+            logger.debug('converting function <%s> to job "%s" (decorators stack depth: %d)', func.__name__, runner, len(return_list))
 
             job_tuple = Job(runner=runner, callback=func, args=args, kwargs=kwargs)
             return_list.append(job_tuple)

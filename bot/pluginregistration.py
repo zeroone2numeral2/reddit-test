@@ -18,7 +18,7 @@ class Plugins(Registration):
         try:
             module = import_module(import_path)
             names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
-            # logger.info('functions to test from %s: %s', import_path, ', '.join(names_list))
+            # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
             for name in names_list:
                 handlers_list = getattr(module, name)  # lista perchè @Plugin.add() genera una lista (stack di decorators)
                 if isinstance(handlers_list, list):
@@ -26,13 +26,14 @@ class Plugins(Registration):
                     handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
                     for handler, group in handlers_list:
                         if isinstance(handler, Handler) and isinstance(group, int):
-                            logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path, type(handler).__name__, name, group)
+                            logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path,
+                                         type(handler).__name__, name, group)
                             valid_handlers.append((handler, group))
                         else:
-                            logger.info('handler %s.%s(%s) skipped because not instance of Handler', import_path, type(handler).__name__,
-                                        name)
+                            logger.debug('function %s.%s(%s) skipped because not instance of Handler', import_path,
+                                         type(handler).__name__, name)
         except Exception as e:
-            logger.error('error while loading handlers from %s: %s', import_path, str(e))
+            logger.warning('error while loading handlers from %s: %s', import_path, str(e))
 
         return valid_handlers
 
