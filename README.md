@@ -1,8 +1,7 @@
 ### db migrations
 
 ```bash
-cd database
-python3 migrations.py -db ../redditmirror.sqlite
+python3 migrations.py
 ```
 
 ### FFMPEG
