@@ -71,6 +71,21 @@ def remdl_command(_, update):
     update.message.reply_text('Removed {} files'.format(len(files)))
 
 
+@Plugins.add(CommandHandler, command=['remffmpeglogs'])
+@d.restricted
+@d.failwithmessage
+def remffmpeglogs_command(_, update):
+    logger.info('/remffmpeglogs command')
+
+    dir_path = os.path.join('logs', 'ffmpeg')
+    files = [f for f in os.listdir(dir_path) if f != '.gitkeep']
+    for file in files:
+        file_path = os.path.join(dir_path, file)
+        u.remove_file_safe(file_path)
+
+    update.message.reply_text('Removed {} log files'.format(len(files)))
+
+
 @Plugins.add(CommandHandler, command=['jobs'])
 @d.restricted
 @d.failwithmessage
