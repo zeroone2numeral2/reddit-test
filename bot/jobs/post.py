@@ -148,13 +148,12 @@ def process_subreddit(subreddit, bot):
         subreddit.save()
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.post * 60, first=0, name='posts_job')
+@Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
 def check_posts(bot, _):
     Log.logger = logging.getLogger(__name__)
-    Log.logger.info('job started at %s', u.now(string=True))
 
     subreddits = (
         Subreddit.select()

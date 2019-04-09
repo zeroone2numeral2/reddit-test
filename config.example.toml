@@ -14,6 +14,7 @@ dir = "bot/jobs"
 manifest = "manifest"
 
 [jobs_frequency] # in minutes
+# the values below must be the job's name (job.name)
 post = 10
 resume = 50
 

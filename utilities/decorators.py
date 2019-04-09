@@ -74,12 +74,26 @@ def log_start_end_dt(func):
         job_result = func(bot, job, *args, **kwargs)
 
         job_end_dt = u.now()
+
+        elapsed_seconds = (job_end_dt - job_start_dt).seconds
+
         logger.info(
-            '%s job ended at %s (elapsed seconds: %d)',
+            '%s job ended at %s (elapsed seconds: %d (%s))',
             job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
-            (job_end_dt - job_start_dt).seconds
+            elapsed_seconds,
+            u.pretty_seconds(elapsed_seconds)
         )
+
+        if elapsed_seconds > (config.jobs_frequency[job.name] * 60):
+            text = '#maxfreq <{}> took more than its frequency (frequency: %d min, elapsed: %d sec (%s))'.format(
+                job.name,
+                config.jobs_frequency[job.name],
+                elapsed_seconds,
+                u.pretty_seconds(elapsed_seconds)
+            )
+            logger.warning(text)
+            bot.send_message(config.telegram.log, text)
 
         return job_result
 
