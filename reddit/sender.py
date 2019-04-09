@@ -48,6 +48,7 @@ class Sender(dict):
         self._subreddit = subreddit
 
         self._sent_message = None
+        self._target_chat_id = self._subreddit.channel.channel_id
 
         self._s.is_image = False
         self._s.media_type = MediaType.NONE
@@ -176,7 +177,11 @@ class Sender(dict):
                 # replace the key in the dict of the mapping object edits that value
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
 
-    def post(self):
+    def post(self, chat_id=None):
+        if chat_id:
+            logger.info('overriding target chat id (%d) with %d', self._target_chat_id, chat_id)
+            self._target_chat_id = chat_id
+
         template = self._subreddit.template
         if not template:
             logger.info('no template: using the default one')
@@ -217,7 +222,7 @@ class Sender(dict):
 
     def _send_text(self, text):
         return self._bot.send_message(
-            self._subreddit.channel.channel_id,
+            self._target_chat_id,
             text,
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=not self._subreddit.webpage_preview
@@ -227,7 +232,7 @@ class Sender(dict):
         logger.info('image url: %s', image_url)
 
         self._sent_message = self._bot.send_photo(
-            self._subreddit.channel.channel_id,
+            self._target_chat_id,
             image_url,
             caption=caption,
             parse_mode=ParseMode.HTML,
@@ -269,7 +274,7 @@ class Sender(dict):
         with open(file_path, 'rb') as f:
             logger.info('uploading video...')
             self._sent_message = self._bot.send_video(
-                self._subreddit.channel.channel_id,
+                self._target_chat_id,
                 f,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
@@ -306,7 +311,7 @@ class Sender(dict):
         logger.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
             self._sent_message = self._bot.send_video(
-                self._subreddit.channel.channel_id,
+                self._target_chat_id,
                 f,
                 caption=caption,
                 thumb=video.get_thumbnail_bo(),
@@ -329,7 +334,7 @@ class Sender(dict):
         logger.info('gif url: %s', url)
 
         return self._bot.send_animation(
-            self._subreddit.channel.channel_id,
+            self._target_chat_id,
             url,
             caption=caption,
             parse_mode=ParseMode.HTML,
@@ -343,7 +348,7 @@ class Sender(dict):
         gfycat.download_thumbnail()
 
         sent_message = self._bot.send_video(
-            self._subreddit.channel.channel_id,
+            self._target_chat_id,
             gfycat.url,
             caption=caption,
             parse_mode=ParseMode.HTML,

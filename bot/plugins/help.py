@@ -27,6 +27,7 @@ HELP_STRING = """\
 /utc: get current UTC time
 /remdl: delete all the files in the downloads directory
 /jobs: get the list of subreddits and their enabled jobs
+/try `[submission id]`: get the submission with that id
 """
 
 
