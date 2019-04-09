@@ -5,7 +5,7 @@ from telegram.ext import Handler
 
 from .registration import Registration
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('plugins')
 
 
 class Plugins(Registration):

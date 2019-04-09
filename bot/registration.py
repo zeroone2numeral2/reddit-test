@@ -3,7 +3,7 @@ import re
 import os
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('plugins')
 
 
 class Registration:

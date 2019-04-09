@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from .registration import Registration
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('plugins')
 
 
 Job = namedtuple('Job', ['runner', 'callback', 'args', 'kwargs'])

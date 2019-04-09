@@ -39,6 +39,9 @@
             "propagate": false,
             "level": "DEBUG"
         },
+        "plugins": {
+            "level": "DEBUG"
+        },
         "telegram": {
             "level": "WARNING"
         },
