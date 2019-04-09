@@ -73,8 +73,8 @@ class Jobs(Registration):
 
         for job_tuple in cls.list:
             if job_tuple.runner == RUNNERS.run_once:
-                job_queue.run_once(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
+                cls.job_queue.run_once(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
             elif job_tuple.runner == RUNNERS.run_repeating:
-                job_queue.run_repeating(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
+                cls.job_queue.run_repeating(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
             elif job_tuple.runner == RUNNERS.run_daily:
-                job_queue.run_daily(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
+                cls.job_queue.run_daily(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)
