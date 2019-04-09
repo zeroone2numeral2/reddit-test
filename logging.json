@@ -55,7 +55,10 @@
             "level": "WARNING"
         },
         "prawcore": {
-            "level": "DEBUG"
+            "level": "WARNING"
+        },
+        "PIL": {
+            "level": "WARNING"
         }
     },
     "formatters": {
