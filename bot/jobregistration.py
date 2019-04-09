@@ -2,7 +2,6 @@ import logging
 from importlib import import_module
 from collections import namedtuple
 
-from .updater import job_queue
 from .registration import Registration
 
 logger = logging.getLogger(__name__)
@@ -21,6 +20,7 @@ class Jobs(Registration):
     list = []
     job_queue = None
 
+    # noinspection PyMethodOverriding
     @classmethod
     def hook(cls, dispatcher, job_queue):
         cls.dispatcher = dispatcher
