@@ -8,13 +8,18 @@ logger = logging.getLogger(__name__)
 
 class Registration:
     list = []
+    dispatcher = None
+
+    @classmethod
+    def hook(cls, dispatcher, **kwargs):
+        cls.dispatcher = dispatcher
 
     @staticmethod
-    def fetch_valid_callbacks(import_path, callbacks_whitelist=None):
+    def _fetch_valid_callbacks(import_path, callbacks_whitelist=None):
         raise NotImplementedError  # must be overridden
 
     @staticmethod
-    def load_manifest(manifest_path):
+    def _load_manifest(manifest_path):
         if not manifest_path:
             return
 
@@ -43,7 +48,7 @@ class Registration:
     @classmethod
     def load(cls, callbacks_dir, manifest_file=''):
         # try to load plugins from manifest file
-        manifest_modules = cls.load_manifest(os.path.join(callbacks_dir, manifest_file))
+        manifest_modules = cls._load_manifest(os.path.join(callbacks_dir, manifest_file))
         if manifest_modules:
             # costruisci path import base della cartella dei plugins/jobs
             target_dir_path = os.path.splitext(callbacks_dir)[0]
@@ -56,7 +61,7 @@ class Registration:
             for module, callbacks in manifest_modules:
                 import_path = base_import_path + module
                 # se la lista delle callbacks è vuota, importa tutte le callback nel modulo
-                valid_handlers = cls.fetch_valid_callbacks(
+                valid_handlers = cls._fetch_valid_callbacks(
                     import_path,
                     callbacks_whitelist=callbacks if callbacks else None
                 )
@@ -72,7 +77,7 @@ class Registration:
                     import_path.insert(0, tail)
 
                 import_path = '.'.join(import_path)
-                valid_handlers = cls.fetch_valid_callbacks(import_path)
+                valid_handlers = cls._fetch_valid_callbacks(import_path)
                 cls.list.extend(valid_handlers)
 
         return len(cls.list)

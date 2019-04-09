@@ -19,9 +19,15 @@ class RUNNERS:
 
 class Jobs(Registration):
     list = []
+    job_queue = None
+
+    @classmethod
+    def hook(cls, dispatcher, job_queue):
+        cls.dispatcher = dispatcher
+        cls.job_queue = job_queue
 
     @staticmethod
-    def fetch_valid_callbacks(import_path, callbacks_whitelist=None):
+    def _fetch_valid_callbacks(import_path, callbacks_whitelist=None):
         valid_jobs = list()
 
         try:
@@ -62,6 +68,9 @@ class Jobs(Registration):
 
     @classmethod
     def register(cls):
+        if not cls.dispatcher or not cls.job_queue:
+            raise ValueError('a dispatcher and a job_queue must be set first with Jobs.hook()')
+
         for job_tuple in cls.list:
             if job_tuple.runner == RUNNERS.run_once:
                 job_queue.run_once(callback=job_tuple.callback, *job_tuple.args, **job_tuple.kwargs)

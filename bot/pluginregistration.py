@@ -3,7 +3,6 @@ from importlib import import_module
 
 from telegram.ext import Handler
 
-from .updater import dispatcher
 from .registration import Registration
 
 logger = logging.getLogger(__name__)
@@ -13,7 +12,7 @@ class Plugins(Registration):
     list = []
 
     @staticmethod
-    def fetch_valid_callbacks(import_path, callbacks_whitelist=None):
+    def _fetch_valid_callbacks(import_path, callbacks_whitelist=None):
         valid_handlers = list()
 
         try:
@@ -73,5 +72,8 @@ class Plugins(Registration):
 
     @classmethod
     def register(cls):
+        if not cls.dispatcher:
+            raise ValueError('a dispatcher must be set first with Plugins.hook()')
+
         for handler, group in cls.list:
-            dispatcher.add_handler(handler, group)
+            cls.dispatcher.add_handler(handler, group)
