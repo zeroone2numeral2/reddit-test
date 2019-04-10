@@ -219,8 +219,8 @@ class Sender(dict):
                     self._sent_message = self._send_gfycat(self._s.media_url, text)
                 
                 return self._sent_message
-            except Exception:
-                logger.error('exeption during the sending of a media, sending as text. Error:', exc_info=True)
+            except Exception as e:
+                logger.error('exeption during the sending of a media, sending as text. Error: %s', str(e))
         else:
             logger.info('post is NOT a media, sending it as text')
         
