@@ -63,7 +63,7 @@ class Plugins(Registration):
         def decorator(dummy_func):
             return_list = list()
 
-            logger.debug('adding to cls.list ConversationHandler "%s" in group %d', dummy_func.__name__, group)
+            logger.debug('adding to cls.list ConversationHandler <%s> in group %d', dummy_func.__name__, group)
 
             return_list.append((conv_handler, group))
 

@@ -92,6 +92,4 @@ conv_handler = ConversationHandler(
 
 @Plugins.add_conversation_hanlder(conv_handler)
 def addchannel_conv_hanlder():
-    # serve solo a registrare il ConversationHanlder già inizializzato in maniera più semplice
-    # Il nome di questa funzione serve è indicativo, ma serve solo al logging
     pass
