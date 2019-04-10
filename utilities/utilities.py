@@ -1,6 +1,7 @@
 import os
 import re
 import urllib.request as urllib
+from mimetypes import guess_type
 
 import pytz
 import math
@@ -216,3 +217,9 @@ def string_to_minutes(string):
             sum_minutes += int(minutes)
 
         return sum_minutes if sum_minutes > 0 else None
+
+
+def guess_mimetype(file_path):
+    result = guess_type(file_path, strict=True)
+    
+    return result[0]

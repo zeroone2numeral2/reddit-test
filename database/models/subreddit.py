@@ -51,6 +51,9 @@ class Subreddit(peewee.Model):
     number_of_posts = peewee.IntegerField(default=3)
     template_resume = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
+    # MATRIX
+    enabled_matrix = peewee.BooleanField(default=False)
+    room_id = peewee.CharField(null=True)
 
     class Meta:
         table_name = 'subreddits'
