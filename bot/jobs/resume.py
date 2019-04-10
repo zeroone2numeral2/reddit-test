@@ -85,7 +85,7 @@ def process_subreddit(subreddit, bot):
         logger.info('submission url: %s', sender.submission.url)
         logger.info('submission title: %s', sender.submission.title)
 
-        if not annoucement_posted and subreddit.resume_template is not False:
+        if not annoucement_posted and subreddit.resume_template:
             sender.post_resume_announcement()
             annoucement_posted = True
 
