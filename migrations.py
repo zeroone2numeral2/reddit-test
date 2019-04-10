@@ -6,6 +6,8 @@ import os
 import peewee
 import sqlite3
 from playhouse.migrate import *
+
+from const import DEFAULT_ANNOUNCEMENT_TEMPLATE
 from config import config
 
 logging.basicConfig(format='[%(asctime)s][%(name)s] %(message)s', level=logging.INFO)
@@ -31,7 +33,7 @@ def main(database_path):
     weekday = peewee.IntegerField(default=5)
     frequency = peewee.CharField(default='day')
     number_of_posts = peewee.IntegerField(default=3)
-    resume_template = peewee.CharField(null=True)
+    resume_template = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
 
     migrations = [
@@ -61,6 +63,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'resume_template', resume_template),
         # 20190404 (resume_last_posted_submission_dt)
         migrator.add_column('subreddits', 'resume_last_posted_submission_dt', resume_last_posted_submission_dt),
+        # 20190410 (rename resume_template to template_resume)
+        migrator.rename_column('subreddits', 'resume_template', 'template_resume'),
     ]
 
     logger.info('Starting migration....')

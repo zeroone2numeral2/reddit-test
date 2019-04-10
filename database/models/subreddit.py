@@ -49,7 +49,7 @@ class Subreddit(peewee.Model):
     weekday = peewee.IntegerField(default=5)  # 0-6, from Monday to Sunday
     frequency = peewee.CharField(default='day')
     number_of_posts = peewee.IntegerField(default=3)
-    resume_template = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
+    template_resume = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
 
     class Meta:

@@ -16,7 +16,7 @@ class SenderResume(Sender):
         self.gen_submission_dict()
 
     def post_resume_announcement(self):
-        template = self._subreddit.resume_template
+        template = self._subreddit.template_resume
         if not template:
             template = DEFAULT_ANNOUNCEMENT_TEMPLATE
 
