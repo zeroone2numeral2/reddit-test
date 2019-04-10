@@ -1,3 +1,4 @@
+import os
 import logging
 
 from matrix_client.client import MatrixClient
@@ -38,7 +39,34 @@ class Matrix:
         
         return result['content_uri']
     
+    def send_text(self, room_id, text):
+        self._api.send_message(room_id, text)
+    
+    def send_emote_html(self, room_id, text):
+        content = dict(
+            body=text,
+            format='org.matrix.custom.html',
+            formatted_body=text,
+            msgtype=MsgType.EMOTE
+        )
+        
+        self._api.send_message_event(room_id, event_type="m.room.message", content=content)
+    
+    def send_notice(self, room_id, text):
+        self._api.send_notice(room_id, text)
+    
     def send_photo(self, room_id, file_path):
+        file_path = os.path.normpath(file_path)
+        file_name = os.path.basename(file_path)
+        
         url = self._upload(file_path)
         
-        self._api.send_content(room_id, url, 'some_name.jpg', MsgType.IMAGE)
+        self._api.send_content(room_id, url, file_name, MsgType.IMAGE)
+    
+    def send_video(self, room_id, file_path):
+        file_path = os.path.normpath(file_path)
+        file_name = os.path.basename(file_path)
+        
+        url = self._upload(file_path)
+        
+        self._api.send_content(room_id, url, file_name, MsgType.VIDEO)

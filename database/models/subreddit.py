@@ -53,6 +53,7 @@ class Subreddit(peewee.Model):
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
     # MATRIX
     enabled_matrix = peewee.BooleanField(default=False)
+    template_matrix = peewee.CharField(default=DEFAULT_MATRIX_TEMPLATE)
     room_id = peewee.CharField(null=True)
 
     class Meta:

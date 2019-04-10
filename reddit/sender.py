@@ -11,6 +11,7 @@ from .downloaders import VReddit
 from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
+from matrix import Matrix
 from database.models import Post
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
@@ -20,6 +21,7 @@ from config import config
 logger = logging.getLogger(__name__)
 
 imgur = Imgur(config.imgur.id, config.imgur.secret)
+matrix = Matrix()
 
 KEY_MAPPER_DICT = dict(
     created_utc=lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp),
@@ -199,6 +201,9 @@ class Sender(dict):
         text = template.format(**self._submission_dict)
         # logger.info('post text: %s', text)
         
+        if config.matrix.enabled:
+            self._matrix_send_text(text)
+        
         if self._s.media_type and self._subreddit.send_medias:
             logger.info('post is a media, sending it as media...')
             try:
@@ -236,6 +241,16 @@ class Sender(dict):
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=not self._subreddit.webpage_preview
         )
+    
+    def _matrix_send_text(self, matrix_text):
+        if self._subreddit.enabled_matrix and self._subreddit.room_id:
+            try:
+                if not matrix_text:
+                    matrix_template = self._subreddit.template_matrix
+                    matrix_text = matrix_template.format(**self._submission_dict)
+                matrix.send_emote_html(self._subreddit.room_id, matrix_text)
+            except Exception as e:
+                logger.error('error while posting to Matrix: %s', str(e), exc_info=True)
 
     def _send_image(self, image_url, caption):
         logger.info('image url: %s', image_url)

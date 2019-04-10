@@ -6,6 +6,7 @@ log = -1001141547703
 admins = [23646077]
 
 [matrix]
+enabled = false
 server = "https://matrix.org"
 username = "specchio-bot"
 password = "JPh5*!qt!4w6Tf"
@@ -20,8 +21,8 @@ manifest = "manifest"
 
 [jobs_frequency] # in minutes
 # the values below must be the job's name (job.name)
-post = 10
-resume = 50
+posts_job = 10
+resume_job = 50
 
 [praw]
 client_id = "0ri3963pR-qmog"

@@ -7,7 +7,7 @@ import peewee
 import sqlite3
 from playhouse.migrate import *
 
-from const import DEFAULT_ANNOUNCEMENT_TEMPLATE
+from const import *
 from config import config
 
 logging.basicConfig(format='[%(asctime)s][%(name)s] %(message)s', level=logging.INFO)
@@ -37,6 +37,7 @@ def main(database_path):
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
     enabled_matrix = peewee.BooleanField(default=False)
     room_id = peewee.CharField(null=True)
+    template_matrix = peewee.CharField(default=DEFAULT_MATRIX_TEMPLATE)
 
     migrations = [
         # 20190318 pt. 1
@@ -70,6 +71,7 @@ def main(database_path):
         # 20190410 pt. 2 (matrix stuffs)
         migrator.add_column('subreddits', 'enabled_matrix', enabled_matrix),
         migrator.add_column('subreddits', 'room_id', room_id),
+        migrator.add_column('subreddits', 'template_matrix', template_matrix),
     ]
 
     logger.info('Starting migration....')
