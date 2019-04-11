@@ -72,6 +72,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'enabled_matrix', enabled_matrix),
         migrator.add_column('subreddits', 'room_id', room_id),
         migrator.add_column('subreddits', 'template_matrix', template_matrix),
+        # 20190411 (drop not null)
+        migrator.drop_not_null('subreddits', 'template_matrix'),
     ]
 
     logger.info('Starting migration....')
