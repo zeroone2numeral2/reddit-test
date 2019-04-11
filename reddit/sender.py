@@ -417,9 +417,14 @@ class Sender(dict):
             logger.info('tests failed: submission is NSFW')
             return False
         elif self._subreddit.ignore_if_newer_than \
-                and isinstance(self._subreddit.ignore_if_newer_than, datetime.datetime) \
-                and ((u.now() - self._s.created_utc).seconds / 60) < self._subreddit.ignore_if_newer_than:
-            logger.info('tests failed: too new (submitted: %s)', self._s.created_utc_formatted)
+                and isinstance(self._subreddit.ignore_if_newer_than, int) \
+                and self._s.elapsed_minutes < self._subreddit.ignore_if_newer_than:
+            logger.info(
+                'tests failed: too new (submitted: %s, elapsed: %s, ignore_if_newer_than: %d)',
+                self._s.created_utc_formatted,
+                u.pretty_minutes(self._s.elapsed_minutes),
+                self._subreddit.ignore_if_newer_than
+            )
             return False
         else:
             return True

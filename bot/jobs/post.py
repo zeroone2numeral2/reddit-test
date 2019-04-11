@@ -116,7 +116,9 @@ def process_subreddit(subreddit, bot):
             Log.logger.info('submission passed filters')
             break
         else:
-            sender.register_ignored()
+            # no need to save ignored submissions in the database, becausethe next time
+            # they might pass the filters
+            # sender.register_ignored()
             Log.logger.info('submission di NOT pass filters, continuing to next one...')
             continue
         
