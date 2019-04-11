@@ -42,15 +42,15 @@ class Matrix:
     def send_text(self, room_id, text):
         self._api.send_message(room_id, text)
     
-    def send_emote_html(self, room_id, text):
+    def send_notice_html(self, room_id, text):
         content = dict(
             body=text,
             format='org.matrix.custom.html',
             formatted_body=text,
-            msgtype=MsgType.EMOTE
+            msgtype=MsgType.NOTICE
         )
         
-        self._api.send_message_event(room_id, event_type="m.room.message", content=content)
+        self._api.send_message_event(room_id, event_type='m.room.message', content=content)
     
     def send_notice(self, room_id, text):
         self._api.send_notice(room_id, text)

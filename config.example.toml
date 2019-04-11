@@ -6,7 +6,7 @@ log = -1001141547703
 admins = [23646077]
 
 [matrix]
-enabled = false
+enabled = true
 server = "https://matrix.org"
 username = "specchio-bot"
 password = "JPh5*!qt!4w6Tf"
