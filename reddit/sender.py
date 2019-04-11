@@ -248,7 +248,7 @@ class Sender(dict):
                 if not matrix_text:
                     matrix_template = self._subreddit.template_matrix
                     matrix_text = matrix_template.format(**self._submission_dict)
-                matrix.send_notice_html(self._subreddit.room_id, matrix_text)
+                matrix.send_text_html(self._subreddit.room_id, matrix_text)
             except Exception as e:
                 logger.error('error while posting to Matrix: %s', str(e), exc_info=True)
 

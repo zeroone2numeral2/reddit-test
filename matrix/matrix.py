@@ -51,6 +51,16 @@ class Matrix:
         )
         
         self._api.send_message_event(room_id, event_type='m.room.message', content=content)
+
+    def send_text_html(self, room_id, text):
+        content = dict(
+            body=text,
+            format='org.matrix.custom.html',
+            formatted_body=text,
+            msgtype=MsgType.TEXT
+        )
+
+        self._api.send_message_event(room_id, event_type='m.room.message', content=content)
     
     def send_notice(self, room_id, text):
         self._api.send_notice(room_id, text)
