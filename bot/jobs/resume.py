@@ -67,10 +67,12 @@ def process_subreddit(subreddit, bot):
         logger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
         return
 
-    elapsed_seconds = 0
+    elapsed_seconds = 999999
     if subreddit.resume_last_posted_submission_dt:
+        logger.info('resume_last_posted_submission_dt is not empty: %s', subreddit.resume_last_posted_submission_dt.strftime('%d/%m/%Y %H:%M:%S'))
         elapsed_seconds = (now - subreddit.resume_last_posted_submission_dt).seconds
 
+    logger.info('now: %s', now.strftime('%d/%m/%Y %H:%M:%S'))
     logger.info('elapsed seconds from the last resume post: %d seconds (%s)', elapsed_seconds, u.pretty_seconds(elapsed_seconds))
 
     if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
