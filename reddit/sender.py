@@ -11,7 +11,8 @@ from .downloaders import VReddit
 from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
-from matrix import Matrix
+# from matrix import Matrix
+from matrix import FakeMatrix as Matrix
 from database.models import Post
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
