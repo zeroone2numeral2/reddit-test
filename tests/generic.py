@@ -10,38 +10,20 @@ def dotted(number):
 # print(dotted(1234546789))
 
 
-def string_to_minutes(string):
-    match = STRING_TO_MINUTES_REGEX.search(string)
-    if match:
-        hours, minutes = match.group('hours', 'minutes')
-        sum = 0
-        if hours:
-            sum += int(hours) * 60
-        if minutes:
-            sum += int(minutes)
+def elapsed_time_smart(seconds):
+    elapsed_minutes = seconds / 60
+    elapsed_hours = elapsed_minutes / 60
+    print(seconds, elapsed_minutes, elapsed_hours)
 
-        return sum if sum > 0 else None
+    # "n hours ago" if hours > 0, else "n minutes ago"
+    if elapsed_hours >= 1:
+        string = '{} hour'.format(int(elapsed_hours))
+        if elapsed_hours >= 2:
+            string += 's'
     else:
-        return 'no match'
-
-
-def pretty_seconds(n_seconds):
-    if n_seconds < 60:
-        return '{}s'.format(n_seconds)
-
-    hours = int(n_seconds / 3600)
-    minutes = int(n_seconds / 60) % 60
-    seconds = n_seconds % 60
-
-    string = ''
-    if hours:
-        string += '{}h '.format(hours)
-
-    if minutes != 0 or (hours and seconds):
-        string += '{}m '.format(minutes)
-
-    if seconds or (minutes == 0 and hours == 0):
-        string += '{}s'.format(seconds)
+        string = '{} minute'.format(int(elapsed_minutes))
+        if elapsed_minutes >= 2:
+            string += 's'
 
     return string
 
@@ -58,17 +40,12 @@ strings = [
 ]
 
 
-def main2():
-    for string in strings:
-        ret = string_to_minutes(string)
-        print(string, '--', ret)
-
-
 
 def main():
-    test = [0, 60, 3600, 62, 3672, 3602]
+    test = [0, 57, 60, 578, 3600, 62, 3672, 3602]
     for t in test:
-        print(t, '-->', pretty_seconds(t))
+        print(elapsed_time_smart(t))
+        print()
 
 
 
