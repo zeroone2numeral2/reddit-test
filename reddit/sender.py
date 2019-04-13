@@ -154,7 +154,7 @@ class Sender(dict):
         self._s.title_escaped = u.escape(self._s.title)
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
-        self._s.elapsed_seconds = (u.now() - created_utc_dt).seconds
+        self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
         self._s.elapsed_minutes = self._s.elapsed_seconds / 60
         self._s.elapsed_hours = self._s.elapsed_minutes / 60
 
