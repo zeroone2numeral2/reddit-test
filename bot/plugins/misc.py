@@ -109,4 +109,26 @@ def remdl_command(_, update):
         subs_strings.append('r/{} ({})'.format(sub[0], ', '.join(jobs)))
 
     update.message.reply_text('\n'.join(subs_strings))
+    
 
+@Plugins.add(CommandHandler, command=['loglines'])
+@d.restricted
+@d.failwithmessage
+def loglines_command(_, update):
+    logger.info('/loglines command')
+    
+    dir_path = os.path.dirname(config.logging.filepath)
+    
+    lines_list = list()
+    dir_files = [f for f in os.listdir(dir_path)][:50]
+    for file in dir_files:
+        file_path = os.path.join(dir_path, file)
+        if not re.search(r'.+\.log(?:\.\d+)?', file_path, re.I):
+            continue
+        
+        with open(file_path) as f:
+            lines_list.append('{} - {}'.format(f.readline()[:25], str(file)))
+    
+    text = '<code>{}</code>'.format('\n'.join(lines_list))
+    
+    update.message.reply_html(text)

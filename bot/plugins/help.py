@@ -29,6 +29,7 @@ HELP_STRING = """\
 /jobs: get the list of subreddits and their enabled jobs
 /try `[submission id]`: get the submission with that id. Note: the subreddit must be saved in the database
 /remffmpeglogs: remove ffmpeg log files
+/loglines: get the date of the first line of every log file in the logs directory
 """
 
 
