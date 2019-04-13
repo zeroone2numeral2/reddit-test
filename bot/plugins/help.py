@@ -30,6 +30,7 @@ HELP_STRING = """\
 /try `[submission id]`: get the submission with that id. Note: the subreddit must be saved in the database
 /remffmpeglogs: remove ffmpeg log files
 /loglines: get the date of the first line of every log file in the logs directory
+/attr `[property]`: get the value of that property for all subreddits
 """
 
 
