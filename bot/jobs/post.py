@@ -96,7 +96,7 @@ def process_subreddit(subreddit, bot):
             u.now(string=True),
             subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
         )
-        elapsed_time_minutes = (u.now() - subreddit.last_posted_submission_dt).seconds / 60
+        elapsed_time_minutes = (u.now() - subreddit.last_posted_submission_dt).total_seconds() / 60
     else:
         Log.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
         elapsed_time_minutes = 9999999
