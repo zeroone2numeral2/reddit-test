@@ -1,6 +1,9 @@
 import logging
+import os
 
 from telegram.ext import CommandHandler
+from telegram.error import TelegramError
+from telegram.error import BadRequest
 
 from bot import Plugins
 from utilities import d
@@ -27,5 +30,18 @@ def subs_list(bot, update):
     placeholders = list()
     for key, val in sender.submission_dict.items():
         placeholders.append('{} ({})'.format(key.strip(), u.html_escape(str(type(val)))))
+    
+    text = '\n'.join(placeholders)
+    try:
+        update.message.reply_html(text)
+        raise TelegramError
+    except (TelegramError, BadRequest):
+        file_path = 'downloads/template.temp.txt'
         
-    update.message.reply_html('\n'.join(placeholders))
+        with open(file_path, 'w+') as f:
+            f.write(text)
+        
+        with open(file_path, 'rb') as f:
+            update.message.reply_document(f)
+        
+        os.remove(file_path)
