@@ -43,7 +43,9 @@ class MediaType:
     GFYCAT = 'gfycat'
 
 
-class Sender(dict):
+class Sender:
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_target_chat_id']
+    
     def __init__(self, bot, subreddit, submission):
         super(Sender, self).__init__()
         self._bot = bot
@@ -171,11 +173,20 @@ class Sender(dict):
     @property
     def submission_dict(self):
         return self._submission_dict
+    
+    @property
+    def subreddit(self):
+        return self._subreddit
 
     @property
     def template_keys(self):
-        return [key for key in self._submission_dict.keys() if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str, int))]
-
+        return_list = list()
+        for key in self._submission_dict.keys():
+            if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str, int)):
+                return_list.append(key)
+        
+        return return_list
+        
     def __getitem__(self, item):
         return self._submission_dict[item]
 
@@ -188,6 +199,10 @@ class Sender(dict):
             if KEY_MAPPER_DICT.get(key, None):
                 # replace the key in the dict of the mapping object edits that value
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
+        
+        for key in dir(self._subreddit):
+            val = getattr(self._s, key)
+            self._submission_dict[key] = val
 
     def post(self, chat_id=None):
         if chat_id:
