@@ -200,11 +200,14 @@ class Sender:
                 continue
                 
             val = getattr(self._s, key)
-            if not isinstance(val, (str, int, bool, datetime.datetime)) and not val is None:
+            # try to stringify val, otherwise continue
+            try:
+                str(val)
+            except ValueError:
                 continue
                 
             self._submission_dict[key] = val
-            if KEY_MAPPER_DICT.get(key, None):
+            if key in KEY_MAPPER_DICT:
                 # replace the key in the dict of the mapping object edits that value
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
         
@@ -213,7 +216,10 @@ class Sender:
                 continue
             
             val = getattr(self._subreddit, key)
-            if not isinstance(val, (str, int, bool, datetime.datetime)) and not val is None:
+            # try to stringify val, otherwise continue
+            try:
+                str(val)  # no need to convert to string, we just have to try to
+            except ValueError:
                 continue
                 
             self._submission_dict[key] = val
