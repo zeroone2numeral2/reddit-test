@@ -129,6 +129,6 @@ def loglines_command(_, update):
         with open(file_path) as f:
             lines_list.append('{} - {}'.format(f.readline()[:25], str(file)))
     
-    text = '<code>{}</code>'.format('\n'.join(lines_list))
+    text = '<code>{}</code>'.format('\n'.join(sorted(lines_list)))
     
     update.message.reply_html(text)
