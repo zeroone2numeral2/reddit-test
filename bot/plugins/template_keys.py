@@ -7,7 +7,6 @@ from telegram.error import BadRequest
 
 from bot import Plugins
 from utilities import d
-from utilities import u
 from database.models import Subreddit
 from reddit import Sender
 from reddit import reddit
@@ -29,11 +28,11 @@ def subs_list(bot, update):
     
     placeholders = list()
     for key, val in sender.submission_dict.items():
-        placeholders.append('{} ({})'.format(key.strip(), u.html_escape(str(type(val)))))
+        placeholders.append('{} ({})'.format(key.strip(), str(type(val))))
     
     text = '\n'.join(placeholders)
     try:
-        update.message.reply_html(text)
+        update.message.reply_text(text)
         raise TelegramError
     except (TelegramError, BadRequest):
         file_path = 'downloads/template.temp.txt'
