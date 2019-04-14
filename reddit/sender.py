@@ -1,6 +1,8 @@
 import logging
 import datetime
 import re
+from collections import OrderedDict
+from pprint import pprint
 from urllib.parse import urlparse
 
 from telegram import ParseMode
@@ -44,7 +46,7 @@ class MediaType:
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_target_chat_id']
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_target_chat_id', '_submission_dict']
     
     def __init__(self, bot, subreddit, submission):
         super(Sender, self).__init__()
@@ -194,15 +196,29 @@ class Sender:
         self._submission_dict = dict()
 
         for key in dir(self._s):
+            if key.startswith('_'):
+                continue
+                
             val = getattr(self._s, key)
+            if not isinstance(val, (str, int, bool, datetime.datetime)) and not val is None:
+                continue
+                
             self._submission_dict[key] = val
             if KEY_MAPPER_DICT.get(key, None):
                 # replace the key in the dict of the mapping object edits that value
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
         
         for key in dir(self._subreddit):
-            val = getattr(self._s, key)
+            if key.startswith('_') or key in ('DoesNotExist',):
+                continue
+            
+            val = getattr(self._subreddit, key)
+            if not isinstance(val, (str, int, bool, datetime.datetime)) and not val is None:
+                continue
+                
             self._submission_dict[key] = val
+                
+        self._submission_dict = OrderedDict(sorted(self._submission_dict.items()))
 
     def post(self, chat_id=None):
         if chat_id:
