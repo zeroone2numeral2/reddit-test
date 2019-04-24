@@ -17,23 +17,31 @@ class Plugins(Registration):
 
         try:
             module = import_module(import_path)
-            names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
-            # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
-            for name in names_list:
-                handlers_list = getattr(module, name)  # lista perchè @Plugin.add() genera una lista (stack di decorators)
-                if isinstance(handlers_list, list):
-                    # filter out list items that are not a tuple of length 2, otherwise the loop will crash
-                    handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
-                    for handler, group in handlers_list:
-                        if isinstance(handler, Handler) and isinstance(group, int):
-                            logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path,
-                                         type(handler).__name__, name, group)
-                            valid_handlers.append((handler, group))
-                        else:
-                            logger.debug('function %s.%s(%s) skipped because not instance of Handler', import_path,
-                                         type(handler).__name__, name)
         except Exception as e:
-            logger.warning('error while loading handlers from %s: %s', import_path, str(e))
+            logger.warning('could not import module %s: %s', import_path, str(e))
+            return
+
+        names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
+        # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
+        for name in names_list:
+            try:
+                # we *try* to import the name because we are not sure the module has that attribute (eg. if a callbacks
+                # whitelist is passed, we are not sure all the calback functions are present in the module
+                handlers_list = getattr(module, name)  # @Plugin.add() generates a list (decorators stack)
+            except AttributeError:
+                logger.warning('AttributeError: could not import "%s" from module %s', name, import_path)
+                continue
+
+            if isinstance(handlers_list, list):
+                # filter out list items that are not a tuple of length 2, otherwise the loop will crash
+                handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
+                for handler, group in handlers_list:
+                    if isinstance(handler, Handler) and isinstance(group, int):
+                        logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path, type(handler).__name__, name, group)
+                        valid_handlers.append((handler, group))
+                    else:
+                        logger.debug('function %s.%s(%s) skipped because not instance of Handler', import_path,
+                                     type(handler).__name__, name)
 
         return valid_handlers
 
