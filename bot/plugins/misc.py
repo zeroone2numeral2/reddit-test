@@ -91,7 +91,7 @@ def remffmpeglogs_command(_, update):
 @Plugins.add(CommandHandler, command=['jobs'])
 @d.restricted
 @d.failwithmessage
-def remdl_command(_, update):
+def jobs_command(_, update):
     logger.info('/jobs command')
 
     subs = Subreddit.subreddits_with_jobs()
