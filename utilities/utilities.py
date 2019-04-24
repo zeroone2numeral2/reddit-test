@@ -102,7 +102,7 @@ def pretty_seconds(n_seconds):
 
     hours = int(n_seconds / 3600)
     minutes = int(n_seconds / 60) % 60
-    seconds = n_seconds % 60
+    seconds = int(n_seconds % 60)
 
     string = ''
     if hours:
