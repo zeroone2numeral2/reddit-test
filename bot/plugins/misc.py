@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 from pprint import pformat
@@ -54,7 +55,8 @@ def getdb_command(_, update):
 def utc_command(_, update):
     logger.info('/utc command')
 
-    update.message.reply_text(u.now(string=True))
+    weekday = datetime.datetime.today().weekday()
+    update.message.reply_text('{}\nWeekday: {}'.format(u.now(string=True), weekday))
 
 
 @Plugins.add(CommandHandler, command=['remdl'])
