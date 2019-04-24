@@ -37,7 +37,7 @@ class Plugins(Registration):
                 handlers_list = [i for i in handlers_list if isinstance(i, tuple) and len(i) == 2]
                 for handler, group in handlers_list:
                     if isinstance(handler, Handler) and isinstance(group, int):
-                        logger.debug('handler %s.%s(%s) will be loaded in group %d', import_path, type(handler).__name__, name, group)
+                        logger.debug('%s <%s.%s> will be loaded in group %d', type(handler).__name__, import_path, name, group)
                         valid_handlers.append((handler, group))
                     else:
                         logger.debug('function %s.%s(%s) skipped because not instance of Handler', import_path,
