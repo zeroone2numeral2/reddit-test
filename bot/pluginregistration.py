@@ -10,9 +10,10 @@ logger = logging.getLogger('plugins')
 
 class Plugins(Registration):
     list = []
+    paths_list = []
 
-    @staticmethod
-    def _fetch_valid_callbacks(import_path, callbacks_whitelist=None):
+    @classmethod
+    def _fetch_valid_callbacks(cls, import_path, callbacks_whitelist=None):
         valid_handlers = list()
 
         try:
@@ -39,6 +40,7 @@ class Plugins(Registration):
                     if isinstance(handler, Handler) and isinstance(group, int):
                         logger.debug('%s <%s.%s> will be loaded in group %d', type(handler).__name__, import_path, name, group)
                         valid_handlers.append((handler, group))
+                        cls.paths_list.append((import_path, name))
                     else:
                         logger.debug('function %s.%s(%s) skipped because not instance of Handler', import_path,
                                      type(handler).__name__, name)
