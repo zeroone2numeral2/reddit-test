@@ -32,19 +32,26 @@ class Jobs(Registration):
 
         try:
             module = import_module(import_path)
-            names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
-            # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
-            for name in names_list:
+        except ImportError as e:
+            logger.warning('could not import module %s: %s', import_path, str(e))
+            return
+
+        names_list = list(vars(module).keys()) if callbacks_whitelist is None else callbacks_whitelist
+        # logger.debug('functions to test from %s: %s', import_path, ', '.join(names_list))
+        for name in names_list:
+            try:
                 jobs_tuple_list = getattr(module, name)  # it's a list because @Plugin.add() generates a list (a stack of decorators)
-                if isinstance(jobs_tuple_list, list):
-                    for job_tuple in jobs_tuple_list:
-                        if isinstance(job_tuple, Job):
-                            logger.debug('job %s.%s will be loaded', import_path, job_tuple.callback.__name__)
-                            valid_jobs.append(job_tuple)
-                        else:
-                            logger.debug('function %s.%s skipped because not an instance of Job', import_path, type(job_tuple).__name__)
-        except Exception as e:
-            logger.warning('error while loading jobs from %s: %s', import_path, str(e), exc_info=False)
+            except AttributeError:
+                logger.warning('AttributeError: could not import "%s" from module %s', name, import_path)
+                continue
+
+            if isinstance(jobs_tuple_list, list):
+                for job_tuple in jobs_tuple_list:
+                    if isinstance(job_tuple, Job):
+                        logger.debug('job %s.%s will be loaded', import_path, job_tuple.callback.__name__)
+                        valid_jobs.append(job_tuple)
+                    else:
+                        logger.debug('function %s.%s skipped because not an instance of Job', import_path, type(job_tuple).__name__)
 
         return valid_jobs
 

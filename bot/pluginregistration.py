@@ -17,7 +17,7 @@ class Plugins(Registration):
 
         try:
             module = import_module(import_path)
-        except Exception as e:
+        except ImportError as e:
             logger.warning('could not import module %s: %s', import_path, str(e))
             return
 
