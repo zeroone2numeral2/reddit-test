@@ -34,12 +34,28 @@ def ignore_because_quiet_hours(subreddit):
     else:
         now = u.now(string=False)
 
-        if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
-            Log.logger.info('Quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                        config.quiet_hours.start, config.quiet_hours.end, now.hour)
-            return True
+        if subreddit.quiet_hours_start not in (None, False) and subreddit.quiet_hours_end not in (False, None):
+            Log.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
+                            subreddit.quiet_hours_end)
+            if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
+                if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
+                    Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                    return True
+            elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
+                if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
+                    Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                    return True
+            else:
+                Log.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
+                return False
         else:
-            return False
+            # if the subreddit doesn't have the quiet hours configured, we use the config ones
+            if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
+                Log.logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                                config.quiet_hours.start, config.quiet_hours.end, now.hour)
+                return True
+            else:
+                return False
 
 
 def calculate_quiet_hours_demultiplier(subreddit):
@@ -71,8 +87,9 @@ def process_submissions(subreddit):
             Log.logger.info('...submission %s has already been posted', submission.id)
             continue
         else:
-            Log.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks', submission.id)
-            
+            Log.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
+                            submission.id)
+
             yield submission
 
 
@@ -108,7 +125,7 @@ def process_subreddit(subreddit, bot):
             quiet_hours_demultiplier
         )
         return
-    
+
     submission, sender = None, None
     for submission in process_submissions(subreddit):
         sender = Sender(bot, subreddit, submission)
@@ -121,7 +138,7 @@ def process_subreddit(subreddit, bot):
             # sender.register_ignored()
             Log.logger.info('submission di NOT pass filters, continuing to next one...')
             continue
-        
+
     if not submission:
         Log.logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return
