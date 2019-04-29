@@ -25,12 +25,12 @@ class Log:
     logger = logger
 
 
-def its_quiet_hours(subreddit):
+def its_quiet_hours(subreddit: Subreddit):
     if subreddit.follow_quiet_hours is None:
         subreddit.follow_quiet_hours = True
         subreddit.save()
 
-    if not subreddit.follow_quiet_hours:
+    if not subreddit.follow_quiet_hours or subreddit.quiet_hours_demultiplier == 0:
         Log.logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
         return False
     else:
@@ -60,7 +60,7 @@ def its_quiet_hours(subreddit):
                 return False
 
 
-def calculate_quiet_hours_demultiplier(subreddit):
+def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
     if subreddit.quiet_hours_demultiplier is None:
         subreddit.quiet_hours_demultiplier = 0
         subreddit.save()
@@ -72,7 +72,7 @@ def calculate_quiet_hours_demultiplier(subreddit):
         return 1
 
 
-def process_submissions(subreddit):
+def process_submissions(subreddit: Subreddit):
     Log.logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
     limit = subreddit.limit or config.praw.submissions_limit
@@ -88,7 +88,7 @@ def process_submissions(subreddit):
             yield submission
 
 
-def process_subreddit(subreddit, bot):
+def process_subreddit(subreddit: Subreddit, bot):
     Log.logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
     # Log.logger.info('(subreddit: %s)', str(subreddit.to_dict()))
 
