@@ -26,14 +26,6 @@ class Log:
 
 
 def its_quiet_hours(subreddit: Subreddit):
-    if subreddit.follow_quiet_hours is None:
-        subreddit.follow_quiet_hours = True
-        subreddit.save()
-
-    if not subreddit.follow_quiet_hours or subreddit.quiet_hours_demultiplier == 0:
-        Log.logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
-        return False
-
     now = u.now()
 
     if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
@@ -65,10 +57,15 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
         subreddit.quiet_hours_demultiplier = 0
         subreddit.save()
 
-    if its_quiet_hours(subreddit):
+    if subreddit.quiet_hours_demultiplier == 1:
+        # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
+        Log.logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
+        return 1
+    elif its_quiet_hours(subreddit):
+        # if it's quiet hours: return the demultiplier
         return subreddit.quiet_hours_demultiplier
     else:
-        Log.logger.info('We are not into the quiet hours timeframe: frequency multiplier is 1')
+        Log.logger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
         return 1
 
 
