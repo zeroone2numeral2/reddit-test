@@ -33,31 +33,31 @@ def its_quiet_hours(subreddit: Subreddit):
     if not subreddit.follow_quiet_hours or subreddit.quiet_hours_demultiplier == 0:
         Log.logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
         return False
-    else:
-        now = u.now()
 
-        if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
-            Log.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
-                            subreddit.quiet_hours_end)
-            if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
-                if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
-                    Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
-                    return True
-            elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
-                if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
-                    Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
-                    return True
-            else:
-                Log.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
-                return False
-        else:
-            # if the subreddit doesn't have the quiet hours configured, we use the config ones
-            if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
-                Log.logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                                config.quiet_hours.start, config.quiet_hours.end, now.hour)
+    now = u.now()
+
+    if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
+        Log.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
+                        subreddit.quiet_hours_end)
+        if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
+            if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
+                Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
-            else:
-                return False
+        elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
+            if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
+                Log.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                return True
+        else:
+            Log.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
+            return False
+    else:
+        # if the subreddit doesn't have the quiet hours configured, we use the config ones
+        if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
+            Log.logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                            config.quiet_hours.start, config.quiet_hours.end, now.hour)
+            return True
+        else:
+            return False
 
 
 def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
