@@ -72,6 +72,37 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
         return 1
 
 
+def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
+    # we increase the max_frequency of the value set for the subreddit, so we can decrease the posting frequency
+    # during quiet hours. If we are not in the quiet hours timeframe, the multplier will always be one,
+    # so the max_frequency will be the same
+    calculated_max_frequency = subreddit.max_frequency * quiet_hours_demultiplier
+
+    now = u.now()
+    now_string = u.now(string=True)
+
+    if subreddit.last_posted_submission_dt:
+        Log.logger.info(
+            'elapsed time (now -- last post): %s -- %s',
+            now_string,
+            subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
+        )
+        elapsed_time_minutes = (now - subreddit.last_posted_submission_dt).total_seconds() / 60
+    else:
+        Log.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
+        elapsed_time_minutes = 9999999
+
+    if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
+        Log.logger.info(
+            'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
+            subreddit.max_frequency,
+            quiet_hours_demultiplier
+        )
+        return False
+    else:
+        return True
+
+
 def process_submissions(subreddit: Subreddit):
     Log.logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
 
@@ -97,28 +128,7 @@ def process_subreddit(subreddit: Subreddit, bot):
         Log.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
         return
 
-    # we increase the max_frequency of the value set for the subreddit, so we can decrease the posting frequency
-    # during quiet hours. If we are not in the quiet hours timeframe, the multplier will always be one,
-    # so the max_frequency will be the same
-    calculated_max_frequency = subreddit.max_frequency * quiet_hours_demultiplier
-
-    if subreddit.last_posted_submission_dt:
-        Log.logger.info(
-            'elapsed time (now -- last post): %s -- %s',
-            u.now(string=True),
-            subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
-        )
-        elapsed_time_minutes = (u.now() - subreddit.last_posted_submission_dt).total_seconds() / 60
-    else:
-        Log.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
-        elapsed_time_minutes = 9999999
-
-    if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
-        Log.logger.info(
-            'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
-            subreddit.max_frequency,
-            quiet_hours_demultiplier
-        )
+    if not time_to_post(subreddit, quiet_hours_demultiplier):
         return
 
     submission, sender = None, None
