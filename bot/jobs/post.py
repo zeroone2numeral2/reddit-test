@@ -18,12 +18,14 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
+NOT_VALUES = (None, False)
+
 
 class Log:
     logger = logger
 
 
-def ignore_because_quiet_hours(subreddit):
+def its_quiet_hours(subreddit):
     if subreddit.follow_quiet_hours is None:
         subreddit.follow_quiet_hours = True
         subreddit.save()
@@ -32,9 +34,9 @@ def ignore_because_quiet_hours(subreddit):
         Log.logger.info('r/%s does not follows quite hours: process submissions', subreddit.name)
         return False
     else:
-        now = u.now(string=False)
+        now = u.now()
 
-        if subreddit.quiet_hours_start not in (None, False) and subreddit.quiet_hours_end not in (False, None):
+        if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
             Log.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
                             subreddit.quiet_hours_end)
             if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
@@ -63,14 +65,7 @@ def calculate_quiet_hours_demultiplier(subreddit):
         subreddit.quiet_hours_demultiplier = 0
         subreddit.save()
 
-    now = u.now(string=False)
-
-    if now.hour > config.quiet_hours.start or now.hour < config.quiet_hours.end:
-        Log.logger.info(
-            'We are in the quiet hours timeframe (%d - %d UTC): use subreddit\'s demultiplier (current hour UTC: %d)',
-            config.quiet_hours.start,
-            config.quiet_hours.end, now.hour
-        )
+    if its_quiet_hours(subreddit):
         return subreddit.quiet_hours_demultiplier
     else:
         Log.logger.info('We are not into the quiet hours timeframe: frequency multiplier is 1')
