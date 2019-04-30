@@ -76,20 +76,20 @@ def on_cancel(_, update):
     return ConversationHandler.END
 
 
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
-    states={
-        FORWARD_MESSAGE: [
-            MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
-            MessageHandler(~Filters.forwarded & ~Filters.command, callback=on_non_forwarded_message),
-        ]
-    },
-    fallbacks=[
-        CommandHandler('cancel', on_cancel)
-    ]
-)
-
-
-@Plugins.add_conversation_hanlder(conv_handler)
+@Plugins.add_conversation_hanlder()
 def addchannel_conv_hanlder():
-    pass
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
+        states={
+            FORWARD_MESSAGE: [
+                MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
+                MessageHandler(~Filters.forwarded & ~Filters.command, callback=on_non_forwarded_message),
+            ]
+        },
+        fallbacks=[
+            CommandHandler('cancel', on_cancel)
+        ]
+    )
+
+    return conv_handler

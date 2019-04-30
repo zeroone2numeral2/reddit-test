@@ -102,19 +102,19 @@ def on_cancel(_, update):
     return ConversationHandler.END
 
 
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler(command=['addsub'], callback=on_addsub_command, pass_args=True, pass_user_data=True)],
-    states={
-        CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
-        ]
-    },
-    fallbacks=[
-        CommandHandler('cancel', on_cancel)
-    ]
-)
-
-
-@Plugins.add_conversation_hanlder(conv_handler)
+@Plugins.add_conversation_hanlder()
 def addsubreddit_conv_hanlder():
-    pass
+    conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler(command=['addsub'], callback=on_addsub_command, pass_args=True, pass_user_data=True)],
+        states={
+            CHANNEL_SELECT: [
+                MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
+            ]
+        },
+        fallbacks=[
+            CommandHandler('cancel', on_cancel)
+        ]
+    )
+
+    return conv_handler

@@ -14,6 +14,8 @@ class Plugins(Registration):
 
     @classmethod
     def _fetch_valid_callbacks(cls, import_path, callbacks_whitelist=None):
+        logger.debug('scanning module: %s', import_path)
+
         valid_handlers = list()
 
         try:
@@ -69,11 +71,12 @@ class Plugins(Registration):
         return decorator
 
     @classmethod
-    def add_conversation_hanlder(cls, conv_handler, group=0):
+    def add_conversation_hanlder(cls, group=0):
         def decorator(dummy_func):
             return_list = list()
 
-            logger.debug('adding to cls.list ConversationHandler <%s> in group %d', dummy_func.__name__, group)
+            logger.debug('ConversationHandler found: <%s> (group %d)', dummy_func.__name__, group)
+            conv_handler = dummy_func()
 
             return_list.append((conv_handler, group))
 

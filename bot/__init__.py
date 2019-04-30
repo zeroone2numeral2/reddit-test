@@ -1,3 +1,3 @@
 from .polling import main
-from .pluginregistration import Plugins
-from .jobregistration import Jobs
+from .ptb_dispatcher_registration import Plugins
+from .ptb_dispatcher_registration import Jobs

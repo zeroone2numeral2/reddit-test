@@ -82,25 +82,25 @@ def on_channel_selected_incorrect(_, update):
     return CHANNEL_SELECT
 
 
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler(
-        command=['subchannel', 'setchannel'],
-        callback=on_set_channel_command,
-        pass_args=True,
-        pass_user_data=True
-    )],
-    states={
-        CHANNEL_SELECT: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_channel_selected, pass_user_data=True),
-            MessageHandler(~Filters.command & Filters.all, callback=on_channel_selected_incorrect),
-        ]
-    },
-    fallbacks=[
-        CommandHandler('cancel', on_cancel)
-    ]
-)
-
-
-@Plugins.add_conversation_hanlder(conv_handler)
+@Plugins.add_conversation_hanlder()
 def setchannel_conv_hanlder():
-    pass
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler(
+            command=['subchannel', 'setchannel'],
+            callback=on_set_channel_command,
+            pass_args=True,
+            pass_user_data=True
+        )],
+        states={
+            CHANNEL_SELECT: [
+                MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_channel_selected,
+                               pass_user_data=True),
+                MessageHandler(~Filters.command & Filters.all, callback=on_channel_selected_incorrect),
+            ]
+        },
+        fallbacks=[
+            CommandHandler('cancel', on_cancel)
+        ]
+    )
+
+    return conv_handler

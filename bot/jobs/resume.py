@@ -15,7 +15,7 @@ from database import db
 from reddit import reddit
 from reddit import SenderResume
 from bot import Jobs
-from ..jobregistration import RUNNERS
+from ..ptb_dispatcher_registration.jobregistration import RUNNERS
 from config import config
 
 logger = logging.getLogger(__name__)

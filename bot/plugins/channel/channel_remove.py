@@ -67,19 +67,18 @@ def on_cancel(_, update):
     return ConversationHandler.END
 
 
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler(command=['remchannel'], callback=on_remchannel_command)],
-    states={
-        CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected)
-        ]
-    },
-    fallbacks=[
-        CommandHandler('cancel', on_cancel)
-    ]
-)
-
-
-@Plugins.add_conversation_hanlder(conv_handler)
+@Plugins.add_conversation_hanlder()
 def remchannel_conv_hanlder():
-    pass
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler(command=['remchannel'], callback=on_remchannel_command)],
+        states={
+            CHANNEL_SELECT: [
+                MessageHandler(Filters.text, callback=on_channel_selected)
+            ]
+        },
+        fallbacks=[
+            CommandHandler('cancel', on_cancel)
+        ]
+    )
+
+    return conv_handler
