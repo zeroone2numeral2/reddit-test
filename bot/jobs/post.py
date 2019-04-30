@@ -14,7 +14,6 @@ from database.models import Post
 from database import db
 from reddit import reddit
 from reddit import Sender
-# from bot import Jobs
 from config import config
 
 logger = logging.getLogger(__name__)
