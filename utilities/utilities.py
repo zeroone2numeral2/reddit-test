@@ -125,7 +125,7 @@ def elapsed_time_smart(seconds):
 
     # "n hours ago" if hours > 0, else "n minutes ago"
     if elapsed_days >= 1:
-        string = '{} days'.format(ceil(elapsed_days))
+        string = '{} day'.format(ceil(elapsed_days))
         if elapsed_days >= 2:
             string += 's'
     elif elapsed_hours >= 1:
