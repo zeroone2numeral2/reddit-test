@@ -34,6 +34,7 @@ KEY_MAPPER_DICT = dict(
 
 IMGUR_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
 
+
 class ImagesWebsites:
     IMGUR = 'imgur'
 
