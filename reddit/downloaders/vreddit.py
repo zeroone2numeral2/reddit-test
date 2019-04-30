@@ -90,7 +90,7 @@ class VReddit(Downloader):
         stderr_filepath = os.path.join('logs', 'ffmpeg', 'ffmpeg_stderr_{}.log'.format(dt_filename))
 
         stdout_file = open(stdout_filepath, 'wb')
-        stderr_file = open(stdout_filepath, 'wb')
+        stderr_file = open(stderr_filepath, 'wb')
 
         # subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
@@ -105,7 +105,6 @@ class VReddit(Downloader):
             ffmpeg_end = u.now()
             ffmpeg_elapsed_seconds = (ffmpeg_end - ffmpeg_start).seconds
             logger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
-
         except subprocess.TimeoutExpired:
             logger.error(
                 'subprocess.TimeoutExpired (%d seconds) error during ffmpeg command execution (see %s, %s)',
@@ -133,7 +132,9 @@ class VReddit(Downloader):
     def download_and_merge(self, skip_audio=False):
         self.download()
         if not skip_audio:
+            # some vreddits don't have an audio (they are GIFs basically),
+            # so we have to skip the audio download and merge
             self.download_audio()
             return self.merge()  # return the merged video/audio path if we didn't skip the audio
         else:
-            return self._file_path  # return the downloaded video path if we have skipped thye audio
+            return self._file_path  # return the downloaded video path if we have skipped the audio
