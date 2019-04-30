@@ -9,7 +9,6 @@ from database.models import Subreddit
 from reddit import Sender
 from reddit import reddit
 from utilities import d
-from config import config
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +30,7 @@ def try_submission(bot, update, args):
 
     sender = Sender(bot, subreddit, submission)
     
-    text = pformat(sender.submission_dict)
-    file_path = 'downloads/template.temp.txt'
-
-    with open(file_path, 'w+') as f:
-        f.write(text)
+    file_path = sender.write_temp_submission_dict()
 
     with open(file_path, 'rb') as f:
         update.message.reply_document(f)

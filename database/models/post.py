@@ -36,6 +36,13 @@ class Post(peewee.Model):
             return False
 
     @classmethod
+    def get_post_by_message(cls, channel, message_id):
+        try:
+            return cls.get(cls.channel == channel, cls.message_id == message_id)
+        except peewee.DoesNotExist:
+            return None
+
+    @classmethod
     def to_dict(cls):
         return model_to_dict(cls)
 

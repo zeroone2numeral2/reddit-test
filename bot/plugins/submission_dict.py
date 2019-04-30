@@ -31,10 +31,7 @@ def subs_list(bot, update, args):
     if len(text) < MAX_MESSAGE_LENGTH:
         update.message.reply_html('<code>{}</code>'.format(text))
     else:
-        file_path = 'downloads/template.temp.txt'
-        
-        with open(file_path, 'w+') as f:
-            f.write(text)
+        file_path = sender.write_temp_submission_dict()
         
         with open(file_path, 'rb') as f:
             update.message.reply_document(f)

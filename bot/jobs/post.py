@@ -161,12 +161,12 @@ def process_subreddit(subreddit: Subreddit, bot):
         if not subreddit.test:
             Log.logger.info('creating Post row...')
             sender.register_post()
+            
+            Log.logger.info('updating Subreddit last post datetime...')
+            subreddit.last_posted_submission_dt = u.now()
+            subreddit.save()
         else:
-            Log.logger.info('not creating Post row: r/%s is a testing subreddit', subreddit.name)
-
-        Log.logger.info('updating Subreddit last post datetime...')
-        subreddit.last_posted_submission_dt = u.now()
-        subreddit.save()
+            Log.logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
 
 
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')

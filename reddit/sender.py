@@ -1,8 +1,9 @@
 import logging
 import datetime
+import os
 import re
 from collections import OrderedDict
-from pprint import pprint
+import pprint
 from urllib.parse import urlparse
 
 from telegram import ParseMode
@@ -467,6 +468,15 @@ class Sender:
             return False
         else:
             return True
+    
+    def write_temp_submission_dict(self):
+        text = pprint.pformat(self.submission_dict)
+        file_path = os.path.join('downloads', '{}.temp.txt'.format(self._s.id))
+    
+        with open(file_path, 'w+') as f:
+            f.write(text)
+            
+        return file_path
         
 
 
