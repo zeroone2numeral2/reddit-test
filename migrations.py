@@ -20,7 +20,6 @@ def main(database_path):
 
     migrator = SqliteMigrator(db)
 
-    follow_quiet_hours = peewee.BooleanField(null=True, default=True)
     limit = peewee.IntegerField(null=True, default=25)
     ignore_if_newer_then = peewee.IntegerField(null=True)
     quiet_hours_start = peewee.IntegerField(null=True)
@@ -41,7 +40,6 @@ def main(database_path):
 
     migrations = [
         # 20190318 pt. 1
-        migrator.add_column('subreddits', 'follow_quiet_hours', follow_quiet_hours),
         migrator.add_column('subreddits', 'limit', limit),
         migrator.add_column('subreddits', 'ignore_if_newer_then', ignore_if_newer_then),
         # 20190318 pt. 2 (rename ignore_if_newer_then to ignore_if_newer_than)
@@ -74,6 +72,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'template_matrix', template_matrix),
         # 20190411 (drop not null)
         migrator.drop_not_null('subreddits', 'template_matrix'),
+        # 20190430
+        migrator.drop_column('subreddits', 'follow_quiet_hours'),
     ]
 
     logger.info('Starting migration....')
