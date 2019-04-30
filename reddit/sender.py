@@ -292,7 +292,7 @@ class Sender:
 
     def _send_image(self, image_url, caption):
         logger.info('image url: %s', image_url)
-
+        
         self._sent_message = self._bot.send_photo(
             self._target_chat_id,
             image_url,
@@ -300,6 +300,7 @@ class Sender:
             parse_mode=ParseMode.HTML,
             timeout=360
         )
+        
         return self._sent_message
 
     def _send_vreddit(self, url, caption):

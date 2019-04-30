@@ -1,4 +1,6 @@
 import logging
+import os
+from pprint import pformat
 
 from telegram.ext import CommandHandler
 from ptbplugins import Plugins
@@ -18,11 +20,6 @@ logger = logging.getLogger(__name__)
 def try_submission(bot, update, args):
     logger.info('/try command')
 
-    """post = Post.get(Post.submission_id == args[0])
-    if not post:
-        update.message.reply_text('No submission "{}" in the database'.format(args[0]))
-        return"""
-
     submission_id = args[0].strip()
 
     submission = reddit.submission(id=submission_id)
@@ -33,6 +30,18 @@ def try_submission(bot, update, args):
         return
 
     sender = Sender(bot, subreddit, submission)
+    
+    text = pformat(sender.submission_dict)
+    file_path = 'downloads/template.temp.txt'
+
+    with open(file_path, 'w+') as f:
+        f.write(text)
+
+    with open(file_path, 'rb') as f:
+        update.message.reply_document(f)
+
+    os.remove(file_path)
+    
     sender.post(chat_id=update.message.chat.id)
 
     update.message.reply_text('Posted (r/{}, {})'.format(submission.subreddit, submission.title))
