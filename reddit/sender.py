@@ -108,8 +108,10 @@ class Sender:
             logger.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
-        # elif re.search(r'i\.reddit\.com/[a-zA-Z1-9]+\.gif$', self._s.url, re.I):
-            # logger.debug('reddit gif url: %s', self._s.url)
+        elif self._s.domain == 'i.redd.it' and self._s.url.endswith('.gif'):
+            logger.debug('url is an i.redd.it gif: treating the submission as a video')
+            self._s.media_type = MediaType.VIDEO
+            self._s.media_url = self._s.url
         elif 'gfycat.com' in self._s.domain_parsed:
             logger.debug('url is a gfycat')
             self._s.media_type = MediaType.GFYCAT
