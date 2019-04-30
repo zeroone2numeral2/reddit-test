@@ -74,7 +74,7 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
     # we increase the max_frequency of the value set for the subreddit, so we can decrease the posting frequency
     # during quiet hours. If we are not in the quiet hours timeframe, the multplier will always be one,
     # so the max_frequency will be the same
-    calculated_max_frequency = subreddit.max_frequency * quiet_hours_demultiplier
+    calculated_max_frequency = int(subreddit.max_frequency * quiet_hours_demultiplier)
 
     now = u.now()
     now_string = u.now(string=True)
