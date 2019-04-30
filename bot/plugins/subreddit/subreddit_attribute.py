@@ -33,7 +33,9 @@ def sub_get_attributes(_, update, args):
     lines_list = list()
     for subreddit in subreddits:
         subreddit_dict = model_to_dict(subreddit)
-        if not subreddit_dict.get(prop, None):
+        try:
+            subreddit_dict[prop]
+        except KeyError:
             update.message.reply_text('Could not find property "{}" (tested on r/{})'.format(prop, subreddit.name))
             return
         
