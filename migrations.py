@@ -74,6 +74,8 @@ def main(database_path):
         migrator.drop_not_null('subreddits', 'template_matrix'),
         # 20190430
         migrator.drop_column('subreddits', 'follow_quiet_hours'),
+        migrator.drop_column('subreddits', 'images_only'),
+        migrator.drop_column('subreddits', 'images_as_file'),
     ]
 
     logger.info('Starting migration....')

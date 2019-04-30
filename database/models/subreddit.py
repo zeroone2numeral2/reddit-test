@@ -29,7 +29,6 @@ class Subreddit(peewee.Model):
     enabled = peewee.BooleanField(default=True)
     template = peewee.CharField(null=True, default=DEFAULT_TEMPLATE)
     send_medias = peewee.BooleanField(default=True)
-    images_as_file = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
     # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_demultiplier = peewee.FloatField(null=True, default=0)
@@ -39,7 +38,6 @@ class Subreddit(peewee.Model):
     test = peewee.BooleanField(default=False)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
-    images_only = peewee.BooleanField(default=False)
     min_score = peewee.IntegerField(null=True)
     ignore_if_newer_than = peewee.IntegerField(null=True)
     allow_nsfw = peewee.BooleanField(default=True, null=True)

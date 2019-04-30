@@ -451,9 +451,6 @@ class Sender:
         if self._subreddit.ignore_stickied and self._s.stickied:
             logger.info('tests failed: sticked submission')
             return False
-        elif self._subreddit.images_only and not self._s.media_type == MediaType.IMAGE:
-            logger.info('tests failed: subreddit is not an image')
-            return False
         elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._s.score:
             logger.info('tests failed: not enough upvotes (%d/%d)', self._s.score, self._subreddit.min_score)
             return False
