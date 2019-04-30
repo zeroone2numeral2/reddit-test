@@ -4,8 +4,8 @@ import os
 from telegram.ext import CommandHandler
 from telegram.error import TelegramError
 from telegram.error import BadRequest
+from ptbplugins import Plugins
 
-from bot import Plugins
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender

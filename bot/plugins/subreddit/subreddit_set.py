@@ -3,9 +3,9 @@ import re
 
 from playhouse.shortcuts import model_to_dict
 from telegram.ext import CommandHandler
+from ptbplugins import Plugins
 
 from database.models import Subreddit
-from bot import Plugins
 from utilities import u
 from utilities import d
 

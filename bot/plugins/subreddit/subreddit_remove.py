@@ -2,9 +2,9 @@ import logging
 
 from telegram.ext import CommandHandler
 from telegram import ParseMode
+from ptbplugins import Plugins
 
 from database.models import Subreddit
-from bot import Plugins
 from utilities import d
 
 logger = logging.getLogger(__name__)

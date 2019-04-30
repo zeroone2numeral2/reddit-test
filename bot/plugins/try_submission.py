@@ -1,8 +1,8 @@
 import logging
 
 from telegram.ext import CommandHandler
+from ptbplugins import Plugins
 
-from bot import Plugins
 from database.models import Subreddit
 from reddit import Sender
 from reddit import reddit

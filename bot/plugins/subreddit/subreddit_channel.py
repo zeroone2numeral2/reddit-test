@@ -4,10 +4,10 @@ from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
 from telegram.ext import Filters
+from ptbplugins import Plugins
 
 from database.models import Channel
 from database.models import Subreddit
-from bot import Plugins
 from bot.markups import Keyboard
 from utilities import u
 from utilities import d

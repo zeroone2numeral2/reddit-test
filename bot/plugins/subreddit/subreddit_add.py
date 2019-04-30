@@ -5,11 +5,11 @@ from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
 from telegram.ext import Filters
 from telegram import ParseMode
+from ptbplugins import Plugins
 
 from bot.markups import Keyboard
 from database.models import Channel
 from database.models import Subreddit
-from bot import Plugins
 from reddit import reddit
 from utilities import u
 from utilities import d

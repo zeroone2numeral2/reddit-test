@@ -7,9 +7,9 @@ from telegram.ext import CommandHandler
 from telegram.ext import Filters
 from telegram.error import BadRequest
 from telegram.error import TelegramError
+from ptbplugins import Plugins
 
 from database.models import Channel
-from bot import Plugins
 from utilities import d
 
 logger = logging.getLogger(__name__)

@@ -2,8 +2,8 @@ import logging
 
 from telegram.ext import CommandHandler
 from peewee import DoesNotExist
+from ptbplugins import Plugins
 
-from bot import Plugins
 from database.models import Post
 from database.models import Ignored
 from reddit import reddit

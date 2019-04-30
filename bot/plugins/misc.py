@@ -5,8 +5,8 @@ from pprint import pformat
 import os
 
 from telegram.ext import CommandHandler
+from ptbplugins import Plugins
 
-from bot import Plugins
 from database.models import Subreddit
 from utilities import u
 from utilities import d

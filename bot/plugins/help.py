@@ -1,8 +1,8 @@
 import logging
 
 from telegram.ext import CommandHandler
+from ptbplugins import Plugins
 
-from bot import Plugins
 from utilities import d
 
 logger = logging.getLogger(__name__)

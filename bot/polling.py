@@ -6,8 +6,6 @@ from .updater import dispatcher
 from .updater import job_queue
 from ptbplugins import Plugins
 from ptbplugins import Jobs
-# from .ptb_dispatcher_registration import Plugins
-# from .ptb_dispatcher_registration import Jobs
 
 from config import config
 

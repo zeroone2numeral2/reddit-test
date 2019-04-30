@@ -4,8 +4,8 @@ from pprint import pformat
 
 from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
+from ptbplugins import Plugins
 
-from bot import Plugins
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
