@@ -32,7 +32,7 @@ class Subreddit(peewee.Model):
     images_as_file = peewee.BooleanField(default=False)
     webpage_preview = peewee.BooleanField(default=True)
     # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
-    quiet_hours_demultiplier = peewee.IntegerField(null=True, default=0)
+    quiet_hours_demultiplier = peewee.FloatField(null=True, default=0)
     limit = peewee.IntegerField(null=True, default=config.praw.submissions_limit)
     quiet_hours_start = peewee.IntegerField(null=True, default=config.quiet_hours.start)
     quiet_hours_end = peewee.IntegerField(null=True, default=config.quiet_hours.end)
