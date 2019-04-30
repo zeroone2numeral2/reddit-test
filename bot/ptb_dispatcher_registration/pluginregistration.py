@@ -5,7 +5,7 @@ from telegram.ext import Handler
 
 from .registration import Registration
 
-logger = logging.getLogger('plugins')
+logger = logging.getLogger('ptb-plugins')
 
 
 class Plugins(Registration):
