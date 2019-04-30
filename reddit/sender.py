@@ -32,6 +32,7 @@ KEY_MAPPER_DICT = dict(
     created=lambda timestamp: datetime.datetime.fromtimestamp(timestamp)
 )
 
+IMGUR_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
 
 class ImagesWebsites:
     IMGUR = 'imgur'
@@ -84,9 +85,9 @@ class Sender:
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
             self._s.media_url = self._s.url.replace('.gifv', '.mp4')
-        elif re.search(r'imgur\.com/[a-zA-Z1-9]+$', self._s.url, re.I):
+        elif re.search(IMGUR_URL_REGEX, self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
-            imgur_direct_url = imgur.get_url(re.search(r'imgur\.com/([a-zA-Z1-9]+)$', self._s.url, re.I).group(1))
+            imgur_direct_url = imgur.get_url(re.search(IMGUR_URL_REGEX, self._s.url, re.I).group(1))
             logger.debug('imgur direct url: %s', imgur_direct_url)
             # also make sure the url is of an image
             if imgur_direct_url.endswith(('.jpg', '.png')):
