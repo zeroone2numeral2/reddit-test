@@ -80,7 +80,7 @@ class Sender:
             logger.debug('url is a jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
-        if self._s.url.endswith('.gifv'):
+        elif self._s.url.endswith('.gifv'):
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
             self._s.media_url = self._s.url.replace('.gifv', '.mp4')
