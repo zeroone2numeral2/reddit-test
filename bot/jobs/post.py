@@ -4,6 +4,8 @@ import time
 from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
+from ptbplugins.jobregistration import RUNNERS
+from ptbplugins import Jobs
 
 from utilities import u
 from utilities import d
@@ -12,8 +14,7 @@ from database.models import Post
 from database import db
 from reddit import reddit
 from reddit import Sender
-from bot import Jobs
-from ..ptb_dispatcher_registration.jobregistration import RUNNERS
+# from bot import Jobs
 from config import config
 
 logger = logging.getLogger(__name__)

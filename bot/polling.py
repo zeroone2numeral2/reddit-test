@@ -4,8 +4,10 @@ import database.database  # we need it to initialize the package as soon as poss
 from .updater import updater
 from .updater import dispatcher
 from .updater import job_queue
-from .ptb_dispatcher_registration import Plugins
-from .ptb_dispatcher_registration import Jobs
+from ptbplugins import Plugins
+from ptbplugins import Jobs
+# from .ptb_dispatcher_registration import Plugins
+# from .ptb_dispatcher_registration import Jobs
 
 from config import config
 
