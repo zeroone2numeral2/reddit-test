@@ -32,6 +32,7 @@ HELP_STRING = """\
 /loglines: get the date of the first line of every log file in the logs directory
 /attr `[property]`: get the value of that property for all subreddits
 /sdict `[subreddit]`: get the submission dict of the last post in that subreddit
+forward a message posted by the bot in a channel: get that submission's dict
 """
 
 
