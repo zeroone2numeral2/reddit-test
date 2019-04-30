@@ -34,9 +34,6 @@ def main(database_path):
     number_of_posts = peewee.IntegerField(default=3)
     resume_template = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
-    enabled_matrix = peewee.BooleanField(default=False)
-    room_id = peewee.CharField(null=True)
-    template_matrix = peewee.CharField(default=DEFAULT_MATRIX_TEMPLATE)
 
     migrations = [
         # 20190318 pt. 1
@@ -66,16 +63,15 @@ def main(database_path):
         migrator.add_column('subreddits', 'resume_last_posted_submission_dt', resume_last_posted_submission_dt),
         # 20190410 (rename resume_template to template_resume)
         migrator.rename_column('subreddits', 'resume_template', 'template_resume'),
-        # 20190410 pt. 2 (matrix stuffs)
-        migrator.add_column('subreddits', 'enabled_matrix', enabled_matrix),
-        migrator.add_column('subreddits', 'room_id', room_id),
-        migrator.add_column('subreddits', 'template_matrix', template_matrix),
         # 20190411 (drop not null)
         migrator.drop_not_null('subreddits', 'template_matrix'),
         # 20190430
         migrator.drop_column('subreddits', 'follow_quiet_hours'),
         migrator.drop_column('subreddits', 'images_only'),
         migrator.drop_column('subreddits', 'images_as_file'),
+        migrator.drop_column('subreddits', 'enabled_matrix'),
+        migrator.drop_column('subreddits', 'template_matrix'),
+        migrator.drop_column('subreddits', 'room_id'),
     ]
 
     logger.info('Starting migration....')

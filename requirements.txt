@@ -6,5 +6,4 @@ toml
 requests
 Pillow
 imgurpython
-matrix_client
 ptbplugins
