@@ -2,6 +2,7 @@ import logging
 from importlib import import_module
 
 from telegram.ext import Handler
+from telegram.ext import ConversationHandler
 
 from .registration import Registration
 
@@ -76,9 +77,10 @@ class Plugins(Registration):
             return_list = list()
 
             logger.debug('ConversationHandler found: <%s> (group %d)', dummy_func.__name__, group)
-            conv_handler = dummy_func()
 
-            return_list.append((conv_handler, group))
+            conv_handler = dummy_func()
+            if isinstance(conv_handler, ConversationHandler):
+                return_list.append((conv_handler, group))
 
             return return_list
 
