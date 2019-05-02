@@ -52,7 +52,10 @@ def sub_settings(_, update, args):
     elif re.search(r'^\d+$', value, re.I):
         logger.info('value is int')
         value = int(value)
-    logger.info('value after true/false/none/int check: %s', value)
+    elif re.search(r'^\d+\.\d+$', value, re.I):
+        logger.info('value is float')
+        value = float(value)
+    logger.info('value after true/false/none/int/float check: %s', value)
 
     try:
         setattr(subreddit, setting, value)
