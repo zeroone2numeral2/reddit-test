@@ -135,15 +135,15 @@ def process_subreddit(subreddit: Subreddit, bot):
             Log.logger.info('submission passed filters')
             break
         else:
-            # no need to save ignored submissions in the database, becausethe next time
+            # no need to save ignored submissions in the database, because the next time
             # they might pass the filters
             # sender.register_ignored()
             Log.logger.info('submission di NOT pass filters, continuing to next one...')
             sender = None  # avoid to use a Sender that did not pass the filters
             continue
 
-    if not submission:
-        Log.logger.info('no submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
+    if not sender:
+        Log.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return
 
     Log.logger.info('submission url: %s', sender.submission.url)
