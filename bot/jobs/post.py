@@ -139,6 +139,7 @@ def process_subreddit(subreddit: Subreddit, bot):
             # they might pass the filters
             # sender.register_ignored()
             Log.logger.info('submission di NOT pass filters, continuing to next one...')
+            sender = None  # avoid to use a Sender that did not pass the filters
             continue
 
     if not submission:
