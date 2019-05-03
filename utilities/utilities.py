@@ -63,7 +63,7 @@ def model_dict(model_instance, plain_formatted_string=False):
     model_instance_dict = model_to_dict(model_instance)
     model_instance_dict = OrderedDict(sorted(model_instance_dict.items()))
     if not plain_formatted_string:
-        return model_instance
+        return model_instance_dict
     else:
         text = '\n'.join('<code>{}</code>: {}'.format(escape(k), escape(str(v))) for k, v in model_instance_dict.items())
         return text
@@ -229,3 +229,19 @@ def guess_mimetype(file_path):
     result = guess_type(file_path, strict=True)
     
     return result[0]
+
+
+class FileWriter:
+    def __init__(self, file_path, text, write=False):
+        self.file_path = file_path
+        self.text = text
+
+        if write:
+            self.write()
+
+    def write(self):
+        with open(self.file_path, 'w+') as f:
+            f.write(self.text)
+
+    def remove(self):
+        os.remove(self.file_path)

@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import re
 from pprint import pformat
@@ -134,3 +135,28 @@ def loglines_command(_, update):
     text = '<code>{}</code>'.format('\n'.join(sorted(lines_list)))
     
     update.message.reply_html(text)
+
+
+@Plugins.add(CommandHandler, command=['json'])
+@d.restricted
+@d.failwithmessage
+def json_command(_, update):
+    logger.info('/json command')
+
+    data = list()
+
+    subreddits = (
+        Subreddit.select()
+    )
+    for subreddit in subreddits:
+        data.append(u.model_dict(subreddit))
+
+    # json.sumps() doesn't work because it can't serialize datetime values
+    # skipkeys just skip the "keys", not the "values"
+    text = json.dumps(data, skipkeys=True, indent=4)
+    file = u.FileWriter('downloads/export.tmp.json', text, write=True)
+
+    with open(file.file_path, 'rb') as f:
+        update.message.reply_document(f)
+
+    file.remove()
