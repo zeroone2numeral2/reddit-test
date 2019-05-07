@@ -1,6 +1,6 @@
 import os
 import re
-from math import ceil
+from math import floor
 import urllib.request as urllib
 from mimetypes import guess_type
 
@@ -125,15 +125,15 @@ def elapsed_time_smart(seconds):
 
     # "n hours ago" if hours > 0, else "n minutes ago"
     if elapsed_days >= 1:
-        string = '{} day'.format(ceil(elapsed_days))
+        string = '{} day'.format(floor(elapsed_days))
         if elapsed_days >= 2:
             string += 's'
     elif elapsed_hours >= 1:
-        string = '{} hour'.format(ceil(elapsed_hours))
+        string = '{} hour'.format(floor(elapsed_hours))
         if elapsed_hours >= 2:
             string += 's'
     else:
-        string = '{} minute'.format(ceil(elapsed_minutes))
+        string = '{} minute'.format(floor(elapsed_minutes))
         if elapsed_minutes >= 2:
             string += 's'
 
