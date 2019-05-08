@@ -29,7 +29,6 @@ def subs_list(_, update):
             string += ' ({})'.format(sub.channel.title)
         else:
             string += ' (no channel)'
-        string += ' freq: {}'.format(u.pretty_minutes(sub.max_frequency))
         strings.append(string)
 
     update.message.reply_text('\n'.join(strings), parse_mode=ParseMode.HTML)
