@@ -2,6 +2,7 @@ import logging
 from functools import wraps
 
 from database.models import Subreddit
+from database.models import Job
 from utilities import u
 from config import config
 
@@ -70,12 +71,16 @@ def log_start_end_dt(func):
     def wrapped(bot, job, *args, **kwargs):
         job_start_dt = u.now()
         logger.info('%s job started at %s', job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
+        job_row = Job(name=job.name, start=job_start_dt)
 
         job_result = func(bot, job, *args, **kwargs)
 
         job_end_dt = u.now()
+        job_row.end = job_end_dt
 
-        elapsed_seconds = (job_end_dt - job_start_dt).seconds
+        elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
+        job_row.duration = elapsed_seconds
+        job_row.save()
 
         logger.info(
             '%s job ended at %s (elapsed seconds: %d (%s))',
