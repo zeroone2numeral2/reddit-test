@@ -209,7 +209,9 @@ class Sender:
         return self._submission_dict[item]
 
     @staticmethod
-    def _parse_media(url, domain, domain_parsed, media_dict):
+    def parse_media(url, media_dict):
+        domain_parsed = urlparse(url).netloc
+
         if url.endswith(('.jpg', '.png')):
             logger.debug('url is a jpg/png: submission is an image')
             return Media(MediaType.IMAGE, url)
@@ -235,7 +237,7 @@ class Sender:
         elif url.endswith('.mp4'):
             logger.debug('url is an mp4: submission is a video')
             return Media(MediaType.VIDEO, url)
-        elif domain == 'i.redd.it' and url.endswith('.gif'):
+        elif domain_parsed == 'i.redd.it' and url.endswith('.gif'):
             logger.debug('url is an i.redd.it gif: treating the submission as a video')
             return Media(MediaType.VIDEO, url)
         elif 'gfycat.com' in domain_parsed:
