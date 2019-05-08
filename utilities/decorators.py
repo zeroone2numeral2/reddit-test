@@ -74,6 +74,7 @@ def log_start_end_dt(func):
         job_row = Job(name=job.name, start=job_start_dt)
 
         job_result = func(bot, job, *args, **kwargs)
+        job_row.posted_messages = int(job_result)
 
         job_end_dt = u.now()
         job_row.end = job_end_dt

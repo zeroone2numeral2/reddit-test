@@ -123,10 +123,10 @@ def process_subreddit(subreddit: Subreddit, bot):
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
         Log.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
-        return
+        return 0
 
     if not time_to_post(subreddit, quiet_hours_demultiplier):
-        return
+        return 0
 
     submission, sender = None, None
     for submission in process_submissions(subreddit):
@@ -144,7 +144,7 @@ def process_subreddit(subreddit: Subreddit, bot):
 
     if not sender:
         Log.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
-        return
+        return 0
 
     Log.logger.info('submission url: %s', sender.submission.url)
     Log.logger.info('submission title: %s', sender.submission.title)
@@ -153,10 +153,10 @@ def process_subreddit(subreddit: Subreddit, bot):
         sent_message = sender.post()
     except (BadRequest, TelegramError) as e:
         Log.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-        return
+        return 0
     except Exception as e:
         Log.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
-        return
+        return 0
 
     if sent_message:
         if not subreddit.test:
@@ -168,6 +168,8 @@ def process_subreddit(subreddit: Subreddit, bot):
             subreddit.save()
         else:
             Log.logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
+
+        return 1  # we posted one message
 
 
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')
@@ -182,12 +184,16 @@ def check_posts(bot, _):
         .where(Subreddit.enabled == True)
     )
 
+    total_posted_messages = 0
     for subreddit in subreddits:
         try:
-            process_subreddit(subreddit, bot)
+            posted_messages = process_subreddit(subreddit, bot)
+            total_posted_messages += int(posted_messages)
         except Exception as e:
             Log.logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         time.sleep(1)
+
+    return total_posted_messages

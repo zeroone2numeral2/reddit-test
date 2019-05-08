@@ -34,6 +34,7 @@ def main(database_path):
     number_of_posts = peewee.IntegerField(default=3)
     resume_template = peewee.CharField(null=True, default=DEFAULT_ANNOUNCEMENT_TEMPLATE)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
+    posted_messages = peewee.IntegerField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -72,6 +73,8 @@ def main(database_path):
         migrator.drop_column('subreddits', 'enabled_matrix'),
         migrator.drop_column('subreddits', 'template_matrix'),
         migrator.drop_column('subreddits', 'room_id'),
+        # 20190508
+        migrator.add_column('jobs', 'posted_messages', posted_messages),
     ]
 
     logger.info('Starting migration....')

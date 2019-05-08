@@ -63,10 +63,10 @@ def process_subreddit(subreddit, bot):
             subreddit.hour,
             now.hour
         )
-        return
+        return 0
     elif subreddit.frequency == 'day' and now.hour != subreddit.hour:
         logger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
-        return
+        return 0
 
     elapsed_seconds = 999999
     if subreddit.resume_last_posted_submission_dt:
@@ -78,12 +78,13 @@ def process_subreddit(subreddit, bot):
 
     if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
         logger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
-        return
+        return 0
     elif subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'week' and elapsed_seconds < 60*60*24):
         logger.info('ignoring subreddit because frequency is "week" and latest has been less than a day ago')
-        return
+        return 0
 
     annoucement_posted = False
+    posted_messages = 0
     for sender in process_submissions(subreddit, bot):
         logger.info('submission url: %s', sender.submission.url)
         logger.info('submission title: %s', sender.submission.title)
@@ -94,12 +95,13 @@ def process_subreddit(subreddit, bot):
 
         try:
             sent_message = sender.post()
+            posted_messages += 1
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-            return
+            continue
         except Exception as e:
             logger.error('generic error while posting the message: %s', str(e), exc_info=True)
-            return
+            continue
 
         if sent_message:
             if not subreddit.test:
@@ -114,6 +116,8 @@ def process_subreddit(subreddit, bot):
 
         time.sleep(1)
 
+    return posted_messages
+
 
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.resume_job * 60, first=0, name='resume_job')
 @d.logerrors
@@ -125,12 +129,16 @@ def check_daily_resume(bot, _):
         .where(Subreddit.enabled_resume == True)
     )
 
+    total_posted_messages = 0
     for subreddit in subreddits:
         try:
-            process_subreddit(subreddit, bot)
+            posted_messages = process_subreddit(subreddit, bot)
+            total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         time.sleep(1)
+
+    return total_posted_messages

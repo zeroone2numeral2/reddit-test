@@ -22,6 +22,6 @@ def durations_command(_, update):
 
     strings_list = list()
     for duration in durations:
-        strings_list.append('{0}: {2} ({start})'.format(*duration, start=duration[1].strftime('%d/%m/%Y %H:%M:%S')))
+        strings_list.append('{0}: {2}/{3} ({start})'.format(*duration, start=duration[1].strftime('%d/%m/%Y %H:%M:%S')))
 
-    update.message.reply_html('<code>{}</code>'.format('\n'.join(strings_list)))
+    update.message.reply_html('<code>$job_name: $seconds/$messages ($start)\n{}</code>'.format('\n'.join(strings_list)))

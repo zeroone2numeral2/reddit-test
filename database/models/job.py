@@ -9,6 +9,7 @@ class Job(peewee.Model):
     start = peewee.DateTimeField(null=True)
     end = peewee.DateTimeField(null=True)
     duration = peewee.IntegerField(null=True)
+    posted_messages = peewee.IntegerField(null=True)
     result = peewee.CharField(null=True)
 
     class Meta:
@@ -27,7 +28,7 @@ class Job(peewee.Model):
 
         result = list()
         for job in rows[:top]:
-            result.append((job.name, job.start, job.duration))
+            result.append((job.name, job.start, job.duration, job.posted_messages))
 
         return result
 
