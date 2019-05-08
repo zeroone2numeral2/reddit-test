@@ -1,9 +1,12 @@
 import logging
+import shutil
 
+import requests
 from telegram import Bot
 from telegram import InputMediaPhoto
 from telegram import InputMediaVideo
 from telegram import InputMediaAnimation
+from telegram import MAX_FILESIZE_DOWNLOAD
 
 from reddit import reddit
 from reddit import Sender
@@ -31,9 +34,9 @@ def test():
     imgur = Imgur(keys_from_config=True)
 
     album_urls = [
-        'https://imgur.com/gallery/O866Q',
+        # 'https://imgur.com/gallery/O866Q',
         'https://imgur.com/a/l9A1Z',
-        'https://imgur.com/a/EPVZsAh'
+        # 'https://imgur.com/a/EPVZsAh',  # custom
     ]
     for album_url in album_urls:
         urls = imgur.parse_album(album_url, limit=10)
@@ -42,15 +45,26 @@ def test():
         input_medias = list()
         for url in urls:
             media = Sender._parse_media(url, 'imgur.com', 'imgur.com', {})
+            print('url:', media.url)
+
+            r_result = requests.head(media.url)
+            print(r_result.headers)
+
             if media.url.endswith(('.jpg', '.png')):
                 input_medias.append(InputMediaPhoto(url))
+                # bot.send_photo(23646077, media.url)
             elif media.type == 'video':
                 input_medias.append(InputMediaVideo(url))
+                bot.send_video(23646077, media.url)
             elif media.type == 'gif':
                 input_medias.append(InputMediaAnimation(url))
+                bot.send_animation(23646077, media.url)
+
+
+
 
         print(input_medias)
-        bot.send_media_group(23646077, input_medias)
+        # bot.send_media_group(23646077, input_medias)
 
 
 def main():
