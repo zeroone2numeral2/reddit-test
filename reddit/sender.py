@@ -63,7 +63,6 @@ class Sender:
     __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_target_chat_id', '_submission_dict']
     
     def __init__(self, bot, subreddit, submission):
-        super(Sender, self).__init__()
         self._bot = bot
         self._s = submission
         self._subreddit = subreddit
