@@ -29,7 +29,7 @@ KEY_MAPPER_DICT = dict(
     created=lambda timestamp: datetime.datetime.fromtimestamp(timestamp)
 )
 
-IMGUR_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
+SINGLE_IMGUR_MEDIA_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
 
 
 class ImagesWebsites:
@@ -43,6 +43,20 @@ class MediaType:
     VIDEO = 'video'
     VREDDIT = 'vreddit'
     GFYCAT = 'gfycat'
+
+
+class Media:
+    def __init__(self, media_type, url):
+        self.type = media_type
+        self.url = url
+
+
+class VRedditMedia(Media):
+    def __init__(self, is_gif, size, duration, *args, **kwargs):
+        Media.__init__(self, *args, **kwargs)
+        self.is_gif = is_gif
+        self.size = size
+        self.duration = duration
 
 
 class Sender:
@@ -83,9 +97,9 @@ class Sender:
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
             self._s.media_url = self._s.url.replace('.gifv', '.mp4')
-        elif re.search(IMGUR_URL_REGEX, self._s.url, re.I):
+        elif re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
-            imgur_direct_url = imgur.get_url(re.search(IMGUR_URL_REGEX, self._s.url, re.I).group(1))
+            imgur_direct_url = imgur.get_url(re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, self._s.url, re.I).group(1))
             logger.debug('imgur direct url: %s', imgur_direct_url)
             # also make sure the url is of an image
             if imgur_direct_url.endswith(('.jpg', '.png')):
@@ -193,6 +207,51 @@ class Sender:
         
     def __getitem__(self, item):
         return self._submission_dict[item]
+
+    @staticmethod
+    def _parse_media(url, domain, domain_parsed, media_dict):
+        if url.endswith(('.jpg', '.png')):
+            logger.debug('url is a jpg/png: submission is an image')
+            return Media(MediaType.IMAGE, url)
+        elif url.endswith('.gifv'):
+            logger.debug('url is a gifv: submission is an GIF')
+            return Media(MediaType.GIF, url.replace('.gifv', '.mp4'))
+        elif re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, url, re.I):
+            # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
+            imgur_direct_url = imgur.get_url(re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, url, re.I).group(1))
+            logger.debug('imgur direct url: %s', imgur_direct_url)
+            # also make sure the url is of an image
+            if imgur_direct_url.endswith(('.jpg', '.png')):
+                logger.debug('url is an Imgur non-direct url to an image: submission is an image')
+                return Media(MediaType.IMAGE, imgur_direct_url)
+            elif imgur_direct_url.endswith('.gifv'):
+                logger.debug('url is an Imgur non-direct url to a gifv: submission is a GIF')
+                logger.debug('replacing ".gifv" with ".mp4"')
+                mp4_url = imgur_direct_url.replace('.gifv', '.mp4')
+                logger.debug('new media_url: %s', mp4_url)
+                return Media(MediaType.GIF, mp4_url)
+            elif imgur_direct_url.endswith('.mp4'):
+                return Media(MediaType.GIF, imgur_direct_url)
+        elif url.endswith('.mp4'):
+            logger.debug('url is an mp4: submission is a video')
+            return Media(MediaType.VIDEO, url)
+        elif domain == 'i.redd.it' and url.endswith('.gif'):
+            logger.debug('url is an i.redd.it gif: treating the submission as a video')
+            return Media(MediaType.VIDEO, url)
+        elif 'gfycat.com' in domain_parsed:
+            logger.debug('url is a gfycat')
+            return Media(MediaType.GFYCAT, url)
+        elif 'reddit_video' in media_dict:
+            logger.debug('url is a vreddit')
+            media_url = media_dict['reddit_video']['fallback_url']
+            video_size = (
+                media_dict['reddit_video']['height'],
+                media_dict['reddit_video']['width']
+            )
+            video_duration = media_dict['reddit_video']['duration']
+            is_gif = media_dict['reddit_video'].get('is_gif', False)  # some v.reddit might not have audio
+
+            return VRedditMedia(MediaType.VREDDIT, media_url, is_gif, video_size, video_duration)
 
     def gen_submission_dict(self):
         self._submission_dict = dict()
