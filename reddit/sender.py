@@ -79,6 +79,7 @@ class Sender:
         self._s.score_dotted = u.dotted(self._s.score or 0)
         self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
         self._s.domain_parsed = urlparse(self._s.url).netloc
+        self._s.title_escaped = u.escape(self._s.title)
         self._s.text = None
         self._s.text_32 = None
         self._s.text_160 = None
@@ -86,6 +87,7 @@ class Sender:
         self._s.text_256 = None
         self._s.video_size = (None, None)
         self._s.video_duration = 0
+        self._submission_dict = dict()
         
         # this whole shit should have its own method
         if self._s.url.endswith(('.jpg', '.png')):
@@ -169,8 +171,6 @@ class Sender:
             self._s.text_256 = self._s.selftext[:256]
 
         created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
-
-        self._s.title_escaped = u.escape(self._s.title)
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
         self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
@@ -180,7 +180,6 @@ class Sender:
         # "n hours ago" if hours > 0, else "n minutes ago"
         self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
 
-        self._submission_dict = dict()
         self.gen_submission_dict()
 
     @property
