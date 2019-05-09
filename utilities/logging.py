@@ -32,18 +32,18 @@ class SubredditRotatingFileHanlder(RotatingFileHandler):
         RotatingFileHandler.__init__(self, file_path, *args, **kwargs)
 
 
-def get_subreddit_logger(sub_name):
-    logger = logging.getLogger(sub_name)
-    if len(logger.handlers) < 1:
-        rotating_file_handler = SubredditRotatingFileHanlder(sub_name, **ROTATING_FILE_HANDLER_KWARGS)
-        formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] >>> %(message)s')
-        rotating_file_handler.setFormatter(formatter)
+def set_logger_file(logger_name, sub_name=None):
+    l = logging.getLogger(logger_name)
 
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(formatter)
+    file_name = '{}.log'.format(sub_name if sub_name else 'redditmirror')
+    file_path = os.path.join('logs', file_name)
 
-        logger.addHandler(stream_handler)
-        logger.addHandler(rotating_file_handler)
+    rfhandler = RotatingFileHandler(file_path, maxBytes=1048576, backupCount=500)
+    formatter = logging.Formatter('[%(asctime)s][%(name)s][%(pathname)s:%(filename)s:%(funcName)s:%(lineno)d][%(levelname)s] >>> %(message)s')
+    rfhandler.setFormatter(formatter)
+    rfhandler.setLevel(logging.DEBUG)
 
-    return logger
+    l.handlers = [rfhandler]
+
+    return l
 

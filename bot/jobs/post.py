@@ -11,6 +11,7 @@ from ptbplugins import Jobs
 
 from utilities import u
 from utilities import d
+from utilities import l
 from database.models import Subreddit
 from database.models import Post
 from database import db
@@ -18,7 +19,7 @@ from reddit import reddit
 from reddit import Sender
 from config import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('sp')
 
 NOT_VALUES = (None, False)
 
@@ -195,9 +196,9 @@ def check_posts(bot, _):
     total_posted_messages = 0
     for subreddit in subreddits:
         try:
-            # update_logger_file(subreddit.name)
+            # l.set_logger_file('subredditprocessor', subreddit.name)
             posted_messages = process_subreddit(subreddit, bot)
-            # update_logger_file()
+            # l.set_logger_file('subredditprocessor')
 
             total_posted_messages += int(posted_messages)
         except Exception as e:

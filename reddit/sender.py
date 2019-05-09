@@ -20,7 +20,7 @@ from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('sp')
 
 imgur = Imgur(config.imgur.id, config.imgur.secret)
 

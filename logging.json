@@ -17,12 +17,12 @@
         },
         "subreddit_console": {
             "class": "logging.StreamHandler",
-            "formatter": "subreddit",
+            "formatter": "standard",
             "level": "DEBUG"
         },
         "subreddit_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "subreddit",
+            "formatter": "standard",
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
@@ -66,10 +66,13 @@
             "format": "[%(name)s][%(levelname)s] >>> %(message)s"
         },
         "standard": {
-            "format": "[%(asctime)s][%(name)s:%(lineno)d][%(levelname)s] >>> %(message)s"
+            "format": "[%(asctime)s][%(name)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] >>> %(message)s"
         },
-        "subreddit": {
+        "filename": {
             "format": "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] >>> %(message)s"
+        },
+        "long": {
+            "format": "[%(asctime)s][%(name)s][%(pathname)s:%(funcName)s:%(lineno)d][%(levelname)s] >>> %(message)s"
         }
     }
 }

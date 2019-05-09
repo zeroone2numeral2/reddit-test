@@ -11,6 +11,7 @@ from ptbplugins.jobregistration import RUNNERS
 
 from utilities import u
 from utilities import d
+from utilities import l
 from database.models import Subreddit
 from database.models import PostResume
 from database import db
@@ -19,7 +20,7 @@ from reddit import SenderResume
 # from bot import Jobs
 from config import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('sp')
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
@@ -132,7 +133,10 @@ def check_daily_resume(bot, _):
     total_posted_messages = 0
     for subreddit in subreddits:
         try:
+            # l.set_logger_file('subredditprocessor', subreddit.name)
             posted_messages = process_subreddit(subreddit, bot)
+            # l.set_logger_file('subredditprocessor')
+
             total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
