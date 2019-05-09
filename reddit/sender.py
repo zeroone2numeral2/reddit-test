@@ -60,7 +60,7 @@ class VRedditMedia(Media):
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_target_chat_id', '_submission_dict']
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_chat_id', '_submission_dict']
     
     def __init__(self, bot, subreddit, submission):
         self._bot = bot
@@ -68,7 +68,7 @@ class Sender:
         self._subreddit = subreddit
 
         self._sent_message = None
-        self._target_chat_id = self._subreddit.channel.channel_id
+        self._chat_id = self._subreddit.channel.channel_id
 
         self._s.is_image = False
         self._s.media_type = MediaType.NONE
@@ -284,13 +284,14 @@ class Sender:
                 continue
                 
             self._submission_dict[key] = val
-                
+
+        # noinspection PyTypeChecker
         self._submission_dict = OrderedDict(sorted(self._submission_dict.items()))
 
     def post(self, chat_id=None):
         if chat_id:
-            logger.info('overriding target chat id (%d) with %d', self._target_chat_id, chat_id)
-            self._target_chat_id = chat_id
+            logger.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
+            self._chat_id = chat_id
 
         template = self._subreddit.template
         if not template:
@@ -332,7 +333,7 @@ class Sender:
 
     def _send_text(self, text):
         return self._bot.send_message(
-            self._target_chat_id,
+            self._chat_id,
             text,
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=not self._subreddit.webpage_preview
@@ -342,7 +343,7 @@ class Sender:
         logger.info('image url: %s', image_url)
         
         self._sent_message = self._bot.send_photo(
-            self._target_chat_id,
+            self._chat_id,
             image_url,
             caption=caption,
             parse_mode=ParseMode.HTML,
@@ -385,7 +386,7 @@ class Sender:
         with open(file_path, 'rb') as f:
             logger.info('uploading video...')
             self._sent_message = self._bot.send_video(
-                self._target_chat_id,
+                self._chat_id,
                 f,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
@@ -422,7 +423,7 @@ class Sender:
         logger.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
             self._sent_message = self._bot.send_video(
-                self._target_chat_id,
+                self._chat_id,
                 f,
                 caption=caption,
                 thumb=video.get_thumbnail_bo(),
@@ -445,7 +446,7 @@ class Sender:
         logger.info('gif url: %s', url)
 
         return self._bot.send_animation(
-            self._target_chat_id,
+            self._chat_id,
             url,
             caption=caption,
             parse_mode=ParseMode.HTML,
@@ -459,7 +460,7 @@ class Sender:
         gfycat.download_thumbnail()
 
         sent_message = self._bot.send_video(
-            self._target_chat_id,
+            self._chat_id,
             gfycat.url,
             caption=caption,
             parse_mode=ParseMode.HTML,

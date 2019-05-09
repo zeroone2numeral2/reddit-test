@@ -50,9 +50,10 @@ class VReddit(Downloader):
         return '<VReddit {} - {}>'.format(self._url, self._url_audio)
 
     def remove(self, keep_thumbnail=False):
+        # noinspection PyBroadException
         try:
             self._thumbnail_bo.close()
-        except:
+        except Exception:
             pass
 
         paths = [

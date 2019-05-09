@@ -27,7 +27,7 @@ class Downloader:
                                   '/240_F_177292812_asUGEDiieLfHjKx9DxTBI50vsS9iZwi0.jpg '
 
         headers = requests.head(url).headers
-        if 'Content-Type' in headers:
+        if 'content-length' in headers:
             self._size = int(headers.get('content-length', 0))
             self._size_readable = u.human_readable_size(self._size)
 
@@ -100,9 +100,10 @@ class Downloader:
         return self._thumbnail_bo
 
     def remove(self, keep_thumbnail=False):
+        # noinspection PyBroadException
         try:
             self._thumbnail_bo.close()
-        except:
+        except Exception:
             pass
 
         try:
