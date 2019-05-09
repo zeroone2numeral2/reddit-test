@@ -14,20 +14,6 @@
             "encoding": "utf8",
             "maxBytes": 1048576,
             "backupCount": 500
-        },
-        "subreddit_console": {
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-            "level": "DEBUG"
-        },
-        "subreddit_file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "standard",
-            "level": "DEBUG",
-            "encoding": "utf8",
-            "maxBytes": 1048576,
-            "filename": "logs/redditmirror.log",
-            "backupCount": 500
         }
     },
     "loggers": {
