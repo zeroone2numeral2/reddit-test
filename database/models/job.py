@@ -21,7 +21,7 @@ class Job(peewee.Model):
 
     @classmethod
     def durations(cls, top=100):
-        rows = cls.select()
+        rows = cls.select().order_by(cls.id.desc())
 
         if not rows:
             return None
