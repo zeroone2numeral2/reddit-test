@@ -35,6 +35,7 @@ class Subreddit(peewee.Model):
     limit = peewee.IntegerField(null=True, default=config.praw.submissions_limit)
     quiet_hours_start = peewee.IntegerField(null=True, default=config.quiet_hours.start)
     quiet_hours_end = peewee.IntegerField(null=True, default=config.quiet_hours.end)
+    number_of_posts = peewee.IntegerField(default=1)
     test = peewee.BooleanField(default=False)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
@@ -46,7 +47,6 @@ class Subreddit(peewee.Model):
     hour = peewee.IntegerField(default=22)
     weekday = peewee.IntegerField(default=5)  # 0-6, from Monday to Sunday
     frequency = peewee.CharField(default='day')
-    number_of_posts = peewee.IntegerField(default=1)
     template_resume = peewee.CharField(null=True)
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
 
