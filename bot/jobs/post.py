@@ -129,7 +129,6 @@ def process_submissions(subreddit: Subreddit):
 
 def process_subreddit(subreddit: Subreddit, bot):
     logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
-    # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
 
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
@@ -159,6 +158,8 @@ def process_subreddit(subreddit: Subreddit, bot):
     if not senders:
         logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return 0
+
+    logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
     messages_posted = 0
     for sender in senders:
