@@ -128,7 +128,7 @@ def process_submissions(subreddit: Subreddit):
 
 
 def process_subreddit(subreddit: Subreddit, bot):
-    logger.info('processing subreddit %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+    logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
     # logger.info('(subreddit: %s)', str(subreddit.to_dict()))
 
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
