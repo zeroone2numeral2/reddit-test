@@ -139,12 +139,15 @@ def process_subreddit(subreddit: Subreddit, bot):
     if not time_to_post(subreddit, quiet_hours_demultiplier):
         return 0
 
-    submission, sender = None, None
+    senders = list()
     for submission in process_submissions(subreddit):
         sender = Sender(bot, subreddit, submission)
         if sender.test_filters():
-            logger.info('submission passed filters')
-            break
+            logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
+            senders.append(sender)
+            if len(senders) >= subreddit.number_of_posts:
+                logger.info('we collected enough posts to post (number_of_posts: %d)', subreddit.number_of_posts)
+                break
         else:
             # no need to save ignored submissions in the database, because the next time
             # they might pass the filters
@@ -153,34 +156,40 @@ def process_subreddit(subreddit: Subreddit, bot):
             sender = None  # avoid to use a Sender that did not pass the filters
             continue
 
-    if not sender:
+    if not senders:
         logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
         return 0
 
-    logger.info('submission url: %s', sender.submission.url)
-    logger.info('submission title: %s', sender.submission.title)
+    messages_posted = 0
+    for sender in senders:
+        logger.info('submission url: %s', sender.submission.url)
+        logger.info('submission title: %s', sender.submission.title)
 
-    try:
-        sent_message = sender.post()
-    except (BadRequest, TelegramError) as e:
-        logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-        return 0
-    except Exception as e:
-        logger.error('generic error while posting the message: %s', str(e), exc_info=True)
-        return 0
+        try:
+            sent_message = sender.post()
+        except (BadRequest, TelegramError) as e:
+            logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+            continue
+        except Exception as e:
+            logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+            continue
 
-    if sent_message:
-        if not subreddit.test:
-            logger.info('creating Post row...')
-            sender.register_post()
-            
-            logger.info('updating Subreddit last post datetime...')
-            subreddit.last_posted_submission_dt = u.now()
-            subreddit.save()
-        else:
-            logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
+        if sent_message:
+            if not subreddit.test:
+                logger.info('creating Post row...')
+                sender.register_post()
 
-        return 1  # we posted one message
+                logger.info('updating Subreddit last post datetime...')
+                subreddit.last_posted_submission_dt = u.now()
+                subreddit.save()
+            else:
+                logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
+
+            messages_posted += 1  # we posted one message
+
+        time.sleep(1)
+
+    return messages_posted
 
 
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')
