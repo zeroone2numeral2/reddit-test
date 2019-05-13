@@ -1,4 +1,5 @@
 import datetime
+from typing import TypeVar, Type
 
 import peewee
 from playhouse.shortcuts import model_to_dict
@@ -16,6 +17,8 @@ DATETIME_ORMATS = [
     '%Y-%m-%d %H:%M:%S',  # year-month-day hour-minute-second
     '%Y-%m-%d',  # year-month-day
 ]
+
+S = TypeVar('S', bound='Subreddit')
 
 
 class Subreddit(peewee.Model):
@@ -62,7 +65,7 @@ class Subreddit(peewee.Model):
         return model_to_dict(cls)
 
     @classmethod
-    def fetch(cls, name):
+    def fetch(cls: Type[S], name) -> S:
         try:
             return cls.get(cls.name ** name)
         except peewee.DoesNotExist:

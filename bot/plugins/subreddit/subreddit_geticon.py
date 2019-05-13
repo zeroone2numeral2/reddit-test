@@ -1,10 +1,10 @@
 import logging
 import os
-import urllib.request
 
 from telegram.ext import CommandHandler
 from ptbplugins import Plugins
 
+from database.models import Subreddit
 from reddit import reddit
 from utilities import d
 
@@ -31,3 +31,23 @@ def sub_icon(_, update, args):
         update.message.reply_document(f)
 
     os.remove(file_path)
+
+
+@Plugins.add(CommandHandler, command=['seticon'], pass_args=True)
+@d.restricted
+@d.failwithmessage
+@d.knownsubreddit
+def sub_seticon(bot, update, args):
+    logger.info('/seticon command')
+
+    sub_name = args[0]
+    sub = Subreddit.fetch(sub_name)
+
+    file_path = reddit.get_icon(sub.name, download=True)
+
+    with open(file_path, 'rb') as f:
+        bot.set_chat_photo(sub.channel.channel_id, f)
+
+    os.remove(file_path)
+
+    update.message.reply_text('Icon updated')
