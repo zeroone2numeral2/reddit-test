@@ -46,8 +46,7 @@ def on_addsub_command(_, update, args, user_data):
         subreddit_name = reddit.subreddit_exists(subreddit_name)  # also returns the correct name
 
     if Subreddit.fetch(subreddit_name):
-        update.message.reply_text('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name),
-                             parse_mode=ParseMode.HTML)
+        update.message.reply_html('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name))
         return ConversationHandler.END
 
     channels_list = Channel.get_list()
