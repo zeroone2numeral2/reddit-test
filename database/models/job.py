@@ -21,6 +21,7 @@ class Job(peewee.Model):
 
     @classmethod
     def durations(cls, top=100, job_name='%'):
+        job_name = job_name or '%'
         rows = cls.select().where(cls.name ** job_name).order_by(cls.id.desc())
 
         if not rows:
