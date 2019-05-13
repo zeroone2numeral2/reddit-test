@@ -24,7 +24,7 @@ def sub_icon(_, update, args):
     sub_name = args[0]
     file_path = reddit.get_icon(sub_name, download=True)
     if not file_path:
-        update.message.reply_text('Subreddit "{}" does\' exist or doesn\'t have an icon'.format(sub_name))
+        update.message.reply_text('Subreddit "{}" does not have an icon'.format(sub_name))
         return
 
     with open(file_path, 'rb') as f:
