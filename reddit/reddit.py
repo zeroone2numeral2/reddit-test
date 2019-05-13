@@ -62,6 +62,8 @@ class Reddit(praw.Reddit):
 
         try:
             icon_url = sub.icon_img
+            if not icon_url:  # sometimes it's an empty string
+                return
         except (AttributeError, Redirect):
             return
 
