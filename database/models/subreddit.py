@@ -100,3 +100,21 @@ class Subreddit(peewee.Model):
         )
 
         return [(sub.name, sub.enabled, sub.enabled_resume) for sub in subs]
+
+    @classmethod
+    def get_invite_links(cls):
+        rows = (
+            Channel.select(
+                Channel.channel_id,
+                Channel.title,
+                Channel.invite_link,
+                peewee.fn.GROUP_CONCAT(cls.name, ', ').coerce(False).alias('subreddits')
+            )
+            .join(cls)
+            .where((cls.enabled == True) | (cls.enabled_resume == True))
+            .group_by(Channel.channel_id)
+            .order_by(peewee.fn.lower(Channel.title))
+            .dicts()
+        )
+
+        return [row for row in rows]

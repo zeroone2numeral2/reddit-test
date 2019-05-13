@@ -68,4 +68,3 @@ class Channel(peewee.Model):
             return cls.get(cls.channel_id == channel_id)
         except peewee.DoesNotExist:
             return None
-
