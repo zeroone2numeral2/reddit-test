@@ -23,7 +23,7 @@ def sub_get_attributes(_, update, args):
     subreddits = (
         Subreddit.select()
         .where(Subreddit.enabled == True | Subreddit.enabled_resume == True)
-        .order_by(Subreddit.name)
+        .order_by(+Subreddit.name)
     )
     if not subreddits:
         update.message.reply_text('No enabled subreddits')
