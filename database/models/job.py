@@ -20,11 +20,8 @@ class Job(peewee.Model):
         return '<Job row {}: {}>'.format(self.id, self.name)
 
     @classmethod
-    def durations(cls, top=100, job_name=None):
-        if not job_name:
-            rows = cls.select().order_by(cls.id.desc())
-        else:
-            rows = cls.select().where(cls.name ** job_name).order_by(cls.id.desc())
+    def durations(cls, top=100, job_name='%'):
+        rows = cls.select().where(cls.name ** job_name).order_by(cls.id.desc())
 
         if not rows:
             return None
