@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @Plugins.add(CommandHandler, command=['d'], pass_args=True)
 @d.restricted
 @d.failwithmessage
+@d.knownsubreddit
 def subs_debug(_, update, args):
     logger.info('/d command')
 
@@ -26,8 +27,8 @@ def subs_debug(_, update, args):
     subreddit_name = args[0]
     sorting = args[1].lower()
 
-    submissions = reddit.get_submissions(subreddit_name, sorting)
     subreddit = Subreddit.fetch(subreddit_name)
+    submissions = reddit.get_submissions(subreddit_name, sorting, limit=subreddit.limit)
 
     text = 'Sub id: <code>{}</code>\n'.format(submissions[0]['subreddit_id'])
     for submission in submissions:
