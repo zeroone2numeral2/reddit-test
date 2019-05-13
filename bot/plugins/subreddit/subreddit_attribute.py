@@ -1,6 +1,8 @@
 import logging
 
 from playhouse.shortcuts import model_to_dict
+# from peewee import SQL
+from peewee import fn
 from telegram.ext import CommandHandler
 from ptbplugins import Plugins
 
@@ -23,12 +25,13 @@ def sub_get_attributes(_, update, args):
     subreddits = (
         Subreddit.select()
         .where(Subreddit.enabled == True | Subreddit.enabled_resume == True)
-        .order_by(+Subreddit.name)
+        # .order_by(Clause(Subreddit.name, SQL('COLLATE NOCASE')))
+        .order_by(fn.lower(Subreddit.name))
     )
     if not subreddits:
         update.message.reply_text('No enabled subreddits')
         return
-    
+
     prop = args[0]
     lines_list = list()
     for subreddit in subreddits:
