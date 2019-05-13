@@ -17,7 +17,7 @@ class Reddit(praw.Reddit):
     def subreddit_exists(self, name):
         try:
             subreddit = self.subreddit(name)
-            return str(subreddit.name)  # save the correct name
+            return str(subreddit.display_name)  # save the correct name
         except Redirect:
             return False
 
