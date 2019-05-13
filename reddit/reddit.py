@@ -1,4 +1,6 @@
 import datetime
+import os
+import urllib.request
 
 import praw
 from prawcore.exceptions import Redirect
@@ -52,13 +54,24 @@ class Reddit(praw.Reddit):
         for submission in self.subreddit(name).top(period, limit=limit):
             yield submission
 
-    def get_icon(self, sub_name):
+    def get_icon(self, sub_name, download=False):
         try:
             sub = self.subreddit(sub_name)
         except Redirect:
             return
 
         try:
-            return sub.icon_img
-        except AttributeError:
+            icon_url = sub.icon_img
+        except (AttributeError, Redirect):
             return
+
+        if download:
+            file_path = os.path.join('downloads', 'icon_{}.png'.format(sub_name))
+
+            with urllib.request.urlopen(icon_url) as response, open(file_path, 'wb') as out_file:
+                data = response.read()
+                out_file.write(data)
+
+            return file_path
+        else:
+            return icon_url

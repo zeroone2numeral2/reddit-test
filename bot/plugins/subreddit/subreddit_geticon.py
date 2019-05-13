@@ -22,16 +22,10 @@ def sub_icon(_, update, args):
         return
 
     sub_name = args[0]
-    icon_url = reddit.get_icon(sub_name)
-    if not icon_url:
+    file_path = reddit.get_icon(sub_name, download=True)
+    if not file_path:
         update.message.reply_text('Subreddit "{}" does\' exist or doesn\'t have an icon'.format(sub_name))
         return
-
-    file_path = os.path.join('downloads', 'icon_{}.png'.format(sub_name))
-
-    with urllib.request.urlopen(icon_url) as response, open(file_path, 'wb') as out_file:
-        data = response.read()
-        out_file.write(data)
 
     with open(file_path, 'rb') as f:
         update.message.reply_document(f)
