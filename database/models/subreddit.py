@@ -76,7 +76,7 @@ class Subreddit(peewee.Model):
     def get_list(cls):
         subs = (
             cls.select()
-            .order_by(cls.name)
+            .order_by(peewee.fn.lower(cls.name))
         )
         
         return [sub for sub in subs]
