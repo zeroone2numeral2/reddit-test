@@ -9,13 +9,18 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['duration', 'durations'])
+@Plugins.add(CommandHandler, command=['duration', 'durations'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def durations_command(_, update):
+def durations_command(_, update, args):
     logger.info('/duration command')
 
-    durations = Job.durations(top=100)
+    if args:
+        job_name = args[0]
+    else:
+        job_name = None
+
+    durations = Job.durations(top=100, job_name=job_name)
     if not durations:
         update.message.reply_text('No row in the database')
         return
