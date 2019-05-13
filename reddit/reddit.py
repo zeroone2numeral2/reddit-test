@@ -51,3 +51,14 @@ class Reddit(praw.Reddit):
     def iter_top(self, name, limit, period='day'):
         for submission in self.subreddit(name).top(period, limit=limit):
             yield submission
+
+    def get_icon(self, sub_name):
+        try:
+            sub = self.subreddit(sub_name)
+        except Redirect:
+            return
+
+        try:
+            return sub.icon_img
+        except AttributeError:
+            return
