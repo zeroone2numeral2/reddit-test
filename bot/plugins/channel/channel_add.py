@@ -1,6 +1,7 @@
 import logging
 
 # noinspection PyPackageRequirements
+from telegram import Bot
 from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
@@ -29,7 +30,7 @@ def on_addchannel_command(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_forwarded_message(bot, update):
+def on_forwarded_message(bot: Bot, update):
     logger.info('adding channel: forwarded message OK')
 
     if not update.message.forward_from_chat:
@@ -48,12 +49,22 @@ def on_forwarded_message(bot, update):
 
     channel = update.message.forward_from_chat
 
+    try:
+        invite_link = bot.export_chat_invite_link(channel.id)
+        channel.invite_link = invite_link
+    except (TelegramError, BadRequest) as e:
+        logger.error('error while exporting invite link: %s', e.message)
+        channel.invite_link = None
+
     if Channel.exists(channel.id):
         Channel.update_channel(channel)
         update.message.reply_text('This channel was already saved (its infos has been updated). Operation completed')
     else:
         Channel.create_from_chat(update.message.forward_from_chat)
         update.message.reply_text('Channel {} ({}) has been saved'.format(channel.title, channel.id))
+
+    if channel.invite_link:
+        update.message.reply_text('Exported invite link: {}'.format(channel.invite_link), disable_web_page_preview=True)
 
     return ConversationHandler.END
 

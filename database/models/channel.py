@@ -44,7 +44,8 @@ class Channel(peewee.Model):
         channel = cls.get(cls.channel_id == chat.id)
 
         channel.title = chat.title
-        channel.username = channel.username
+        channel.username = chat.username
+        channel.invite_link = chat.invite_link
         channel.save()
 
     @classmethod
