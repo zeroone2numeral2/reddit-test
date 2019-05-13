@@ -72,6 +72,7 @@ def on_channel_selected(_, update, user_data):
     channel = Channel.get(Channel.channel_id == channel_id)
 
     subreddit_name = user_data.pop('name')
+    logger.debug('testing subreddit: %s', subreddit_name)
 
     subreddit_id = None
     for submission in reddit.subreddit(subreddit_name).new(limit=1):
