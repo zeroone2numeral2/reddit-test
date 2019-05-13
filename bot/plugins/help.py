@@ -34,6 +34,8 @@ HELP_STRING = """\
 /sdict `[subreddit]`: get the submission dict of the last post in that subreddit
 forward a message posted by the bot in a channel: get that submission's dict
 /duration: show the duration of the most recent 100 jobs executed
+/icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
+/seticon `[subreddit]`: set the channel icon to that subreddit's icon
 """
 
 

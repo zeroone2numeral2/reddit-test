@@ -44,6 +44,9 @@ def sub_seticon(bot, update, args):
     sub = Subreddit.fetch(sub_name)
 
     file_path = reddit.get_icon(sub.name, download=True)
+    if not file_path:
+        update.message.reply_text('Subreddit "{}" does\' exist or doesn\'t have an icon'.format(sub_name))
+        return
 
     with open(file_path, 'rb') as f:
         bot.set_chat_photo(sub.channel.channel_id, f)
