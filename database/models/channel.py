@@ -11,6 +11,7 @@ class Channel(peewee.Model):
     title = peewee.CharField(null=False)
     username = peewee.CharField(null=True)
     added = peewee.DateTimeField(default=datetime.datetime.utcnow)
+    invite_link = peewee.CharField(null=True)
 
     class Meta:
         table_name = 'channels'
