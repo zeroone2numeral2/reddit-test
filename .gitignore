@@ -21,6 +21,7 @@ venv/
 *.mp4
 *.mp3
 *.jpg
+*.png
 
 # binaries
 ffmpeg.exe
