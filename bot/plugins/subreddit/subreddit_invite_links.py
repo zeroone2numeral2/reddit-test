@@ -17,10 +17,11 @@ def links_command(_, update):
     logger.info('/links command')
 
     channels = Subreddit.get_invite_links()[:95]
-    string_link = '• <a href="{invite_link}">{subreddits}</a> ({title} {channel_id})'
-    string_no_link = '• {subreddits} ({title} - {channel_id})'
+    string_link = '• <a href="{invite_link}">r/{subreddits}</a> ({title} {channel_id})'
+    string_no_link = '• r/{subreddits} ({title} - {channel_id})'
     strings = list()
     for channel in channels:
+        channel['subreddits'] = ', r/'.join(channel['subreddits'])
         if channel.get('invite_link', None):
             strings.append(string_link.format(**channel))
         else:

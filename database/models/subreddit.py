@@ -117,4 +117,4 @@ class Subreddit(peewee.Model):
             .dicts()
         )
 
-        return [row for row in rows]
+        return [{**row, 'subreddits': row['subreddits'].split(', ')} for row in rows]
