@@ -91,10 +91,10 @@ def log_start_end_dt(func):
             u.pretty_seconds(elapsed_seconds)
         )
 
-        if elapsed_seconds > (config.jobs_frequency[job.name] * 60):
-            text = '#maxfreq <{}> took more than its frequency (frequency: %d min, elapsed: %d sec (%s))'.format(
+        if elapsed_seconds > (config.jobs[job.name].interval * 60):
+            text = '#maxfreq <{}> took more than its interval (frequency: %d min, elapsed: %d sec (%s))'.format(
                 job.name,
-                config.jobs_frequency[job.name],
+                config.jobs[job.name].interval,
                 elapsed_seconds,
                 u.pretty_seconds(elapsed_seconds)
             )
