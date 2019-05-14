@@ -193,7 +193,7 @@ def process_subreddit(subreddit: Subreddit, bot):
     return messages_posted
 
 
-# @Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')
+@Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.posts_job * 60, first=0, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
