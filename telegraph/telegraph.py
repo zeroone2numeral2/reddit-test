@@ -10,10 +10,9 @@ class ListItem:
         self.invite_link = invite_link
 
 
-class TelegraphAPI(Telegraph):
-    def __init__(self, *args, **kwargs):
-        Telegraph.__init__(self, *args, **kwargs)
-
+class Page:
+    def __init__(self, url):
+        self._url = url
         self._list_items = list()
 
     def update(self):
@@ -41,3 +40,9 @@ class TelegraphAPI(Telegraph):
 
     def reset(self):
         self._list_items = list()
+
+
+class TelegraphAPI(Telegraph):
+    @staticmethod
+    def get_page(self):
+        return Page('')
