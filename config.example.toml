@@ -14,10 +14,13 @@ manifest = "manifest"
 dir = "bot/jobs"
 manifest = "manifest"
 
-[jobs_frequency] # in minutes
-# the values below must be the job's name (job.name)
-posts_job = 10
-resume_job = 50
+[jobs.posts_job] # in minutes
+interval = 10
+first = 0
+
+[jobs.resume_job] # in minutes
+interval = 50
+first = 0
 
 [praw]
 client_id = "0ri3963pR-qmog"

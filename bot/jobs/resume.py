@@ -120,7 +120,7 @@ def process_subreddit(subreddit, bot):
     return posted_messages
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=config.jobs_frequency.resume_job * 60, first=0, name='resume_job')
+@Jobs.add(RUNNERS.run_repeating, interval=config.jobs.resume_job.interval * 60, first=config.jobs.resume_job.first * 60, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
 @db.atomic('IMMEDIATE')
