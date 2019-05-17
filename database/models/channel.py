@@ -36,7 +36,8 @@ class Channel(peewee.Model):
         cls.create(
             channel_id=chat.id,
             title=chat.title,
-            username=chat.username
+            username=chat.username,
+            invite_link=chat.invite_link
         )
 
     @classmethod

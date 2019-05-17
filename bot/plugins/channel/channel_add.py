@@ -60,7 +60,7 @@ def on_forwarded_message(bot: Bot, update):
         Channel.update_channel(channel)
         update.message.reply_text('This channel was already saved (its infos has been updated). Operation completed')
     else:
-        Channel.create_from_chat(update.message.forward_from_chat)
+        Channel.create_from_chat(channel)
         update.message.reply_text('Channel {} ({}) has been saved'.format(channel.title, channel.id))
 
     if channel.invite_link:
