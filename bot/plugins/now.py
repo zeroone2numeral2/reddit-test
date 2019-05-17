@@ -10,6 +10,14 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
+NOW_TEXT = """\
+<b>UTC</b>: {utc_time}
+<b>Localized ({tz_key})</b>: {localized_time}
+
+Weekday: {weekday}\
+"""
+DATETIME_FORMAT = '%d/%m/%Y, %H:%M'
+
 
 @Plugins.add(CommandHandler, command=['now'], pass_args=True)
 @d.restricted
@@ -17,23 +25,23 @@ logger = logging.getLogger(__name__)
 def now_command(_, update, args):
     logger.info('/now command')
 
-    timezone = None
+    timezone = 'it'
     if args:
-        timezone = args[0]
+        timezone = args[0].lower()
 
-    now = u.now()
-    if timezone:
-        now = u.localize_utc(now, timezone.lower())
-        if isinstance(now, KeysView):
-            # u.localize_utc returned a list: the timezone we passed is invalid
-            update.message.reply_text('Valid timezone keys: {}'.format(', '.join(now)))
-            return
+    now_utc = u.now()
+    now_tz = u.localize_utc(now_utc, timezone)
+    if isinstance(now_tz, KeysView):
+        # u.localize_utc returned a list: the timezone we passed is invalid
+        update.message.reply_text('Valid timezone keys: {}'.format(', '.join(now_tz)))
+        return
 
     weekday = datetime.datetime.today().weekday()
-    update.message.reply_text('{}\nWeekday: {}\nTimezone: {}'.format(
-        now.strftime('%d/%m/%Y %H:%M'),
-        weekday,
-        timezone or 'none'
+    update.message.reply_html(NOW_TEXT.format(
+        utc_time=now_utc.strftime(DATETIME_FORMAT),
+        localized_time=now_tz.strftime(DATETIME_FORMAT),
+        weekday=weekday,
+        tz_key=timezone
     ))
 
 
