@@ -116,7 +116,7 @@ def on_export_channel_selected_incorrect(_, update):
 @d.failwithmessage
 def on_export_cancel(_, update):
     logger.info('conversation canceled with /cancel')
-    update.message.reply_text('Operation aborted')
+    update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 

@@ -10,6 +10,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 from ptbplugins import Plugins
 
+from bot.markups import Keyboard
 from database.models import Channel
 from utilities import d
 
@@ -82,7 +83,7 @@ def on_non_forwarded_message(_, update):
 @d.failwithmessage
 def on_cancel(_, update):
     logger.info('conversation canceled with /cancel')
-    update.message.reply_text('Operation aborted')
+    update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 

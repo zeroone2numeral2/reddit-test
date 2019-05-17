@@ -77,7 +77,7 @@ def on_cancel(_, update):
 @d.failwithmessage
 def on_channel_selected_incorrect(_, update):
     logger.info('unexpected message while selecting channel')
-    update.message.reply_text('Select a channel, or /cancel')
+    update.message.reply_text('Select a channel, or /cancel', reply_markup=Keyboard.REMOVE)
 
     return CHANNEL_SELECT
 

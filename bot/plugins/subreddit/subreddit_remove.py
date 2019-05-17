@@ -1,7 +1,6 @@
 import logging
 
 from telegram.ext import CommandHandler
-from telegram import ParseMode
 from ptbplugins import Plugins
 
 from database.models import Subreddit
@@ -22,4 +21,4 @@ def delete_sub(_, update, args):
     subreddit = Subreddit.fetch(subreddit_name)
     subreddit.delete_instance()
 
-    update.message.reply_text('r/{} has gone'.format(subreddit_name), parse_mode=ParseMode.HTML)
+    update.message.reply_html('r/{} has gone'.format(subreddit_name))
