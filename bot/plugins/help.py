@@ -11,6 +11,7 @@ HELP_STRING = """\
 *Channels*
 /addchannel: register a channel (if already saved: updates its info)
 /remchannel: remove a channel
+/updatetitles: update all the chat titles in the database
 
 *Subreddits*
 /addsub `[subreddit name]`: register a subreddit

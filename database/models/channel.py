@@ -64,6 +64,15 @@ class Channel(peewee.Model):
         return return_list
 
     @classmethod
+    def get_all(cls):
+        all_channels = (
+            cls.select()
+            .order_by(peewee.fn.lower(cls.title))
+        )
+
+        return all_channels
+
+    @classmethod
     def safe_get(cls, channel_id):
         try:
             return cls.get(cls.channel_id == channel_id)
