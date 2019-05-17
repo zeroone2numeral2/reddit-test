@@ -95,6 +95,7 @@ def process_subreddit(subreddit, bot):
             annoucement_posted = True
 
         try:
+            time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
             sent_message = sender.post()
             posted_messages += 1
         except (BadRequest, TelegramError) as e:
@@ -115,7 +116,7 @@ def process_subreddit(subreddit, bot):
             subreddit.resume_last_posted_submission_dt = u.now()
             subreddit.save()
 
-        time.sleep(1)
+        # time.sleep(1)
 
     return posted_messages
 
@@ -143,6 +144,6 @@ def check_daily_resume(bot, _):
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
-        time.sleep(1)
+        # time.sleep(1)
 
     return total_posted_messages

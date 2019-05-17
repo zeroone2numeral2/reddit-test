@@ -167,6 +167,7 @@ def process_subreddit(subreddit: Subreddit, bot):
         logger.info('submission title: %s', sender.submission.title)
 
         try:
+            time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
             sent_message = sender.post()
         except (BadRequest, TelegramError) as e:
             logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
@@ -188,7 +189,7 @@ def process_subreddit(subreddit: Subreddit, bot):
 
             messages_posted += 1  # we posted one message
 
-        time.sleep(1)
+        # time.sleep(1)
 
     return messages_posted
 
@@ -216,6 +217,6 @@ def check_posts(bot, _):
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
-        time.sleep(1)
+        # time.sleep(1)
 
     return total_posted_messages
