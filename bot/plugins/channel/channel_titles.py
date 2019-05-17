@@ -34,9 +34,10 @@ def on_updatetitles_command(bot: Bot, update):
             errors.append((channel.title, e.message))
             continue
 
-        channel.title = chat.title
-        channel.save()
-        updated_channels += 1
+        if channel.title != chat.title:
+            channel.title = chat.title
+            channel.save()
+            updated_channels += 1
 
     errors_string = '\n'.join(['{}: {}'.format(title, err) for title, err in errors])
-    update.message.reply_text('Channels updated: {}\nErrors:\n{}'.format(updated_channels, errors_string))
+    update.message.reply_text('Channels updated: {}/{}\nErrors:\n{}'.format(updated_channels, len(channels), errors_string))
