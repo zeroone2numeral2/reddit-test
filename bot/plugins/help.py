@@ -44,8 +44,8 @@ HELP_STRING = """\
 /getconfig: see config values
 /remdl: delete all the files in the downloads directory
 /db: get the database file
-/now `<timezone key>`: get current UTC time, or the current time in a timezone
-/tz: get a list of valid timezone keys
+/now `<utc hour>`: get current UTC time and its localizations. If an hour is passed, times will be \
+calculated at that UTC hour
 /try `[submission id]`: get the submission with that id. Note: the subreddit must be saved in the database
 forward a message posted by the bot in a channel: get that submission's dict
 """

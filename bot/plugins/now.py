@@ -1,7 +1,9 @@
 import datetime
 import logging
+import re
 from collections import KeysView
 
+import pytz
 from telegram.ext import CommandHandler
 from ptbplugins import Plugins
 
@@ -10,13 +12,19 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
-NOW_TEXT = """\
-<b>UTC</b>: {utc_time}
-<b>Localized ({tz_key})</b>: {localized_time}
+NOW_TEXT = """<b>UTC</b>: {utc_time}
 
-Weekday: {weekday}\
-"""
+{localized_times}
+
+<b>UTC weekday</b>: {weekday}"""
+
 DATETIME_FORMAT = '%d/%m/%Y, %H:%M'
+
+TIMEZONES_MAP = dict(
+    it=pytz.timezone('Europe/Rome'),
+    ny=pytz.timezone('America/New_York'),
+    la=pytz.timezone('America/Los_Angeles')
+)
 
 
 @Plugins.add(CommandHandler, command=['now'], pass_args=True)
@@ -25,31 +33,30 @@ DATETIME_FORMAT = '%d/%m/%Y, %H:%M'
 def now_command(_, update, args):
     logger.info('/now command')
 
-    timezone = 'it'
+    selected_hour = None
     if args:
-        timezone = args[0].lower()
+        if not re.search(r'^\d+$', args[0]):
+            update.message.reply_text('Argument must be a number')
+            return
+
+        selected_hour = int(args[0])
+        if selected_hour > 23:
+            update.message.reply_text('Argument must be <= 23')
+            return
 
     now_utc = u.now()
-    now_tz = u.localize_utc(now_utc, timezone)
-    if isinstance(now_tz, KeysView):
-        # u.localize_utc returned a list: the timezone we passed is invalid
-        update.message.reply_text('Valid timezone keys: {}'.format(', '.join(now_tz)))
-        return
+    if selected_hour is not None:
+        logger.info('replacing utc hour with %d', selected_hour)
+        now_utc = now_utc.replace(hour=selected_hour)
+
+    timezones_strings = list()
+    for tz_key, pytz_timezone in TIMEZONES_MAP.items():
+        time_string = u.localize_utc(now_utc, pytz_timezone).strftime(DATETIME_FORMAT)
+        timezones_strings.append('<b>{}</b>: {}'.format(tz_key.upper(), time_string))
 
     weekday = datetime.datetime.today().weekday()
     update.message.reply_html(NOW_TEXT.format(
         utc_time=now_utc.strftime(DATETIME_FORMAT),
-        localized_time=now_tz.strftime(DATETIME_FORMAT),
-        weekday=weekday,
-        tz_key=timezone
+        localized_times='\n'.join(timezones_strings),
+        weekday=weekday
     ))
-
-
-@Plugins.add(CommandHandler, command=['tz'])
-@d.restricted
-@d.failwithmessage
-def tz_command(_, update):
-    logger.info('/tz command')
-
-    timezones_list = u.localize_utc(_, '')
-    update.message.reply_text('Timezone keys: {}'.format(', '.join(timezones_list)))

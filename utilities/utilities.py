@@ -5,6 +5,7 @@ import urllib.request as urllib
 from mimetypes import guess_type
 
 import pytz
+from pytz.tzinfo import DstTzInfo
 import math
 import logging.config
 import datetime
@@ -22,19 +23,12 @@ DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
-timezone = pytz.timezone('Europe/Rome')
-TIMEZONES_MAP = dict(
-    it=pytz.timezone('Europe/Rome'),
-    ny=pytz.timezone('America/New_York'),
-    la=pytz.timezone('America/Los_Angeles')
-)
-
 
 def html_escape(string):
     return escape(string)
 
 
-def now(string=False, timezone_aware=False, utc=True):
+def now(string=False, utc=True):
     """Return a datetime object or a string
 
     :param string: True -> returns current datetime as a string (default format), str -> use the passed string as format
@@ -45,8 +39,6 @@ def now(string=False, timezone_aware=False, utc=True):
 
     if utc:
         now = datetime.datetime.utcnow()
-    elif timezone_aware:
-        now = timezone.localize(datetime.datetime.now())
     else:
         now = datetime.datetime.now()
 
@@ -60,13 +52,12 @@ def now(string=False, timezone_aware=False, utc=True):
         return now
 
 
-def localize_utc(utc_time, zone):
-    tz = TIMEZONES_MAP.get(zone, None)
-    if not tz:
-        return TIMEZONES_MAP.keys()
+def localize_utc(utc_time, pytz_timezone):
+    if not isinstance(pytz_timezone, DstTzInfo):
+        raise ValueError('pytz_timezone must be of type pytz.timezone')
 
     # https://stackoverflow.com/questions/25264811/pytz-converting-utc-and-timezone-to-local-time
-    return pytz.utc.localize(utc_time, is_dst=None).astimezone(tz)
+    return pytz.utc.localize(utc_time, is_dst=None).astimezone(pytz_timezone)
 
 
 def dotted(number):
