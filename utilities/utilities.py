@@ -23,6 +23,11 @@ VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
 timezone = pytz.timezone('Europe/Rome')
+TIMEZONES_MAP = dict(
+    it=pytz.timezone('Europe/Rome'),
+    ny=pytz.timezone('America/New_York'),
+    la=pytz.timezone('America/Los_Angeles')
+)
 
 
 def html_escape(string):
@@ -53,6 +58,15 @@ def now(string=False, timezone_aware=False, utc=True):
         return now.strftime(string)
     else:
         return now
+
+
+def localize_utc(utc_time, zone):
+    tz = TIMEZONES_MAP.get(zone, None)
+    if not tz:
+        return TIMEZONES_MAP.keys()
+
+    # https://stackoverflow.com/questions/25264811/pytz-converting-utc-and-timezone-to-local-time
+    return pytz.utc.localize(utc_time, is_dst=None).astimezone(tz)
 
 
 def dotted(number):

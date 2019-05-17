@@ -22,9 +22,10 @@ HELP_STRING = """\
 /force `[job name]`: force that job
 /d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
 /getconfig: see config values
-/log: get the log file. Pass a number as argument if you want to get an archived log file
+/log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
 /db: get the database file
-/utc: get current UTC time
+/now `<timezone key>`: get current UTC time, or the current time in a timezone
+/tz: get a list of valid timezone keys
 /remdl: delete all the files in the downloads directory
 /jobs: get the list of subreddits and their enabled jobs
 /try `[submission id]`: get the submission with that id. Note: the subreddit must be saved in the database
