@@ -507,6 +507,9 @@ class Sender:
         elif self._subreddit.allow_nsfw is not None and self._subreddit.allow_nsfw == False and self._s.over_18:
             logger.info('tests failed: submission is NSFW')
             return False
+        elif self._subreddit.hide_spoilers and self._s.spoiler == True:
+            logger.info('tests failed: submission is a spoiler')
+            return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, int) \
                 and self._s.elapsed_minutes < self._subreddit.ignore_if_newer_than:

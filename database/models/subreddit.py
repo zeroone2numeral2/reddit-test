@@ -45,6 +45,7 @@ class Subreddit(peewee.Model):
     min_score = peewee.IntegerField(null=True)
     ignore_if_newer_than = peewee.IntegerField(null=True)
     allow_nsfw = peewee.BooleanField(default=True, null=True)
+    hide_spoilers = peewee.BooleanField(default=False, null=True)
     # RESUME FIELDS
     enabled_resume = peewee.BooleanField(default=False)
     hour = peewee.IntegerField(default=22)

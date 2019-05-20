@@ -36,6 +36,7 @@ def main(database_path):
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
     posted_messages = peewee.IntegerField(null=True)
     invite_link = peewee.CharField(null=True)
+    hide_spoilers = peewee.BooleanField(default=False, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -78,6 +79,8 @@ def main(database_path):
         migrator.add_column('jobs', 'posted_messages', posted_messages),
         # 20190513
         migrator.add_column('channels', 'invite_link', invite_link),
+        # 20190520
+        migrator.add_column('subreddits', 'hide_spoilers', hide_spoilers),
     ]
 
     logger.info('Starting migration....')
