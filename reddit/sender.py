@@ -151,7 +151,9 @@ class Sender:
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
-            self._s.flair_normalized = '{}'.format(str(self._s.link_flair_text).lower().replace(' ', '_'))
+            ascii_flair = re.sub(r'[^a-z_0-9 ]+', '', str(self._s.link_flair_text), flags=re.I)
+            ascii_flair.replace(' ', '_').lower()
+            self._s.flair_normalized = ascii_flair
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
