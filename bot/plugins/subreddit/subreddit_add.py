@@ -38,12 +38,17 @@ def on_addsub_command(_, update, args, user_data):
 
     subreddit_name = clean_name
 
-    if not reddit.subreddit_exists(subreddit_name):
+    name_from_request = reddit.subreddit_exists(subreddit_name)
+    if not name_from_request:
         logger.info('non existing subreddit: %s', subreddit_name)
         update.message.reply_text('"r/{}" does not seem to exist'.format(subreddit_name))
         return ConversationHandler.END
     else:
-        subreddit_name = reddit.subreddit_exists(subreddit_name)  # also returns the correct name
+        if clean_name.lower() == 'all':
+            # this is a particular case
+            subreddit_name = 'all'
+        else:
+            subreddit_name = name_from_request  # reddit.subreddit_exists() returns the correct name
 
     if Subreddit.fetch(subreddit_name):
         update.message.reply_html('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name))
