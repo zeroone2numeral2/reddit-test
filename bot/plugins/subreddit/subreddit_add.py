@@ -44,11 +44,7 @@ def on_addsub_command(_, update, args, user_data):
         update.message.reply_text('"r/{}" does not seem to exist'.format(subreddit_name))
         return ConversationHandler.END
     else:
-        if clean_name.lower() == 'all':
-            # this is a particular case
-            subreddit_name = 'all'
-        else:
-            subreddit_name = name_from_request  # reddit.subreddit_exists() returns the correct name
+        subreddit_name = name_from_request  # reddit.subreddit_exists() returns the correct name
 
     if Subreddit.fetch(subreddit_name):
         update.message.reply_html('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name))
@@ -77,10 +73,12 @@ def on_channel_selected(_, update, user_data):
     channel = Channel.get(Channel.channel_id == channel_id)
 
     subreddit_name = user_data.pop('name')
-    logger.debug('testing subreddit: %s', subreddit_name)
+    logger.debug('testing subreddit to fetch its id: %s', subreddit_name)
 
     subreddit_id = None
     for submission in reddit.subreddit(subreddit_name).new(limit=1):
+        # u.print_submission(submission)
+
         subreddit_name = submission.subreddit
         subreddit_id = submission.subreddit_id
         logger.info('subreddit_id: %s', subreddit_id)

@@ -250,3 +250,13 @@ class FileWriter:
 
     def remove(self):
         os.remove(self.file_path)
+
+
+def print_submission(submission):
+    attrs = [a for a in dir(submission) if not a.startswith('_')]
+    max_key_len = len(max(attrs, key=len))
+
+    base_string = '{:.<%d} > {}' % max_key_len
+    for attr in attrs:
+        string = base_string.format(attr, getattr(submission, attr))
+        print(string)
