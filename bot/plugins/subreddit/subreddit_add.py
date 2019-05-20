@@ -76,13 +76,18 @@ def on_channel_selected(_, update, user_data):
     logger.debug('testing subreddit to fetch its id: %s', subreddit_name)
 
     subreddit_id = None
-    for submission in reddit.subreddit(subreddit_name).new(limit=1):
-        # u.print_submission(submission)
+    if subreddit_name.lower() == 'all':
+        # r/all is not a real subreddit, so it doesn't have an id. We will use "frontpage" as id
+        logger.info('we are adding r/all')
+        subreddit_id = 'frontpage'
+    else:
+        for submission in reddit.subreddit(subreddit_name).new(limit=1):
+            # u.print_submission(submission)
 
-        subreddit_name = submission.subreddit
-        subreddit_id = submission.subreddit_id
-        logger.info('subreddit_id: %s', subreddit_id)
-        break
+            subreddit_name = submission.subreddit
+            subreddit_id = submission.subreddit_id
+            logger.info('subreddit_id: %s', subreddit_id)
+            break
 
     logger.info('saving subreddit...')
     Subreddit.create(
