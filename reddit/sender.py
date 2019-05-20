@@ -73,6 +73,7 @@ class Sender:
         self._s.is_image = False
         self._s.media_type = MediaType.NONE
         self._s.flair_with_space = ''
+        self._s.flair_normalized = ''
         self._s.nsfw = self._s.over_18
         self._s.sorting = self._subreddit.sorting or 'hot'
         self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
@@ -150,6 +151,7 @@ class Sender:
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
+            self._s.flair_normalized = '{}'.format(str(self._s.link_flair_text).lower().replace(' ', '_'))
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
