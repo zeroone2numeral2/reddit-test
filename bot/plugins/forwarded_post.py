@@ -3,9 +3,11 @@ import os
 
 from telegram import Update
 from telegram.ext import MessageHandler
+from telegram.ext import CallbackQueryHandler
 from telegram.ext import Filters
 from ptbplugins import Plugins
 
+from bot.markups import InlineKeyboard
 from database.models import Subreddit
 from database.models import Channel
 from database.models import Post
@@ -56,3 +58,35 @@ def on_forwarded_post(bot, update: Update):
         update.message.reply_document(f)
 
     os.remove(file_path)
+
+    markup = InlineKeyboard.vote(submission_id)
+    update.message.reply_text('You can upvote/downvote this submission', reply_markup=markup)
+
+
+@Plugins.add(CallbackQueryHandler, pattern=r'(\w+):(.+)', pass_groups=True)
+@d.restricted
+@d.failwithmessage
+def up_down_button(_, update: Update, groups):
+    logger.info('up/down inline button, groups: %s', groups)
+
+    vote = groups[0]
+    submission_id = groups[1]
+
+    submission = reddit.submission(id=submission_id)
+
+    # voting cannot be done by bots
+    # see https://praw.readthedocs.io/en/latest/code_overview/models/submission.html#praw.models.Submission.downvote
+
+    try:
+        if vote == 'upvote':
+            submission.upvote()
+        elif vote == 'downvote':
+            submission.downvote()
+    except Exception as e:
+        update.callback_query.answer('Error while voting: {}'.format(str(e)), show_alert=True)
+        return
+
+    update.callback_query.answer('Submission {}d'.format(vote))
+
+    markup = InlineKeyboard.vote(submission_id, vote)
+    update.callback_query.edit_message_reply_markup(markup)
