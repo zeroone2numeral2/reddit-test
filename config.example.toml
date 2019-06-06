@@ -6,6 +6,12 @@ log = -1001141547703
 admins = [23646077]
 index = "reddit_mirrors" # telegram channel with the channels index
 
+[pyrogram]
+session_name = "redditbot"
+workers = 1
+api_id = 78189
+api_hash = "45637520c755297fb626c1926efe1d4f"
+
 [plugins]
 dir = "bot/plugins"
 manifest = "manifest"
