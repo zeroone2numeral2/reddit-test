@@ -32,7 +32,7 @@ class VReddit(Downloader):
         self._audio_size = 0
         self._audio_path = os.path.join('downloads', '{}.mp3'.format(self._identifier))
         self._video_path = self._file_path
-        self._merged_path = self._file_path.replace('.mp4', '_merged.mp4')
+        self._merged_path = os.path.normpath(self._file_path.replace('.mp4', '_merged.mp4'))
 
     @property
     def audio_path(self):
@@ -136,6 +136,10 @@ class VReddit(Downloader):
             # some vreddits don't have an audio (they are GIFs basically),
             # so we have to skip the audio download and merge
             self.download_audio()
-            return self.merge()  # return the merged video/audio path if we didn't skip the audio
+            self.merge()
+
+            self._size = os.path.getsize(self._merged_path)  # calculate the size again after audio and video are merged
+
+            return self._merged_path  # return the merged video/audio path if we didn't skip the audio
         else:
             return self._file_path  # return the downloaded video path if we have skipped the audio

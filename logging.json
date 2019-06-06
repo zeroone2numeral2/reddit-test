@@ -45,6 +45,9 @@
         },
         "PIL": {
             "level": "WARNING"
+        },
+        "pyrogram": {
+            "level": "WARNING"
         }
     },
     "formatters": {

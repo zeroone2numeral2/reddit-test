@@ -2,7 +2,7 @@ import logging
 
 from pyrogram import Client
 
-from ..reddit.downloaders import FileTooBig
+from reddit.downloaders import FileTooBig
 
 logger = logging.getLogger(__name__)
 

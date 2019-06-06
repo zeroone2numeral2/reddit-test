@@ -3,8 +3,8 @@ import random
 
 import requests
 
+from const import MaxSize
 from utilities import u
-from const import MAX_SIZE
 
 
 class FileTooBig(Exception):
@@ -12,24 +12,22 @@ class FileTooBig(Exception):
 
 
 class Downloader:
-    def __init__(self, url, thumbnail_url='', identifier=random.randint(1, 10000)):
+    def __init__(self, url, thumbnail_url='', identifier=random.randint(1, 10000), max_size=MaxSize.BOT_API):
         self._url = url
         self._identifier = identifier
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
         self._size = 0
-        self._size_readable = '0 b'
         self._thumbnail_url = thumbnail_url
         self._thumbnail_path = ''
         self._thumbnail_bo = None
+        self._max_size = max_size
 
         if self._thumbnail_url == 'nsfw':
-            self._thumbnail_url = 'https://t3.ftcdn.net/jpg/01/77/29/28' \
-                                  '/240_F_177292812_asUGEDiieLfHjKx9DxTBI50vsS9iZwi0.jpg '
+            self._thumbnail_url = 'https://t3.ftcdn.net/jpg/01/77/29/28/240_F_177292812_asUGEDiieLfHjKx9DxTBI50vsS9iZwi0.jpg '
 
         headers = requests.head(url).headers
         if 'content-length' in headers:
             self._size = int(headers.get('content-length', 0))
-            self._size_readable = u.human_readable_size(self._size)
 
     @property
     def url(self):
@@ -41,7 +39,13 @@ class Downloader:
 
     @property
     def size_readable(self):
-        return self._size_readable
+        # it might change during the processing of the files (eg. see vreddit video/audio merge),
+        # so we have to generate the string every time
+        return u.human_readable_size(self._size)
+
+    @property
+    def size(self):
+        return self._size
 
     @property
     def thumbnail_path(self):
@@ -56,12 +60,12 @@ class Downloader:
         return self._thumbnail_url
 
     def __repr__(self):
-        return '<Downloaded content {} ({})>'.format(self._url, self._size_readable)
+        return '<Downloaded content {} ({})>'.format(self._url, self.size_readable)
 
     def check_size(self, raise_exception=True):
-        if self._size > MAX_SIZE:
+        if self._size > self._max_size:
             if raise_exception:
-                raise FileTooBig('file size is too big for Telegram: {}'.format(self._size_readable))
+                raise FileTooBig('file size is too big for Telegram: {}'.format(self.size_readable))
             else:
                 return False
 
@@ -75,7 +79,6 @@ class Downloader:
         # get the size if we weren't able to do that via headers
         if not self._size:
             self._size = os.path.getsize(self._file_path)
-            self._size_readable = u.human_readable_size(self._size)
 
             self.check_size()  # check the size again and raise an exception if necessary
 

@@ -258,5 +258,9 @@ def print_submission(submission):
 
     base_string = '{:.<%d} > {}' % max_key_len
     for attr in attrs:
-        string = base_string.format(attr, getattr(submission, attr))
-        print(string)
+        try:
+            string = base_string.format(attr, getattr(submission, attr))
+            print(string)
+        except Exception as e:
+            string = base_string.format(attr, 'EXCEPTION: ' + str(e))
+            print(string)

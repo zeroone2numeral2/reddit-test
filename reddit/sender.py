@@ -8,12 +8,14 @@ from urllib.parse import urlparse
 
 from telegram import ParseMode
 
+from const import MaxSize
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
 from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
+from pyroutils import PyroClient
 from database.models import Post
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
@@ -23,6 +25,14 @@ from config import config
 logger = logging.getLogger('sp')
 
 imgur = Imgur(config.imgur.id, config.imgur.secret)
+mtproto = PyroClient(
+    'pyrogram_bot',
+    bot_token=config.telegram.token,
+    api_id=config.pyrogram.api_id,
+    api_hash=config.pyrogram.api_hash,
+    workers=config.pyrogram.workers,
+    no_updates=True
+)
 
 KEY_MAPPER_DICT = dict(
     created_utc=lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp),
@@ -89,7 +99,20 @@ class Sender:
         self._s.video_size = (None, None)
         self._s.video_duration = 0
         self._submission_dict = dict()
-        
+
+        # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
+        # We can get the parent submission of the crosspost from `submission.crosspost_parent_list[0]`
+        # and then we can add it to the crossposted submission
+        self._s.xpost_from = ''
+        self._s.xpost_from_string = ''
+        if self._s.crosspost_parent:
+            logger.info('note: submission is a crosspost')
+            self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
+            self._s.xpost_from_string = 'xpost from /r/{}'.format(self._s.xpost_from)
+            self._s.xpost_from_string_dotted = '• {}'.format(self._s.xpost_from_string)
+            self._s.media = self._s.crosspost_parent_list[0].get('media', None)
+            self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
+
         # this whole shit should have its own method
         if self._s.url.endswith(('.jpg', '.png')):
             logger.debug('url is a jpg/png: submission is an image')
@@ -186,6 +209,8 @@ class Sender:
         self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.channel_invite_link = self._subreddit.channel.invite_link or None
+
+        # u.print_submission(self._s)
 
         self.gen_submission_dict()
 
@@ -338,6 +363,16 @@ class Sender:
 
         return self._sent_message
 
+    def _upload_video(self, chat_id, file_path, pyrogram=False, *args, **kwargs):
+        if not pyrogram:
+            with open(file_path, 'rb') as f:
+                logger.info('uploading video using the bot API...')
+                return self._bot.send_video(chat_id, f, *args, **kwargs)
+        else:
+            logger.info('uploading video using mtproto...')
+            with mtproto:
+                return mtproto.upload_video(chat_id, file_path, *args, **kwargs)
+
     def _send_text(self, text):
         return self._bot.send_message(
             self._chat_id,
@@ -362,7 +397,7 @@ class Sender:
     def _send_vreddit(self, url, caption):
         logger.info('vreddit url: %s', url)
 
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO)
         logger.info('vreddit video url: %s', vreddit.url)
         logger.info('vreddit audio url: %s', vreddit.url_audio)
 
@@ -375,7 +410,7 @@ class Sender:
         try:
             logger.info('downloading video/audio and merging them...')
             file_path = vreddit.download_and_merge(skip_audio=True if self._s.is_gif else False)
-            logger.info('...merging ended')
+            logger.info('...merging ended. File size: %s', vreddit.size_readable)
             logger.info('file path of the video we will send: %s', file_path)
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
@@ -390,11 +425,24 @@ class Sender:
         vreddit.download_thumbnail()
         logger.info('thumbnail path: %s', vreddit.thumbnail_path)
 
-        with open(file_path, 'rb') as f:
-            logger.info('uploading video...')
-            self._sent_message = self._bot.send_video(
+        if vreddit.size > MaxSize.BOT_API:
+            self._sent_message = self._upload_video(
                 self._chat_id,
-                f,
+                file_path,
+                pyrogram=True,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                thumb=vreddit.thumbnail_path,
+                height=self._s.video_size[0],
+                width=self._s.video_size[1],
+                duration=self._s.video_duration,
+                supports_streaming=True
+            )
+        else:
+            self._sent_message = self._upload_video(
+                self._chat_id,
+                file_path,
+                pyrogram=False,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
                 thumb=vreddit.get_thumbnail_bo(),
@@ -418,7 +466,7 @@ class Sender:
         try:
             logger.info('downloading video...')
             video.download()
-            logger.info('...download ended')
+            logger.info('...download ended. File size: %s', video.size_readable)
         except FileTooBig:
             logger.info('video is too big to be sent (%s), removing file and sending text...', video.size_readable)
             video.remove(keep_thumbnail=True)

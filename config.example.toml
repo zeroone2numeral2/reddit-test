@@ -8,7 +8,7 @@ index = "reddit_mirrors" # telegram channel with the channels index
 
 [pyrogram]
 session_name = "redditbot"
-workers = 1
+workers = 0
 api_id = 78189
 api_hash = "45637520c755297fb626c1926efe1d4f"
 
