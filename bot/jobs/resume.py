@@ -29,7 +29,7 @@ def process_submissions(subreddit, bot):
     logger.info('fetching submissions')
 
     i = 0
-    for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.frequency):
+    for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.sorting):
         logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if PostResume.already_posted(subreddit, submission.id):
             logger.info('...submission %s has already been posted', submission.id)
@@ -52,7 +52,13 @@ def process_submissions(subreddit, bot):
 
 
 def process_subreddit(subreddit, bot):
-    logger.info('processing subreddit %s (r/%s) (frequency: %s)', subreddit.subreddit_id, subreddit.name, subreddit.frequency)
+    logger.info(
+        'processing subreddit %s (r/%s) (frequency: %s, sorting: %s)',
+        subreddit.subreddit_id,
+        subreddit.name,
+        subreddit.frequency,
+        subreddit.sorting
+    )
 
     now = u.now()
     weekday = datetime.datetime.today().weekday()
