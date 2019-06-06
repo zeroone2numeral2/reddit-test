@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 
 from telegram import Bot
 from telegram import ParseMode
+from telegram.error import BadRequest
+from telegram.error import TelegramError
 
 from const import MaxSize
 from .downloaders import Imgur
@@ -515,9 +517,7 @@ class Sender:
 
         gfycat.download_thumbnail()
 
-        sent_message = self._bot.send_video(
-            self._chat_id,
-            gfycat.url,
+        video_args = dict(
             caption=caption,
             parse_mode=ParseMode.HTML,
             width=gfycat.sizes[0],
@@ -526,6 +526,23 @@ class Sender:
             duration=gfycat.duration,
             timeout=360
         )
+
+        try:
+            sent_message = self._bot.send_video(self._chat_id, gfycat.url, **video_args)
+        except (BadRequest, TelegramError) as e:
+            if 'failed to get http url content' not in e.message.lower():
+                # raise again the error if it's not related to send-by-url
+                raise e
+
+            logger.info('telegram http-url error while sending by url: %s', e.message)
+            logger.info('trying to download and send...')
+            gfycat.download()
+            logger.info('file downloaded to %s (%s)', gfycat.file_path, gfycat.size_readable)
+            if gfycat.size > MaxSize.BOT_API:
+                video_args['thumb'] = gfycat.thumbnail_path
+                sent_message = self._upload_video(self._chat_id, gfycat.file_path, pyrogram=True, **video_args)
+            else:
+                sent_message = self._upload_video(self._chat_id, gfycat.file_path, pyrogram=False, **video_args)
 
         gfycat.remove()
 
