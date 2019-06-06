@@ -187,13 +187,13 @@ def resize_thumbnail(image_path):
 
     image = Image.open(image_path)
 
-    if image.size[0] < 91 and image.size[1] < 91:
+    if image.size[0] < 321 and image.size[1] < 321:
         sizes = image.size
     else:
         i = 0 if image.size[0] > image.size[1] else 1  # index of the largest dimension
         new = [None, None]
-        new[i] = 90
-        rateo = 90 / image.size[i]
+        new[i] = 320
+        rateo = 320 / image.size[i]
         new[1 if i == 0 else 0] = int(math.floor(image.size[1 if i == 0 else 0] * round(rateo, 4)))
 
         sizes = tuple(new)
