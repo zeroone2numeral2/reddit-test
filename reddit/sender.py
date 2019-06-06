@@ -513,7 +513,7 @@ class Sender:
         )
 
     def _send_gfycat(self, url, caption):
-        gfycat = Gfycat(url)
+        gfycat = Gfycat(url, identifier=self._s.id)
         logger.info('gfycat url: %s', gfycat.url)
 
         gfycat.download_thumbnail()
