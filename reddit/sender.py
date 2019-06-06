@@ -367,12 +367,18 @@ class Sender:
 
         return self._sent_message
 
-    def _upload_video(self, chat_id, file_path, pyrogram=False, *args, **kwargs):
-        if not pyrogram:
+    def _upload_video(self, chat_id, file_path, file_size=0, *args, **kwargs):
+        if file_size < MaxSize.BOT_API:
+            kwargs['thumb'] = kwargs['thumb_bo']
             with open(file_path, 'rb') as f:
                 logger.info('uploading video using the bot API...')
                 return self._bot.send_video(chat_id, f, *args, **kwargs)
         else:
+            # client.send_video doesn't accept unknown arguments
+            kwargs['thumb'] = kwargs.pop('thumb_path', None)
+            kwargs.pop('thumb_bo', None)
+            kwargs.pop('timeout', None)
+
             logger.info('uploading video using mtproto...')
             with mtproto:
                 return mtproto.upload_video(chat_id, file_path, *args, **kwargs)
@@ -429,33 +435,19 @@ class Sender:
         vreddit.download_thumbnail()
         logger.info('thumbnail path: %s', vreddit.thumbnail_path)
 
-        if vreddit.size > MaxSize.BOT_API:
-            self._sent_message = self._upload_video(
-                self._chat_id,
-                file_path,
-                pyrogram=True,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                thumb=vreddit.thumbnail_path,
-                height=self._s.video_size[0],
-                width=self._s.video_size[1],
-                duration=self._s.video_duration,
-                supports_streaming=True
-            )
-        else:
-            self._sent_message = self._upload_video(
-                self._chat_id,
-                file_path,
-                pyrogram=False,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                thumb=vreddit.get_thumbnail_bo(),
-                height=self._s.video_size[0],
-                width=self._s.video_size[1],
-                duration=self._s.video_duration,
-                supports_streaming=True,
-                timeout=360
-            )
+        video_args = dict(
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            thumb_path=vreddit.thumbnail_path,
+            thumb_bo=vreddit.get_thumbnail_bo(),
+            height=self._s.video_size[0],
+            width=self._s.video_size[1],
+            duration=self._s.video_duration,
+            supports_streaming=True,
+            timeout=360
+        )
+
+        self._sent_message = self._upload_video(self._chat_id, file_path, file_size=vreddit.size, **video_args)
 
         logger.info('removing downloaded files...')
         vreddit.remove()
