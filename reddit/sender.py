@@ -115,6 +115,7 @@ class Sender:
             self._s.xpost_from_string_dotted = '• {}'.format(self._s.xpost_from_string)
             self._s.media = self._s.crosspost_parent_list[0].get('media', None)
             self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
+            self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
 
         # this whole shit should have its own method
         if self._s.url.endswith(('.jpg', '.png')):
