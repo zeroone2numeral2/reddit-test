@@ -41,11 +41,14 @@ class Reddit(praw.Reddit):
         args = []
         kwargs = dict(limit=limit)
 
-        if sorting == Sorting.TOP:
+        if sorting.lower() in (Sorting.TOP, Sorting.timeframe.DAY):
             iterator = self.subreddit(name).top
             args = [Sorting.timeframe.DAY]
-        elif sorting == Sorting.NEW:
+        elif sorting.lower() == Sorting.NEW:
             iterator = self.subreddit(name).new
+        elif sorting.lower() == Sorting.timeframe.WEEK:
+            iterator = self.subreddit(name).top
+            args = [Sorting.timeframe.WEEK]
 
         for submission in iterator(*args, **kwargs):
             yield submission
