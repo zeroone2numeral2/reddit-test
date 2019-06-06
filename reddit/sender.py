@@ -6,6 +6,7 @@ from collections import OrderedDict
 import pprint
 from urllib.parse import urlparse
 
+from telegram import Bot
 from telegram import ParseMode
 
 from const import MaxSize
@@ -73,7 +74,7 @@ class Sender:
     __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_chat_id', '_submission_dict']
     
     def __init__(self, bot, subreddit, submission):
-        self._bot = bot
+        self._bot: Bot = bot
         self._s = submission
         self._subreddit = subreddit
 
@@ -105,8 +106,8 @@ class Sender:
         # and then we can add it to the crossposted submission
         self._s.xpost_from = ''
         self._s.xpost_from_string = ''
-        if self._s.crosspost_parent:
-            logger.info('note: submission is a crosspost')
+        if hasattr(self._s, 'crosspost_parent'):
+            logger.info('note: submission is a crosspost of %s', self._s.crosspost_parent)
             self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
             self._s.xpost_from_string = 'xpost from /r/{}'.format(self._s.xpost_from)
             self._s.xpost_from_string_dotted = '• {}'.format(self._s.xpost_from_string)
