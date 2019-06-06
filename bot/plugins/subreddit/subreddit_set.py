@@ -67,8 +67,8 @@ def sub_settings(_, update, args):
 
     new_value = getattr(subreddit, setting)
 
-    update.message.reply_html('Done\n<code>{setting}</code>: {new_value}\n\nValue type: {input_type}'.format(
+    update.message.reply_html('Done\n<code>{setting}</code>: {new_value}\n\nValue type: <code>{input_type}</code>'.format(
         setting=setting,
         new_value=u.escape(str(new_value)),
-        input_type=u.escape(str(type(value)))
+        input_type=u.escape(str(type(value).__name__))
     ))
