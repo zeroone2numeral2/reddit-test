@@ -379,7 +379,7 @@ class Sender:
             kwargs.pop('thumb_bo', None)
             kwargs.pop('timeout', None)
 
-            logger.info('uploading video using mtproto...')
+            logger.info('uploading video using mtproto (file size: %d, max bot API: %d)...', file_size, MaxSize.BOT_API)
             with mtproto:
                 return mtproto.upload_video(chat_id, file_path, *args, **kwargs)
 
