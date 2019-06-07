@@ -31,7 +31,11 @@ def failwithmessage(func):
         try:
             return func(bot, update, *args, **kwargs)
         except Exception as e:
-            logger.error('error during handler execution: %s', str(e), exc_info=True)
+            exc_info = True
+            if 'database is locked' in str(e).lower():
+                exc_info = False  # do not log the whole traceback if the error is 'database is locked'
+
+            logger.error('error during handler execution: %s', str(e), exc_info=exc_info)
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
