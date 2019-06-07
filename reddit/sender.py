@@ -379,9 +379,14 @@ class Sender:
             kwargs.pop('thumb_bo', None)
             kwargs.pop('timeout', None)
 
-            logger.info('uploading video using mtproto (file size: %d, max bot API: %d)...', file_size, MaxSize.BOT_API)
+            logger.info('uploading video using mtproto (file size: %d (%s), max bot API: %d)...', file_size,
+                        u.human_readable_size(file_size), MaxSize.BOT_API)
             with mtproto:
-                return mtproto.upload_video(chat_id, file_path, *args, **kwargs)
+                logger.debug('mtproto upload started at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
+                sent_message = mtproto.upload_video(chat_id, file_path, *args, **kwargs)
+                logger.debug('mtproto upload ended at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
+
+                return sent_message
 
     def _send_text(self, text):
         return self._bot.send_message(
