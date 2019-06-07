@@ -414,7 +414,7 @@ class Sender:
     def _send_vreddit(self, url, caption):
         logger.info('vreddit url: %s', url)
 
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED)
         logger.info('vreddit video url: %s', vreddit.url)
         logger.info('vreddit audio url: %s', vreddit.url_audio)
 
