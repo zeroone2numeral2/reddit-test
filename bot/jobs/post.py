@@ -188,6 +188,8 @@ def process_subreddit(subreddit: Subreddit, bot):
                 logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
 
             messages_posted += 1  # we posted one message
+        else:
+            logger.warning('Sender.post() did not return any sent message, so we are not registering this submission and the last post datetime')
 
         # time.sleep(1)
 
