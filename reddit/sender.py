@@ -386,6 +386,8 @@ class Sender:
                 sent_message = mtproto.upload_video(chat_id, file_path, *args, **kwargs)
                 logger.debug('mtproto upload ended at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
 
+                logger.debug('client.send_video() result: %s', str(sent_message))
+
                 return sent_message
 
     def _send_text(self, text):
