@@ -95,7 +95,7 @@ def log_start_end_dt(func):
             text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}))'.format(
                 job.name,
                 config.jobs[job.name].interval,
-                elapsed_seconds,
+                round(elapsed_seconds, 2),
                 u.pretty_seconds(elapsed_seconds)
             )
             logger.warning(text)
