@@ -29,6 +29,12 @@ def process_submissions(subreddit, bot):
     logger.info('fetching submissions')
 
     i = 0
+    if subreddit.sorting == 'hot':
+        # we change the sorting way to 'day', because we can't get the 'top' submission from the period 'hot'
+        logger.warning('resume_job: changing "sorting" property of r/%s to "say"', subreddit.name)
+        subreddit.sorting = 'day'
+        subreddit.save()
+
     for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.sorting):
         logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if PostResume.already_posted(subreddit, submission.id):
