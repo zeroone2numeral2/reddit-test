@@ -367,8 +367,8 @@ class Sender:
 
         return self._sent_message
 
-    def _upload_video(self, chat_id, file_path, file_size=0, *args, **kwargs):
-        if file_size < MaxSize.BOT_API:
+    def _upload_video(self, chat_id, file_path, file_size=0, force_bot_api=False, *args, **kwargs):
+        if file_size < MaxSize.BOT_API or force_bot_api:
             kwargs['thumb'] = kwargs['thumb_bo']
             with open(file_path, 'rb') as f:
                 logger.info('uploading video using the bot API...')
@@ -414,7 +414,8 @@ class Sender:
     def _send_vreddit(self, url, caption):
         logger.info('vreddit url: %s', url)
 
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED)
+        # we set as max_size the max size supported by the bot API, so we can avoid to use pyrogram (see issue #82)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.BOT_API)
         logger.info('vreddit video url: %s', vreddit.url)
         logger.info('vreddit audio url: %s', vreddit.url_audio)
 
@@ -454,7 +455,12 @@ class Sender:
             timeout=360
         )
 
-        self._sent_message = self._upload_video(self._chat_id, file_path, file_size=vreddit.size, **video_args)
+        self._sent_message = self._upload_video(
+            self._chat_id, file_path,
+            file_size=vreddit.size,
+            force_bot_api=True,  # see issue #82
+            **video_args
+        )
 
         logger.info('removing downloaded files...')
         vreddit.remove()
