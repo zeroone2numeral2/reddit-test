@@ -1,5 +1,5 @@
 python-telegram-bot==11.1.0
-pyrogram==0.13.0
+pyrogram[fast]==0.13.0
 praw
 pytz
 peewee
