@@ -120,8 +120,8 @@ def on_setdesc_channel_selected(bot: Bot, update):
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
                 format_dict['quiet_block'] = '. Less frequent posts (frequency x{}) from {} to {} UTC'.format(
                     subreddit.quiet_hours_demultiplier,
-                    subreddit.quiet_hours_start,
-                    subreddit.quiet_hours_end
+                    subreddit.quiet_hours_start or config.quiet_hours.start,
+                    subreddit.quiet_hours_end or config.quiet_hours.end
                 )
 
             subs_info_list.append(BASE_POST.format(**format_dict))
