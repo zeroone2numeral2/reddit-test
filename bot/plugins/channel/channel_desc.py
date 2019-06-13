@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 CHANNEL_SELECT = range(1)
 
 BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, {number_of_posts} {posts_string} every ~{pretty_time} \
-from /{sorting}/{quiet_block}{ignored_block}\
+from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
 """
 
 BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, top {number_of_posts} {posts_string} from /{sorting}/ \
