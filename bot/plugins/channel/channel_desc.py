@@ -91,6 +91,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             posts_string='post' if subreddit.number_of_posts == 1 else 'posts',
             pretty_time=pretty_time(subreddit.max_frequency),
             sorting=subreddit.sorting,
+            ignored_block='',
             quiet_block='',
             min_score_block='',
             nsfw_spoiler_block='',
