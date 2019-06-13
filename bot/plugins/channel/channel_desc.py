@@ -165,6 +165,8 @@ def on_setdesc_channel_selected(bot: Bot, update):
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('...message not pinned: {}'.format(e.message))
 
+    return ConversationHandler.END
+
 
 @d.restricted
 @d.failwithmessage
