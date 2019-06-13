@@ -147,8 +147,8 @@ def gen_channel_description(bot: Bot, update):
         try:
             channel_obj.pinned_message.delete()
             update.message.reply_text('...old pinned message deleted')
-        except Exception as e:
-            logger.warning('could not delete old pinned message: %s', str(e))
+        except (BadRequest, TelegramError) as e:
+            logger.warning('could not delete old pinned message: %s', e.message)
 
     try:
         bot.pin_chat_message(channel_id, sent_message.message_id, disable_notification=True)
@@ -157,10 +157,10 @@ def gen_channel_description(bot: Bot, update):
             # try to delete the "message pinned" service message
             bot.delete_message(channel_id, sent_message.message_id + 1)
             update.message.reply_text('...service message deleted')
-        except:
+        except (TelegramError, BadRequest):
             pass
-    except Exception as e:
-        update.message.reply_text('...message not pinned: {}'.format(str(e)))
+    except (BadRequest, TelegramError) as e:
+        update.message.reply_text('...message not pinned: {}'.format(e.message))
 
     # update.message.reply_html(text, disable_web_page_preview=True)
 
