@@ -28,7 +28,7 @@ BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, {number
 from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
 """
 
-BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, top {number_of_posts} {posts_string} from /{sorting}/ \
+BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
 every {period} at {hour} UTC{weekday_block}{ignored_block}\
 """
 
