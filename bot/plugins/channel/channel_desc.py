@@ -22,6 +22,8 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
+CHANNEL_SELECT = range(1)
+
 BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, {number_of_posts} {posts_string} every ~{pretty_time} \
 from /{sorting}/{quiet_block}{min_score_block}{nsfw_spoiler_block}{ignored_block}\
 """
@@ -69,18 +71,17 @@ def pretty_time(total_minutes):
     return string
 
 
-@Plugins.add(CommandHandler, command=['getdesc', 'setdesc'])
 @d.restricted
 @d.failwithmessage
-def gen_channel_description(bot: Bot, update):
-    logger.info('getdesc/setdesc command: %s', update.message.text)
+def on_setdesc_channel_selected(bot: Bot, update):
+    logger.info('setdesc command channel selected: %s', update.message.text)
 
-    channel_id = -1001115950415
+    channel_id = u.expand_channel_id(update.message.text)
     subreddits = Subreddit.select().join(Channel).where(Channel.channel_id == channel_id, (Subreddit.enabled == True | Subreddit.enabled_resume == True))
 
     if not subreddits:
-        print('no channel')
-        return
+        update.message.reply_text('No subreddit in this channel')
+        return ConversationHandler.END
 
     subs_info_list = []
     for i, subreddit in enumerate(subreddits):
@@ -140,7 +141,8 @@ def gen_channel_description(bot: Bot, update):
     text = '{}\n\n{}\n\n{}'.format(HEADER, subs_text, footer)
 
     sent_message = bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
-    update.message.reply_markdown('[Message sent]({}), pinning...'.format(u.message_link(sent_message)))
+    update.message.reply_markdown('[Message sent]({}), pinning...'.format(u.message_link(sent_message)),
+                                  reply_markup=Keyboard.REMOVE)
 
     channel_obj = bot.get_chat(channel_id)
     if channel_obj.pinned_message:
@@ -162,8 +164,57 @@ def gen_channel_description(bot: Bot, update):
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('...message not pinned: {}'.format(e.message))
 
-    # update.message.reply_html(text, disable_web_page_preview=True)
 
+@d.restricted
+@d.failwithmessage
+def on_setdesc_command(_, update):
+    logger.info('/setdesc command')
+
+    channels_list = Channel.get_list()
+    if not channels_list:
+        update.message.reply_text('No saved channel. Use /addchannel to add a channel')
+        return ConversationHandler.END
+
+    reply_markup = Keyboard.from_list(channels_list)
+    update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
+
+    return CHANNEL_SELECT
+
+
+@d.restricted
+@d.failwithmessage
+def on_setdesc_channel_selected_incorrect(_, update):
+    logger.info('unexpected message while selecting channel')
+    update.message.reply_text('Select a channel, or /cancel')
+
+    return CHANNEL_SELECT
+
+
+@d.restricted
+@d.failwithmessage
+def on_setdesc_cancel(_, update):
+    logger.info('conversation canceled with /cancel')
+    update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
+
+    return ConversationHandler.END
+
+
+@Plugins.add_conversation_hanlder()
+def setdesc_channel_conv_hanlder():
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler(command=['setdesc'], callback=on_setdesc_command)],
+        states={
+            CHANNEL_SELECT: [
+                MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_setdesc_channel_selected),
+                MessageHandler(~Filters.command & Filters.all, callback=on_setdesc_channel_selected_incorrect),
+            ]
+        },
+        fallbacks=[
+            CommandHandler('cancel', on_setdesc_cancel)
+        ]
+    )
+
+    return conv_handler
 
 
 
