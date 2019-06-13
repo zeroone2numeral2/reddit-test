@@ -45,12 +45,20 @@ WEEKDAYS = (
 )
 
 
-def pretty_time(total_minutes):
+def pretty_time(total_minutes, sep=', ', round_by=10):
+    """Pretty string representation of minutes
+
+    :param total_minutes: time in minutes
+    :param sep: string that separates hours and minutes (if both present)
+    :param round_by: round minutes to the highest multiple of 'round_by' possible
+    :return: string
+    """
+
     hours = int(total_minutes / 60)
     minutes = total_minutes - (hours * 60)
 
-    if (minutes % 10) != 0:
-        minutes = minutes + (10 - (minutes % 10))
+    if (minutes % round_by) != 0:
+        minutes = minutes + (round_by - (minutes % round_by))
         if minutes == 60:
             minutes = 0
             hours += 1
@@ -64,7 +72,7 @@ def pretty_time(total_minutes):
 
     if minutes > 0:
         if hours > 0:
-            string += ', '
+            string += sep
 
         string += '{} minutes'.format(minutes)
 
@@ -106,7 +114,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             if subreddit.hide_spoilers:
                 ignored_list.append('spoilers')
             if subreddit.ignore_if_newer_than:
-                ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than))
+                ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
             format_dict['ignored_block'] = '. Ignored submissions: {}'.format(', '.join(ignored_list))
