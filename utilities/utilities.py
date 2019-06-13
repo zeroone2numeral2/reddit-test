@@ -264,3 +264,10 @@ def print_submission(submission):
         except Exception as e:
             string = base_string.format(attr, 'EXCEPTION: ' + str(e))
             print(string)
+
+
+def message_link(message):
+    if message.chat.username:
+        return 'https://t.me/{}/{}'.format(message.chat.username, message.message_id)
+    else:
+        return 'https://t.me/c/{}/{}'.format(str(message.chat.id)[3:], message.message_id)
