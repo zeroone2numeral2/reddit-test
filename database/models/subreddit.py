@@ -80,7 +80,8 @@ class Subreddit(peewee.Model):
     def get_list(cls):
         subs = (
             cls.select()
-            .order_by(peewee.fn.lower(cls.name))
+            # .order_by(peewee.fn.lower(cls.name))
+            .order_by(cls.added)
         )
         
         return [sub for sub in subs]

@@ -1,11 +1,9 @@
 import logging
 
 from telegram.ext import CommandHandler
-from telegram import ParseMode
 from ptbplugins import Plugins
 
 from database.models import Subreddit
-from utilities import u
 from utilities import d
 
 logger = logging.getLogger(__name__)
@@ -23,12 +21,14 @@ def subs_list(_, update):
         return
     
     strings = list()
-    for sub in subreddits:
-        string = '<code>{}</code>'.format(sub.name)
-        if sub.channel:
-            string += ' ({})'.format(sub.channel.title)
-        else:
-            string += ' (no channel)'
+    for i, sub in enumerate(subreddits):
+        string = '{}. <code>{}</code> ({}, {})'.format(
+            i + 1,
+            sub.name,
+            sub.added.strftime('%d/%m/%Y'),
+            sub.channel.title if sub.channel else 'no channel'
+        )
         strings.append(string)
 
-    update.message.reply_text('\n'.join(strings), parse_mode=ParseMode.HTML)
+    text = 'Subreddits ordered by addition date:\n\n{}'.format('\n'.join(strings))
+    update.message.reply_html(text)
