@@ -118,11 +118,17 @@ class Sender:
             self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
 
         # this whole shit should have its own method
-        if self._s.url.endswith(('.jpg', '.png')):
+        url_lower = self._s.url.lower()
+        if url_lower.endswith(('.jpg', '.png')):
             logger.debug('url is a jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
-        elif self._s.url.endswith('.gifv'):
+        elif 'artstation.com' in url_lower:
+            # artstation urls might end by ".jpg?5363773" but Telegram is capable to send them anyway
+            logger.debug('url is an ArtStation jpg/png: submission is an image')
+            self._s.media_type = MediaType.IMAGE
+            self._s.media_url = self._s.url
+        elif url_lower.endswith('.gifv'):
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
             self._s.media_url = self._s.url.replace('.gifv', '.mp4')
@@ -144,7 +150,7 @@ class Sender:
             elif imgur_direct_url.endswith('.mp4'):
                 self._s.media_type = MediaType.GIF
                 self._s.media_url = imgur_direct_url
-        elif self._s.url.endswith('.mp4'):
+        elif url_lower.endswith('.mp4'):
             logger.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
