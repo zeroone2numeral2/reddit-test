@@ -25,7 +25,7 @@ def subs_list(_, update):
         string = '{}. <code>{}</code> ({}, {})'.format(
             i + 1,
             sub.name,
-            sub.added.strftime('%d/%m/%Y'),
+            sub.added.strftime('%d/%m/%Y') if sub.added else '??/??/????',
             sub.channel.title if sub.channel else 'no channel'
         )
         strings.append(string)
