@@ -421,7 +421,7 @@ class Sender:
         logger.info('vreddit url: %s', url)
 
         # we set as max_size the max size supported by the bot API, so we can avoid to use pyrogram (see issue #82)
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.BOT_API)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED)
         logger.info('vreddit video url: %s', vreddit.url)
         logger.info('vreddit audio url: %s', vreddit.url_audio)
 
@@ -464,7 +464,7 @@ class Sender:
         self._sent_message = self._upload_video(
             self._chat_id, file_path,
             file_size=vreddit.size,
-            force_bot_api=True,  # see issue #82
+            force_bot_api=False,  # True is used because of issue #82
             **video_args
         )
 
