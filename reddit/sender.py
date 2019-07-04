@@ -29,7 +29,7 @@ logger = logging.getLogger('sp')
 
 imgur = Imgur(config.imgur.id, config.imgur.secret)
 mtproto = PyroClient(
-    'pyrogram_bot',
+    config.pyrogram.session_name,
     bot_token=config.telegram.token,
     api_id=config.pyrogram.api_id,
     api_hash=config.pyrogram.api_hash,
@@ -332,7 +332,8 @@ class Sender:
         return self._sent_message
 
     def _upload_video(self, chat_id, file_path, file_size=0, force_bot_api=False, *args, **kwargs):
-        if file_size < MaxSize.BOT_API or force_bot_api:
+        if file_size < MaxSize.BOT_API or force_bot_api or not config.pyrogram.enabled:
+            logger.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
             kwargs['thumb'] = kwargs['thumb_bo']
             with open(file_path, 'rb') as f:
                 logger.info('uploading video using the bot API...')
