@@ -1,16 +1,16 @@
 [telegram]
 workers = 1
-token = "725730806:AAHi73QEEXhxOaMQFRLqQXbItsILGbzHZ34" # @redditmirrorbot
-#token = "285333393:AAEvoP_Q7BdnvGAjgMW5JZoyeuo0jKvV3Cc" # @janembabot
-log = -1001141547703
-admins = [23646077]
+token = "" #  # CHANGEME
+log = -1001141547703 # CHANGEME
+admins = [23646077] # CHANGEME
 index = "reddit_mirrors" # telegram channel with the channels index
 
 [pyrogram]
+enabled = true
 session_name = "redditbot"
 workers = 0
-api_id = 78189
-api_hash = "45637520c755297fb626c1926efe1d4f"
+api_id = 12345 # CHANGEME
+api_hash = "" # CHANGEME
 
 [plugins]
 dir = "bot/plugins"
@@ -30,9 +30,9 @@ interval = 50
 first = 0
 
 [praw]
-client_id = "0ri3963pR-qmog"
-client_secret = "aM5f4s7KyxaHoI3Y1sUkiSx5tjk"
-user_agent = "test script by -"
+client_id = "" # CHANGEME
+client_secret = "" # CHANGEME
+user_agent = "" # CHANGEME
 submissions_limit = 25
 
 [sqlite]
@@ -51,8 +51,8 @@ start = 21 # in UTC. Rome: UTC + 1/2
 end = 6 # in UTC. Rome: UTC + 1/2
 
 [imgur]
-id = "0a9a0e9ec81b35e"
-secret = "d866c9c64893558a76d8724b20323522b5757072"
+id = "" # CHANGEME
+secret = "" # CHANGEME
 
 [ffmpeg]
 cmd_path = "ffmpeg"
