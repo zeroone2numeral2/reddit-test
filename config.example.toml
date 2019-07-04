@@ -19,7 +19,7 @@ manifest = "manifest"
 [jobs]
 dir = "bot/jobs"
 manifest = "manifest"
-posts_cooldown = 1 # in seconds
+posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
 
 [jobs.posts_job] # in minutes
 interval = 10
