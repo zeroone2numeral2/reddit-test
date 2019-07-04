@@ -26,6 +26,10 @@ On windows, it is necessary to have the binaries placed in the project root dire
 
 On any other platform, it assumes you have ffmpeg installed and that it is possible to run ffmpeg from your shell.
 
+### What are the commands?
+
+Use `/help` or read the code.
+
 ### Disclaimer
 
 This bot has been written in my spare time, it's horrible python, and is meant to be a personal tool for personal use, built on my needs.
