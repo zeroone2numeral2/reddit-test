@@ -128,6 +128,11 @@ class Sender:
             logger.debug('url is an ArtStation jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
+        elif 'images-wixmp' in url_lower:
+            # Telegram is capable to send these urls as images
+            logger.debug('url is an images-wixmp image: submission is an image')
+            self._s.media_type = MediaType.IMAGE
+            self._s.media_url = self._s.url
         elif url_lower.endswith('.gifv'):
             logger.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
