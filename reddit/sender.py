@@ -199,12 +199,14 @@ class Sender:
         if self._s.comments_url == self._s.url:
             self._s.textual = True
             self._s.thread_or_urls = '<a href="{}">thread</a>'.format(self._s.comments_url)
+            self._s.force_disable_link_preview = True
         else:
             self._s.textual = False
             self._s.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
                 self._s.url,
                 self._s.comments_url
             )
+            self._s.force_disable_link_preview = False
 
         if self._s.selftext:
             self._s.text = self._s.selftext
@@ -362,7 +364,7 @@ class Sender:
             self._chat_id,
             text,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=not self._subreddit.webpage_preview
+            disable_web_page_preview=not self._subreddit.webpage_preview or self._s.force_disable_link_preview
         )
 
     def _send_image(self, image_url, caption):
