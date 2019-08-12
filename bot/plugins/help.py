@@ -30,6 +30,8 @@ HELP_STRING = """\
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /seticon `[subreddit]`: set the channel icon to that subreddit's icon
 /exportlink: revoke and regenerate the invite link of a channel
+/optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
+subreddit name
 
 *Logs*
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
