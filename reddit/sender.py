@@ -186,6 +186,9 @@ class Sender:
                 self._s.thumbnail = 'https://www.reddit.com/static/nsfw2.png'
             elif self._s.thumbnail == 'default':
                 self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
+            elif self._s.thumbnail == 'spoiler':
+                # this is actually not the correct icon
+                self._s.thumbnail = 'https://www.reddit.com/static/self_default2.png'
         elif not self._s.thumbnail:
             self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
 
