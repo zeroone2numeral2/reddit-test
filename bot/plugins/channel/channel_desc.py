@@ -143,17 +143,26 @@ def on_setdesc_channel_selected(bot: Bot, update):
             subs_info_list.append(BASE_RESUME.format(**format_dict))
 
     subs_text = '\n\n'.join(subs_info_list)
-    footer = '<a href="{}">Invite link</a> also in the description. More subreddit mirrors: @{}'.format(
-        subreddits[0].channel.invite_link or '',
-        config.telegram.index
-    )
+
+    channel_obj = bot.get_chat(channel_id)
+    if channel_obj.username:
+        # if the channel has a public username, use a different wording for the footer
+        footer = 'Invite link also <a href="{}">here</a>. More subreddit mirrors: @{}'.format(
+            subreddits[0].channel.invite_link or '',
+            config.telegram.index
+        )
+    else:
+        footer = '<a href="{}">Invite link</a> also in the description. More subreddit mirrors: @{}'.format(
+            subreddits[0].channel.invite_link or '',
+            config.telegram.index
+        )
+
     text = '{}\n\n{}\n\n{}'.format(HEADER, subs_text, footer)
 
     sent_message = bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
     update.message.reply_markdown('[Message sent]({}), pinning...'.format(u.message_link(sent_message)),
-                                  reply_markup=Keyboard.REMOVE)
+                                  reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
 
-    channel_obj = bot.get_chat(channel_id)
     if channel_obj.pinned_message:
         try:
             channel_obj.pinned_message.delete()
