@@ -44,6 +44,14 @@ KEY_MAPPER_DICT = dict(
 
 SINGLE_IMGUR_MEDIA_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
 
+DEFAULT_THUMBNAILS = {
+    # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
+    'self': 'https://www.reddit.com/static/self_default2.png',
+    'nsfw': 'https://www.reddit.com/static/nsfw2.png',
+    'default': 'https://www.reddit.com/static/noimage.png',
+    'spoiler': 'https://www.reddit.com/static/self_default2.png'  # this is actually not the correct icon
+}
+
 
 class ImagesWebsites:
     IMGUR = 'imgur'
@@ -178,17 +186,9 @@ class Sender:
             self._s.video_duration = self._s.media['reddit_video']['duration']
             self._s.is_gif = self._s.media['reddit_video'].get('is_gif', False)  # some v.reddit might not have audio
 
-        if self._s.thumbnail and self._s.thumbnail in ('self', 'nsfw'):
+        if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
             # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
-            if self._s.thumbnail == 'self':
-                self._s.thumbnail = 'https://www.reddit.com/static/self_default2.png'
-            elif self._s.thumbnail == 'nsfw':
-                self._s.thumbnail = 'https://www.reddit.com/static/nsfw2.png'
-            elif self._s.thumbnail == 'default':
-                self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
-            elif self._s.thumbnail == 'spoiler':
-                # this is actually not the correct icon
-                self._s.thumbnail = 'https://www.reddit.com/static/self_default2.png'
+            self._s.thumbnail = DEFAULT_THUMBNAILS[self._s.thumbnail.lower()]
         elif not self._s.thumbnail:
             self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
 
