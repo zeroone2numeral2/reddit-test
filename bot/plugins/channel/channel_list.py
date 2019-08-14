@@ -52,6 +52,7 @@ def on_channels_list(bot, update):
                                         parse_mode=ParseMode.HTML)
 
         if i == 0:
+            first_sent_message = sent_message
             first_message_link = u.message_link(sent_message)
 
     first_sent_message.reply_html(STANDARD_TEXT)
