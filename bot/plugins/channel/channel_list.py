@@ -3,6 +3,7 @@ from math import floor
 
 from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
+from telegram import ParseMode
 from ptbplugins import Plugins
 
 from database.models import Subreddit
@@ -12,7 +13,7 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
-STANDARD_TEST = """Full list of channels here (pinned message)
+STANDARD_TEXT = """Full list of channels here (pinned message)
 
 <b>Request a subreddit mirror</b>: https://telegra.ph/how-to-03-20"""
 
@@ -43,12 +44,14 @@ def on_channels_list(bot, update):
         # should not exceed 100 (max number of entities)
         chunk_size = 100
 
-    last_message_link, last_sent_message = None, None
+    first_message_link, first_sent_message = None, None
     for i in range(0, len(lines), chunk_size):
         chunk = lines[i:i + chunk_size]
         text = '\n'.join(chunk)
-        last_sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True)
+        sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True,
+                                        parse_mode=ParseMode.HTML)
 
-        last_message_link = u.message_link(last_sent_message)
+        if i == 0:
+            first_message_link = u.message_link(sent_message)
 
-    last_sent_message.reply_html(STANDARD_TEST)
+    first_sent_message.reply_html(STANDARD_TEXT)
