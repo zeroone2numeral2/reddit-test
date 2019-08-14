@@ -1,6 +1,8 @@
 import logging
+from math import floor
 
 from telegram.ext import CommandHandler
+from telegram import MAX_MESSAGE_LENGTH
 from ptbplugins import Plugins
 
 from database.models import Subreddit
@@ -35,12 +37,16 @@ def on_channels_list(bot, update):
         )
         lines.append(line)
 
-    steps = 50  # should be 100 (max number of entities)
+    avg_line_length = int(sum(map(len, lines)) / len(lines))
+    chunk_size = floor(MAX_MESSAGE_LENGTH/avg_line_length) - 10  # make sure to have a margin of some characters
+    if chunk_size > 100:
+        # should not exceed 100 (max number of entities)
+        chunk_size = 100
+
     last_message_link, last_sent_message = None, None
-    for i in range(0, len(lines), steps):
-        chunk = lines[i:i + steps]
+    for i in range(0, len(lines), chunk_size):
+        chunk = lines[i:i + chunk_size]
         text = '\n'.join(chunk)
-        update.message.reply_text('{}\n{}'.format(len(text), len(chunk)))
         last_sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True)
 
         last_message_link = u.message_link(last_sent_message)
