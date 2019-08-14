@@ -22,13 +22,14 @@ def on_channels_list(_, update):
 
     lines = list()
     for channel in channels:
-        line = '• ({added}) /r/{subreddits} • <a href="{invite_link}">link</a>'.format(
+        line = '• {added} • <a href="{invite_link}">link</a> • /r/{subreddits}'.format(
             added=channel['added'].strftime('%d/%m/%Y'),
             subreddits=', /r/'.join(channel['subreddits']),
             invite_link=channel['invite_link']
         )
         lines.append(line)
 
-    text = '\n'.join(lines)
-
-    update.message.reply_html(text, disable_web_page_preview=True)
+    for i in range(0, len(lines), 100):
+        chunk = lines[i:i + 100]
+        text = '\n'.join(chunk)
+        update.message.reply_html(text, disable_web_page_preview=True)
