@@ -29,6 +29,6 @@ def on_channels_list(_, update):
         )
         lines.append(line)
 
-    text = '\n• '.join(lines)
+    text = '\n'.join(lines)
 
     update.message.reply_html(text, disable_web_page_preview=True)
