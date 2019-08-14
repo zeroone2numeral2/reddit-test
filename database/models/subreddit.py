@@ -120,3 +120,23 @@ class Subreddit(peewee.Model):
         )
 
         return [{**row, 'subreddits': row['subreddits'].split(', ')} for row in rows]
+
+    @classmethod
+    def get_channels(cls):
+        rows = (
+            Channel.select(
+                Channel.channel_id,
+                Channel.title,
+                Channel.invite_link,
+                Channel.added,
+                peewee.fn.GROUP_CONCAT(cls.name, ', ').coerce(False).alias('subreddits')
+            )
+            .join(cls)
+            .where((cls.enabled == True) | (cls.enabled_resume == True))
+            .group_by(Channel.channel_id)
+            # .order_by(peewee.fn.lower(Channel.title))
+            .order_by(Channel.added)
+            .dicts()
+        )
+
+        return [{**row, 'subreddits': row['subreddits'].split(', ')} for row in rows]
