@@ -55,4 +55,6 @@ def on_channels_list(bot, update):
             first_sent_message = sent_message
             first_message_link = u.message_link(sent_message)
 
-    first_sent_message.reply_html(STANDARD_TEXT)
+    final_message = first_sent_message.reply_html(STANDARD_TEXT)
+
+    update.message.reply_text('Done {}'.format(u.message_link(final_message)), disable_web_page_preview=True)
