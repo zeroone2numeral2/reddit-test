@@ -35,11 +35,12 @@ def on_channels_list(bot, update):
         )
         lines.append(line)
 
-    steps = 50
+    steps = 50  # should be 100 (max number of entities)
     last_message_link, last_sent_message = None, None
     for i in range(0, len(lines), steps):
         chunk = lines[i:i + steps]
         text = '\n'.join(chunk)
+        update.message.reply_text('{}\n{}'.format(len(text), len(chunk)))
         last_sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True)
 
         last_message_link = u.message_link(last_sent_message)
