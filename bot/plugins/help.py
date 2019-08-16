@@ -33,6 +33,7 @@ HELP_STRING = """\
 /exportlink: revoke and regenerate the invite link of a channel
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
+/clone `[origin sub] [dest sub]`: clone the origin subreddit's settings to the destination subreddit
 
 *Logs*
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file

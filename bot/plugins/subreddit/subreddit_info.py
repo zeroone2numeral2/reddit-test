@@ -1,7 +1,6 @@
 import logging
 
 from telegram.ext import CommandHandler
-from telegram import ParseMode
 from ptbplugins import Plugins
 
 from database.models import Subreddit
@@ -22,4 +21,4 @@ def sub_info(_, update, args):
     subreddit = Subreddit.fetch(subreddit_name)
 
     text = u.model_dict(subreddit, plain_formatted_string=True)
-    update.message.reply_text(text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+    update.message.reply_html(text, disable_web_page_preview=True)
