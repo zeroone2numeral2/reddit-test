@@ -116,7 +116,8 @@ class Sender:
         # and then we can add it to the crossposted submission
         self._s.xpost_from = ''
         self._s.xpost_from_string = ''
-        if hasattr(self._s, 'crosspost_parent'):
+        if hasattr(self._s, 'crosspost_parent') and len(self._s.crosspost_parent_list) > 0:
+            # sometimes submissions has the 'crosspost_parent' but there's no item in 'crosspost_parent_list'
             logger.info('note: submission is a crosspost of %s', self._s.crosspost_parent)
             self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
             self._s.xpost_from_string = 'xpost from /r/{}'.format(self._s.xpost_from)
