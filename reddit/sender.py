@@ -519,7 +519,7 @@ class Sender:
             channel=self._subreddit.channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
             posted_at=u.now() if self._sent_message else None,
-            sent_message=self._sent_message.de_json() if self._sent_message else None
+            sent_message=self._sent_message.de_json(self._sent_message, self._bot) if self._sent_message else None
         )
     
     def register_ignored(self):
