@@ -11,6 +11,7 @@ class PostResume(peewee.Model):
     channel = peewee.ForeignKeyField(Channel, backref='posts')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
+    sent_message = peewee.CharField(null=True)
 
     class Meta:
         table_name = 'resume_posts'
