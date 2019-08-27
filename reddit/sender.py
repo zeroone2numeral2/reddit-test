@@ -8,8 +8,10 @@ from urllib.parse import urlparse
 
 from telegram import Bot
 from telegram import ParseMode
+from telegram import Message as PtbMessage
 from telegram.error import BadRequest
 from telegram.error import TelegramError
+from pyrogram import Message as PyroMessage
 
 from const import MaxSize
 from .downloaders import Imgur
@@ -513,13 +515,20 @@ class Sender:
         return sent_message
     
     def register_post(self):
+        if isinstance(self._sent_message, PtbMessage):
+            sent_message_json = self._sent_message.to_json()
+        elif isinstance(self._sent_message, PyroMessage):
+            sent_message_json = str(self._sent_message)
+        else:
+            sent_message_json = None
+        
         Post.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
             posted_at=u.now() if self._sent_message else None,
-            sent_message=self._sent_message.to_json() if self._sent_message else None
+            sent_message=sent_message_json
         )
     
     def register_ignored(self):
