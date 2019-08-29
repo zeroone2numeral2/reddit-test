@@ -1,4 +1,6 @@
 from telegram import ParseMode
+from telegram import Message as PtbMessage
+from pyrogram import Message as PyroMessage
 
 from const import DEFAULT_ANNOUNCEMENT_TEMPLATE
 from database.models import PostResume
@@ -30,11 +32,18 @@ class SenderResume(Sender):
         )
 
     def register_post(self):
+        if isinstance(self._sent_message, PtbMessage):
+            sent_message_json = self._sent_message.to_json()
+        elif isinstance(self._sent_message, PyroMessage):
+            sent_message_json = str(self._sent_message)
+        else:
+            sent_message_json = None
+        
         PostResume.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
             posted_at=u.now() if self._sent_message else None,
-            sent_message=self._sent_message.to_json() if self._sent_message else None
+            sent_message=sent_message_json
         )
