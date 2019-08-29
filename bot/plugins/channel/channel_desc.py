@@ -24,11 +24,11 @@ logger = logging.getLogger(__name__)
 
 CHANNEL_SELECT = range(1)
 
-BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, {number_of_posts} {posts_string} every ~{pretty_time} \
+BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>{hashtag_placeholder}, {number_of_posts} {posts_string} every ~{pretty_time} \
 from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
 """
 
-BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
+BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
 every {period} at {hour} UTC{weekday_block}{ignored_block}\
 """
 
@@ -99,6 +99,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             posts_string='post' if subreddit.number_of_posts == 1 else 'posts',
             pretty_time=pretty_time(subreddit.max_frequency),
             sorting=subreddit.sorting,
+            hashtag_placeholder='',
             ignored_block='',
             quiet_block='',
             min_score_block='',
@@ -125,6 +126,9 @@ def on_setdesc_channel_selected(bot: Bot, update):
             format_dict['sorting'] = 'top/week'
 
         if subreddit.enabled:
+            if subreddit.template and '#{subreddit}' in subreddit.template:
+                format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
+
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
                 format_dict['quiet_block'] = '. Less frequent posts (frequency x{}) from {} to {} UTC'.format(
                     subreddit.quiet_hours_demultiplier,
@@ -134,6 +138,9 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
             subs_info_list.append(BASE_POST.format(**format_dict))
         elif subreddit.enabled_resume:
+            if subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
+                format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
+
             format_dict['period'] = subreddit.frequency
             format_dict['hour'] = subreddit.hour
             format_dict['weekday_block'] = ''
