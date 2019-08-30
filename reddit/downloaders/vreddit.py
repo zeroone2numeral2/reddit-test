@@ -2,6 +2,8 @@ import os
 import re
 import logging
 import subprocess
+import urllib.request
+import urllib.error
 
 from reddit.downloaders import Downloader
 from utilities import u
@@ -48,6 +50,18 @@ class VReddit(Downloader):
 
     def __repr__(self):
         return '<VReddit {} - {}>'.format(self._url, self._url_audio)
+
+    def audio_url_forbidden(self):
+        """Check whether the audio url is a working url or not.
+        Sometimes v.reddit videos might have the is_gif property set to False, but
+        still have no audio (see issue #91). So we have to do this additional check
+        """
+        try:
+            urllib.request.urlopen(self._url_audio)
+            return False
+        except urllib.error.HTTPError as e:
+            logger.error('audio url validity check: the url is forbidden (%s)', str(e))
+            return True
 
     def remove(self, keep_thumbnail=False):
         # noinspection PyBroadException
