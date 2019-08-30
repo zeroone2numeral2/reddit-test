@@ -398,7 +398,7 @@ class Sender:
             logger.info('[1/2] vreddit is a GIF (does not have an audio): we will NOT try to download the audio and merge audio and video')
             logger.info('[2/2] the following logs will mention the merged audio/video, but we are now just handling the video')
 
-        video_without_audio = False  # we should check here if the audio url is a webpage (#91)
+        video_without_audio = False  # we should check here if the audio url is a webpage (issue #91)
 
         file_path = vreddit.file_path
         logger.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
