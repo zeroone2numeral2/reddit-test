@@ -55,7 +55,11 @@ class VReddit(Downloader):
         """Check whether the audio url is a working url or not.
         Sometimes v.reddit videos might have the is_gif property set to False, but
         still have no audio (see issue #91). So we have to do this additional check
+
+        Inspired by https://stackoverflow.com/a/21515813
         """
+
+        # https://stackoverflow.com/a/21515813
         try:
             urllib.request.urlopen(self._url_audio)
             return False
