@@ -38,6 +38,7 @@ def main(database_path):
     invite_link = peewee.CharField(null=True)
     hide_spoilers = peewee.BooleanField(default=False, null=True)
     sent_message = peewee.CharField(null=True)
+    medias_only = peewee.BooleanField(default=False, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -85,6 +86,8 @@ def main(database_path):
         # 20190826
         migrator.add_column('posts', 'sent_message', sent_message),
         migrator.add_column('resume_posts', 'sent_message', sent_message),
+        # 20190830
+        migrator.add_column('subreddits', 'medias_only', medias_only),
     ]
 
     logger.info('Starting migration....')

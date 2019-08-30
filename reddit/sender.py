@@ -547,6 +547,9 @@ class Sender:
         if self._subreddit.ignore_stickied and self._s.stickied:
             logger.info('tests failed: sticked submission')
             return False
+        elif self._subreddit.medias_only and not self._s.media_type:
+            logger.info('tests failed: submission is a text and we only want media posts')
+            return False
         elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._s.score:
             logger.info('tests failed: not enough upvotes (%d/%d)', self._s.score, self._subreddit.min_score)
             return False
