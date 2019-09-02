@@ -55,7 +55,10 @@ def on_forwarded_message(bot: Bot, update):
         channel.invite_link = invite_link
     except (TelegramError, BadRequest) as e:
         logger.error('error while exporting invite link: %s', e.message)
-        channel.invite_link = None
+        if channel.username:
+            channel.invite_link = 'https://t.me/{}'.format(channel.username)
+        else:
+            channel.invite_link = None
 
     if Channel.exists(channel.id):
         Channel.update_channel(channel)
@@ -65,7 +68,7 @@ def on_forwarded_message(bot: Bot, update):
         update.message.reply_text('Channel {} ({}) has been saved'.format(channel.title, channel.id))
 
     if channel.invite_link:
-        update.message.reply_text('Exported invite link: {}'.format(channel.invite_link), disable_web_page_preview=True)
+        update.message.reply_text('Exported invite link/public link: {}'.format(channel.invite_link), disable_web_page_preview=True)
 
     return ConversationHandler.END
 
