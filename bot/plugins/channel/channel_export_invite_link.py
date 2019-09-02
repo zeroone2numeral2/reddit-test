@@ -89,11 +89,18 @@ def on_export_channel_selected(bot: Bot, update, user_data):
         return ConversationHandler.END
 
     try:
+        # first: try to revoke the current invite link
         invite_link = bot.export_chat_invite_link(channel_id)
     except (TelegramError, BadRequest) as e:
         logger.error('error while exporting invite link: %s', e.message)
-        update.message.reply_text('Error while exporting invite link: {}'.format(e.message))
-        return ConversationHandler.END
+
+        # maybe the channel is public and the bot doesn't have the permission to generete an invite link, so we try to get the chat
+        channel_object = bot.get_chat(channel_id)
+        if channel_object.username:
+            invite_link = 'https://t.me/{}'.format(channel_object.username)
+        else:
+            update.message.reply_text('Error while exporting invite link (the channel is not public): {}'.format(e.message))
+            return ConversationHandler.END
 
     channel.invite_link = invite_link
     channel.save()
