@@ -21,7 +21,7 @@ HELP_STRING = """\
 /subs: list subreddits
 /sub `[subreddit name]`: database row of that subreddit
 /config `<filter>`: change a subreddit configuration. Optional filter to filter the keyboard results
-/set `[subreddit name] [setting] [value]`: set "setting" to "value". "true", "True" will be converted to `True`, \
+(dead) /set `[subreddit name] [setting] [value]`: set "setting" to "value". "true", "True" will be converted to `True`, \
 "false", "False" will be converted to `False`, "none", "None" will be converted to `None`
 /get `[subreddit name] [setting]`: get the value of that setting
 /remsub `[subreddit name]`: delete the subreddit from the database

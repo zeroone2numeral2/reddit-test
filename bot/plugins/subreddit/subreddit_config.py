@@ -30,7 +30,7 @@ def on_config_command(_, update, args):
         update.message.reply_text('Cannot find any subreddit (filter: {})'.format(name_filter))
         return ConversationHandler.END
 
-    reply_markup = Keyboard.from_list(['{}. /r/{}'.format(s.id, s.name) for s in subreddits])
+    reply_markup = Keyboard.from_list(['{}. /r/{} ({})'.format(s.id, s.name, s.channel.title) for s in subreddits])
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
     return SUBREDDIT_SELECT
@@ -48,8 +48,10 @@ def on_subreddit_selected(_, update, user_data):
 
     user_data['subreddit'] = subreddit
 
-    update.message.reply_text('Selected subreddit: /r/{}. You can now change its configuration'.format(subreddit.name),
-                              reply_markup=Keyboard.REMOVE)
+    update.message.reply_text(
+        'Selected subreddit: /r/{s.name} (channel: {s.channel.title}). You can now change its configuration'.format(s=subreddit),
+        reply_markup=Keyboard.REMOVE
+    )
 
     return CHANGE_CONFIG
 

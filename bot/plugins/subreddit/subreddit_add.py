@@ -46,9 +46,11 @@ def on_addsub_command(_, update, args, user_data):
     else:
         subreddit_name = name_from_request  # reddit.subreddit_exists() returns the correct name
 
+    """ allow to add the same subreddit multiple times
     if Subreddit.fetch(subreddit_name):
         update.message.reply_html('This sub is already saved (<code>/sub {}</code>)'.format(subreddit_name))
         return ConversationHandler.END
+    """
 
     channels_list = Channel.get_list()
     if not channels_list:
