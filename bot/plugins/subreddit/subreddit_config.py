@@ -33,6 +33,7 @@ def on_config_command(_, update, args):
     reply_markup = Keyboard.from_list(['{}. /r/{} ({})'.format(s.id, s.name, s.channel.title) for s in subreddits])
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
+
     return SUBREDDIT_SELECT
 
 

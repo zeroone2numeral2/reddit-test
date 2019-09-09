@@ -20,10 +20,10 @@ HELP_STRING = """\
 /setchannel `[subreddit name]`: change a subreddit's channel
 /subs: list subreddits
 /sub `[subreddit name]`: database row of that subreddit
-/config `<filter>`: change a subreddit configuration. Optional filter to filter the keyboard results
-(dead) /set `[subreddit name] [setting] [value]`: set "setting" to "value". "true", "True" will be converted to `True`, \
-"false", "False" will be converted to `False`, "none", "None" will be converted to `None`
-/get `[subreddit name] [setting]`: get the value of that setting
+/config `<filter>`: change a subreddit configuration. Optional filter to filter the keyboard results. "true", \
+"True" will be converted to `True`, \
+"false", "False" will be converted to `False`, \
+"none", "None" will be converted to `None`
 /remsub `[subreddit name]`: delete the subreddit from the database
 /d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
 /attr `[property]`: get the value of that property for all subreddits
@@ -34,7 +34,7 @@ HELP_STRING = """\
 /exportlink: revoke and regenerate the invite link of a channel
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
-/clone `[origin sub] [dest sub]`: clone the origin subreddit's settings to the destination subreddit
+/clone `<origin sub name filter> <dest sub name filter>`: clone the origin subreddit's settings to the destination subreddit
 
 *Logs*
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
