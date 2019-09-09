@@ -44,16 +44,8 @@ def on_channels_list(bot, update):
         )
         lines.append(line)
 
-    avg_line_length = int(sum(map(len, lines)) / len(lines))
-    chunk_size = floor(MAX_MESSAGE_LENGTH/avg_line_length) - 10  # make sure to have a margin of some characters
-    if chunk_size > 100:
-        # should not exceed 100 (max number of entities)
-        chunk_size = 100
-
     first_message_link, first_sent_message = None, None
-    for i in range(0, len(lines), chunk_size):
-        chunk = lines[i:i + chunk_size]
-        text = '\n'.join(chunk)
+    for i, text in enumerate(u.split_text(lines, join_by='\n')):
         sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True,
                                         parse_mode=ParseMode.HTML)
 
