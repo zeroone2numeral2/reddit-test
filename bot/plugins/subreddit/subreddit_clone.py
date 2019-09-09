@@ -79,7 +79,7 @@ def on_dest_subreddit_selected(_, update, user_data):
 
     Subreddit.update(**origin_dict).where(Subreddit.id == dest_sub.id).execute()
 
-    update.message.reply_text('"{}" settings cloned to "{}"'.format(origin_sub.name, dest_sub.name))
+    update.message.reply_text('"{}" settings cloned to "{}"'.format(origin_sub.name, dest_sub.name), reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
