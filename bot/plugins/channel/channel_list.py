@@ -30,9 +30,11 @@ def on_channels_list(bot, update):
         return
 
     lines = list()
+    non_public_channels = list()
     for channel in channels:
         if not channel.public:
             # do not post channels that are not public
+            non_public_channels.append(channel['title'])
             continue
 
         line = '• {added} • <a href="{invite_link}">link</a> • /r/{subreddits}'.format(
@@ -62,3 +64,5 @@ def on_channels_list(bot, update):
     final_message = first_sent_message.reply_html(STANDARD_TEXT)
 
     update.message.reply_text('Done {}'.format(u.message_link(final_message)), disable_web_page_preview=True)
+    if non_public_channels:
+        update.message.reply_text('Non-public channels ignored: {}'.format(', '.join(non_public_channels)))
