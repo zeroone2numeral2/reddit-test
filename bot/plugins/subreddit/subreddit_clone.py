@@ -1,7 +1,6 @@
 import logging
 import re
 
-from playhouse.shortcuts import model_to_dict
 from telegram.ext import ConversationHandler
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
