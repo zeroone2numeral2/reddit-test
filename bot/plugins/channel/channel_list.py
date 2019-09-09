@@ -31,6 +31,10 @@ def on_channels_list(bot, update):
 
     lines = list()
     for channel in channels:
+        if not channel.public:
+            # do not post channels that are not public
+            continue
+
         line = '• {added} • <a href="{invite_link}">link</a> • /r/{subreddits}'.format(
             added=channel['added'].strftime('%d/%m/%Y'),
             subreddits=', /r/'.join(channel['subreddits']),

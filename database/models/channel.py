@@ -12,6 +12,7 @@ class Channel(peewee.Model):
     username = peewee.CharField(null=True)
     added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     invite_link = peewee.CharField(null=True)
+    public = peewee.BooleanField(default=True)  # non-public channels are not posted with /updatelist
 
     class Meta:
         table_name = 'channels'
