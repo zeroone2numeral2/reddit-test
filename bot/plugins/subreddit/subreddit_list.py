@@ -5,6 +5,7 @@ from ptbplugins import Plugins
 
 from database.models import Subreddit
 from utilities import d
+from utilities import u
 
 logger = logging.getLogger(__name__)
 
@@ -30,5 +31,5 @@ def subs_list(_, update):
         )
         strings.append(string)
 
-    text = 'Subreddits ordered by addition date:\n\n{}'.format('\n'.join(strings))
-    update.message.reply_html(text)
+    for text in u.split_text(strings, join_by='\n'):
+        update.message.reply_html(text)

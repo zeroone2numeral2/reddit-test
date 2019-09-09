@@ -16,6 +16,7 @@ import requests
 from PIL import Image
 
 from playhouse.shortcuts import model_to_dict
+from telegram import MAX_MESSAGE_LENGTH
 
 logger = logging.getLogger(__name__)
 
@@ -271,3 +272,14 @@ def message_link(message):
         return 'https://t.me/{}/{}'.format(message.chat.username, message.message_id)
     else:
         return 'https://t.me/c/{}/{}'.format(str(message.chat.id)[3:], message.message_id)
+
+
+def split_text(strings_list, join_by: str=False):
+    avg_string_len = sum(map(len, strings_list)) / len(strings_list)
+    list_items_per_message = int(MAX_MESSAGE_LENGTH / avg_string_len)
+
+    for i in range(0, len(strings_list), list_items_per_message):
+        if not join_by:
+            yield strings_list[i:i + list_items_per_message]
+        else:
+            yield join_by.join(strings_list[i:i + list_items_per_message])
