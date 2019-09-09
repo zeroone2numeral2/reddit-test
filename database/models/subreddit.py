@@ -79,14 +79,17 @@ class Subreddit(peewee.Model):
         setattr(cls, field, value)
 
     @classmethod
-    def get_list(cls):
+    def get_list(cls, name_filter=None):
         subs = (
             cls.select()
             # .order_by(peewee.fn.lower(cls.name))
             .order_by(cls.added)
         )
-        
-        return [sub for sub in subs]
+
+        if not name_filter:
+            return [sub for sub in subs]
+        else:
+            return [sub for sub in subs if name_filter.lower() in sub.name.lower()]
     
     @classmethod
     def subreddit_with_channel(cls, channel):
