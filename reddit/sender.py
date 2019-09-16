@@ -130,7 +130,7 @@ class Sender:
 
         # this whole shit should have its own method
         url_lower = self._s.url.lower()
-        if url_lower.endswith(('.jpg', '.png')):
+        if url_lower.endswith(('.jpg', '.png', '.jpeg')):
             logger.debug('url is a jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
