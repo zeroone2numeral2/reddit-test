@@ -28,7 +28,7 @@ def sub_icon(_, update, args):
         return
 
     with open(file_path, 'rb') as f:
-        update.message.reply_document(f)
+        update.message.reply_document(f, caption='#icon_{}'.format(sub_name))
 
     os.remove(file_path)
 
