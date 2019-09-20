@@ -65,7 +65,7 @@ def on_setting_change(_, update, user_data):
     logger.info('subreddit_name: %s', user_data['subreddit'].name)
 
     # extract values
-    match = re.search(r'^(\w+)\s+(.+)$', update.message.text, re.I & re.M)
+    match = re.search(r'^(\w+)\s+(.+)', update.message.text, re.I & re.M)
     if not match:
         update.message.reply_text('Use the following format: [key] [new value]')
         return CHANGE_CONFIG
