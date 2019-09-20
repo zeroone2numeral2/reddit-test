@@ -32,7 +32,7 @@ def on_channels_list(bot, update):
     lines = list()
     non_public_channels = list()
     for channel in channels:
-        if not channel.public:
+        if not channel.get('public', None):
             # do not post channels that are not public
             non_public_channels.append(channel['title'])
             continue
