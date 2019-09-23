@@ -136,7 +136,7 @@ class Subreddit(peewee.Model):
                 Channel.title,
                 Channel.invite_link,
                 Channel.added,
-                peewee.fn.GROUP_CONCAT(cls.name, ', ').coerce(False).alias('subreddits')
+                peewee.fn.GROUP_CONCAT(cls.id, ', ').coerce(False).alias('subreddits')
             )
             .join(cls)
             .where((cls.enabled == True) | (cls.enabled_resume == True))

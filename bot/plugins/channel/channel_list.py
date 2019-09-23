@@ -24,6 +24,7 @@ STANDARD_TEXT = """Full list of channels here (pinned message)
 def on_channels_list(bot, update):
     logger.info('/updatelist command')
 
+    # this whole function and the Subreddit method is a shitshow
     channels = Subreddit.get_channels()
     if not channels:
         update.message.reply_text('No saved channel. Use /addchannel to add a channel')
@@ -37,9 +38,17 @@ def on_channels_list(bot, update):
             non_public_channels.append(channel['title'])
             continue
 
-        line = '• {added} • <a href="{invite_link}">link</a> • /r/{subreddits}'.format(
+        channel_subreddits = list()
+        for sub_id in channel['subreddits']:
+            subreddit = Subreddit.get(id=int(sub_id))
+            channel_subreddits.append(subreddit)
+
+        # rebuild the list
+        channel['subreddits'] = ['/{}/{}'.format('m' if s.is_multireddit else 'r', s.name) for s in channel_subreddits]
+
+        line = '• {added} • <a href="{invite_link}">link</a> • {subreddits}'.format(
             added=channel['added'].strftime('%d/%m/%Y'),
-            subreddits=', /r/'.join(channel['subreddits']),
+            subreddits=', '.join(channel['subreddits']),
             invite_link=channel['invite_link']
         )
         lines.append(line)
