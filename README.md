@@ -46,6 +46,7 @@ updatetitles - update all the chat titles in the db
 setdesc - pin the channel description
 updatelist - update the channel's subreddits list
 addsub - register a subreddit
+addmulti - register a multireddit
 setchannel - change a subreddit's channel
 subs - list subreddits
 sub - database row of that subreddit

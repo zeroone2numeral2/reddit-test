@@ -77,7 +77,7 @@ def on_channel_selected(_, update, user_data):
 
     logger.info('saving multireddit...')
     Subreddit.create(
-        subreddit_id='m',
+        subreddit_id='{}:{}'.format(redditor, multireddit_name),
         channel=channel,
         name=multireddit_name,
         is_multireddit=True,

@@ -117,7 +117,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
         if subreddit.is_multireddit:
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
-            format_dict['multi_subs'] = ' (subreddits: r/' + ', r/'.join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name)) + ')'
+            format_dict['multi_subs'] = ' (/r/' + ', /r/'.join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name)) + ')'
         else:
             format_dict['sub_multi_prefix'] = 'r'
             format_dict['url'] = SUBREDDIT_URL.format(name=subreddit.name)

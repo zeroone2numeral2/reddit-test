@@ -36,6 +36,9 @@ HELP_STRING = """\
 subreddit name
 /clone `<origin sub name filter> <dest sub name filter>`: clone the origin subreddit's settings to the destination subreddit
 
+*Multireddits*
+/addmulti `[creator] [name]`: add a multireddit to a channel 
+
 *Logs*
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
 /loglines: get the date of the first line of every log file in the logs directory
