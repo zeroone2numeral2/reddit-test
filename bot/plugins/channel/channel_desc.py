@@ -118,7 +118,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
 
-            if (subreddit.template and '#{subreddit}' in subreddit.template) or subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
+            if (subreddit.template and '#{subreddit}' in subreddit.template) or (subreddit.template_resume and '#{subreddit}' in subreddit.template_resume):
                 # decide how to prefix the multireddit's subreddits list
                 sub_prefix = '#'
             else:
