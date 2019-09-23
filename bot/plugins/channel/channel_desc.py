@@ -117,7 +117,17 @@ def on_setdesc_channel_selected(bot: Bot, update):
         if subreddit.is_multireddit:
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
-            format_dict['multi_subs'] = ' (/r/' + ', /r/'.join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name)) + ')'
+
+            if (subreddit.template and '#{subreddit}' in subreddit.template) or subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
+                # decide how to prefix the multireddit's subreddits list
+                sub_prefix = '#'
+            else:
+                sub_prefix = '/r/'
+
+            format_dict['multi_subs'] = ' ({first_sub_prefix}{subs_list})'.format(
+                first_sub_prefix=sub_prefix,
+                subs_list=', {}'.format(sub_prefix).join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name))
+            )
         else:
             format_dict['sub_multi_prefix'] = 'r'
             format_dict['url'] = SUBREDDIT_URL.format(name=subreddit.name)
@@ -152,7 +162,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
             subs_info_list.append(BASE_POST.format(**format_dict))
         elif subreddit.enabled_resume:
-            if subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
+            if not subreddit.is_multireddit and subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
             format_dict['period'] = subreddit.frequency
