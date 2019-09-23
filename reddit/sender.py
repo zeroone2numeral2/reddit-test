@@ -547,8 +547,8 @@ class Sender:
                 timeout=360
             )
             return sent_message
-        except (BadRequest, TelegramError):
-            logger.info('i.reddit gif: TelegramError/BadRequest while sending by url, falling back to self._send_video...')
+        except (BadRequest, TelegramError) as e:
+            logger.info('i.reddit gif: TelegramError/BadRequest while sending by url (%s), falling back to self._send_video...', e.message)
             return self._send_video(url, caption)
 
     def register_post(self):
