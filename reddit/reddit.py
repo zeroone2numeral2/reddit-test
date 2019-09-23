@@ -21,9 +21,9 @@ class Reddit(praw.Reddit):
         except Redirect:
             return False
 
-    def get_submissions(self, subreddit, sorting='hot', limit=config.praw.submissions_limit):
+    def get_submissions(self, subreddit, multireddit=False, sorting='hot', limit=config.praw.submissions_limit):
         result = list()
-        for submission in self.iter_submissions(subreddit, sorting, limit):
+        for submission in self.iter_submissions(subreddit, multireddit=multireddit, sorting=sorting, limit=limit):
             created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
 
             result.append(dict(
@@ -36,18 +36,22 @@ class Reddit(praw.Reddit):
 
         return result
 
-    def iter_submissions(self, name, sorting='hot', limit=config.praw.submissions_limit):
-        iterator = self.subreddit(name).hot
+    def iter_submissions(self, name, multireddit=False, sorting='hot', limit=config.praw.submissions_limit):
+        if not multireddit:
+            iterator = self.subreddit(name).hot
+        else:
+            iterator = self.multireddit(redditor=config.praw.username, name=name).hot
+
         args = []
         kwargs = dict(limit=limit)
 
         if sorting.lower() in (Sorting.TOP, Sorting.timeframe.DAY):
-            iterator = self.subreddit(name).top
+            iterator = self.subreddit(name).top if not multireddit else self.multireddit(redditor=config.praw.username, name=name).top
             args = [Sorting.timeframe.DAY]
         elif sorting.lower() == Sorting.NEW:
-            iterator = self.subreddit(name).new
+            iterator = self.subreddit(name).new if not multireddit else self.multireddit(redditor=config.praw.username, name=name).new
         elif sorting.lower() == Sorting.timeframe.WEEK:
-            iterator = self.subreddit(name).top
+            iterator = self.subreddit(name).top if not multireddit else self.multireddit(redditor=config.praw.username, name=name).top
             args = [Sorting.timeframe.WEEK]
 
         for submission in iterator(*args, **kwargs):
@@ -80,3 +84,5 @@ class Reddit(praw.Reddit):
             return file_path
         else:
             return icon_url
+
+
