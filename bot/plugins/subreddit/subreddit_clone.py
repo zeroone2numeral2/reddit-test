@@ -16,6 +16,17 @@ logger = logging.getLogger(__name__)
 
 ORIGIN_SUBREDDIT_SELECT, DEST_SUBREDDIT_SELECT = range(2)
 
+CLONE_KEYS_TO_IGNORE = (
+    'subreddit_id',
+    'name',
+    'channel',
+    'last_posted_submission_dt',
+    'added',
+    'id',
+    'is_multireddit',
+    'multireddit_owner'
+)
+
 
 @d.restricted
 @d.failwithmessage
@@ -73,7 +84,7 @@ def on_dest_subreddit_selected(_, update, user_data):
     origin_sub = user_data.pop('origin')
 
     origin_dict = u.model_dict(origin_sub, plain_formatted_string=False)
-    for key in ('subreddit_id', 'name', 'channel', 'last_posted_submission_dt', 'added', 'id'):
+    for key in CLONE_KEYS_TO_IGNORE:
         # we don't have to override these fields
         origin_dict.pop(key, None)
 
