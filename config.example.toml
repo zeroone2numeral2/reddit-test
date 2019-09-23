@@ -30,7 +30,6 @@ interval = 50
 first = 0
 
 [praw]
-username = "" # CHANGEME
 client_id = "" # CHANGEME
 client_secret = "" # CHANGEME
 user_agent = "" # CHANGEME
