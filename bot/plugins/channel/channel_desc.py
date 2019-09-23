@@ -16,6 +16,7 @@ from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
 from database.models import Subreddit
+from reddit import reddit
 from utilities import u
 from utilities import d
 from config import config
@@ -24,11 +25,15 @@ logger = logging.getLogger(__name__)
 
 CHANNEL_SELECT = range(1)
 
-BASE_POST = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>{hashtag_placeholder}, {number_of_posts} {posts_string} every ~{pretty_time} \
+SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
+
+MULTIREDDIT_URL = 'https://old.reddit.com/user/{redditor}/m/{name}/'
+
+BASE_POST = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}, {number_of_posts} {posts_string} every ~{pretty_time} \
 from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
 """
 
-BASE_RESUME = """{i}) <a href="https://reddit.com/r/{name}">/r/{name}</a>{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
+BASE_RESUME = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a></a>{multi_subs}{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
 every {period} at {hour} UTC{weekday_block}{ignored_block}\
 """
 
@@ -105,8 +110,17 @@ def on_setdesc_channel_selected(bot: Bot, update):
             min_score_block='',
             nsfw_spoiler_block='',
             ignore_if_newer_block='',
+            multi_subs='',
             i=i + 1
         )
+
+        if subreddit.is_multireddit:
+            format_dict['sub_multi_prefix'] = 'm'
+            format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
+            format_dict['multi_subs'] = ' (subreddits: r/' + ', r/'.join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name)) + ')'
+        else:
+            format_dict['sub_multi_prefix'] = 'r'
+            format_dict['url'] = SUBREDDIT_URL.format(name=subreddit.name)
 
         if subreddit.allow_nsfw == False or subreddit.hide_spoilers or subreddit.ignore_if_newer_than or subreddit.min_score:
             ignored_list = list()
@@ -126,7 +140,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             format_dict['sorting'] = 'top/week'
 
         if subreddit.enabled:
-            if subreddit.template and '#{subreddit}' in subreddit.template:
+            if not subreddit.is_multireddit and subreddit.template and '#{subreddit}' in subreddit.template:
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:

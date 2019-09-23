@@ -75,6 +75,9 @@ class Reddit(praw.Reddit):
         for submission in self.subreddit(name).top(period, limit=limit):
             yield submission
 
+    def multi_subreddits(self, redditor, name):
+        return [s.display_name for s in self.multireddit(redditor, name).subreddits]
+
     def get_icon(self, sub_name, download=False):
         try:
             sub = self.subreddit(sub_name)
