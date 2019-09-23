@@ -32,11 +32,14 @@ def on_channels_list(bot, update):
 
     lines = list()
     non_public_channels = list()
+    i = 0
     for channel in channels:
         if channel.get('public', False):
             # do not post channels that are not public
             non_public_channels.append(channel['title'])
             continue
+
+        i += 1
 
         channel_subreddits = list()
         for sub_id in channel['subreddits']:
@@ -46,7 +49,8 @@ def on_channels_list(bot, update):
         # rebuild the list
         channel['subreddits'] = ['/{}/{}'.format('m' if s.is_multireddit else 'r', s.name) for s in channel_subreddits]
 
-        line = '• {added} • <a href="{invite_link}">link</a> • {subreddits}'.format(
+        line = '{i} • {added} • <a href="{invite_link}">link</a> • {subreddits}'.format(
+            i=i,
             added=channel['added'].strftime('%d/%m/%Y'),
             subreddits=', '.join(channel['subreddits']),
             invite_link=channel['invite_link']
