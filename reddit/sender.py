@@ -66,6 +66,7 @@ class MediaType:
     VIDEO = 'video'
     VREDDIT = 'vreddit'
     GFYCAT = 'gfycat'
+    REDDIT_GIF = 'reddit_gif'
 
 
 class Media:
@@ -181,9 +182,13 @@ class Sender:
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
         elif self._s.domain == 'i.redd.it' and self._s.url.endswith('.gif'):
-            logger.debug('url is an i.redd.it gif: treating the submission as a video')
-            self._s.media_type = MediaType.VIDEO
-            self._s.media_url = self._s.url
+            logger.debug('url is an i.redd.it gif')
+            self._s.media_type = MediaType.REDDIT_GIF
+            try:
+                self._s.media_url = self._s.preview['images'][0]['variants']['mp4']['resolutions'][-1]['url']
+            except KeyError:
+                logger.debug('KeyError while getting the i.reddit gif high resolution mp4 url, using submission.url instead...')
+                self._s.media_url = self._s.url
         elif 'gfycat.com' in self._s.domain_parsed:
             logger.debug('url is a gfycat')
             self._s.media_type = MediaType.GFYCAT
@@ -339,6 +344,9 @@ class Sender:
                 elif self._s.media_type == MediaType.GFYCAT:
                     logger.info('post is a gfycat: using _send_gfycat()')
                     self._sent_message = self._send_gfycat(self._s.media_url, text)
+                elif self._s.media_type == MediaType.REDDIT_GIF:
+                    logger.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
+                    self._sent_message = self._send_i_reddit_gif(self._s.media_url, text)
                 
                 return self._sent_message
             except Exception as e:
@@ -528,7 +536,21 @@ class Sender:
         gfycat.remove()
 
         return sent_message
-    
+
+    def _send_i_reddit_gif(self, url, caption):
+        try:
+            sent_message = self._bot.send_video(
+                self._chat_id,
+                url,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                timeout=360
+            )
+            return sent_message
+        except (BadRequest, TelegramError):
+            logger.info('i.reddit gif: TelegramError/BadRequest while sending by url, falling back to self._send_video...')
+            return self._send_video(url, caption)
+
     def register_post(self):
         if isinstance(self._sent_message, PtbMessage):
             sent_message_json = self._sent_message.to_json()

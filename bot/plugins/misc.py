@@ -47,6 +47,17 @@ def remdl_command(_, update):
     update.message.reply_text('Removed {} files'.format(len(files)))
 
 
+@Plugins.add(CommandHandler, command=['sendv'], pass_args=True)
+@d.restricted
+@d.failwithmessage
+def remdl_command(_, update, args):
+    logger.info('/sendv command')
+
+    url = args[0]
+
+    update.message.reply_video(url)
+
+
 @Plugins.add(CommandHandler, command=['json'])
 @d.restricted
 @d.failwithmessage
