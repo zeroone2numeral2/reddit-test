@@ -112,10 +112,10 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
 
 
 def process_submissions(subreddit: Subreddit):
-    logger.info('fetching submissions (sorting: %s)', subreddit.sorting)
+    logger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or config.praw.submissions_limit
-    for submission in reddit.iter_submissions(subreddit.name, sorting=subreddit.sorting.lower(), limit=limit):
+    for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=subreddit.sorting.lower(), limit=limit):
         logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if Post.already_posted(subreddit, submission.id):
             logger.info('...submission %s has already been posted', submission.id)

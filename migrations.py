@@ -40,6 +40,8 @@ def main(database_path):
     sent_message = peewee.CharField(null=True)
     medias_only = peewee.BooleanField(default=False, null=True)
     public = peewee.BooleanField(default=True)
+    is_multireddit = peewee.BooleanField(default=False)
+    multireddit_owner = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -91,6 +93,9 @@ def main(database_path):
         migrator.add_column('subreddits', 'medias_only', medias_only),
         # 20190909
         migrator.add_column('channels', 'public', public),
+        # 20190923
+        migrator.add_column('subreddits', 'is_multireddit', is_multireddit),
+        migrator.add_column('subreddits', 'multireddit_owner', multireddit_owner),
     ]
 
     logger.info('Starting migration....')

@@ -4,6 +4,7 @@ import urllib.request
 
 import praw
 from prawcore.exceptions import Redirect
+from prawcore.exceptions import NotFound
 
 from .sortings import Sorting
 from utilities import u
@@ -18,12 +19,23 @@ class Reddit(praw.Reddit):
         try:
             subreddit = self.subreddit(name)
             return str(subreddit.display_name)  # save the correct name
-        except Redirect:
+        except (Redirect, NotFound):
             return False
 
-    def get_submissions(self, subreddit, multireddit=False, sorting='hot', limit=config.praw.submissions_limit):
+    def multireddit_exists(self, redditor, name):
+        try:
+            multireddit = self.multireddit(redditor=redditor, name=name)
+            if multireddit.visibility != 'public':
+                # the API doesn't allow to request submissions from private multis
+                return False
+
+            return str(multireddit.name)  # save the correct name
+        except (Redirect, NotFound):
+            return False
+
+    def get_submissions(self, subreddit, multireddit_owner=False, sorting='hot', limit=config.praw.submissions_limit):
         result = list()
-        for submission in self.iter_submissions(subreddit, multireddit=multireddit, sorting=sorting, limit=limit):
+        for submission in self.iter_submissions(subreddit, multireddit_owner=multireddit_owner, sorting=sorting, limit=limit):
             created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
 
             result.append(dict(
@@ -36,22 +48,24 @@ class Reddit(praw.Reddit):
 
         return result
 
-    def iter_submissions(self, name, multireddit=False, sorting='hot', limit=config.praw.submissions_limit):
-        if not multireddit:
+    def iter_submissions(self, name, multireddit_owner=None, sorting='hot', limit=config.praw.submissions_limit):
+        if not multireddit_owner:
             iterator = self.subreddit(name).hot
         else:
-            iterator = self.multireddit(redditor=config.praw.username, name=name).hot
+            iterator = self.multireddit(redditor=multireddit_owner, name=name).hot
+
+        sorting = sorting.lower()
 
         args = []
         kwargs = dict(limit=limit)
 
-        if sorting.lower() in (Sorting.TOP, Sorting.timeframe.DAY):
-            iterator = self.subreddit(name).top if not multireddit else self.multireddit(redditor=config.praw.username, name=name).top
+        if sorting in (Sorting.TOP, Sorting.timeframe.DAY):
+            iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.DAY]
-        elif sorting.lower() == Sorting.NEW:
-            iterator = self.subreddit(name).new if not multireddit else self.multireddit(redditor=config.praw.username, name=name).new
-        elif sorting.lower() == Sorting.timeframe.WEEK:
-            iterator = self.subreddit(name).top if not multireddit else self.multireddit(redditor=config.praw.username, name=name).top
+        elif sorting == Sorting.NEW:
+            iterator = self.subreddit(name).new if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).new
+        elif sorting== Sorting.timeframe.WEEK:
+            iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.WEEK]
 
         for submission in iterator(*args, **kwargs):

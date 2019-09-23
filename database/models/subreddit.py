@@ -40,6 +40,8 @@ class Subreddit(peewee.Model):
     quiet_hours_start = peewee.IntegerField(null=True, default=config.quiet_hours.start)
     quiet_hours_end = peewee.IntegerField(null=True, default=config.quiet_hours.end)
     number_of_posts = peewee.IntegerField(default=1)
+    is_multireddit = peewee.BooleanField(default=False)
+    multireddit_owner = peewee.CharField(null=True)
     test = peewee.BooleanField(default=False)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
