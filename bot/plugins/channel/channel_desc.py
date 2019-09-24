@@ -33,7 +33,7 @@ BASE_POST = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{h
 from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
 """
 
-BASE_RESUME = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a></a>{multi_subs}{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
+BASE_RESUME = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
 every {period} at {hour} UTC{weekday_block}{ignored_block}\
 """
 
