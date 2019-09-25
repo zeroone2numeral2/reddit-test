@@ -20,6 +20,7 @@ SUBREDDIT_SELECT, CHANGE_CONFIG = range(2)
 
 @d.restricted
 @d.failwithmessage
+# @d.deferred_handle_lock
 def on_config_command(_, update, args):
     logger.info('/config command, args: %s', str(args))
 
@@ -39,6 +40,7 @@ def on_config_command(_, update, args):
 
 @d.restricted
 @d.failwithmessage
+# @d.deferred_handle_lock
 def on_subreddit_selected(_, update, user_data):
     logger.info('subreddit selected: %s', update.message.text)
 
@@ -59,6 +61,7 @@ def on_subreddit_selected(_, update, user_data):
 
 @d.restricted
 @d.failwithmessage
+# @d.deferred_handle_lock
 def on_setting_change(_, update, user_data):
     logger.info('changed subreddit property: %s', update.message.text)
 

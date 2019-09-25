@@ -1,8 +1,11 @@
 import logging
+import time
 from functools import wraps
 
 from database.models import Subreddit
 from database.models import Job
+from database import db
+from sqlite3 import OperationalError
 from utilities import u
 from config import config
 
@@ -106,5 +109,32 @@ def log_start_end_dt(func):
             bot.send_message(config.telegram.log, text)
 
         return job_result
+
+    return wrapped
+
+
+def deferred_handle_lock(func):
+    @wraps(func)
+    def wrapped(bot, update, *args, **kwargs):
+        with db.atomic('DEFERRED'):
+            # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
+
+            # acquire a peewee deferred lock: a sahred lock is acquired, but as soon as we need to write, it acquires a
+            # reserved lock. There can only be a reserved lock at time on a database, this means that if a
+            # function (handler) tries to write while the database is locked, an exception is raised. We
+            # try to run the handler until the lock is released.
+            # IMPORTANT: when a job runs, it acquires an 'EXCLUSIVE' lock which locks the database for
+            # everyone so there shouldn't be any issue with jobs being blocked by a lock
+            # acquired by an handler because the job will acquire a lock when it start
+            # and will release it only when it ends
+            while True:
+                try:
+                    return func(bot, update, *args, **kwargs)
+                except OperationalError as e:
+                    if str(e) == 'database is locked':
+                        logger.info('database is locked, sleeping')
+                        time.sleep(1)
+                    else:
+                        raise e
 
     return wrapped

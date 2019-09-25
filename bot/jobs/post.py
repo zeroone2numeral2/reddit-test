@@ -199,8 +199,9 @@ def process_subreddit(subreddit: Subreddit, bot):
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs.posts_job.interval * 60, first=config.jobs.posts_job.first * 60, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
-@db.atomic('IMMEDIATE')
+@db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
 def check_posts(bot, _):
+    time.sleep(10)
     subreddits = (
         Subreddit.select()
         .where(Subreddit.enabled == True)
