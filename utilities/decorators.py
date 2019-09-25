@@ -124,7 +124,7 @@ def deferred_handle_lock(func):
             # function (handler) tries to write while the database is locked, an exception is raised. We
             # try to run the handler until the lock is released.
             # IMPORTANT: when a job runs, it acquires an 'EXCLUSIVE' lock which locks the database for
-            # everyone so there shouldn't be any issue with jobs being blocked by a lock
+            # everyone ('except for read uncommitted') so there shouldn't be any issue with jobs being blocked by a lock
             # acquired by an handler because the job will acquire a lock when it start
             # and will release it only when it ends
             while True:

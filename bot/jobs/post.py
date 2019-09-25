@@ -201,7 +201,6 @@ def process_subreddit(subreddit: Subreddit, bot):
 @d.log_start_end_dt
 @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
 def check_posts(bot, _):
-    time.sleep(10)
     subreddits = (
         Subreddit.select()
         .where(Subreddit.enabled == True)
