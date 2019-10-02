@@ -186,8 +186,8 @@ class Sender:
             self._s.media_type = MediaType.REDDIT_GIF
             try:
                 self._s.media_url = self._s.preview['images'][0]['variants']['mp4']['resolutions'][-1]['url']
-            except KeyError:
-                logger.debug('KeyError while getting the i.reddit gif high resolution mp4 url, using submission.url instead...')
+            except (KeyError, IndexError):
+                logger.debug('KeyError/IndexError while getting the i.reddit gif high resolution mp4 url. self._s.preview: %s\nusing submission.url instead...', str(self._s.preview))
                 self._s.media_url = self._s.url
         elif 'gfycat.com' in self._s.domain_parsed:
             logger.debug('url is a gfycat')
