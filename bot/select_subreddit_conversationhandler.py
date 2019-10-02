@@ -1,4 +1,5 @@
 import re
+import logging
 from functools import wraps
 
 from telegram.ext import CommandHandler
@@ -8,12 +9,28 @@ from bot.markups import Keyboard
 from database.models import Subreddit
 from utilities import d
 
-SUBREDDIT_SELECT = range(1)
+logger = logging.getLogger(__name__)
+
+FIRST_STEP = range(1)
+
+
+@d.restricted
+@d.failwithmessage
+def on_cancel(_, update, user_data):
+    logger.debug('shared subreddit selector (fallback), text: %s', update.message.text)
+
+    update.message.reply_text('Operation aborted/completed', reply_markup=Keyboard.REMOVE)
+
+    user_data.pop('subreddit', None)
+
+    return ConversationHandler.END
 
 
 @d.restricted
 @d.failwithmessage
 def subreddit_selection(_, update, args):
+    logger.debug('shared subreddit selector (entry point), text: %s', update.message.text)
+
     name_filter = args[0] if args else None
 
     subreddits = Subreddit.get_list(name_filter=name_filter)
@@ -25,17 +42,23 @@ def subreddit_selection(_, update, args):
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
 
-    return SUBREDDIT_SELECT
+    logger.debug('returing next state: %d', FIRST_STEP[0])
+    return FIRST_STEP  # first step after the entry point
 
 
 class SelectSubredditConversationHandler(ConversationHandler):
-    def __init__(self, entry_command, states, fallbacks, entry_points=None, *args, **kwargs):
+    def __init__(self, entry_command, states, fallbacks=None, entry_points=None, *args, **kwargs):
         entry_command_hanlder = CommandHandler(command=entry_command, callback=subreddit_selection, pass_args=True)
 
         if entry_points:
             entry_points.insert(0, entry_command_hanlder)
         else:
             entry_points = [entry_command_hanlder]
+
+        if not fallbacks:
+            fallbacks = [CommandHandler(['cancel', 'done'], on_cancel, pass_user_data=True)]
+
+        # print(entry_points, states, fallbacks)
 
         super().__init__(entry_points, states, fallbacks, *args, **kwargs)
 
@@ -44,9 +67,10 @@ class SelectSubredditConversationHandler(ConversationHandler):
         @wraps(func)
         def wrapped(bot, update, *args, **kwargs):
             subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
+            logger.debug('subreddit fetcher decorator: subreddit id: %d', subreddit_key)
 
             subreddit = Subreddit.get(Subreddit.id == subreddit_key)
 
-            return func(bot, update, subreddit, *args, **kwargs)
+            return func(bot, update, subreddit=subreddit, *args, **kwargs)
 
         return wrapped
