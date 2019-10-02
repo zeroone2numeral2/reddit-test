@@ -3,7 +3,7 @@ import datetime
 import os
 import re
 from collections import OrderedDict
-import pprint
+from pprint import pformat
 from urllib.parse import urlparse
 
 from telegram import Bot
@@ -187,7 +187,7 @@ class Sender:
             try:
                 self._s.media_url = self._s.preview['images'][0]['variants']['mp4']['resolutions'][-1]['url']
             except (KeyError, IndexError):
-                logger.debug('KeyError/IndexError while getting the i.reddit gif high resolution mp4 url. self._s.preview: %s\nusing submission.url instead...', str(self._s.preview))
+                logger.debug('KeyError/IndexError while getting the i.reddit gif high resolution mp4 url. self._s.preview: %s\nusing submission.url instead...', pformat(self._s.preview))
                 self._s.media_url = self._s.url
         elif 'gfycat.com' in self._s.domain_parsed:
             logger.debug('url is a gfycat')
