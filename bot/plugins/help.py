@@ -56,7 +56,7 @@ subreddit name
 /db: get the database file
 /now `<utc hour>`: get current UTC time and its localizations. If an hour is passed, times will be \
 calculated at that UTC hour
-/try `[submission id]`: get the submission with that id. Note: the subreddit must be saved in the database
+/try `[submission id]`: get the submission with that id (the subreddit doesn't need to be saved in the db)
 forward a message posted by the bot in a channel: get that submission's dict
 """
 

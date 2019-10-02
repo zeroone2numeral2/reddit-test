@@ -6,6 +6,7 @@ from telegram.ext import CommandHandler
 from ptbplugins import Plugins
 
 from database.models import Subreddit
+from database.models import Channel
 from reddit import Sender
 from reddit import reddit
 from utilities import d
@@ -23,12 +24,16 @@ def try_submission(bot, update, args):
 
     submission = reddit.submission(id=submission_id)
 
-    subreddit = Subreddit.fetch(submission.subreddit)
-    if not subreddit:
-        update.message.reply_text('No subreddit "{}" in the database'.format(submission.subreddit))
-        return
+    # pick a random channel to pass to Sender
+    tmp_channel = Channel.select().order_by(Channel.channel_id.desc()).get()
 
-    sender = Sender(bot, subreddit, submission)
+    tmp_subreddit = Subreddit(
+        subreddit_id=submission.subreddit.id,
+        channel=tmp_channel,
+        name=str(submission.subreddit)
+    )
+
+    sender = Sender(bot, tmp_subreddit, submission)
     
     file_path = sender.write_temp_submission_dict()
 
