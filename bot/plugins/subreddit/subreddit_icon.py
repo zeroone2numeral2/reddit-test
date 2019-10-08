@@ -65,9 +65,7 @@ def seticon_subreddit_conv_hanlder():
     conv_handler = SelectSubredditConversationHandler(
         entry_command='seticon',
         states={
-            SUBREDDIT_SELECT: [
-                MessageHandler(Filters.text, callback=sub_seticon)
-            ],
+            SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=sub_seticon)],
         }
     )
 
