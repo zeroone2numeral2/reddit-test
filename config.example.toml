@@ -33,6 +33,8 @@ first = 0
 client_id = "" # CHANGEME
 client_secret = "" # CHANGEME
 user_agent = "" # CHANGEME
+username = "" # CHANGEME, only needed for private and quarantined subs
+password = "" # CHANGEME, only needed for private and quarantined subs
 submissions_limit = 25
 
 [sqlite]
