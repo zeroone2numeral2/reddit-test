@@ -10,7 +10,7 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
-SUBREDDIT_SELECT = range(1)
+SUBREDDIT_SELECT = 0
 
 
 @d.restricted

@@ -12,7 +12,7 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
-SUBREDDIT_SELECT = range(1)
+SUBREDDIT_SELECT = 0
 
 
 @d.restricted
@@ -32,9 +32,7 @@ def info_subreddit_conv_hanlder():
     conv_handler = SelectSubredditConversationHandler(
         entry_command=['sub', 'info'],
         states={
-            SUBREDDIT_SELECT: [
-                MessageHandler(Filters.text, callback=on_subreddit_selected)
-            ],
+            SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected)],
         }
     )
 

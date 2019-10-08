@@ -97,7 +97,7 @@ def on_setting_change(_, update, user_data):
 @Plugins.add_conversation_hanlder()
 def config_subreddit_conv_hanlder():
     conv_handler = SelectSubredditConversationHandler(
-        entry_command=['config'],
+        entry_command='config',
         states={
             SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
             CHANGE_CONFIG: [MessageHandler(Filters.text, callback=on_setting_change, pass_user_data=True)]

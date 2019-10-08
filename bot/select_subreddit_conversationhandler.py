@@ -11,7 +11,7 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
-FIRST_STEP = range(1)
+FIRST_STEP = 0
 
 
 @d.restricted
@@ -42,7 +42,7 @@ def subreddit_selection(_, update, args):
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
 
-    logger.debug('returing next state: %d', FIRST_STEP[0])
+    logger.debug('returing next state: %d', FIRST_STEP)
     return FIRST_STEP  # first step after the entry point
 
 
