@@ -40,7 +40,6 @@ def sub_icon(_, update, args):
 
 @d.restricted
 @d.failwithmessage
-@d.knownsubreddit
 @SelectSubredditConversationHandler.pass_subreddit
 def sub_seticon(bot, update, subreddit=None):
     logger.info('/seticon command, selected subreddit: %s', update.message.text)

@@ -2,15 +2,12 @@ import logging
 import re
 
 from playhouse.shortcuts import model_to_dict
-from telegram.ext import ConversationHandler
-from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from ptbplugins import Plugins
 
 from ...select_subreddit_conversationhandler import SelectSubredditConversationHandler
 from bot.markups import Keyboard
-from database.models import Subreddit
 from utilities import u
 from utilities import d
 
@@ -102,12 +99,8 @@ def config_subreddit_conv_hanlder():
     conv_handler = SelectSubredditConversationHandler(
         entry_command=['config'],
         states={
-            SUBREDDIT_SELECT: [
-                MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)
-            ],
-            CHANGE_CONFIG: [
-                MessageHandler(Filters.text, callback=on_setting_change, pass_user_data=True)
-            ]
+            SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
+            CHANGE_CONFIG: [MessageHandler(Filters.text, callback=on_setting_change, pass_user_data=True)]
         }
     )
 
