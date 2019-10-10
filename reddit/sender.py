@@ -605,7 +605,7 @@ class Sender:
             return True
     
     def write_temp_submission_dict(self):
-        text = pprint.pformat(self.submission_dict)
+        text = pformat(self.submission_dict)
         file_path = os.path.join('downloads', '{}.temp.txt'.format(self._s.id))
     
         with open(file_path, 'w+') as f:
