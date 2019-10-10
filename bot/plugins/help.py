@@ -14,7 +14,7 @@ HELP_STRING = """\
 /updatetitles: update all the chat titles in the database
 /setdesc: pin a pre-formatted message that describes the channel
 /updatelist: update the channel's subreddits list
-/members: top 10 channels by number of members
+/members: top 25 channels by number of members
 
 *Subreddits*
 /addsub `[subreddit name]`: register a subreddit

@@ -68,7 +68,7 @@ remffmpeglogs - remove ffmpeg logs
 force - force that job
 jobs - get the list of subreddits and their enabled jobs
 duration - show the duration of the most recent 100 jobs
-members - top 10 channels by number of members
+members - top channels by number of members
 ph - list template's placeholders
 getconfig - see config values
 remdl - empty the downloads directory

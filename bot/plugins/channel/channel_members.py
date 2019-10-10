@@ -38,6 +38,6 @@ def on_top_members_command(bot: Bot, update):
 
     channels_members.sort(key=lambda x: x[1], reverse=True)
 
-    channels_string = '\n'.join(['{0}: {1}'.format(*c) for c in channels_members][:9])
+    channels_string = '\n'.join(['{i}) {0}: {1}'.format(*c, i=i+1) for i, c in enumerate(channels_members)][:24])
     errors_string = '\n'.join(['{}: {}'.format(title, err) for title, err in errors])
     update.message.reply_text('{}\n\nErrors:\n{}'.format(channels_string, errors_string))
