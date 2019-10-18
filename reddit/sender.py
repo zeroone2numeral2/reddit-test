@@ -105,11 +105,11 @@ class Sender:
         self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
         self._s.domain_parsed = urlparse(self._s.url).netloc
         self._s.title_escaped = u.escape(self._s.title)
-        self._s.text = None
-        self._s.text_32 = None
-        self._s.text_160 = None
-        self._s.text_200 = None
-        self._s.text_256 = None
+        self._s.text = ''
+        self._s.text_32 = ''
+        self._s.text_160 = ''
+        self._s.text_200 = ''
+        self._s.text_256 = ''
         self._s.video_size = (None, None)
         self._s.video_duration = 0
         self._submission_dict = dict()
