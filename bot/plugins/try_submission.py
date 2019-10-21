@@ -34,8 +34,8 @@ def try_submission(bot, update, args):
     )
 
     # try to get the real subreddit if we have it saved in the db
-    if Subreddit.fetch(submission.subreddit.name):
-        tmp_subreddit = Subreddit.fetch(submission.subreddit.name)
+    if Subreddit.fetch(submission.subreddit.subreddit):
+        tmp_subreddit = Subreddit.fetch(submission.subreddit.subreddit)
 
     sender = Sender(bot, tmp_subreddit, submission)
     
