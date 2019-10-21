@@ -77,6 +77,13 @@ class Subreddit(peewee.Model):
             return None
 
     @classmethod
+    def get_safe(cls: Type[S], *args, **kwargs):
+        try:
+            return cls.get(*args, **kwargs)
+        except peewee.DoesNotExist:
+            return None
+
+    @classmethod
     def set_field(cls, field, value):
         setattr(cls, field, value)
 
