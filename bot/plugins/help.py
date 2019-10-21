@@ -24,7 +24,7 @@ HELP_STRING = """\
 /config `<filter>`: change a subreddit configuration. Optional filter to filter the keyboard results. "true", \
 "True" will be converted to `True`, \
 "false", "False" will be converted to `False`, \
-"none", "None" will be converted to `None`
+"none", "None" will be converted to `None`. Just pass a field name to get its value
 /remsub `[subreddit name]`: delete the subreddit from the database
 /d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
 /attr `[property]`: get the value of that property for all subreddits

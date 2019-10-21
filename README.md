@@ -51,7 +51,6 @@ setchannel - change a subreddit's channel
 subs - list subreddits
 sub - database row of that subreddit
 set - change a subreddit setting
-get - get the value of a setting
 remsub - delete the subreddit from the database
 d - get the last n submission from the subreddit, sorted by hot/top/new
 attr - get the value of that property for all subreddits
