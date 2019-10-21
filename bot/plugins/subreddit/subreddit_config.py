@@ -41,6 +41,24 @@ def on_setting_change(_, update, user_data):
 
     logger.info('subreddit_name: %s', user_data['subreddit'].name)
 
+    # just return the value if only one word is passed
+    if re.search(r'^\w+$', update.message.text, re.I & re.M):
+        setting = update.message.text.lower()
+        subreddit_dict = model_to_dict(user_data['subreddit'])
+
+        try:
+            subreddit_dict[setting]
+        except KeyError:
+            update.message.reply_text('Cannot find field "{}" in the database row'.format(setting))
+            return CHANGE_CONFIG
+
+        value = getattr(user_data['subreddit'], setting)
+
+        update.message.reply_text('{}:'.format(setting))
+        update.message.reply_html('<code>{}</code>'.format(u.escape(str(value))))
+
+        return CHANGE_CONFIG
+
     # extract values
     match = re.search(r'^(\w+)\s+((?:.|\s)+)$', update.message.text, re.I & re.M)
     if not match:
