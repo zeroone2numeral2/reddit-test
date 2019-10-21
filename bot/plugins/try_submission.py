@@ -28,8 +28,8 @@ def try_submission(bot, update, args):
     tmp_channel = Channel.select().order_by(Channel.channel_id.desc()).get()
 
     # try to get the real subreddit if we have it saved in the db
-    if Subreddit.fetch(submission.subreddit.subreddit):
-        tmp_subreddit = Subreddit.fetch(submission.subreddit.subreddit)
+    if Subreddit.fetch(submission.subreddit.name):
+        tmp_subreddit = Subreddit.fetch(submission.subreddit.name)
     else:
         tmp_subreddit = Subreddit(
             subreddit_id=submission.subreddit.id,
@@ -37,7 +37,6 @@ def try_submission(bot, update, args):
             name=str(submission.subreddit)
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...')
-
 
     sender = Sender(bot, tmp_subreddit, submission)
     
