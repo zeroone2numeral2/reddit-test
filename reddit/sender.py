@@ -46,6 +46,8 @@ KEY_MAPPER_DICT = dict(
 
 SINGLE_IMGUR_MEDIA_URL_REGEX = r'imgur\.com/([a-zA-Z0-9]+)$'
 
+HIDDEN_CHAR = u'\u200B'
+
 DEFAULT_THUMBNAILS = {
     # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
     'self': 'https://www.reddit.com/static/self_default2.png',
@@ -101,6 +103,9 @@ class Sender:
         self._s.nsfw = self._s.over_18
         self._s.sorting = self._subreddit.sorting or 'hot'
         self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
+        self._s.hidden_char = HIDDEN_CHAR  # we might need it for some templates
+        self._s.hidden_url_comments = '<a href="{}">{}</a>'.format(self._s.comments_url, HIDDEN_CHAR)
+        self._s.hidden_url = '<a href="{}">{}</a>'.format(self._s.url, HIDDEN_CHAR)
         self._s.score_dotted = u.dotted(self._s.score or 0)
         self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
         self._s.domain_parsed = urlparse(self._s.url).netloc
