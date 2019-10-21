@@ -33,6 +33,10 @@ def try_submission(bot, update, args):
         name=str(submission.subreddit)
     )
 
+    # try to get the real subreddit if we have it saved in the db
+    if Subreddit.fetch(submission.subreddit.name):
+        tmp_subreddit = Subreddit.fetch(submission.subreddit.name)
+
     sender = Sender(bot, tmp_subreddit, submission)
     
     file_path = sender.write_temp_submission_dict()
