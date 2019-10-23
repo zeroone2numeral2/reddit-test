@@ -235,11 +235,12 @@ class Sender:
             self._s.force_disable_link_preview = False
 
         if self._s.selftext:
+            text_len = len(self._s.selftext)
             self._s.text = self._s.selftext
-            self._s.text_32 = self._s.selftext[:32]
-            self._s.text_160 = self._s.selftext[:120]
-            self._s.text_200 = self._s.selftext[:200]
-            self._s.text_256 = self._s.selftext[:256]
+            self._s.text_32 = '{}{}'.format(self._s.selftext[:32], '' if text_len <= 32 else ' [...]')
+            self._s.text_160 = '{}{}'.format(self._s.selftext[:160], '' if text_len <= 160 else ' [...]')
+            self._s.text_200 = '{}{}'.format(self._s.selftext[:200], '' if text_len <= 200 else ' [...]')
+            self._s.text_256 = '{}{}'.format(self._s.selftext[:256], '' if text_len <= 256 else ' [...]')
 
         created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
