@@ -31,3 +31,5 @@ tests/generic.py
 
 # pyrogram
 *.session
+
+*.rar
