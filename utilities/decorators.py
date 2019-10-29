@@ -78,7 +78,9 @@ def log_start_end_dt(func):
     def wrapped(bot, job, *args, **kwargs):
         job_start_dt = u.now()
         logger.info('%s job started at %s', job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
-        job_row = Job(name=job.name, start=job_start_dt)
+
+        with db.atomic():
+            job_row = Job(name=job.name, start=job_start_dt)
 
         job_result = func(bot, job, *args, **kwargs)
         job_row.posted_messages = int(job_result)
@@ -88,7 +90,9 @@ def log_start_end_dt(func):
 
         elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
         job_row.duration = elapsed_seconds
-        job_row.save()
+
+        with db.atomic():
+            job_row.save()
 
         logger.info(
             '%s job ended at %s (elapsed seconds: %d (%s))',

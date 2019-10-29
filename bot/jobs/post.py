@@ -66,7 +66,8 @@ def its_quiet_hours(subreddit: Subreddit):
 def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
     if subreddit.quiet_hours_demultiplier is None:
         subreddit.quiet_hours_demultiplier = 0
-        subreddit.save()
+        with db.atomic():
+            subreddit.save()
 
     if subreddit.quiet_hours_demultiplier == 1:
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
@@ -183,7 +184,9 @@ def process_subreddit(subreddit: Subreddit, bot):
 
                 logger.info('updating Subreddit last post datetime...')
                 subreddit.last_posted_submission_dt = u.now()
-                subreddit.save()
+
+                with db.atomic():
+                    subreddit.save()
             else:
                 logger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
 
@@ -199,12 +202,13 @@ def process_subreddit(subreddit: Subreddit, bot):
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs.posts_job.interval * 60, first=config.jobs.posts_job.first * 60, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
-@db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
+# @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
 def check_posts(bot, _):
-    subreddits = (
-        Subreddit.select()
-        .where(Subreddit.enabled == True)
-    )
+    with db.atomic():
+        subreddits = (
+            Subreddit.select()
+            .where(Subreddit.enabled == True)
+        )
 
     total_posted_messages = 0
     for subreddit in subreddits:

@@ -33,7 +33,8 @@ def process_submissions(subreddit, bot):
         # we change the sorting way to 'day', because we can't get the 'top' submission from the period 'hot'
         logger.warning('resume_job: changing "sorting" property of r/%s to "say"', subreddit.name)
         subreddit.sorting = 'day'
-        subreddit.save()
+        with db.atomic():
+            subreddit.save()
 
     for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.sorting):
         logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
@@ -126,7 +127,8 @@ def process_subreddit(subreddit, bot):
 
             logger.info('updating Subreddit last *resume* post datetime...')
             subreddit.resume_last_posted_submission_dt = u.now()
-            subreddit.save()
+            with db.atomic():
+                subreddit.save()
 
         # time.sleep(1)
 
@@ -136,12 +138,13 @@ def process_subreddit(subreddit, bot):
 @Jobs.add(RUNNERS.run_repeating, interval=config.jobs.resume_job.interval * 60, first=config.jobs.resume_job.first * 60, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
-@db.atomic('IMMEDIATE')
+# @db.atomic('IMMEDIATE')
 def check_daily_resume(bot, _):
-    subreddits = (
-        Subreddit.select()
-        .where(Subreddit.enabled_resume == True)
-    )
+    with db.atomic():
+        subreddits = (
+            Subreddit.select()
+            .where(Subreddit.enabled_resume == True)
+        )
 
     total_posted_messages = 0
     for subreddit in subreddits:

@@ -14,6 +14,7 @@ from telegram.error import TelegramError
 from pyrogram import Message as PyroMessage
 
 from const import MaxSize
+from database import db
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
@@ -564,22 +565,24 @@ class Sender:
             sent_message_json = str(self._sent_message)
         else:
             sent_message_json = None
-        
-        Post.create(
-            submission_id=self._s.id,
-            subreddit=self._subreddit,
-            channel=self._subreddit.channel,
-            message_id=self._sent_message.message_id if self._sent_message else None,
-            posted_at=u.now() if self._sent_message else None,
-            sent_message=sent_message_json
-        )
+
+        with db.atomic():
+            Post.create(
+                submission_id=self._s.id,
+                subreddit=self._subreddit,
+                channel=self._subreddit.channel,
+                message_id=self._sent_message.message_id if self._sent_message else None,
+                posted_at=u.now() if self._sent_message else None,
+                sent_message=sent_message_json
+            )
     
     def register_ignored(self):
-        Ignored.create(
-            submission_id=self._s.id,
-            subreddit=self._subreddit,
-            ignored_at=u.now() if self._sent_message else None
-        )
+        with db.atomic():
+            Ignored.create(
+                submission_id=self._s.id,
+                subreddit=self._subreddit,
+                ignored_at=u.now() if self._sent_message else None
+            )
     
     def test_filters(self):
         if self._subreddit.ignore_stickied and self._s.stickied:
