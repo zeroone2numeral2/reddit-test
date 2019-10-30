@@ -8,12 +8,13 @@
             "level": "DEBUG"
         },
         "file": {
-            "class": "logging.handlers.RotatingFileHandler",
+            "class": "logging.handlers.TimedRotatingFileHandler",
             "formatter": "standard",
+            "when": "midnight",
+            "interval": 1,
             "level": "DEBUG",
             "encoding": "utf8",
-            "maxBytes": 1048576,
-            "backupCount": 500
+            "backupCount": "180"
         }
     },
     "loggers": {
