@@ -15,7 +15,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "backupCount": "180",
-            "fileName": "redditmirror.log"
+            "fileName": "logs/redditmirror.log"
         }
     },
     "loggers": {
