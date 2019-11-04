@@ -16,10 +16,9 @@ ROTATING_FILE_HANDLER_KWARGS = {
 }
 
 
-def load_logging_config(file_path, logfile):
+def load_logging_config(file_path):
     with open(file_path, 'r') as f:
         logging_config = json.load(f)
-    logging_config['handlers']['file']['filename'] = logfile
 
     LoggingConfig.dict = logging_config
 

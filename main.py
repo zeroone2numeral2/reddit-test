@@ -6,7 +6,7 @@ from config import config
 
 
 logger = logging.getLogger(__name__)
-l.load_logging_config(config.logging.config, config.logging.filepath)
+l.load_logging_config(config.logging.config)
 
 
 if __name__ == '__main__':
