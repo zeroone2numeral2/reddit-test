@@ -49,15 +49,12 @@ addsub - register a subreddit
 addmulti - register a multireddit
 setchannel - change a subreddit's channel
 subs - list subreddits
-sub - database row of that subreddit
-set - change a subreddit setting
-remsub - delete the subreddit from the database
+info - database row of that subreddit
+rem - delete the subreddit from the database
 d - get the last n submission from the subreddit, sorted by hot/top/new
-attr - get the value of that property for all subreddits
 sdict - get the submission dict of the last post in that subreddit
-links - get a list of channels plus their links
 icon - get that subreddit icon
-seticon - set the channel icon
+setchannelicon - set the channel icon
 exportlink - regenerate the invite link of a channel
 optin - interact with a quarantined subreddit
 clone - clone the origin subreddit's settings
@@ -74,4 +71,6 @@ remdl - empty the downloads directory
 db - get the db file
 now - get current UTC time
 try - get the submission with that id
+clonefrom - clone a subreddit's setting
+disable - disable a subreddit
 ```

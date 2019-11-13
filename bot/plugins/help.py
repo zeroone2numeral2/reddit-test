@@ -8,37 +8,36 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 HELP_STRING = """\
-*Channels*
-/addchannel: register a channel (if already saved: updates its info)
+*Adding and removing channels*
+/addchannel: save a channel (if already saved: updates its info)
 /remchannel: remove a channel
+
+*Managing channels*
 /updatetitles: update all the chat titles in the database
 /setdesc: pin a pre-formatted message that describes the channel
-/updatelist: update the channel's subreddits list
 /members: top 25 channels by number of members
+/exportlink: revoke and regenerate the invite link of a channel
 
-*Subreddits*
+*Managing the channels catalogue*
+/updatelist: update the catalogue channel's subreddits list
+
+*Adding a subreddit/multireddit*
 /addsub `[subreddit name]`: register a subreddit
-/setchannel `[subreddit name]`: change a subreddit's channel
-/subs: list subreddits
-/sub `[subreddit name]`: database row of that subreddit
-/config `<filter>`: change a subreddit configuration. Optional filter to filter the keyboard results. "true", \
-"True" will be converted to `True`, \
-"false", "False" will be converted to `False`, \
-"none", "None" will be converted to `None`. Just pass a field name to get its value
-/remsub `[subreddit name]`: delete the subreddit from the database
+/addmulti `[creator] [multireddit name]`: add a multireddit to a channel 
+
+*Managing a subreddit's settings*
+/sub `<filter>`: change a subreddit configuration. Optional filter to filter by subreddit's name the keyboard to \
+select the subreddit from. When you use this command you'll enter the configuration mode of a subreddit, from \
+there some commands can be used to edit its settings
+
+*Other operations with subreddits*
+/subs: list all subreddits
 /d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
-/attr `[property]`: get the value of that property for all subreddits
 /sdict `[subreddit]`: get the submission dict of the last post in that subreddit
 /links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
-/seticon `[subreddit]`: set the channel icon to that subreddit's icon
-/exportlink: revoke and regenerate the invite link of a channel
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
-/clone `<origin sub name filter> <dest sub name filter>`: clone the origin subreddit's settings to the destination subreddit
-
-*Multireddits*
-/addmulti `[creator] [name]`: add a multireddit to a channel 
 
 *Logs*
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
@@ -47,7 +46,6 @@ subreddit name
 
 *Jobs*
 /force `[job name]`: force that job
-/jobs: get the list of subreddits and their enabled jobs
 /duration `<job name>`: show the duration of the most recent 100 jobs executed. Can be filtered by job name
 
 *Misc*

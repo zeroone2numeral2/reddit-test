@@ -50,7 +50,7 @@ def remdl_command(_, update):
 @Plugins.add(CommandHandler, command=['sendv'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def remdl_command(_, update, args):
+def sendv_command(_, update, args):
     logger.info('/sendv command')
 
     url = args[0]

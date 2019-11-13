@@ -1,12 +1,16 @@
 import logging
+import re
 import time
 from functools import wraps
+
+from telegram.ext import ConversationHandler
 
 from database.models import Subreddit
 from database.models import Job
 from database import db
 from sqlite3 import OperationalError
 from utilities import u
+from bot import updater
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -143,3 +147,25 @@ def deferred_handle_lock(func):
                     raise e
 
     return wrapped
+
+
+def pass_subreddit(answer=False):
+    def real_decorator(func):
+        @wraps(func)
+        def wrapped(bot, update, *args, **kwargs):
+            ud = updater.dispatcher.user_data.get(update.effective_user.id, {})
+
+            subreddit = None
+            if ud and ud.get('data', None) and ud['data'].get('subreddit', None):
+                subreddit = ud['data']['subreddit']
+
+            if not subreddit and answer:
+                logger.debug('no subreddit previously selected (callback: %s)', func.__name__)
+                update.message.reply_text('Ooops, you need to select a subreddit first. Use the /subreddit command to pick one')
+                return ConversationHandler.END  # just in case we are in a conversation
+
+            return func(bot, update, subreddit=subreddit, *args, **kwargs)
+
+        return wrapped
+
+    return real_decorator
