@@ -29,21 +29,24 @@ SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
 
 MULTIREDDIT_URL = 'https://old.reddit.com/user/{redditor}/m/{name}/'
 
-BASE_POST = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}, {number_of_posts} {posts_string} every ~{pretty_time} \
-from <code>/{sorting}/</code>{quiet_block}{ignored_block}\
-"""
+BASE_POST = """📌 <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+⚡️{number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>\
+{quiet_block}\
+{ignored_block}"""
 
-BASE_RESUME = """{i}) <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}, top {number_of_posts} {posts_string} from <code>/{sorting}/</code> \
-every {period} at {hour} UTC{weekday_block}{ignored_block}\
-"""
+BASE_RESUME = """📌 <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+⚡️ top {number_of_posts} {posts_string} from <code>/{sorting}/</code> every {period} at {hour} UTC{weekday_block}\
+{ignored_block}"""
 
 HEADER = '<b>This channel tracks the following subreddits</b>:'
 
-FOOTER_PUBLIC_CHANNEL = """Number of daily posts: ~{}
-Invite link also <a href="{}">here</a>. More subreddit mirrors: @{}"""
+FOOTER_PUBLIC_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
+🔗 Invite link also <a href="{}">here</a>
+More subreddit mirrors: @{}"""
 
-FOOTER_PRIVATE_CHANNEL = """Number of daily posts: ~{}
-<a href="{}">Invite link</a> also in the description. More subreddit mirrors: @{}"""
+FOOTER_PRIVATE_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
+🔗 <a href="{}">Invite link</a> also in the description
+📣 More subreddit mirrors: @{}"""
 
 WEEKDAYS = (
     'Monday',
@@ -118,10 +121,13 @@ def on_setdesc_channel_selected(bot: Bot, update):
             nsfw_spoiler_block='',
             ignore_if_newer_block='',
             multi_subs='',
-            i=i + 1
+            # i=i + 1
         )
 
-        # this is done both for posts jobs and resume jobs
+        ################
+        # COMMON PARTS #
+        ################
+
         if subreddit.is_multireddit:
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
@@ -151,19 +157,23 @@ def on_setdesc_channel_selected(bot: Bot, update):
                 ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
-            format_dict['ignored_block'] = '. Ignored submissions: {}'.format(', '.join(ignored_list))
+            format_dict['ignored_block'] = '\n🗑 Ignored submissions: {}'.format(', '.join(ignored_list))
 
         if subreddit.sorting in ('top', 'day'):
             format_dict['sorting'] = 'top/day'
         elif subreddit.sorting == 'week':
             format_dict['sorting'] = 'top/week'
 
+        ######################
+        # TYPE-SPECIFIC PART #
+        ######################
+
         if subreddit.enabled:
             if not subreddit.is_multireddit and subreddit.template and '#{subreddit}' in subreddit.template:
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
-                format_dict['quiet_block'] = '. Less frequent posts (frequency x{}) from {} to {} UTC'.format(
+                format_dict['quiet_block'] = '\n💤 Less frequent posts (frequency x{}) from {} to {} UTC'.format(
                     subreddit.quiet_hours_demultiplier,
                     subreddit.quiet_hours_start or config.quiet_hours.start,
                     subreddit.quiet_hours_end or config.quiet_hours.end
@@ -172,6 +182,8 @@ def on_setdesc_channel_selected(bot: Bot, update):
             subs_info_list.append(BASE_POST.format(**format_dict))
 
         elif subreddit.enabled_resume:
+            format_dict['i'] = i + 1
+
             if not subreddit.is_multireddit and subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
