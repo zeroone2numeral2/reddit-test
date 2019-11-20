@@ -315,7 +315,7 @@ def number_of_daily_posts(s: Subreddit):
 
         n += n_during_normal_hours + n_during_quiet_hours
 
-        n = int(n)
+        n = round(n)
 
     if s.enabled_resume:
         n += s.number_of_posts
