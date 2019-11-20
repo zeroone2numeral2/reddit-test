@@ -52,7 +52,7 @@ def main():
 
         quiet_hours_start = 22
         quiet_hours_end = 6
-        quiet_hours_demultiplier = 0.0
+        quiet_hours_demultiplier = 1.0
 
         number_of_posts = 1
 
