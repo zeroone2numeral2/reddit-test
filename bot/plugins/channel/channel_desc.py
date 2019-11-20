@@ -39,6 +39,12 @@ every {period} at {hour} UTC{weekday_block}{ignored_block}\
 
 HEADER = '<b>This channel tracks the following subreddits</b>:'
 
+FOOTER_PUBLIC_CHANNEL = """Number of daily posts: ~{}
+Invite link also <a href="{}">here</a>. More subreddit mirrors: @{}"""
+
+FOOTER_PRIVATE_CHANNEL = """Number of daily posts: ~{}
+<a href="{}">Invite link</a> also in the description. More subreddit mirrors: @{}"""
+
 WEEKDAYS = (
     'Monday',
     'Tuesday',
@@ -97,6 +103,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
         return ConversationHandler.END
 
     subs_info_list = []
+    total_number_of_daily_posts = 0
     for i, subreddit in enumerate(subreddits):
         format_dict = dict(
             name=subreddit.name,
@@ -114,6 +121,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             i=i + 1
         )
 
+        # this is done both for posts jobs and resume jobs
         if subreddit.is_multireddit:
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
@@ -132,6 +140,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             format_dict['sub_multi_prefix'] = 'r'
             format_dict['url'] = SUBREDDIT_URL.format(name=subreddit.name)
 
+        # this is done both for posts jobs and resume jobs
         if subreddit.allow_nsfw == False or subreddit.hide_spoilers or subreddit.ignore_if_newer_than or subreddit.min_score:
             ignored_list = list()
             if not subreddit.allow_nsfw:
@@ -161,6 +170,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
                 )
 
             subs_info_list.append(BASE_POST.format(**format_dict))
+
         elif subreddit.enabled_resume:
             if not subreddit.is_multireddit and subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
@@ -175,15 +185,22 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
     subs_text = '\n\n'.join(subs_info_list)
 
+    try:
+        total_number_of_daily_posts += u.number_of_daily_posts(subreddit)
+    except Exception as e:
+        logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e))
+
     channel_obj = bot.get_chat(channel_id)
     if channel_obj.username:
         # if the channel has a public username, use a different wording for the footer
-        footer = 'Invite link also <a href="{}">here</a>. More subreddit mirrors: @{}'.format(
+        footer = FOOTER_PUBLIC_CHANNEL.format(
+            total_number_of_daily_posts,
             subreddits[0].channel.invite_link or '',
             config.telegram.index
         )
     else:
-        footer = '<a href="{}">Invite link</a> also in the description. More subreddit mirrors: @{}'.format(
+        footer = FOOTER_PRIVATE_CHANNEL.format(
+            total_number_of_daily_posts,
             subreddits[0].channel.invite_link or '',
             config.telegram.index
         )

@@ -18,6 +18,8 @@ from PIL import Image
 from playhouse.shortcuts import model_to_dict
 from telegram import MAX_MESSAGE_LENGTH
 
+from database.models import Subreddit
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
@@ -283,3 +285,39 @@ def split_text(strings_list, join_by: str=False):
             yield strings_list[i:i + list_items_per_message]
         else:
             yield join_by.join(strings_list[i:i + list_items_per_message])
+
+
+def number_of_daily_posts(s: Subreddit):
+    n = 0
+
+    if s.enabled:
+        hours_of_reduced_frequency = 0
+        if s.quiet_hours_demultiplier != 1.0:
+            if s.quiet_hours_start > s.quiet_hours_end:
+                hours_of_reduced_frequency += 24 - s.quiet_hours_start
+                hours_of_reduced_frequency += s.quiet_hours_end + 1
+            elif s.quiet_hours_start < s.quiet_hours_end:
+                hours_of_reduced_frequency += s.quiet_hours_end - s.quiet_hours_start + 1
+
+        hours_of_normal_frequency = 24 - hours_of_reduced_frequency
+
+        minutes_of_normal_frequencies = hours_of_normal_frequency * 60
+        minutes_of_reduced_frequency = hours_of_reduced_frequency * 60
+
+        # number of messages during normal hours
+        n_during_normal_hours = (minutes_of_normal_frequencies / s.max_frequency) * s.number_of_posts
+
+        n_during_quiet_hours = 0
+        if minutes_of_reduced_frequency:
+            # number of messages during quiet hours
+            reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
+            n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
+
+        n += n_during_normal_hours + n_during_quiet_hours
+
+        n = int(n)
+
+    if s.enabled_resume:
+        n += s.number_of_posts
+
+    return n
