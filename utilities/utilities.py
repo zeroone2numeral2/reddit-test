@@ -310,8 +310,9 @@ def number_of_daily_posts(s: Subreddit, print_debug=False):
         n_during_quiet_hours = 0
         if minutes_of_reduced_frequency:
             # number of messages during quiet hours
-            reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
-            n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
+            if s.quiet_hours_demultiplier != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
+                reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
+                n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
 
         n += n_during_normal_hours + n_during_quiet_hours
 

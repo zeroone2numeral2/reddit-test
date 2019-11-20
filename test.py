@@ -25,8 +25,9 @@ def main():
             n_during_quiet_hours = 0
             if minutes_of_reduced_frequency:
                 # number of messages during quiet hours
-                reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
-                n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
+                if s.quiet_hours_demultiplier != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
+                    reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
+                    n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
 
             n += n_during_normal_hours + n_during_quiet_hours
 
@@ -49,13 +50,13 @@ def main():
         enabled = True
         enabled_resume = False
 
-        quiet_hours_start = 4
-        quiet_hours_end = 7
-        quiet_hours_demultiplier = 1.0
+        quiet_hours_start = 22
+        quiet_hours_end = 6
+        quiet_hours_demultiplier = 0.0
 
         number_of_posts = 1
 
-        max_frequency = 295
+        max_frequency = 115
 
     print('n:', number_of_daily_posts(s))
 
