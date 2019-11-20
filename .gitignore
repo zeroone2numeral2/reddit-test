@@ -28,6 +28,7 @@ ffmpeg.exe
 
 # tests
 tests/generic.py
+test.py
 
 # pyrogram
 *.session
