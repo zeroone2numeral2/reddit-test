@@ -4,6 +4,7 @@ from math import floor
 def main():
     def number_of_daily_posts(s):
         n = 0
+
         if s.enabled:
             hours_of_reduced_frequency = 0
             if s.quiet_hours_demultiplier != 1.0:
@@ -24,39 +25,37 @@ def main():
             n_during_quiet_hours = 0
             if minutes_of_reduced_frequency:
                 # number of messages during quiet hours
-                n_during_quiet_hours = (minutes_of_reduced_frequency / (s.max_frequency * s.quiet_hours_demultiplier)) * s.number_of_posts
+                reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
+                n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
 
             n += n_during_normal_hours + n_during_quiet_hours
 
-            n = int(n)
+            n = round(n)
 
         if s.enabled_resume:
             n += s.number_of_posts
 
-
-        print('normal freq.: {}\nreduced freq.: {}\nq.h. start: {}\nq.h. end: {}\nnormal h. messages: {}\nq.h. messages: {}'.format(
-            hours_of_normal_frequency,
-            hours_of_reduced_frequency,
-            s.quiet_hours_start,
-            s.quiet_hours_end,
-            n_during_normal_hours,
-            n_during_quiet_hours
-        ))
+        print('hours_of_normal_frequency', hours_of_normal_frequency)
+        print('minutes_of_normal_frequencies', minutes_of_normal_frequencies)
+        print('hours_of_reduced_frequency', hours_of_reduced_frequency)
+        print('minutes_of_reduced_frequency', minutes_of_reduced_frequency)
+        print('n_during_normal_hours', n_during_normal_hours)
+        print('n_during_quiet_hours', n_during_quiet_hours)
 
         return n
 
 
     class s:
         enabled = True
-        enabled_resume = True
+        enabled_resume = False
 
         quiet_hours_start = 4
         quiet_hours_end = 7
-        quiet_hours_demultiplier = 1.5
+        quiet_hours_demultiplier = 1.0
 
-        number_of_posts = 2
+        number_of_posts = 1
 
-        max_frequency = 120
+        max_frequency = 295
 
     print('n:', number_of_daily_posts(s))
 

@@ -287,7 +287,7 @@ def split_text(strings_list, join_by: str=False):
             yield join_by.join(strings_list[i:i + list_items_per_message])
 
 
-def number_of_daily_posts(s: Subreddit):
+def number_of_daily_posts(s: Subreddit, print_debug=False):
     n = 0
 
     if s.enabled:
@@ -319,5 +319,14 @@ def number_of_daily_posts(s: Subreddit):
 
     if s.enabled_resume:
         n += s.number_of_posts
+
+    if print_debug:
+        print('hours_of_normal_frequency', hours_of_normal_frequency)
+        print('minutes_of_normal_frequencies', minutes_of_normal_frequencies)
+        print('hours_of_reduced_frequency', hours_of_reduced_frequency)
+        print('minutes_of_reduced_frequency', minutes_of_reduced_frequency)
+        print('n_during_normal_hours', n_during_normal_hours)
+        print('n_during_quiet_hours', n_during_quiet_hours)
+        print('n', n)
 
     return n
