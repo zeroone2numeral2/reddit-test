@@ -400,7 +400,8 @@ class Sender:
 
     def _send_image(self, image_url, caption):
         logger.info('image url: %s', image_url)
-        
+
+        start = u.now()
         self._sent_message = self._bot.send_photo(
             self._chat_id,
             image_url,
@@ -408,6 +409,8 @@ class Sender:
             parse_mode=ParseMode.HTML,
             timeout=360
         )
+        end = u.now()
+        logger.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
         
         return self._sent_message
 
