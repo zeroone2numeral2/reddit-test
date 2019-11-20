@@ -183,12 +183,12 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
             subs_info_list.append(BASE_RESUME.format(**format_dict))
 
-    subs_text = '\n\n'.join(subs_info_list)
+        try:
+            total_number_of_daily_posts += u.number_of_daily_posts(subreddit)
+        except Exception as e:
+            logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e))
 
-    try:
-        total_number_of_daily_posts += u.number_of_daily_posts(subreddit)
-    except Exception as e:
-        logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e))
+    subs_text = '\n\n'.join(subs_info_list)
 
     channel_obj = bot.get_chat(channel_id)
     if channel_obj.username:
