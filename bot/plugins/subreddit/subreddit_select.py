@@ -40,12 +40,13 @@ def on_sub_command(_, update, args):
 
     name_filter = args[0] if args else None
 
-    subreddits = Subreddit.get_list(name_filter=name_filter)
+    subreddits: [Subreddit] = Subreddit.get_list(name_filter=name_filter)
     if not subreddits:
         update.message.reply_text('Cannot find any subreddit (filter: {})'.format(name_filter))
         return ConversationHandler.END
 
-    reply_markup = Keyboard.from_list(['{}. /r/{} ({})'.format(s.id, s.name, s.channel.title) for s in subreddits])
+    buttons_list = ['{}. /{}/{} ({})'.format(s.id, 'm' if s.is_multireddit else 'r', s.name, s.channel.title) for s in subreddits]
+    reply_markup = Keyboard.from_list(buttons_list)
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
 
