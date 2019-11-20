@@ -40,13 +40,10 @@ BASE_RESUME = """📌 <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}
 
 HEADER = '<b>This channel tracks the following subreddits</b>:'
 
-FOOTER_PUBLIC_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
-🔗 Invite link also <a href="{}">here</a>
+FOOTER = """📬 Number of daily posts: <b>~{}</b>
 📣 More subreddit mirrors: @{}"""
 
-FOOTER_PRIVATE_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
-🔗 <a href="{}">Invite link</a> also in the description
-📣 More subreddit mirrors: @{}"""
+ADDITIONAL_FOOTER_PRIVATE_CHANNEL = """🔗 This channel's invite link <a href="{}">here</a>"""
 
 WEEKDAYS = (
     'Monday',
@@ -203,21 +200,16 @@ def on_setdesc_channel_selected(bot: Bot, update):
     subs_text = '\n\n'.join(subs_info_list)
 
     channel_obj = bot.get_chat(channel_id)
-    if channel_obj.username:
-        # if the channel has a public username, use a different wording for the footer
-        footer = FOOTER_PUBLIC_CHANNEL.format(
-            total_number_of_daily_posts,
-            subreddits[0].channel.invite_link or '',
-            config.telegram.index
-        )
-    else:
-        footer = FOOTER_PRIVATE_CHANNEL.format(
-            total_number_of_daily_posts,
-            subreddits[0].channel.invite_link or '',
-            config.telegram.index
-        )
 
-    text = '{}\n\n{}\n\n{}'.format(HEADER, subs_text, footer)
+    footer = FOOTER.format(
+        total_number_of_daily_posts,
+        config.telegram.index
+    )
+    if not channel_obj.username:
+        # if the channel is private, add the invite link to the footer
+        footer += '\n' + ADDITIONAL_FOOTER_PRIVATE_CHANNEL.format(subreddits[0].channel.invite_link or '')
+
+    text = '{}\n\n{}\n\n\n{}'.format(HEADER, subs_text, footer)
 
     try:
         sent_message = bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
