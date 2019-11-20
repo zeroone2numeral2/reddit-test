@@ -42,7 +42,7 @@ HEADER = '<b>This channel tracks the following subreddits</b>:'
 
 FOOTER_PUBLIC_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
 🔗 Invite link also <a href="{}">here</a>
-More subreddit mirrors: @{}"""
+📣 More subreddit mirrors: @{}"""
 
 FOOTER_PRIVATE_CHANNEL = """📬 Number of daily posts: <b>~{}</b>
 🔗 <a href="{}">Invite link</a> also in the description
