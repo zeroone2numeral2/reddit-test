@@ -316,18 +316,22 @@ def number_of_daily_posts(s: Subreddit, print_debug=False):
 
         n += n_during_normal_hours + n_during_quiet_hours
 
-        n = round(n)
-
     if s.enabled_resume:
         n += s.number_of_posts
+
+    n_rounded = round(n)
 
     if print_debug:
         print('hours_of_normal_frequency', hours_of_normal_frequency)
         print('minutes_of_normal_frequencies', minutes_of_normal_frequencies)
+        print()
         print('hours_of_reduced_frequency', hours_of_reduced_frequency)
         print('minutes_of_reduced_frequency', minutes_of_reduced_frequency)
+        print()
         print('n_during_normal_hours', n_during_normal_hours)
         print('n_during_quiet_hours', n_during_quiet_hours)
+        print()
         print('n', n)
+        print('n_rounded', n_rounded)
 
-    return n
+    return n_rounded
