@@ -58,7 +58,8 @@ def on_sub_command(_, update, args):
 def on_subreddit_selected(_, update, user_data=None):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
-    subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
+    # subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
+    subreddit_key = int(re.search(r'^(\d+).*', update.message.text, re.I).group(1))
     logger.debug('subreddit id: %d', subreddit_key)
 
     subreddit = Subreddit.get(Subreddit.id == subreddit_key)
