@@ -212,6 +212,15 @@ def on_setdesc_channel_selected(bot: Bot, update):
     text = '{}\n\n{}\n\n\n{}'.format(HEADER, subs_text, footer)
 
     try:
+        update.message.reply_text('Trying to edit pinned message...')
+        channel_obj.pinned_message.edit_text(text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+        update.message.reply_markdown('[Message edited]({})'.format(u.message_link(channel_obj.pinned_message)),
+                                      reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
+        return
+    except (TelegramError, BadRequest) as e:
+        update.message.reply_text('Failed: {}'.format(str(e)))
+
+    try:
         sent_message = bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('Error while posting: {}'.format(e.message))
