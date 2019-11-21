@@ -43,6 +43,8 @@ class Subreddit(peewee.Model):
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
     test = peewee.BooleanField(default=False)
+    url_button = peewee.BooleanField(default=False)
+    comments_button = peewee.BooleanField(default=False)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)

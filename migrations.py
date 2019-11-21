@@ -42,6 +42,8 @@ def main(database_path):
     public = peewee.BooleanField(default=True)
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
+    url_button = peewee.BooleanField(default=False)
+    comments_button = peewee.BooleanField(default=False)
 
     migrations = [
         # 20190318 pt. 1
@@ -96,6 +98,9 @@ def main(database_path):
         # 20190923
         migrator.add_column('subreddits', 'is_multireddit', is_multireddit),
         migrator.add_column('subreddits', 'multireddit_owner', multireddit_owner),
+        # 20191121
+        migrator.add_column('subreddits', 'url_button', url_button),
+        migrator.add_column('subreddits', 'comments_button', comments_button),
     ]
 
     logger.info('Starting migration....')

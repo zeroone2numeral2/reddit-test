@@ -22,7 +22,9 @@ from.downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from pyroutils import PyroClient
+from bot.markups import InlineKeyboard
 from database.models import Post
+from database.models import Subreddit
 from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u
@@ -92,7 +94,7 @@ class Sender:
     def __init__(self, bot, subreddit, submission):
         self._bot: Bot = bot
         self._s = submission
-        self._subreddit = subreddit
+        self._subreddit: Subreddit = subreddit
 
         self._sent_message = None
         self._chat_id = self._subreddit.channel.channel_id
@@ -246,6 +248,13 @@ class Sender:
         created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
+        if self._subreddit.comments_button \
+            or (self._subreddit.enabled and '{num_comments' in self._subreddit.template) \
+            or (self._subreddit.enabled_resume and '{num_comments' in self._subreddit.template_resume):
+            # calling a subreddit's num_comments property probably executes an API request. Make it
+            # an int if we'll need it
+            self._s.num_comments = int(self._s.num_comments)
+
         self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
         self._s.elapsed_minutes = self._s.elapsed_seconds / 60
         self._s.elapsed_hours = self._s.elapsed_minutes / 60
@@ -332,28 +341,36 @@ class Sender:
 
         text = template.format(**self._submission_dict)
         # logger.info('post text: %s', text)
+
+        reply_markup = None
+        if self._subreddit.url_button and self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons(url=self._s.url, comments=self._s.comments_url, n_comments=self._s.num_comments)
+        elif self._subreddit.url_button and not self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons(url=self._s.url)
+        elif not self._subreddit.url_button and self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons(comments=self._s.comments_url, n_comments=self._s.num_comments)
         
         if self._s.media_type and self._subreddit.send_medias:
             logger.info('post is a media, sending it as media...')
             try:
                 if self._s.media_type == MediaType.IMAGE:
                     logger.info('post is an image: using _send_image()')
-                    self._sent_message = self._send_image(self._s.media_url, text)
+                    self._sent_message = self._send_image(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VREDDIT:
                     logger.info('post is a vreddit: using _send_vreddit()')
-                    self._sent_message = self._send_vreddit(self._s.media_url, text)
+                    self._sent_message = self._send_vreddit(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VIDEO:
                     logger.info('post is a video: using _send_video()')
-                    self._sent_message = self._send_video(self._s.media_url, text)
+                    self._sent_message = self._send_video(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GIF:
                     logger.info('post is a gif: using _send_gif()')
-                    self._sent_message = self._send_gif(self._s.media_url, text)
+                    self._sent_message = self._send_gif(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GFYCAT:
                     logger.info('post is a gfycat: using _send_gfycat()')
-                    self._sent_message = self._send_gfycat(self._s.media_url, text)
+                    self._sent_message = self._send_gfycat(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.REDDIT_GIF:
                     logger.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
-                    self._sent_message = self._send_i_reddit_gif(self._s.media_url, text)
+                    self._sent_message = self._send_i_reddit_gif(self._s.media_url, text, reply_markup=reply_markup)
                 
                 return self._sent_message
             except Exception as e:
@@ -362,7 +379,7 @@ class Sender:
             logger.info('post is NOT a media, sending it as text')
         
         logger.info('posting a text...')
-        self._sent_message = self._send_text(text)
+        self._sent_message = self._send_text(text, reply_markup=reply_markup)
 
         return self._sent_message
 
@@ -390,15 +407,16 @@ class Sender:
 
                 return sent_message
 
-    def _send_text(self, text):
+    def _send_text(self, text, reply_markup=None):
         return self._bot.send_message(
             self._chat_id,
             text,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=not self._subreddit.webpage_preview or self._s.force_disable_link_preview
+            disable_web_page_preview=not self._subreddit.webpage_preview or self._s.force_disable_link_preview,
+            reply_markup=reply_markup
         )
 
-    def _send_image(self, image_url, caption):
+    def _send_image(self, image_url, caption, reply_markup=None):
         logger.info('image url: %s', image_url)
 
         start = u.now()
@@ -407,6 +425,7 @@ class Sender:
             image_url,
             caption=caption,
             parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
             timeout=360
         )
         end = u.now()
@@ -414,7 +433,7 @@ class Sender:
         
         return self._sent_message
 
-    def _send_vreddit(self, url, caption):
+    def _send_vreddit(self, url, caption, reply_markup=None):
         logger.info('vreddit url: %s', url)
 
         # we set as max_size the max size supported by the bot API, so we can avoid to use pyrogram (see issue #82)
@@ -460,6 +479,7 @@ class Sender:
             width=self._s.video_size[1],
             duration=self._s.video_duration,
             supports_streaming=True,
+            reply_markup=reply_markup,
             timeout=360
         )
 
@@ -475,7 +495,7 @@ class Sender:
 
         return self._sent_message
 
-    def _send_video(self, url, caption):
+    def _send_video(self, url, caption, reply_markup=None):
         logger.info('video url: %s', url)
 
         video = Downloader(url, identifier=self._s.id)
@@ -504,6 +524,7 @@ class Sender:
                 duration=None,
                 parse_mode=ParseMode.HTML,
                 supports_streaming=True,
+                reply_markup=reply_markup,
                 timeout=360
             )
         logger.debug('...upload completed')
@@ -514,7 +535,7 @@ class Sender:
         
         return self._sent_message
     
-    def _send_gif(self, url, caption):
+    def _send_gif(self, url, caption, reply_markup=None):
         logger.info('gif url: %s', url)
 
         return self._bot.send_animation(
@@ -522,10 +543,11 @@ class Sender:
             url,
             caption=caption,
             parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
             timeout=360
         )
 
-    def _send_gfycat(self, url, caption):
+    def _send_gfycat(self, url, caption, reply_markup=None):
         gfycat = Gfycat(url)
         logger.info('gfycat url: %s', gfycat.url)
 
@@ -540,6 +562,7 @@ class Sender:
             height=gfycat.sizes[1],
             thumb=gfycat.get_thumbnail_bo(),
             duration=gfycat.duration,
+            reply_markup=reply_markup,
             timeout=360
         )
 
@@ -547,19 +570,20 @@ class Sender:
 
         return sent_message
 
-    def _send_i_reddit_gif(self, url, caption):
+    def _send_i_reddit_gif(self, url, caption, reply_markup=None):
         try:
             sent_message = self._bot.send_video(
                 self._chat_id,
                 url,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup,
                 timeout=360
             )
             return sent_message
         except (BadRequest, TelegramError) as e:
             logger.info('i.reddit gif: TelegramError/BadRequest while sending by url (%s), falling back to self._send_video...', e.message)
-            return self._send_video(url, caption)
+            return self._send_video(url, caption, reply_markup=reply_markup)
 
     def register_post(self):
         if isinstance(self._sent_message, PtbMessage):

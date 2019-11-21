@@ -21,3 +21,20 @@ class InlineKeyboard:
         ]]
 
         return InlineKeyboardMarkup(keyboard)
+
+    @staticmethod
+    def post_buttons(url=None, comments=None, n_comments=None):
+        if url.lower() == comments.lower():
+            keyboard = [[InlineKeyboardButton('thread • {}'.format(n_comments), url=comments)]]
+        else:
+            keyboard = [[]]
+            if url:
+                keyboard[0].append(InlineKeyboardButton('url', url=url))
+            if comments:
+                button_text = 'comments'
+                if n_comments:
+                    button_text += ' • ' + str(n_comments)
+
+                keyboard[0].append(InlineKeyboardButton(button_text, url=comments))
+
+        return InlineKeyboardMarkup(keyboard)
