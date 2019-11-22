@@ -249,8 +249,8 @@ class Sender:
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
         if self._subreddit.comments_button \
-            or (self._subreddit.enabled and '{num_comments' in self._subreddit.template) \
-            or (self._subreddit.enabled_resume and '{num_comments' in self._subreddit.template_resume):
+            or (self._subreddit.enabled and self._subreddit.template and '{num_comments}' in self._subreddit.template) \
+            or (self._subreddit.enabled_resume and self._subreddit.template_resume and '{num_comments}' in self._subreddit.template_resume):
             # calling a subreddit's num_comments property probably executes an API request. Make it
             # an int if we'll need it
             self._s.num_comments = int(self._s.num_comments)
