@@ -10,7 +10,7 @@
         "file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "formatter": "standard",
-            "when": "midnight",
+            "when": "d",
             "interval": 1,
             "level": "DEBUG",
             "encoding": "utf8",
