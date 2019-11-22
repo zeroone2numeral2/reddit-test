@@ -73,4 +73,5 @@ now - get current UTC time
 try - get the submission with that id
 clonefrom - clone a subreddit's setting
 disable - disable a subreddit
+end - exit a subreddit's configuration
 ```
