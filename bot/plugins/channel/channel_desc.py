@@ -218,7 +218,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             channel_obj.pinned_message.edit_text(text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
             update.message.reply_markdown('[Message edited]({})'.format(u.message_link(channel_obj.pinned_message)),
                                           reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
-            return
+            return ConversationHandler.END
         except (TelegramError, BadRequest) as e:
             update.message.reply_text('Failed: {}'.format(str(e)))
 
@@ -227,7 +227,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('Error while posting: {}'.format(e.message))
         update.message.reply_text(text, disable_web_page_preview=True)
-        return
+        return ConversationHandler.END
 
     update.message.reply_markdown('[Message sent]({}), pinning...'.format(u.message_link(sent_message)),
                                   reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
