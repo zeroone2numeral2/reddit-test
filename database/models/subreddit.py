@@ -103,10 +103,14 @@ class Subreddit(peewee.Model):
             return [sub for sub in subs if name_filter.lower() in sub.name.lower()]
     
     @classmethod
-    def subreddit_with_channel(cls, channel):
+    def linked_to_channel(cls, channel):
         try:
-            cls.get(cls.channel == channel)
-            return True
+            subs = (
+                cls.select().
+                where(cls.channel == channel)
+            )
+
+            return [sub for sub in subs]
         except peewee.DoesNotExist:
             return False
 

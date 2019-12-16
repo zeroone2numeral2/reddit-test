@@ -44,17 +44,25 @@ def on_channel_selected(_, update):
     logger.info('channel_id: %d', channel_id)
     channel = Channel.get(Channel.channel_id == channel_id)
 
-    if Subreddit.subreddit_with_channel(channel):
-        update.message.reply_text('Sorry, apparently there is one or more subreddits using this channel',
-                                  reply_markup=Keyboard.REMOVE)
-        return ConversationHandler.END
-    
+    channel_subreddits = Subreddit.linked_to_channel(channel)
+    if channel_subreddits:
+        for subreddit in channel_subreddits:
+            subreddit.channel = None
+            subreddit.save()
+
     channel_title = channel.title
     
     logger.info('Deleting channel...')
     channel.delete_instance()
     
-    update.message.reply_text('Channel "{}" removed'.format(channel_title), reply_markup=Keyboard.REMOVE)
+    update.message.reply_text(
+        'Channel "{}" removed. Linked subreddits: {} (if any, their channel as been set to NULL)'.format(
+            channel_title,
+            ', '.join([s.name for s in channel_subreddits]) if channel_subreddits else 'none'
+        ),
+        reply_markup=Keyboard.REMOVE
+    )
+
     return ConversationHandler.END
 
 
