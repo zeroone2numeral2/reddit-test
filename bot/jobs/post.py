@@ -207,7 +207,7 @@ def check_posts(bot, _):
     with db.atomic():
         subreddits = (
             Subreddit.select()
-            .where(Subreddit.enabled == True)
+            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
         )
 
     total_posted_messages = 0

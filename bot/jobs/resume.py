@@ -143,7 +143,7 @@ def check_daily_resume(bot, _):
     with db.atomic():
         subreddits = (
             Subreddit.select()
-            .where(Subreddit.enabled_resume == True)
+            .where(Subreddit.enabled_resume == True, Subreddit.channel.is_null(False))
         )
 
     total_posted_messages = 0
