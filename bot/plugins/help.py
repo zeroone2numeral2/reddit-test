@@ -2,7 +2,7 @@ import logging
 
 from telegram.ext import CommandHandler
 
-from bot import mainbot
+from bot import bot
 from utilities import d
 
 logger = logging.getLogger(__name__)
@@ -68,4 +68,4 @@ def on_help_command(update, _):
     update.message.reply_markdown(HELP_STRING)
 
 
-mainbot.add_handler(CommandHandler(['start', 'help'], on_help_command))
+bot.add_handler(CommandHandler(['start', 'help'], on_help_command))
