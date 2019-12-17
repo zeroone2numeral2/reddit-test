@@ -12,13 +12,7 @@ workers = 0
 api_id = 12345 # CHANGEME
 api_hash = "" # CHANGEME
 
-[plugins]
-dir = "bot/plugins"
-manifest = "manifest"
-
 [jobs]
-dir = "bot/jobs"
-manifest = "manifest"
 posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
 
 [jobs.stream] # in minutes
