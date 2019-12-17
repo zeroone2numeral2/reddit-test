@@ -298,5 +298,4 @@ mainbot.add_handler(ConversationHandler(
     fallbacks=[
         CommandHandler('cancel', on_setdesc_cancel)
     ]
-)
-)
+))
