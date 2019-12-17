@@ -10,7 +10,6 @@ from telegram.ext import CallbackContext
 
 from utilities import u
 from utilities import d
-from utilities import l
 from database.models import Subreddit
 from database.models import PostResume
 from database import db
