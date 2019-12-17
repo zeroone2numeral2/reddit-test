@@ -2,9 +2,9 @@ import logging
 import re
 import os
 
-from telegram.ext import CommandHandler, CallbackContext
+from telegram.ext import CommandHandler
 
-from bot import mainbot
+from bot import bot
 from utilities import u
 from utilities import d
 from config import config
@@ -36,7 +36,7 @@ def loglines_command(update, _):
 
 @d.restricted
 @d.failwithmessage
-def remffmpeglogs_command(update, _):
+def remffmpeglogs_command(_, update):
     logger.info('/remffmpeglogs command')
 
     dir_path = os.path.join('logs', 'ffmpeg')
@@ -50,18 +50,18 @@ def remffmpeglogs_command(update, _):
 
 @d.restricted
 @d.failwithmessage
-def getlog_command(update, context: CallbackContext):
+def getlog_command(_, update, args):
     logger.info('/getlog command')
 
     file_path = config.logging.filepath
-    if context.args and re.search(r'^\d+$', context.args[0], re.I):
-        log_file_num = context.args[0]
+    if args and re.search(r'^\d+$', args[0], re.I):
+        log_file_num = args[0]
         file_path = file_path.replace('.log', '.log.{}'.format(log_file_num))
 
     with open(os.path.normpath(file_path), 'rb') as f:
         update.message.reply_document(f)
 
 
-mainbot.add_handler(CommandHandler(loglines_command, ['loglines']))
-mainbot.add_handler(CommandHandler(remffmpeglogs_command, ['remffmpeglogs']))
-mainbot.add_handler(CommandHandler(getlog_command, ['getlog']))
+bot.add_handler(CommandHandler(loglines_command, ['loglines']))
+bot.add_handler(CommandHandler(remffmpeglogs_command, ['remffmpeglogs']))
+bot.add_handler(CommandHandler(getlog_command, ['getlog']))
