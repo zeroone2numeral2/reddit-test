@@ -5,7 +5,7 @@ import re
 import pytz
 from telegram.ext import CommandHandler, CallbackContext
 
-from bot import bot
+from bot import mainbot
 from utilities import u
 from utilities import d
 
@@ -60,4 +60,4 @@ def now_command(update, context: CallbackContext):
     ))
 
 
-bot.add_handler(CommandHandler(['now'], now_command))
+mainbot.add_handler(CommandHandler(['now'], now_command))

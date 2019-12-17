@@ -5,7 +5,7 @@ from telegram.ext import CommandHandler
 from telegram.error import TelegramError
 from telegram.error import BadRequest
 
-from bot import bot
+from bot import mainbot
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 @d.restricted
 @d.failwithmessage
-def on_placeholders_command(update, _):
+def on_placeholders_command(update, context):
     logger.info('/placeholders command')
 
     sender = None
     subreddit = Subreddit.select().get()
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission)
         break
     
     placeholders = list()
@@ -45,4 +45,4 @@ def on_placeholders_command(update, _):
         os.remove(file_path)
 
 
-bot.add_handler(CommandHandler(['placeholders', 'ph'], on_placeholders_command))
+mainbot.add_handler(CommandHandler(['placeholders', 'ph'], on_placeholders_command))

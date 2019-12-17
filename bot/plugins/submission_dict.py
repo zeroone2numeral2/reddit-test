@@ -5,7 +5,7 @@ from pprint import pformat
 from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
 
-from bot import bot
+from bot import mainbot
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -23,7 +23,7 @@ def on_sdict_command(update, context):
     sender = None
     subreddit = Subreddit.fetch(context.args[0])
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission)
         break
     
     text = pformat(sender.submission_dict)
@@ -38,4 +38,4 @@ def on_sdict_command(update, context):
         os.remove(file_path)
 
 
-bot.add_handler(CommandHandler('sdict', on_sdict_command))
+mainbot.add_handler(CommandHandler('sdict', on_sdict_command))

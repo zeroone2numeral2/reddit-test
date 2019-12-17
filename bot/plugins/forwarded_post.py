@@ -6,7 +6,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import Filters
 
-from bot import bot
+from bot import mainbot
 from bot.markups import InlineKeyboard
 from database.models import Subreddit
 from database.models import Channel
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 @d.restricted
 @d.failwithmessage
-def on_forwarded_post(update: Update, _):
+def on_forwarded_post(update: Update, context):
     logger.info('forwarded message')
     
     if not update.message.forward_from_chat:
@@ -49,7 +49,7 @@ def on_forwarded_post(update: Update, _):
         update.message.reply_text('No subreddit "{}" in the database'.format(submission.subreddit))
         return
 
-    sender = Sender(bot, subreddit, submission)
+    sender = Sender(context.bot, subreddit, submission)
 
     file_path = sender.write_temp_submission_dict()
 
@@ -90,5 +90,5 @@ def up_down_button(update: Update, _, groups):
     update.callback_query.edit_message_reply_markup(markup)
 
 
-bot.add_handler(MessageHandler(on_forwarded_post, Filters.forwarded))
-bot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))
+mainbot.add_handler(MessageHandler(on_forwarded_post, Filters.forwarded))
+mainbot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))

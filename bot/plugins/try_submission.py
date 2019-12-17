@@ -3,7 +3,7 @@ import os
 
 from telegram.ext import CommandHandler
 
-from bot import bot
+from bot import mainbot
 from database.models import Subreddit
 from database.models import Channel
 from reddit import Sender
@@ -37,7 +37,7 @@ def try_submission(update, context):
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
 
-    sender = Sender(bot, tmp_subreddit, submission)
+    sender = Sender(context.bot, tmp_subreddit, submission)
     
     file_path = sender.write_temp_submission_dict()
 
@@ -51,4 +51,4 @@ def try_submission(update, context):
     update.message.reply_text('Posted (r/{}, {})'.format(submission.subreddit, submission.title))
 
 
-bot.add_handler(CommandHandler('try', try_submission))
+mainbot.add_handler(CommandHandler('try', try_submission))

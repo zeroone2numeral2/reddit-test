@@ -5,7 +5,7 @@ import os
 
 from telegram.ext import CommandHandler
 
-from bot import bot
+from bot import mainbot
 from database.models import Subreddit
 from utilities import u
 from utilities import d
@@ -78,8 +78,8 @@ def json_command(update, _):
     file.remove()
 
 
-bot.add_handler(CommandHandler(['getconfig'], getconfig_command))
-bot.add_handler(CommandHandler(['getdb', 'db'], getdb_command))
-bot.add_handler(CommandHandler(['remdl'], remdl_command))
-bot.add_handler(CommandHandler(['sendv'], sendv_command))
-bot.add_handler(CommandHandler(['json'], json_command))
+mainbot.add_handler(CommandHandler(['getconfig'], getconfig_command))
+mainbot.add_handler(CommandHandler(['getdb', 'db'], getdb_command))
+mainbot.add_handler(CommandHandler(['remdl'], remdl_command))
+mainbot.add_handler(CommandHandler(['sendv'], sendv_command))
+mainbot.add_handler(CommandHandler(['json'], json_command))
