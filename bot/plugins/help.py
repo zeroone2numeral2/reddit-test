@@ -1,8 +1,8 @@
 import logging
 
 from telegram.ext import CommandHandler
-from ptbplugins import Plugins
 
+from bot import bot
 from utilities import d
 
 logger = logging.getLogger(__name__)
@@ -60,10 +60,12 @@ forward a message posted by the bot in a channel: get that submission's dict
 """
 
 
-@Plugins.add(CommandHandler, command=['start', 'help'])
 @d.restricted
 @d.failwithmessage
-def subs_list(_, update):
+def on_help_command(update, _):
     logger.info('/help command')
     
     update.message.reply_markdown(HELP_STRING)
+
+
+bot.add_handler(CommandHandler(['start', 'help'], on_help_command))
