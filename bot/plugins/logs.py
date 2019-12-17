@@ -3,8 +3,8 @@ import re
 import os
 
 from telegram.ext import CommandHandler
-from ptbplugins import Plugins
 
+from bot import bot
 from utilities import u
 from utilities import d
 from config import config
@@ -12,10 +12,9 @@ from config import config
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['loglines'])
 @d.restricted
 @d.failwithmessage
-def loglines_command(_, update):
+def loglines_command(update, _):
     logger.info('/loglines command')
 
     dir_path = os.path.dirname(config.logging.filepath)
@@ -35,7 +34,6 @@ def loglines_command(_, update):
     update.message.reply_html(text)
 
 
-@Plugins.add(CommandHandler, command=['remffmpeglogs'])
 @d.restricted
 @d.failwithmessage
 def remffmpeglogs_command(_, update):
@@ -50,7 +48,6 @@ def remffmpeglogs_command(_, update):
     update.message.reply_text('Removed {} log files'.format(len(files)))
 
 
-@Plugins.add(CommandHandler, command=['getlog', 'log'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 def getlog_command(_, update, args):
@@ -63,3 +60,8 @@ def getlog_command(_, update, args):
 
     with open(os.path.normpath(file_path), 'rb') as f:
         update.message.reply_document(f)
+
+
+bot.add_handler(CommandHandler(loglines_command, ['loglines']))
+bot.add_handler(CommandHandler(remffmpeglogs_command, ['remffmpeglogs']))
+bot.add_handler(CommandHandler(getlog_command, ['getlog']))
