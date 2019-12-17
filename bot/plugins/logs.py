@@ -2,7 +2,7 @@ import logging
 import re
 import os
 
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, CallbackContext
 
 from bot import bot
 from utilities import u
@@ -36,7 +36,7 @@ def loglines_command(update, _):
 
 @d.restricted
 @d.failwithmessage
-def remffmpeglogs_command(_, update):
+def remffmpeglogs_command(update, _):
     logger.info('/remffmpeglogs command')
 
     dir_path = os.path.join('logs', 'ffmpeg')
@@ -50,12 +50,12 @@ def remffmpeglogs_command(_, update):
 
 @d.restricted
 @d.failwithmessage
-def getlog_command(_, update, args):
+def getlog_command(update, context: CallbackContext):
     logger.info('/getlog command')
 
     file_path = config.logging.filepath
-    if args and re.search(r'^\d+$', args[0], re.I):
-        log_file_num = args[0]
+    if context.args and re.search(r'^\d+$', context.args[0], re.I):
+        log_file_num = context.args[0]
         file_path = file_path.replace('.log', '.log.{}'.format(log_file_num))
 
     with open(os.path.normpath(file_path), 'rb') as f:
