@@ -4,7 +4,7 @@ import os
 
 from telegram.ext import CommandHandler, CallbackContext
 
-from bot import bot
+from bot import mainbot
 from utilities import u
 from utilities import d
 from config import config
@@ -62,6 +62,6 @@ def getlog_command(update, context: CallbackContext):
         update.message.reply_document(f)
 
 
-bot.add_handler(CommandHandler(loglines_command, ['loglines']))
-bot.add_handler(CommandHandler(remffmpeglogs_command, ['remffmpeglogs']))
-bot.add_handler(CommandHandler(getlog_command, ['getlog']))
+mainbot.add_handler(CommandHandler(loglines_command, ['loglines']))
+mainbot.add_handler(CommandHandler(remffmpeglogs_command, ['remffmpeglogs']))
+mainbot.add_handler(CommandHandler(getlog_command, ['getlog']))
