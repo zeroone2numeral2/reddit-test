@@ -1,12 +1,11 @@
 import datetime
 import logging
 import re
-from collections import KeysView
 
 import pytz
-from telegram.ext import CommandHandler
-from ptbplugins import Plugins
+from telegram.ext import CommandHandler, CallbackContext
 
+from bot import bot
 from utilities import u
 from utilities import d
 
@@ -27,19 +26,18 @@ TIMEZONES_MAP = dict(
 )
 
 
-@Plugins.add(CommandHandler, command=['now'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def now_command(_, update, args):
+def now_command(update, context: CallbackContext):
     logger.info('/now command')
 
     selected_hour = None
-    if args:
-        if not re.search(r'^\d+$', args[0]):
+    if context.args:
+        if not re.search(r'^\d+$', context.args[0]):
             update.message.reply_text('Argument must be a number')
             return
 
-        selected_hour = int(args[0])
+        selected_hour = int(context.args[0])
         if selected_hour > 23:
             update.message.reply_text('Argument must be <= 23')
             return
@@ -60,3 +58,6 @@ def now_command(_, update, args):
         localized_times='\n'.join(timezones_strings),
         weekday=weekday
     ))
+
+
+bot.add_handler(CommandHandler(['now'], now_command))
