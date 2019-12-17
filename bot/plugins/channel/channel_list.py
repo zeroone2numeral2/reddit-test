@@ -1,11 +1,9 @@
 import logging
-from math import floor
 
-from telegram.ext import CommandHandler
-from telegram import MAX_MESSAGE_LENGTH
+from telegram.ext import CommandHandler, CallbackContext
 from telegram import ParseMode
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Subreddit
 from utilities import d
 from utilities import u
@@ -18,10 +16,9 @@ STANDARD_TEXT = """Full list of channels here (pinned message)
 <b>Request a subreddit mirror</b>: https://telegra.ph/how-to-03-20"""
 
 
-@Plugins.add(CommandHandler, command=['updatelist'])
 @d.restricted
 @d.failwithmessage
-def on_channels_list(bot, update):
+def on_channels_list(update, context: CallbackContext):
     logger.info('/updatelist command')
 
     # this whole function and the Subreddit method is a shitshow
@@ -59,8 +56,8 @@ def on_channels_list(bot, update):
 
     first_message_link, first_sent_message = None, None
     for i, text in enumerate(u.split_text(lines, join_by='\n')):
-        sent_message = bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True,
-                                        parse_mode=ParseMode.HTML)
+        sent_message = context.bot.send_message('@' + config.telegram.index, text, disable_web_page_preview=True,
+                                                parse_mode=ParseMode.HTML)
 
         if i == 0:
             first_sent_message = sent_message
@@ -71,3 +68,6 @@ def on_channels_list(bot, update):
     update.message.reply_text('Done {}'.format(u.message_link(final_message)), disable_web_page_preview=True)
     if non_public_channels:
         update.message.reply_text('Non-public channels ignored: {}'.format(', '.join(non_public_channels)))
+
+
+mainbot.add_handler(CommandHandler('updatelist', on_channels_list))
