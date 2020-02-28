@@ -45,6 +45,7 @@ class Subreddit(peewee.Model):
     test = peewee.BooleanField(default=False)
     url_button = peewee.BooleanField(default=False)
     comments_button = peewee.BooleanField(default=False)
+    template_no_url = peewee.CharField(null=True)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)
