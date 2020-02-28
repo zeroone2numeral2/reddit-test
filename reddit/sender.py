@@ -334,8 +334,15 @@ class Sender:
             logger.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
             self._chat_id = chat_id
 
-        template = self._subreddit.template
+        if not self._s.textual or not self._subreddit.template_no_url:
+            # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
+            # use the template saved in the database
+            template = self._subreddit.template
+        else:
+            template = self._subreddit.template_no_url
+
         if not template:
+            # if there is no correct template set in the db, use the default one
             logger.info('no template: using the default one')
             template = DEFAULT_TEMPLATE
 
