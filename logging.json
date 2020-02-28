@@ -8,6 +8,15 @@
             "level": "DEBUG"
         },
         "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "filename": "logs/redditmirror.log",
+            "maxBytes": 1048576,
+            "backupCount": 500
+        },
+        "timed_file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "formatter": "standard",
             "when": "d",
