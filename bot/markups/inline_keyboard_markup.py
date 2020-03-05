@@ -24,7 +24,7 @@ class InlineKeyboard:
 
     @staticmethod
     def post_buttons(url=None, comments=None, n_comments=None):
-        if url.lower() == comments.lower():
+        if url and comments and url.lower() == comments.lower():
             keyboard = [[InlineKeyboardButton('thread • {}'.format(n_comments), url=comments)]]
         else:
             keyboard = [[]]
