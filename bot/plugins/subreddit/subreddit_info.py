@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import CommandHandler
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from ptbplugins import Plugins
 
 from utilities import u
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def on_subreddit_selected(_, update, subreddit):
+def on_subreddit_selected(update: Update, _, subreddit):
     logger.info('/info command')
 
     text = u.model_dict(subreddit, plain_formatted_string=True)
