@@ -3,6 +3,7 @@ from .bot import RedditBot
 from utilities import utilities
 from .jobs.stream import check_posts
 from .jobs.resume import check_daily_resume
+from .customfilters import CustomFilters
 from config import config
 
 
