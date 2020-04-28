@@ -13,7 +13,7 @@ from bot.markups import Keyboard
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 SUBREDDIT_SELECT = 0
 
@@ -37,6 +37,7 @@ Use /end when you are done\
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_sub_command(update: Update, context: CallbackContext):
     logger.debug('/sub: selecting subreddit, text: %s', update.message.text)
 
@@ -57,6 +58,7 @@ def on_sub_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -78,6 +80,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_cancel(update: Update, context: CallbackContext):
     logger.debug('ending conversation')
 
@@ -91,6 +94,7 @@ def on_cancel(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
+@d.logconversation
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 

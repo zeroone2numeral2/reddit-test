@@ -10,13 +10,14 @@ from utilities import u
 from utilities import d
 from bot import CustomFilters, mainbot
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 
 @d.restricted
 @d.failwithmessage
-@d.deferred_handle_lock
+# @d.deferred_handle_lock
 @d.pass_subreddit(answer=True)
+@d.logconversation
 def on_setting_change(update: Update, _, subreddit):
     logger.info('changed subreddit property: %s', update.message.text)
 

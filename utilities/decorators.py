@@ -3,6 +3,7 @@ import re
 import time
 from functools import wraps
 
+from telegram import Update
 from telegram.ext import ConversationHandler, CallbackContext
 
 from database.models import Subreddit
@@ -14,6 +15,9 @@ from bot import updater
 from config import config
 
 logger = logging.getLogger(__name__)
+loggerc = logging.getLogger('conversation')
+loggerh = logging.getLogger('handler')
+loggerj = logging.getLogger('job')
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
@@ -42,7 +46,7 @@ def failwithmessage(func):
             if 'database is locked' in str(e).lower():
                 exc_info = False  # do not log the whole traceback if the error is 'database is locked'
 
-            logger.error('error during handler execution: %s', str(e), exc_info=exc_info)
+            loggerh.error('error during handler execution: %s', str(e), exc_info=exc_info)
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
@@ -55,7 +59,7 @@ def logerrors(func):
         try:
             return func(context, *args, **kwargs)
         except Exception as e:
-            logger.error('error during job execution: %s', str(e), exc_info=True)
+            loggerj.error('error during job execution: %s', str(e), exc_info=True)
 
     return wrapped
 
@@ -81,7 +85,7 @@ def log_start_end_dt(func):
     @wraps(func)
     def wrapped(context: CallbackContext, *args, **kwargs):
         job_start_dt = u.now()
-        logger.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
+        loggerj.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
         with db.atomic():
             job_row = Job(name=context.job.name, start=job_start_dt)
@@ -98,7 +102,7 @@ def log_start_end_dt(func):
         with db.atomic():
             job_row.save()
 
-        logger.info(
+        loggerj.info(
             '%s job ended at %s (elapsed seconds: %d (%s))',
             context.job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
@@ -113,7 +117,7 @@ def log_start_end_dt(func):
                 round(elapsed_seconds, 2),
                 u.pretty_seconds(elapsed_seconds)
             )
-            logger.warning(text)
+            loggerj.warning(text)
             context.bot.send_message(config.telegram.log, text)
 
         return job_result
@@ -169,3 +173,20 @@ def pass_subreddit(answer=False):
         return wrapped
 
     return real_decorator
+
+
+def logconversation(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        step_returned = func(update, context, *args, **kwargs)
+        loggerc.debug(
+            'user %d: function <%s> returned step %d (%s)',
+            update.effective_user.id,
+            func.__name__,
+            step_returned,
+            'x'  # get_status_description(step_returned)
+        )
+
+        return step_returned
+
+    return wrapped

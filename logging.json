@@ -16,7 +16,34 @@
             "maxBytes": 1048576,
             "backupCount": 500
         },
-        "timed_file": {
+        "file_conversation_steps": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "conversation_status",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/conversations.log",
+            "backupCount": 20
+        },
+        "file_dispatcher_handlers": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/handlers.log",
+            "backupCount": 20
+        },
+        "file_jobs": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/jobs.log",
+            "backupCount": 20
+        },
+        "timed_file_test": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "formatter": "standard",
             "when": "d",
@@ -28,15 +55,27 @@
         }
     },
     "loggers": {
+        "conversation": {
+            "handlers": ["console", "file_conversation_steps"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
+        "handler": {
+            "handlers": ["console", "file_dispatcher_handlers"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
+        "job": {
+            "handlers": ["console", "file_jobs"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
         "": {
             "handlers": [
                 "console",
                 "file"
             ],
             "propagate": false,
-            "level": "DEBUG"
-        },
-        "plugins": {
             "level": "DEBUG"
         },
         "telegram": {
@@ -66,13 +105,16 @@
             "format": "[%(name)s][%(levelname)s] >>> %(message)s"
         },
         "standard": {
-            "format": "[%(asctime)s][%(name)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] >>> %(message)s"
+            "format": "[%(asctime)s][%(name)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
         },
         "filename": {
             "format": "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] >>> %(message)s"
         },
         "long": {
             "format": "[%(asctime)s][%(name)s][%(pathname)s:%(funcName)s:%(lineno)d][%(levelname)s] >>> %(message)s"
+        },
+        "conversation_status": {
+            "format": "[%(asctime)s][%(levelname)s] %(message)s"
         }
     }
 }
