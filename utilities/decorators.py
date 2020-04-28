@@ -15,9 +15,13 @@ from bot import updater
 from config import config
 
 logger = logging.getLogger(__name__)
-loggerc = logging.getLogger('conversation')
-loggerh = logging.getLogger('handler')
-loggerj = logging.getLogger('job')
+
+
+class Log:
+    conv = logging.getLogger('conversation')
+    handler = logging.getLogger('handler')
+    job = logging.getLogger('job')
+
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
@@ -46,7 +50,7 @@ def failwithmessage(func):
             if 'database is locked' in str(e).lower():
                 exc_info = False  # do not log the whole traceback if the error is 'database is locked'
 
-            loggerh.error('error during handler execution: %s', str(e), exc_info=exc_info)
+            Log.handler.error('error during handler execution: %s', str(e), exc_info=exc_info)
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
@@ -59,7 +63,7 @@ def logerrors(func):
         try:
             return func(context, *args, **kwargs)
         except Exception as e:
-            loggerj.error('error during job execution: %s', str(e), exc_info=True)
+            Log.job.error('error during job execution: %s', str(e), exc_info=True)
 
     return wrapped
 
@@ -85,7 +89,7 @@ def log_start_end_dt(func):
     @wraps(func)
     def wrapped(context: CallbackContext, *args, **kwargs):
         job_start_dt = u.now()
-        loggerj.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
+        Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
         with db.atomic():
             job_row = Job(name=context.job.name, start=job_start_dt)
@@ -102,7 +106,7 @@ def log_start_end_dt(func):
         with db.atomic():
             job_row.save()
 
-        loggerj.info(
+        Log.job.info(
             '%s job ended at %s (elapsed seconds: %d (%s))',
             context.job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
@@ -117,7 +121,7 @@ def log_start_end_dt(func):
                 round(elapsed_seconds, 2),
                 u.pretty_seconds(elapsed_seconds)
             )
-            loggerj.warning(text)
+            Log.job.warning(text)
             context.bot.send_message(config.telegram.log, text)
 
         return job_result
@@ -179,7 +183,7 @@ def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         step_returned = func(update, context, *args, **kwargs)
-        loggerc.debug(
+        Log.conv.debug(
             'user %d: function <%s> returned step %d (%s)',
             update.effective_user.id,
             func.__name__,
