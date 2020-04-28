@@ -73,7 +73,7 @@ class Subreddit(peewee.Model):
         return model_to_dict(cls)
 
     @classmethod
-    def fetch(cls: Type[S], name) -> S:
+    def fetch(cls: Type[S], name) -> [S, None]:
         try:
             return cls.get(cls.name ** name)
         except peewee.DoesNotExist:
