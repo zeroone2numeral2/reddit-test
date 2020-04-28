@@ -1,7 +1,8 @@
 import logging
 import re
 
-from telegram.ext import ConversationHandler
+from telegram import Update
+from telegram.ext import ConversationHandler, CallbackContext
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
@@ -31,11 +32,11 @@ CLONE_KEYS_TO_IGNORE = (
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def on_clonefrom_command(_, update, args=None, **kwargs):
-    logger.info('/clonefrom command, args: %s', str(args))
+def on_clonefrom_command(update: Update, context: CallbackContext, **kwargs):
+    logger.info('/clonefrom command, args: %s', str(context.args))
 
     # we consider the second argument as a filter for the destination subreddit selection keyboard
-    name_filter = args[0] if args else None
+    name_filter = context.args[0] if context.args else None
 
     subreddits = Subreddit.get_list(name_filter=name_filter)
     if not subreddits:
@@ -52,7 +53,7 @@ def on_clonefrom_command(_, update, args=None, **kwargs):
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def on_origin_subreddit_selected(_, update, subreddit=None):
+def on_origin_subreddit_selected(update: Update, _, subreddit=None):
     logger.info('/clonefrom command: origin subreddit selected (%s)', update.message.text)
 
     subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
@@ -74,7 +75,7 @@ def on_origin_subreddit_selected(_, update, subreddit=None):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(_, update):
+def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Okay, operation canceled', reply_markup=Keyboard.REMOVE)
 
