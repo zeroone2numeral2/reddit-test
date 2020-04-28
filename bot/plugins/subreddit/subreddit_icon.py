@@ -3,8 +3,8 @@ import os
 
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext
-from ptbplugins import Plugins
 
+from bot import mainbot
 from bot.markups import Keyboard
 from reddit import reddit
 from utilities import d
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 SUBREDDIT_SELECT = 0
 
 
-@Plugins.add(CommandHandler, command=['geticon', 'icon'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 def sub_icon(update: Update, context: CallbackContext):
@@ -36,11 +35,10 @@ def sub_icon(update: Update, context: CallbackContext):
     os.remove(file_path)
 
 
-@Plugins.add(CommandHandler, command=['setchannelicon'])
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def sub_seticon(update: Update, context: CallbackContext, subreddit=None):
+def sub_set_icon(update: Update, context: CallbackContext, subreddit=None):
     logger.info('/setchannelicon command')
 
     file_path = reddit.get_icon(subreddit.name, download=True)
@@ -55,3 +53,7 @@ def sub_seticon(update: Update, context: CallbackContext, subreddit=None):
     os.remove(file_path)
 
     update.message.reply_text('Icon updated')
+
+
+mainbot.add_handler(CommandHandler(['geticon', 'icon'], sub_icon, pass_args=True))
+mainbot.add_handler(CommandHandler(['setchannelicon'], sub_set_icon))

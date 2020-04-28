@@ -2,8 +2,8 @@ import logging
 
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext
-from ptbplugins import Plugins
 
+from bot import mainbot
 from reddit import reddit
 from utilities import u
 from utilities import d
@@ -11,7 +11,6 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['optin', 'oi'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 def optin_quarantined(update: Update, context: CallbackContext):
@@ -33,3 +32,6 @@ def optin_quarantined(update: Update, context: CallbackContext):
     except Exception as e:
         update.message.reply_text('Exception while trying to opt-in to subreddit {}:'.format(sub_name))
         update.message.reply_html('<code>{}</code>'.format(u.html_escape(str(e))))
+
+
+mainbot.add_handler(CommandHandler(['optin', 'oi'], optin_quarantined, pass_args=True))

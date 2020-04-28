@@ -1,9 +1,9 @@
 import logging
 
 from telegram import Update
-from telegram.ext import CommandHandler, CallbackContext
-from ptbplugins import Plugins
+from telegram.ext import CommandHandler
 
+from bot import mainbot
 from database.models import Subreddit
 from utilities import d
 from utilities import u
@@ -11,7 +11,6 @@ from utilities import u
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['subs', 'list'])
 @d.restricted
 @d.failwithmessage
 def subs_list(update: Update, _):
@@ -34,3 +33,6 @@ def subs_list(update: Update, _):
 
     for text in u.split_text(strings, join_by='\n'):
         update.message.reply_html(text)
+
+
+mainbot.add_handler(CommandHandler(['subs', 'list'], subs_list))

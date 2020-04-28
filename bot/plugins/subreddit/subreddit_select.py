@@ -5,7 +5,8 @@ from telegram import Update
 from telegram.ext import MessageHandler, CommandHandler, CallbackContext
 from telegram.ext import Filters
 from telegram.ext import ConversationHandler
-from ptbplugins import Plugins
+
+from bot import mainbot
 from database.models import Subreddit
 
 from bot.markups import Keyboard
@@ -87,7 +88,6 @@ def on_cancel(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-@Plugins.add(CommandHandler, command=['end'], pass_user_data=True)
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
@@ -101,14 +101,11 @@ def on_end(update: Update, context: CallbackContext, subreddit=None):
     update.message.reply_text(text)
 
 
-@Plugins.add_conversation_hanlder()
-def info_subreddit_conv_hanlder():
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(command=['sub', 'subreddit'], callback=on_sub_command, pass_args=True)],
-        states={
-            SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
-        },
-        fallbacks=[CommandHandler(['cancel', 'done'], on_cancel, pass_user_data=True)]
-    )
-
-    return conv_handler
+mainbot.add_handler(CommandHandler(['end'], on_end, pass_user_data=True))
+mainbot.add_handler(ConversationHandler(
+    entry_points=[CommandHandler(command=['sub', 'subreddit'], callback=on_sub_command, pass_args=True)],
+    states={
+        SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
+    },
+    fallbacks=[CommandHandler(['cancel', 'done'], on_cancel, pass_user_data=True)]
+))

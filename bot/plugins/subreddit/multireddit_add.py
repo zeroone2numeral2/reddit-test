@@ -6,8 +6,8 @@ from telegram.ext import CommandHandler
 from telegram.ext import Filters
 from telegram.ext import CallbackContext
 from telegram import Update
-from ptbplugins import Plugins
 
+from bot import mainbot
 from bot.markups import Keyboard
 from database.models import Channel
 from database.models import Subreddit
@@ -98,19 +98,15 @@ def on_cancel(update: Update, _):
     return ConversationHandler.END
 
 
-@Plugins.add_conversation_hanlder()
-def addsubreddit_conv_hanlder():
-    conv_handler = ConversationHandler(
-        entry_points=[
-            CommandHandler(command=['addmulti'], callback=on_addmulti_command, pass_args=True, pass_user_data=True)],
-        states={
-            CHANNEL_SELECT: [
-                MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
-            ]
-        },
-        fallbacks=[
-            CommandHandler('cancel', on_cancel)
+mainbot.add_handler(ConversationHandler(
+    entry_points=[
+        CommandHandler(command=['addmulti'], callback=on_addmulti_command, pass_args=True, pass_user_data=True)],
+    states={
+        CHANNEL_SELECT: [
+            MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
         ]
-    )
-
-    return conv_handler
+    },
+    fallbacks=[
+        CommandHandler('cancel', on_cancel)
+    ]
+))

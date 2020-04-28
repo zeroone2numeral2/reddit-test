@@ -3,8 +3,8 @@ import logging
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext
 from peewee import DoesNotExist
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Post
 from database.models import PostResume
 from database.models import Subreddit
@@ -14,7 +14,6 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['d'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
@@ -46,3 +45,6 @@ def subs_debug(update: Update, context: CallbackContext):
         text += '\n• (((<code>{id}</code>/{elapsed_smart}/{score_dotted}/{posted}))) <b>{title_escaped}</b>'.format(**submission, posted=posted)
 
     update.message.reply_html(text)
+
+
+mainbot.add_handler(CommandHandler(['d'], subs_debug, pass_args=True))

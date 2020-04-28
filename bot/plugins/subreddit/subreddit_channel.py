@@ -4,8 +4,8 @@ from telegram import Update
 from telegram.ext import ConversationHandler, CommandHandler, CallbackContext
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Channel
 from bot.markups import Keyboard
 from utilities import u
@@ -71,18 +71,14 @@ def on_cancel(update: Update, _):
     return ConversationHandler.END
 
 
-@Plugins.add_conversation_hanlder()
-def setchannel_conv_hanlder():
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(command=['setchannel'], callback=select_channel)],
-        states={
-            SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=select_channel, pass_user_data=True)],
-            CHANNEL_SELECT: [
-                MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_channel_selected),
-                MessageHandler(~Filters.command & Filters.all, callback=on_channel_selected_incorrect),
-            ],
-        },
-        fallbacks=[CommandHandler(['cancel', 'done'], on_cancel)]
-    )
-
-    return conv_handler
+mainbot.add_handler(ConversationHandler(
+    entry_points=[CommandHandler(command=['setchannel'], callback=select_channel)],
+    states={
+        SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=select_channel, pass_user_data=True)],
+        CHANNEL_SELECT: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_channel_selected),
+            MessageHandler(~Filters.command & Filters.all, callback=on_channel_selected_incorrect),
+        ],
+    },
+    fallbacks=[CommandHandler(['cancel', 'done'], on_cancel)]
+))

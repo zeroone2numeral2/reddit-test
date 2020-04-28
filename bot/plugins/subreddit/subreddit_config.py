@@ -3,18 +3,16 @@ import re
 
 from playhouse.shortcuts import model_to_dict
 from telegram import Update
-from telegram.ext import MessageHandler, CallbackContext
+from telegram.ext import MessageHandler
 from telegram.ext import Filters
-from ptbplugins import Plugins
 
 from utilities import u
 from utilities import d
-from bot import CustomFilters
+from bot import CustomFilters, mainbot
 
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(MessageHandler, filters=Filters.text & CustomFilters.subreddit_set & ~Filters.command)
 @d.restricted
 @d.failwithmessage
 @d.deferred_handle_lock
@@ -91,3 +89,6 @@ def on_setting_change(update: Update, _, subreddit):
         new_value=u.escape(str(new_value)),
         input_type=u.escape(str(type(value).__name__))
     ))
+
+
+mainbot.add_handler(MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, on_setting_change))
