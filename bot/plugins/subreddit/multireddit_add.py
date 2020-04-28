@@ -4,7 +4,8 @@ from telegram.ext import ConversationHandler
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
 from telegram.ext import Filters
-from telegram import ParseMode
+from telegram.ext import CallbackContext
+from telegram import Update
 from ptbplugins import Plugins
 
 from bot.markups import Keyboard
@@ -13,7 +14,6 @@ from database.models import Subreddit
 from reddit import reddit
 from utilities import u
 from utilities import d
-from config import config
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +24,14 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 @d.restricted
 @d.failwithmessage
-def on_addmulti_command(_, update, args, user_data):
-    logger.info('/addmultib command, args: %s', str(args))
-    if len(args) < 2:
+def on_addmulti_command(update: Update, context: CallbackContext):
+    logger.info('/addmultib command, args: %s', str(context.args))
+    if len(context.args) < 2:
         update.message.reply_text('Usage: /addmulti [owner] [multireddit name]')
         return ConversationHandler.END
 
-    multireddit_name = args[1]
-    redditor = args[0]
+    multireddit_name = context.args[1]
+    redditor = context.args[0]
 
     clean_name = u.normalize_sub_name(multireddit_name)
     if not clean_name:
@@ -53,8 +53,8 @@ def on_addmulti_command(_, update, args, user_data):
         update.message.reply_text('No saved channel. Use /addchannel to add a channel')
         return ConversationHandler.END
 
-    user_data['name'] = multireddit_name
-    user_data['redditor'] = redditor
+    context.user_data['name'] = multireddit_name
+    context.user_data['redditor'] = redditor
 
     reply_markup = Keyboard.from_list(channels_list)
     update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
@@ -64,15 +64,15 @@ def on_addmulti_command(_, update, args, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected(_, update, user_data):
+def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
     logger.info('channel_id: %d', channel_id)
     channel = Channel.get(Channel.channel_id == channel_id)
 
-    multireddit_name = user_data.pop('name')
-    redditor = user_data.pop('redditor')
+    multireddit_name = context.user_data.pop('name')
+    redditor = context.user_data.pop('redditor')
     logger.debug('testing subreddit to fetch its id: %s', multireddit_name)
 
     logger.info('saving multireddit...')
@@ -91,7 +91,7 @@ def on_channel_selected(_, update, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(_, update):
+def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
