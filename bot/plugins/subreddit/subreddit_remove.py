@@ -1,7 +1,7 @@
 import logging
 
-from telegram.ext import MessageHandler, CommandHandler
-from telegram.ext import Filters
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from ptbplugins import Plugins
 
 from utilities import d
@@ -15,11 +15,11 @@ SUBREDDIT_SELECT = 0
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def delete_sub(_, update, user_data=None, subreddit=None):
+def delete_sub(update: Update, context: CallbackContext, subreddit=None):
     logger.info('/remove command')
 
     subreddit.delete_instance()
 
     update.message.reply_html('/r/{s.name} ({s.channel.title}) has gone, you have also exited the configuring mode for this sub'.format(s=subreddit))
 
-    user_data.pop('data', None)
+    context.user_data.pop('data', None)
