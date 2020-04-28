@@ -90,5 +90,5 @@ def up_down_button(update: Update, _, groups):
     update.callback_query.edit_message_reply_markup(markup)
 
 
-mainbot.add_handler(MessageHandler(on_forwarded_post, Filters.forwarded))
+mainbot.add_handler(MessageHandler(Filters.forwarded, on_forwarded_post))
 mainbot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))
