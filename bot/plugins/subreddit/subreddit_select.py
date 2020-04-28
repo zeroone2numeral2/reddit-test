@@ -1,6 +1,7 @@
 import logging
 import re
 
+from playhouse.shortcuts import model_to_dict
 from telegram import Update
 from telegram.ext import MessageHandler, CommandHandler, CallbackContext
 from telegram.ext import Filters
@@ -9,14 +10,14 @@ from telegram.ext import ConversationHandler
 from bot import mainbot
 from bot.conversation import Status
 from database.models import Subreddit
-
 from bot.markups import Keyboard
+from bot import updater
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
 
-TEXT = """You are configuring /r/{s.name} (channel: {s.channel.title})
+TEXT = """You are configuring /r/{s.name} (channel: {channel_title})
 
 <b>Available commands</b>: \
 /info, \
@@ -37,6 +38,7 @@ Use /end when you are done\
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_sub_command(update: Update, context: CallbackContext):
     logger.debug('/sub: selecting subreddit, text: %s', update.message.text)
 
@@ -47,7 +49,7 @@ def on_sub_command(update: Update, context: CallbackContext):
         update.message.reply_text('Cannot find any subreddit (filter: {})'.format(name_filter))
         return ConversationHandler.END
 
-    buttons_list = ['{}. /{}/{} ({})'.format(s.id, 'm' if s.is_multireddit else 'r', s.name, s.channel.title) for s in subreddits]
+    buttons_list = ['{}. /{}/{} ({})'.format(s.id, 'm' if s.is_multireddit else 'r', s.name, s.channel.title if s.channel else 'no channel') for s in subreddits]
     reply_markup = Keyboard.from_list(buttons_list)
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
@@ -58,6 +60,7 @@ def on_sub_command(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -70,7 +73,8 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     context.user_data['data'] = dict()
     context.user_data['data']['subreddit'] = subreddit
 
-    text = TEXT.format(s=subreddit)
+    channel_title = 'no channel' if not subreddit.channel else subreddit.channel.title
+    text = TEXT.format(s=subreddit, channel_title=channel_title)
 
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 
@@ -80,6 +84,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_cancel(update: Update, context: CallbackContext):
     logger.debug('ending conversation')
 
@@ -94,6 +99,7 @@ def on_cancel(update: Update, context: CallbackContext):
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
 @d.logconversation
+@d.loguserdata
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 

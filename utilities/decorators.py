@@ -195,3 +195,16 @@ def logconversation(func):
         return step_returned
 
     return wrapped
+
+
+def loguserdata(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        logger.debug('user_data (from context): %s', context.user_data)
+        logger.debug('user_data (from dispatcher): %s', updater.dispatcher.user_data.get(update.effective_user.id, {}))
+
+        step_returned = func(update, context, *args, **kwargs)
+
+        return step_returned
+
+    return wrapped

@@ -24,6 +24,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_addsub_command(update: Update, context: CallbackContext):
     logger.info('/addsub command, args: %s', str(context.args))
     if not context.args:
@@ -69,6 +70,7 @@ def on_addsub_command(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
@@ -108,6 +110,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.loguserdata
 def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
