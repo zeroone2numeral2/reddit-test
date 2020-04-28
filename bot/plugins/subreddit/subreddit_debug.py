@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import CommandHandler
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from peewee import DoesNotExist
 from ptbplugins import Plugins
 
@@ -17,15 +18,15 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def subs_debug(_, update, args):
+def subs_debug(update: Update, context: CallbackContext):
     logger.info('/d command')
 
-    if len(args) < 2:
+    if len(context.args) < 2:
         update.message.reply_text('Usage: /d [subreddit] [sorting]')
         return
 
-    subreddit_name = args[0]
-    sorting = args[1].lower()
+    subreddit_name = context.args[0]
+    sorting = context.args[1].lower()
 
     subreddit = Subreddit.fetch(subreddit_name)
     submissions = reddit.get_submissions(subreddit_name, sorting, limit=subreddit.limit)
