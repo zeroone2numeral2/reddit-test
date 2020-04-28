@@ -1,7 +1,8 @@
 import logging
 import re
 
-from telegram.ext import MessageHandler, CommandHandler
+from telegram import Update
+from telegram.ext import MessageHandler, CommandHandler, CallbackContext
 from telegram.ext import Filters
 from telegram.ext import ConversationHandler
 from ptbplugins import Plugins
@@ -35,10 +36,10 @@ Use /end when you are done\
 
 @d.restricted
 @d.failwithmessage
-def on_sub_command(_, update, args):
+def on_sub_command(update: Update, context: CallbackContext):
     logger.debug('/sub: selecting subreddit, text: %s', update.message.text)
 
-    name_filter = args[0] if args else None
+    name_filter = context.args[0] if context.args else None
 
     subreddits: [Subreddit] = Subreddit.get_list(name_filter=name_filter)
     if not subreddits:
@@ -55,7 +56,7 @@ def on_sub_command(_, update, args):
 
 @d.restricted
 @d.failwithmessage
-def on_subreddit_selected(_, update, user_data=None):
+def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
     # subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
@@ -64,8 +65,8 @@ def on_subreddit_selected(_, update, user_data=None):
 
     subreddit = Subreddit.get(Subreddit.id == subreddit_key)
 
-    user_data['data'] = dict()
-    user_data['data']['subreddit'] = subreddit
+    context.user_data['data'] = dict()
+    context.user_data['data']['subreddit'] = subreddit
 
     text = TEXT.format(s=subreddit)
 
@@ -76,12 +77,12 @@ def on_subreddit_selected(_, update, user_data=None):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(_, update, user_data):
+def on_cancel(update: Update, context: CallbackContext):
     logger.debug('ending conversation')
 
     update.message.reply_text('Okay, operation canceled', reply_markup=Keyboard.REMOVE)
 
-    user_data.pop('subreddit', None)
+    context.user_data.pop('subreddit', None)
 
     return ConversationHandler.END
 
@@ -90,12 +91,12 @@ def on_cancel(_, update, user_data):
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def on_end(_, update, user_data=None, subreddit=None):
+def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 
     text = 'Exited configuration mode for /r/{s.name} (channel: {s.channel.title})'.format(s=subreddit)
 
-    user_data.pop('data', None)
+    context.user_data.pop('data', None)
 
     update.message.reply_text(text)
 
