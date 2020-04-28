@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import CommandHandler
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from ptbplugins import Plugins
 
 from database.models import Subreddit
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 @Plugins.add(CommandHandler, command=['subs', 'list'])
 @d.restricted
 @d.failwithmessage
-def subs_list(_, update):
+def subs_list(update: Update, _):
     logger.info('/subs command')
 
     subreddits = Subreddit.get_list()
