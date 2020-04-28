@@ -17,7 +17,7 @@ from reddit import reddit
 from reddit import SenderResume
 from config import config
 
-logger = logging.getLogger('sp')
+logger = logging.getLogger('job')
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 

@@ -18,7 +18,7 @@ from reddit import reddit
 from reddit import Sender
 from config import config
 
-logger = logging.getLogger('sp')
+logger = logging.getLogger('job')
 
 NOT_VALUES = (None, False)
 

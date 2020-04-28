@@ -7,7 +7,7 @@ from bot import mainbot
 from database.models import Subreddit
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 
 @d.restricted
