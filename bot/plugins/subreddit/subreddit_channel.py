@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import ConversationHandler, CommandHandler
+from telegram import Update
+from telegram.ext import ConversationHandler, CommandHandler, CallbackContext
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from ptbplugins import Plugins
@@ -18,7 +19,7 @@ SUBREDDIT_SELECT, CHANNEL_SELECT = range(2)
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def select_channel(_, update, *args, **kwargs):
+def select_channel(update: Update, _, **kwargs):
     logger.info('setchannel callback: %s', update.message.text)
 
     channels_list = Channel.get_list()
@@ -38,7 +39,7 @@ def select_channel(_, update, *args, **kwargs):
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit()
-def on_channel_selected(_, update, subreddit=None):
+def on_channel_selected(update: Update, _, subreddit=None):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -54,7 +55,7 @@ def on_channel_selected(_, update, subreddit=None):
 
 @d.restricted
 @d.failwithmessage
-def on_channel_selected_incorrect(_, update):
+def on_channel_selected_incorrect(update: Update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
@@ -63,7 +64,7 @@ def on_channel_selected_incorrect(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_cancel(_, update):
+def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Okay, we will not change this subreddit\'s channel', reply_markup=Keyboard.REMOVE)
 
