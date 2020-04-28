@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import CommandHandler
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from ptbplugins import Plugins
 
 from utilities import d
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def on_disable_command(_, update, subreddit):
+def on_disable_command(update: Update, _, subreddit):
     logger.info('/disable command')
 
     subreddit.enabled = False
