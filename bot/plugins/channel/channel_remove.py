@@ -12,7 +12,7 @@ from database.models import Subreddit
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 CHANNEL_SELECT = range(1)
 
@@ -49,6 +49,7 @@ def on_channel_selected(update, _):
         for subreddit in channel_subreddits:
             subreddit.channel = None
             subreddit.save()
+            logger.debug('removed bind channel for subreddit r/%s', subreddit.name)
 
     channel_title = channel.title
     

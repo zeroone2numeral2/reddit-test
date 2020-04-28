@@ -104,6 +104,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'comments_button', comments_button),
         # 20200228
         migrator.add_column('subreddits', 'template_no_url', template_no_url),
+        # 20200428
+        migrator.drop_not_null('subreddits', 'channel_id'),
     ]
 
     logger.info('Starting migration....')
