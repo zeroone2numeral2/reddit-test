@@ -2,7 +2,8 @@ import logging
 import re
 
 from playhouse.shortcuts import model_to_dict
-from telegram.ext import MessageHandler
+from telegram import Update
+from telegram.ext import MessageHandler, CallbackContext
 from telegram.ext import Filters
 from ptbplugins import Plugins
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 @d.failwithmessage
 @d.deferred_handle_lock
 @d.pass_subreddit(answer=True)
-def on_setting_change(_, update, subreddit):
+def on_setting_change(update: Update, _, subreddit):
     logger.info('changed subreddit property: %s', update.message.text)
 
     logger.info('subreddit_name: %s', subreddit.name)
