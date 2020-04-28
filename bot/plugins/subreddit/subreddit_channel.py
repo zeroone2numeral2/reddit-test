@@ -6,18 +6,18 @@ from telegram.ext import MessageHandler
 from telegram.ext import Filters
 
 from bot import mainbot
+from bot.conversation import Status
 from database.models import Channel
 from bot.markups import Keyboard
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
-
-SUBREDDIT_SELECT, CHANNEL_SELECT = range(2)
+logger = logging.getLogger('handler')
 
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit(answer=True)
 def select_channel(update: Update, _, **kwargs):
     logger.info('setchannel callback: %s', update.message.text)
@@ -33,11 +33,12 @@ def select_channel(update: Update, _, **kwargs):
         reply_markup=reply_markup
     )
 
-    return CHANNEL_SELECT
+    return Status.CHANNEL_SELECT
 
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit()
 def on_channel_selected(update: Update, _, subreddit=None):
     logger.info('channel selected: %s', update.message.text)
@@ -59,11 +60,12 @@ def on_channel_selected_incorrect(update: Update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
-    return CHANNEL_SELECT
+    return Status.CHANNEL_SELECT
 
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Okay, we will not change this subreddit\'s channel', reply_markup=Keyboard.REMOVE)
@@ -74,8 +76,8 @@ def on_cancel(update: Update, _):
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['setchannel'], callback=select_channel)],
     states={
-        SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=select_channel, pass_user_data=True)],
-        CHANNEL_SELECT: [
+        Status.SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=select_channel, pass_user_data=True)],
+        Status.CHANNEL_SELECT: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_channel_selected),
             MessageHandler(~Filters.command & Filters.all, callback=on_channel_selected_incorrect),
         ],

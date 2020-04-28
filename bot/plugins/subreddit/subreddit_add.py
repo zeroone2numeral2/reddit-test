@@ -8,6 +8,7 @@ from telegram.ext import CallbackContext
 from telegram import Update
 
 from bot import mainbot
+from bot.conversation import Status
 from bot.markups import Keyboard
 from database.models import Channel
 from database.models import Subreddit
@@ -15,15 +16,14 @@ from reddit import reddit
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
-
-CHANNEL_SELECT = range(1)
+logger = logging.getLogger('handler')
 
 VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_addsub_command(update: Update, context: CallbackContext):
     logger.info('/addsub command, args: %s', str(context.args))
     if not context.args:
@@ -63,11 +63,12 @@ def on_addsub_command(update: Update, context: CallbackContext):
     reply_markup = Keyboard.from_list(channels_list)
     update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
 
-    return CHANNEL_SELECT
+    return Status.CHANNEL_SELECT
 
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
@@ -106,6 +107,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
@@ -117,7 +119,7 @@ mainbot.add_handler(ConversationHandler(
     entry_points=[
         CommandHandler(command=['addsub'], callback=on_addsub_command, pass_args=True, pass_user_data=True)],
     states={
-        CHANNEL_SELECT: [
+        Status.CHANNEL_SELECT: [
             MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
         ]
     },

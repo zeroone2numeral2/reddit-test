@@ -7,6 +7,7 @@ from telegram.ext import Filters
 from telegram.ext import ConversationHandler
 
 from bot import mainbot
+from bot.conversation import Status
 from database.models import Subreddit
 
 from bot.markups import Keyboard
@@ -14,8 +15,6 @@ from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
-
-SUBREDDIT_SELECT = 0
 
 TEXT = """You are configuring /r/{s.name} (channel: {s.channel.title})
 
@@ -53,7 +52,7 @@ def on_sub_command(update: Update, context: CallbackContext):
 
     update.message.reply_text('Select the subreddit (or /cancel):', reply_markup=reply_markup)
 
-    return SUBREDDIT_SELECT
+    return Status.SUBREDDIT_SELECT
 
 
 @d.restricted
@@ -109,7 +108,7 @@ mainbot.add_handler(CommandHandler(['end'], on_end, pass_user_data=True))
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['sub', 'subreddit'], callback=on_sub_command, pass_args=True)],
     states={
-        SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
+        Status.SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
     },
     fallbacks=[CommandHandler(['cancel', 'done'], on_cancel, pass_user_data=True)]
 ))

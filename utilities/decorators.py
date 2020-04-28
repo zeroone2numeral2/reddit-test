@@ -6,6 +6,7 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ConversationHandler, CallbackContext
 
+from bot.conversation import get_status_description
 from database.models import Subreddit
 from database.models import Job
 from database import db
@@ -188,7 +189,7 @@ def logconversation(func):
             update.effective_user.id,
             func.__name__,
             step_returned,
-            'x'  # get_status_description(step_returned)
+            get_status_description(step_returned)
         )
 
         return step_returned

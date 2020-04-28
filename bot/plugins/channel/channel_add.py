@@ -16,7 +16,7 @@ from utilities import d
 
 logger = logging.getLogger(__name__)
 
-FORWARD_MESSAGE = range(1)
+WAITING_FORWARDED_MESSAGE = range(1)
 
 
 @d.restricted
@@ -94,7 +94,7 @@ def on_cancel(update, _):
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
     states={
-        FORWARD_MESSAGE: [
+        WAITING_FORWARDED_MESSAGE: [
             MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
             MessageHandler(~Filters.forwarded & ~Filters.command, callback=on_non_forwarded_message),
         ]
