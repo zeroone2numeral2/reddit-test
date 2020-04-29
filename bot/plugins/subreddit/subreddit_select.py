@@ -38,7 +38,6 @@ Use /end when you are done\
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.loguserdata
 def on_sub_command(update: Update, context: CallbackContext):
     logger.debug('/sub: selecting subreddit, text: %s', update.message.text)
 
@@ -60,7 +59,6 @@ def on_sub_command(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.loguserdata
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -84,7 +82,6 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.loguserdata
 def on_cancel(update: Update, context: CallbackContext):
     logger.debug('ending conversation')
 
@@ -99,7 +96,6 @@ def on_cancel(update: Update, context: CallbackContext):
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
 @d.logconversation
-@d.loguserdata
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 

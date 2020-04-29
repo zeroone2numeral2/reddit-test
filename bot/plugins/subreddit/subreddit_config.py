@@ -18,7 +18,6 @@ logger = logging.getLogger('handler')
 # @d.deferred_handle_lock
 @d.pass_subreddit(answer=True)
 @d.logconversation
-@d.loguserdata
 def on_setting_change(update: Update, _, subreddit):
     logger.info('changed subreddit property: %s', update.message.text)
 

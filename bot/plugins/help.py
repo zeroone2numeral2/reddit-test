@@ -62,7 +62,6 @@ forward a message posted by the bot in a channel: get that submission's dict
 
 @d.restricted
 @d.failwithmessage
-@d.loguserdata
 def on_help_command(update, _):
     logger.info('/help command')
     
