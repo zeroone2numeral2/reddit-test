@@ -161,11 +161,11 @@ def pass_subreddit(answer=False):
     def real_decorator(func):
         @wraps(func)
         def wrapped(update, context, *args, **kwargs):
-            ud = updater.dispatcher.user_data.get(update.effective_user.id, {})
+            ud = context.user_data.get(update.effective_user.id, {})
 
             subreddit = None
-            if ud and ud.get('data', None) and ud['data'].get('subreddit', None):
-                subreddit = ud['data']['subreddit']
+            if context.user_data and context.user_data.get('data', None) and context.user_data['data'].get('subreddit', None):
+                subreddit = context.user_data['data']['subreddit']
 
             if not subreddit and answer:
                 logger.debug('no subreddit previously selected (callback: %s)', func.__name__)
@@ -182,7 +182,7 @@ def pass_subreddit(answer=False):
 def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
-        step_returned = func(update, context, *args, **kwargs)
+        step_returned = func(update, context, *args, **kwargs) or -10
         Log.conv.debug(
             'user %d: function <%s> returned step %d (%s)',
             update.effective_user.id,

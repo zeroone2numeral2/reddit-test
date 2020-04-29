@@ -1,7 +1,7 @@
 # noinspection PyPackageRequirements
 from telegram.ext import BaseFilter
 
-from bot import updater
+from bot import mainbot as updater
 
 
 class SubredditSet(BaseFilter):

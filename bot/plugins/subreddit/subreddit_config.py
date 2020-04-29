@@ -8,7 +8,8 @@ from telegram.ext import Filters
 
 from utilities import u
 from utilities import d
-from bot import CustomFilters, mainbot
+from bot import mainbot
+from bot.customfilters import CustomFilters
 
 logger = logging.getLogger('handler')
 
