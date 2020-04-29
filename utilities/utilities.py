@@ -28,13 +28,6 @@ VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
 
-def load_logging_config(file_name='logging.json'):
-    with open(file_name, 'r') as f:
-        logging_config = json.load(f)
-
-    logging.config.dictConfig(logging_config)
-
-
 def html_escape(string):
     return escape(string)
 

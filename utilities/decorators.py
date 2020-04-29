@@ -12,7 +12,7 @@ from database.models import Job
 from database import db
 from sqlite3 import OperationalError
 from utilities import u
-from bot import updater
+from bot import mainbot as updater
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -200,11 +200,16 @@ def logconversation(func):
 def loguserdata(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
-        logger.debug('user_data (from context): %s', context.user_data)
-        logger.debug('user_data (from dispatcher): %s', updater.dispatcher.user_data.get(update.effective_user.id, {}))
+        logger.debug('user data BEFORE callback:')
+        logger.debug('from context: %s', context.user_data)
+        logger.debug('from dispatcher: %s', updater.dispatcher.user_data)
 
-        step_returned = func(update, context, *args, **kwargs)
+        callback_result = func(update, context, *args, **kwargs)
 
-        return step_returned
+        logger.debug('user data AFTER callback:')
+        logger.debug('from context: %s', context.user_data)
+        logger.debug('from dispatcher: %s', updater.dispatcher.user_data)
+
+        return callback_result
 
     return wrapped
