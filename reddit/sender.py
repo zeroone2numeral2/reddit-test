@@ -363,7 +363,11 @@ class Sender:
             try:
                 if self._s.media_type == MediaType.IMAGE:
                     logger.info('post is an image: using _send_image()')
-                    self._sent_message = self._send_image(self._s.media_url, text, reply_markup=reply_markup)
+                    if config.telegram.get('send_images_by_url', True):
+                        self._sent_message = self._send_image_url(self._s.media_url, text, reply_markup=reply_markup)
+                    else:
+                        logger.info('config said to NOT send the image by url: we will try to download it')
+                        self._sent_message = self._send_image_download(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VREDDIT:
                     logger.info('post is a vreddit: using _send_vreddit()')
                     self._sent_message = self._send_vreddit(self._s.media_url, text, reply_markup=reply_markup)
@@ -434,7 +438,21 @@ class Sender:
             timeout=360
         )
 
-    def _send_image(self, image_url, caption, reply_markup=None):
+    def _send_image_download(self, image_url, caption, reply_markup=None):
+        logger.info('image url: %s', image_url)
+
+        image = Image(image_url)
+        success = image.download(raise_exception=False)
+        if not success:
+            # failed to download: raise an exception
+            raise BaseException('failed to send by url and to download file')
+
+        self._sent_message = self._send_image_base(image.file_bytes, caption=caption, reply_markup=reply_markup)
+        image.close()
+
+        return self._sent_message
+
+    def _send_image_url(self, image_url, caption, reply_markup=None):
         logger.info('image url: %s', image_url)
 
         start = u.now()
@@ -446,14 +464,7 @@ class Sender:
                 raise e
 
             logger.info('sending by url failed: trying to dowload image url')
-            image = Image(image_url)
-            success = image.download()
-            if not success:
-                # failed to download: raise an exception
-                raise BaseException('failed to send by url and to download file')
-
-            self._sent_message = self._send_image_base(image.file_bytes, caption=caption, reply_markup=reply_markup)
-            image.close()
+            self._sent_message = self._send_image_download(image_url, caption=caption, reply_markup=reply_markup)
 
         end = u.now()
         logger.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
