@@ -43,7 +43,7 @@ def process_submissions(subreddit, bot):
             slogger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
                          submission.id)
 
-            sender = SenderResume(bot, subreddit, submission)
+            sender = SenderResume(bot, subreddit, submission, slogger)
             if not sender.test_filters():
                 # do not return the object if it doesn't pass the filters
                 slogger.info('submission DID NOT pass the filters. continuing to the next submission...')
