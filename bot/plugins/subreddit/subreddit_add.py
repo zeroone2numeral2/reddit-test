@@ -66,7 +66,7 @@ def on_addsub_command(update: Update, context: CallbackContext):
 
     reply_markup = Keyboard.from_list(channels_list)
     # noinspection SqlNoDataSourceInspection
-    text = "Select the subreddit's channel from the list ({}), or /cancel".format(
+    text = "Select the subreddit's channel from the list ({}), or /cancel (use /skip to add the subreddit without a channel)".format(
         'filtered list' if len(context.args) > 1 else 'full list'
     )
     update.message.reply_text(text, reply_markup=reply_markup)
@@ -80,9 +80,13 @@ def on_addsub_command(update: Update, context: CallbackContext):
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
-    channel_id = u.expand_channel_id(update.message.text)
-    logger.info('channel_id: %d', channel_id)
-    channel = Channel.get(Channel.channel_id == channel_id)
+    channel = None
+    if update.message.text != '/skip':
+        channel_id = u.expand_channel_id(update.message.text)
+        logger.info('channel_id: %d', channel_id)
+        channel = Channel.get(Channel.channel_id == channel_id)
+    else:
+        logger.info('subreddit will not be associated to a channel')
 
     subreddit_name = context.user_data.pop('name')
     logger.debug('testing subreddit to fetch its id: %s', subreddit_name)
@@ -108,7 +112,10 @@ def on_channel_selected(update: Update, context: CallbackContext):
         name=subreddit_name
     )
 
-    update.message.reply_text('r/{} saved (channel: {})'.format(subreddit_name, channel.title), reply_markup=Keyboard.REMOVE)
+    update.message.reply_text(
+        'r/{} saved (channel: {})'.format(subreddit_name, channel.title if channel else 'none'),
+        reply_markup=Keyboard.REMOVE
+    )
 
     return ConversationHandler.END
 
@@ -128,7 +135,7 @@ mainbot.add_handler(ConversationHandler(
         CommandHandler(command=['addsub'], callback=on_addsub_command, pass_args=True, pass_user_data=True)],
     states={
         Status.CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
+            MessageHandler(Filters.text | Filters.command, on_channel_selected, pass_user_data=True)
         ]
     },
     fallbacks=[
