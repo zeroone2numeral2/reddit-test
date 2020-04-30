@@ -9,7 +9,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
-from bot.logging import get_subreddit_logger
+from bot.logging import slogger
 from utilities import u
 from utilities import d
 from utilities import l
@@ -25,7 +25,7 @@ logger = logging.getLogger('job')
 NOT_VALUES = (None, False)
 
 
-def its_quiet_hours(subreddit: Subreddit, slogger):
+def its_quiet_hours(subreddit: Subreddit):
     now = u.now()
 
     if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
@@ -52,7 +52,7 @@ def its_quiet_hours(subreddit: Subreddit, slogger):
             return False
 
 
-def calculate_quiet_hours_demultiplier(subreddit: Subreddit, slogger):
+def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
     if subreddit.quiet_hours_demultiplier is None:
         subreddit.quiet_hours_demultiplier = 0
         with db.atomic():
@@ -62,7 +62,7 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit, slogger):
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
         slogger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
         return 1
-    elif its_quiet_hours(subreddit, slogger):
+    elif its_quiet_hours(subreddit):
         # if it's quiet hours: return the demultiplier
         return subreddit.quiet_hours_demultiplier
     else:
@@ -70,7 +70,7 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit, slogger):
         return 1
 
 
-def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier, slogger):
+def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
     # we increase the max_frequency of the value set for the subreddit, so we can decrease the posting frequency
     # during quiet hours. If we are not in the quiet hours timeframe, the multplier will always be one,
     # so the max_frequency will be the same
@@ -117,15 +117,15 @@ def process_submissions(subreddit: Subreddit, slogger):
             yield submission
 
 
-def process_subreddit(subreddit: Subreddit, bot: Bot, slogger):
+def process_subreddit(subreddit: Subreddit, bot: Bot):
     logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
 
-    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit, slogger)
+    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
         slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
         return 0
 
-    if not time_to_post(subreddit, quiet_hours_demultiplier, slogger):
+    if not time_to_post(subreddit, quiet_hours_demultiplier):
         return 0
 
     senders = list()
@@ -200,14 +200,9 @@ def check_posts(context: CallbackContext):
 
     total_posted_messages = 0
     for subreddit in subreddits:
+        slogger.set_subreddit(subreddit)
         try:
-            # l.set_logger_file('subredditprocessor', subreddit.name)
-            subreddit_logger = get_subreddit_logger(subreddit)
-
-            posted_messages = process_subreddit(subreddit, context.bot, subreddit_logger)
-
-            # l.set_logger_file('subredditprocessor')
-
+            posted_messages = process_subreddit(subreddit, context.bot)
             total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
