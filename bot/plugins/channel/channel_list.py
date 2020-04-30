@@ -46,7 +46,7 @@ def on_channels_list(update, context: CallbackContext):
         # rebuild the list
         channel['subreddits'] = ['/{}/{}'.format('m' if s.is_multireddit else 'r', s.name) for s in channel_subreddits]
 
-        line = '[{i}][{added}] {title} • <a href="{invite_link}">link</a> • mirrors: {subreddits}'.format(
+        line = '[{i}][{added}] <a href="{invite_link}">{title}</a> (mirrors: {subreddits})'.format(
             i=i,
             title=u.html_escape(channel['title']),
             added=channel['added'].strftime('%d/%m/%Y'),
