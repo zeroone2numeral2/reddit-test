@@ -27,7 +27,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 def on_addsub_command(update: Update, context: CallbackContext):
     logger.info('/addsub command, args: %s', str(context.args))
     if not context.args:
-        update.message.reply_text('Usage: /addsub [sub name]')
+        update.message.reply_text('Usage: /addsub [sub name] <channel title filter>')
         return ConversationHandler.END
 
     subreddit_name = context.args[0]
@@ -59,6 +59,10 @@ def on_addsub_command(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
     context.user_data['name'] = subreddit_name
+
+    if len(context.args) > 1:
+        channel_title_filter = context.args[1].lower()
+        channels_list = [c for c in channels_list if channel_title_filter in c.title.lower()]
 
     reply_markup = Keyboard.from_list(channels_list)
     update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
