@@ -18,9 +18,10 @@ from database import db
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
-from.downloaders.vreddit import FfmpegTimeoutError
+from .downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
+from .downloaders import Image
 from pyroutils import PyroClient
 from bot.markups import InlineKeyboard
 from database.models import Post
@@ -423,18 +424,37 @@ class Sender:
             reply_markup=reply_markup
         )
 
-    def _send_image(self, image_url, caption, reply_markup=None):
-        logger.info('image url: %s', image_url)
-
-        start = u.now()
-        self._sent_message = self._bot.send_photo(
+    def _send_image_base(self, image, caption=None, reply_markup=None):
+        return self._bot.send_photo(
             self._chat_id,
-            image_url,
+            image,
             caption=caption,
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup,
             timeout=360
         )
+
+    def _send_image(self, image_url, caption, reply_markup=None):
+        logger.info('image url: %s', image_url)
+
+        start = u.now()
+        try:
+            self._sent_message = self._send_image_base(image=image_url, caption=caption, reply_markup=reply_markup)
+        except TelegramError as e:
+            # if sending by url fails, try to download the image and post it
+            if 'failed to get http url content' not in e.message.lower():
+                raise e
+
+            logger.info('sending by url failed: trying to dowload image url')
+            image = Image(image_url)
+            success = image.download()
+            if not success:
+                # failed to download: raise an exception
+                raise BaseException('failed to send by url and to download file')
+
+            self._sent_message = self._send_image_base(image.file_bytes, caption=caption, reply_markup=reply_markup)
+            image.close()
+
         end = u.now()
         logger.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
         
