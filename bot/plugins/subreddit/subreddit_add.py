@@ -62,10 +62,14 @@ def on_addsub_command(update: Update, context: CallbackContext):
 
     if len(context.args) > 1:
         channel_title_filter = context.args[1].lower()
-        channels_list = [c for c in channels_list if channel_title_filter in c.title.lower()]
+        channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
 
     reply_markup = Keyboard.from_list(channels_list)
-    update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
+    # noinspection SqlNoDataSourceInspection
+    text = "Select the subreddit's channel from the list ({}), or /cancel".format(
+        'filtered list' if len(context.args) > 1 else 'full list'
+    )
+    update.message.reply_text(text, reply_markup=reply_markup)
 
     return Status.CHANNEL_SELECT
 

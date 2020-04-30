@@ -10,13 +10,12 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from bot import mainbot
+from bot.conversation import Status
 from bot.markups import Keyboard
 from database.models import Channel
 from utilities import d
 
 logger = logging.getLogger(__name__)
-
-WAITING_FORWARDED_MESSAGE = range(1)
 
 
 @d.restricted
@@ -26,7 +25,7 @@ def on_addchannel_command(update, _):
 
     update.message.reply_text('Forward me a message from the channel you want to add, or /cancel')
 
-    return FORWARD_MESSAGE
+    return Status.WAITING_FORWARDED_MESSAGE
 
 
 @d.restricted
@@ -36,17 +35,17 @@ def on_forwarded_message(update, context: CallbackContext):
 
     if not update.message.forward_from_chat:
         update.message.reply_text("Forward me a message from a channel (or /cancel). I'm waiting.")
-        return FORWARD_MESSAGE
+        return Status.WAITING_FORWARDED_MESSAGE
 
     try:
         chat_member = update.message.forward_from_chat.get_member(context.bot.id)
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('Add me to the channel as administrators first. Try again or /cancel ({})'.format(e.message))
-        return FORWARD_MESSAGE
+        return Status.WAITING_FORWARDED_MESSAGE
 
     if chat_member.status != 'administrator':
         update.message.reply_text('I am not administrator of this channel, try again or /cancel')
-        return FORWARD_MESSAGE
+        return Status.WAITING_FORWARDED_MESSAGE
 
     channel = update.message.forward_from_chat
 
@@ -79,7 +78,7 @@ def on_non_forwarded_message(update, _):
     logger.info('adding channel: forwarded message NOT OK: not forwarded')
     update.message.reply_text('I need a forwarded message, try again or /cancel')
 
-    return FORWARD_MESSAGE
+    return Status.WAITING_FORWARDED_MESSAGE
 
 
 @d.restricted
@@ -94,7 +93,7 @@ def on_cancel(update, _):
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
     states={
-        WAITING_FORWARDED_MESSAGE: [
+        Status.WAITING_FORWARDED_MESSAGE: [
             MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
             MessageHandler(~Filters.forwarded & ~Filters.command, callback=on_non_forwarded_message),
         ]
