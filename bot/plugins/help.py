@@ -22,7 +22,7 @@ HELP_STRING = """\
 /updatelist: update the catalogue channel's subreddits list
 
 *Adding a subreddit/multireddit*
-/addsub `[subreddit name]`: register a subreddit
+/addsub `[subreddit name] <channel title filter>`: register a subreddit
 /addmulti `[creator] [multireddit name]`: add a multireddit to a channel 
 
 *Managing a subreddit's settings*
