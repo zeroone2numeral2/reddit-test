@@ -9,19 +9,38 @@ logger = logging.getLogger(__name__)
 
 
 class Image:
-    def __init__(self, image_url, use_stream=False):
+    def __init__(self, image_url, use_stream=False, use_tempfile=True, file_name=None):
         self._url = image_url
         self._use_stream = use_stream
-        self._tempfile_downloaded = tempfile.SpooledTemporaryFile()
+        self._tempfile_downloaded = None
+        self._use_tempfile = use_tempfile
         self._size = None
 
-        # this is just for streams
+        if self._use_tempfile:
+            self._tempfile_downloaded = tempfile.TemporaryFile()
+
+        # this is just for streams or if use_tempfile is False
         self._file_path = None
+
+        if self._use_stream or not self._use_tempfile:
+            if not file_name:
+                raise ValueError('file_name needed if use_stream is true or use_tempfile is false')
+
+            if not file_name.lower().endswith(('.jpg', '.png')):
+                if self._url.lower().endswith('.png'):
+                    file_name += '.png'
+                else:
+                    file_name += '.jpg'
+
+            self._file_path = os.path.join('downloads', file_name)
 
     @property
     def file_bytes(self):
-        self._tempfile_downloaded.seek(0)
-        return self._tempfile_downloaded
+        if self._use_tempfile:
+            self._tempfile_downloaded.seek(0)
+            return self._tempfile_downloaded
+
+        return open(self._file_path, 'rb')
 
     @property
     def size(self):
@@ -46,8 +65,13 @@ class Image:
 
     def _download(self, raise_exception=False) -> bool:
         try:
-            dloaded_file = urllib.urlopen(self._url)
-            self._tempfile_downloaded = dloaded_file.read()
+            dloaded_file = requests.get(self._url)
+
+            if self._use_tempfile:
+                self._tempfile_downloaded.write(dloaded_file.content)
+            else:
+                with open(self._file_path, 'wb') as f:
+                    f.write(dloaded_file.content)
         except Exception as e:
             if raise_exception:
                 raise e
@@ -58,15 +82,13 @@ class Image:
         return True
 
     # noinspection PyUnreachableCode
-    def _download_stream(self, file_name=None, chunk_size=1024):
+    def _download_stream(self, chunk_size=1024):
         raise NotImplementedError
 
         # https://stackoverflow.com/a/16696317
 
-        if not file_name:
-            file_name = self._url.split('/')[-1]
-
-        self._file_path = os.path.join('downloads', file_name)
+        # if not file_name:
+        #     file_name = self._url.split('/')[-1]
 
         response = requests.get(self._url, stream=True)
 
@@ -81,12 +103,13 @@ class Image:
         return self._file_path
 
     def close(self):
-        try:
-            self._tempfile_downloaded.close()
-        except Exception as e:
-            logger.error('error while trying to close downloaded tempfile: %s', str(e))
-
-        try:
-            os.remove(self._file_path)
-        except Exception as e:
-            logger.error('error while trying to delete downloaded file %s: %s', self._file_path, str(e))
+        if self._use_stream or not self._use_tempfile:
+            try:
+                os.remove(self._file_path)
+            except Exception as e:
+                logger.error('error while trying to delete downloaded file %s: %s', self._file_path, str(e))
+        elif self._use_tempfile:
+            try:
+                self._tempfile_downloaded.close()
+            except Exception as e:
+                logger.error('error while trying to close downloaded tempfile: %s', str(e))

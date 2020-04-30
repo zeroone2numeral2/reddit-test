@@ -431,7 +431,7 @@ class Sender:
     def _send_image_base(self, image, caption=None, reply_markup=None):
         return self._bot.send_photo(
             self._chat_id,
-            image,
+            photo=image,
             caption=caption,
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup,
@@ -439,7 +439,7 @@ class Sender:
         )
 
     def _send_image_download(self, image_url, caption, reply_markup=None):
-        logger.info('image url: %s', image_url)
+        logger.info('downloading and sending image (image url: %s)', image_url)
 
         image = Image(image_url)
         success = image.download(raise_exception=False)
@@ -447,13 +447,13 @@ class Sender:
             # failed to download: raise an exception
             raise BaseException('failed to send by url and to download file')
 
-        self._sent_message = self._send_image_base(image.file_bytes, caption=caption, reply_markup=reply_markup)
+        self._sent_message = self._send_image_base(image=image.file_bytes, caption=caption, reply_markup=reply_markup)
         image.close()
 
         return self._sent_message
 
     def _send_image_url(self, image_url, caption, reply_markup=None):
-        logger.info('image url: %s', image_url)
+        logger.info('sending image by url (image url: %s)', image_url)
 
         start = u.now()
         try:
