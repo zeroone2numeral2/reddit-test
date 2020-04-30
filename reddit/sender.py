@@ -90,12 +90,13 @@ class VRedditMedia(Media):
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_chat_id', '_submission_dict']
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_chat_id', '_submission_dict', 'log']
     
-    def __init__(self, bot, subreddit, submission):
+    def __init__(self, bot, subreddit, submission, subreddit_logger):
         self._bot: Bot = bot
         self._s = submission
         self._subreddit: Subreddit = subreddit
+        self.log = subreddit_logger
 
         self._sent_message = None
         self._chat_id = self._subreddit.channel.channel_id
@@ -130,7 +131,7 @@ class Sender:
         self._s.xpost_from_string = ''
         if hasattr(self._s, 'crosspost_parent') and len(self._s.crosspost_parent_list) > 0:
             # sometimes submissions has the 'crosspost_parent' but there's no item in 'crosspost_parent_list'
-            logger.info('note: submission is a crosspost of %s', self._s.crosspost_parent)
+            self.log.info('note: submission is a crosspost of %s', self._s.crosspost_parent)
             self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
             self._s.xpost_from_string = 'xpost from /r/{}'.format(self._s.xpost_from)
             self._s.xpost_from_string_dotted = '• {}'.format(self._s.xpost_from_string)
@@ -141,69 +142,69 @@ class Sender:
         # this whole shit should have its own method
         url_lower = self._s.url.lower()
         if url_lower.endswith(('.jpg', '.png', '.jpeg')):
-            logger.debug('url is a jpg/png: submission is an image')
+            self.log.debug('url is a jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
         elif 'artstation.com' in url_lower:
             # artstation urls might end by ".jpg?5363773" but Telegram is capable to send them anyway
-            logger.debug('url is an ArtStation jpg/png: submission is an image')
+            self.log.debug('url is an ArtStation jpg/png: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
         elif 'images-wixmp' in url_lower:
             # Telegram is capable to send these urls as images
-            logger.debug('url is an images-wixmp image: submission is an image')
+            self.log.debug('url is an images-wixmp image: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
         elif 'i.reddituploads.com' in url_lower:
             # Telegram is capable to send these urls as images
-            logger.debug('url is a reddituploads image: submission is an image')
+            self.log.debug('url is a reddituploads image: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
         elif 'https://instagram.' in url_lower and '.jpg' in url_lower:
             # Telegram is capable to send these urls as images
-            logger.debug('url is an Instagram image: submission is an image')
+            self.log.debug('url is an Instagram image: submission is an image')
             self._s.media_type = MediaType.IMAGE
             self._s.media_url = self._s.url
         elif url_lower.endswith('.gifv'):
-            logger.debug('url is a gifv: submission is an GIF')
+            self.log.debug('url is a gifv: submission is an GIF')
             self._s.media_type = MediaType.GIF
             self._s.media_url = self._s.url.replace('.gifv', '.mp4')
         elif re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, self._s.url, re.I):
             # check if the url is an url to an Imgur image even if it doesn't end with jpg/png
             imgur_direct_url = imgur.get_url(re.search(SINGLE_IMGUR_MEDIA_URL_REGEX, self._s.url, re.I).group(1))
-            logger.debug('imgur direct url: %s', imgur_direct_url)
+            self.log.debug('imgur direct url: %s', imgur_direct_url)
             # also make sure the url is of an image
             if imgur_direct_url.endswith(('.jpg', '.png')):
-                logger.debug('url is an Imgur non-direct url to an image: submission is an image')
+                self.log.debug('url is an Imgur non-direct url to an image: submission is an image')
                 self._s.media_type = MediaType.IMAGE
                 self._s.media_url = imgur_direct_url
             elif imgur_direct_url.endswith('.gifv'):
-                logger.debug('url is an Imgur non-direct url to a gifv: submission is a GIF')
+                self.log.debug('url is an Imgur non-direct url to a gifv: submission is a GIF')
                 self._s.media_type = MediaType.GIF
-                logger.debug('replacing ".gifv" with ".mp4"')
+                self.log.debug('replacing ".gifv" with ".mp4"')
                 self._s.media_url = imgur_direct_url.replace('.gifv', '.mp4')
-                logger.debug('new media_url: %s', self._s.media_url)
+                self.log.debug('new media_url: %s', self._s.media_url)
             elif imgur_direct_url.endswith('.mp4'):
                 self._s.media_type = MediaType.GIF
                 self._s.media_url = imgur_direct_url
         elif url_lower.endswith('.mp4'):
-            logger.debug('url is an mp4: submission is a video')
+            self.log.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
         elif self._s.domain == 'i.redd.it' and self._s.url.endswith('.gif'):
-            logger.debug('url is an i.redd.it gif')
+            self.log.debug('url is an i.redd.it gif')
             self._s.media_type = MediaType.REDDIT_GIF
             try:
                 self._s.media_url = self._s.preview['images'][0]['variants']['mp4']['resolutions'][-1]['url']
             except (KeyError, IndexError):
-                logger.debug('KeyError/IndexError while getting the i.reddit gif high resolution mp4 url. self._s.preview: %s\nusing submission.url instead...', pformat(self._s.preview))
+                self.log.debug('KeyError/IndexError while getting the i.reddit gif high resolution mp4 url. self._s.preview: %s\nusing submission.url instead...', pformat(self._s.preview))
                 self._s.media_url = self._s.url
         elif 'gfycat.com' in self._s.domain_parsed:
-            logger.debug('url is a gfycat')
+            self.log.debug('url is a gfycat')
             self._s.media_type = MediaType.GFYCAT
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
-            logger.debug('url is a vreddit')
+            self.log.debug('url is a vreddit')
             self._s.media_type = MediaType.VREDDIT
             self._s.media_url = self._s.media['reddit_video']['fallback_url']
             self._s.video_size = (
@@ -332,7 +333,7 @@ class Sender:
 
     def post(self, chat_id=None):
         if chat_id:
-            logger.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
+            self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
             self._chat_id = chat_id
 
         if not self._s.textual or not self._subreddit.template_no_url:
@@ -344,11 +345,11 @@ class Sender:
 
         if not template:
             # if there is no correct template set in the db, use the default one
-            logger.info('no template: using the default one')
+            self.log.info('no template: using the default one')
             template = DEFAULT_TEMPLATE
 
         text = template.format(**self._submission_dict)
-        # logger.info('post text: %s', text)
+        # self.log.info('post text: %s', text)
 
         reply_markup = None
         if self._subreddit.url_button and self._subreddit.comments_button:
@@ -359,48 +360,48 @@ class Sender:
             reply_markup = InlineKeyboard.post_buttons(comments=self._s.comments_url, n_comments=self._s.num_comments)
         
         if self._s.media_type and self._subreddit.send_medias:
-            logger.info('post is a media, sending it as media...')
+            self.log.info('post is a media, sending it as media...')
             try:
                 if self._s.media_type == MediaType.IMAGE:
-                    logger.info('post is an image: using _send_image()')
+                    self.log.info('post is an image: using _send_image()')
                     if config.telegram.get('send_images_by_url', True):
                         self._sent_message = self._send_image_url(self._s.media_url, text, reply_markup=reply_markup)
                     else:
-                        logger.info('config said to NOT send the image by url: we will try to download it')
+                        self.log.info('config said to NOT send the image by url: we will try to download it')
                         self._sent_message = self._send_image_download(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VREDDIT:
-                    logger.info('post is a vreddit: using _send_vreddit()')
+                    self.log.info('post is a vreddit: using _send_vreddit()')
                     self._sent_message = self._send_vreddit(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VIDEO:
-                    logger.info('post is a video: using _send_video()')
+                    self.log.info('post is a video: using _send_video()')
                     self._sent_message = self._send_video(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GIF:
-                    logger.info('post is a gif: using _send_gif()')
+                    self.log.info('post is a gif: using _send_gif()')
                     self._sent_message = self._send_gif(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GFYCAT:
-                    logger.info('post is a gfycat: using _send_gfycat()')
+                    self.log.info('post is a gfycat: using _send_gfycat()')
                     self._sent_message = self._send_gfycat(self._s.media_url, text, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.REDDIT_GIF:
-                    logger.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
+                    self.log.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
                     self._sent_message = self._send_i_reddit_gif(self._s.media_url, text, reply_markup=reply_markup)
                 
                 return self._sent_message
             except Exception as e:
-                logger.error('exeption during the sending of a media, sending as text. Error: %s', str(e))
+                self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e))
         else:
-            logger.info('post is NOT a media, sending it as text')
+            self.log.info('post is NOT a media, sending it as text')
         
-        logger.info('posting a text...')
+        self.log.info('posting a text...')
         self._sent_message = self._send_text(text, reply_markup=reply_markup)
 
         return self._sent_message
 
     def _upload_video(self, chat_id, file_path, file_size=0, force_bot_api=False, *args, **kwargs):
         if file_size < MaxSize.BOT_API or force_bot_api or not config.pyrogram.enabled:
-            logger.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
+            self.log.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
             kwargs['thumb'] = kwargs['thumb_bo']
             with open(file_path, 'rb') as f:
-                logger.info('uploading video using the bot API...')
+                self.log.info('uploading video using the bot API...')
                 return self._bot.send_video(chat_id, f, *args, **kwargs)
         else:
             # client.send_video doesn't accept unknown arguments
@@ -408,14 +409,14 @@ class Sender:
             kwargs.pop('thumb_bo', None)
             kwargs.pop('timeout', None)
 
-            logger.info('uploading video using mtproto (file size: %d (%s), max bot API: %d)...', file_size,
+            self.log.info('uploading video using mtproto (file size: %d (%s), max bot API: %d)...', file_size,
                         u.human_readable_size(file_size), MaxSize.BOT_API)
             with mtproto:
-                logger.debug('mtproto upload started at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
+                self.log.debug('mtproto upload started at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
                 sent_message = mtproto.upload_video(chat_id, file_path, *args, **kwargs)
-                logger.debug('mtproto upload ended at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
+                self.log.debug('mtproto upload ended at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
 
-                logger.debug('client.send_video() result: %s', str(sent_message))
+                self.log.debug('client.send_video() result: %s', str(sent_message))
 
                 return sent_message
 
@@ -439,7 +440,7 @@ class Sender:
         )
 
     def _send_image_download(self, image_url, caption, reply_markup=None):
-        logger.info('downloading and sending image (image url: %s)', image_url)
+        self.log.info('downloading and sending image (image url: %s)', image_url)
 
         image = Image(image_url)
         success = image.download(raise_exception=False)
@@ -453,7 +454,7 @@ class Sender:
         return self._sent_message
 
     def _send_image_url(self, image_url, caption, reply_markup=None):
-        logger.info('sending image by url (image url: %s)', image_url)
+        self.log.info('sending image by url (image url: %s)', image_url)
 
         start = u.now()
         try:
@@ -463,50 +464,50 @@ class Sender:
             if 'failed to get http url content' not in e.message.lower():
                 raise e
 
-            logger.info('sending by url failed: trying to dowload image url')
+            self.log.info('sending by url failed: trying to dowload image url')
             self._sent_message = self._send_image_download(image_url, caption=caption, reply_markup=reply_markup)
 
         end = u.now()
-        logger.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
+        self.log.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
         
         return self._sent_message
 
     def _send_vreddit(self, url, caption, reply_markup=None):
-        logger.info('vreddit url: %s', url)
+        self.log.info('vreddit url: %s', url)
 
         # we set as max_size the max size supported by the bot API, so we can avoid to use pyrogram (see issue #82)
         vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED)
-        logger.info('vreddit video url: %s', vreddit.url)
-        logger.info('vreddit audio url: %s', vreddit.url_audio)
+        self.log.info('vreddit video url: %s', vreddit.url)
+        self.log.info('vreddit audio url: %s', vreddit.url_audio)
 
         if self._s.is_gif:
-            logger.info('[1/2] vreddit is a GIF (does not have an audio): we will NOT try to download the audio and merge audio and video')
-            logger.info('[2/2] the following logs will mention the merged audio/video, but we are now just handling the video')
+            self.log.info('[1/2] vreddit is a GIF (does not have an audio): we will NOT try to download the audio and merge audio and video')
+            self.log.info('[2/2] the following logs will mention the merged audio/video, but we are now just handling the video')
 
         video_without_audio = False  # we should check here if the audio url is a webpage (issue #91)
         if self._s.is_gif or vreddit.audio_url_forbidden():
-            logger.info('this vreddit does not have an audio, we will skip the audio download')
+            self.log.info('this vreddit does not have an audio, we will skip the audio download')
             video_without_audio = True
 
         file_path = vreddit.file_path
-        logger.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
+        self.log.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
         try:
-            logger.info('downloading video/audio and merging them...')
+            self.log.info('downloading video/audio and merging them...')
             file_path = vreddit.download_and_merge(skip_audio=video_without_audio)
-            logger.info('...merging ended. File size: %s', vreddit.size_readable)
-            logger.info('file path of the video we will send: %s', file_path)
+            self.log.info('...merging ended. File size: %s', vreddit.size_readable)
+            self.log.info('file path of the video we will send: %s', file_path)
         except FileTooBig:
-            logger.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
+            self.log.info('video is too big to be sent (%s), removing file and sending text...', vreddit.size_readable)
             vreddit.remove()
             raise FileTooBig
         except FfmpegTimeoutError:
-            logger.info('ffmpeg timeout error during the merging of video/audio')
+            self.log.info('ffmpeg timeout error during the merging of video/audio')
             vreddit.remove()
             raise FfmpegTimeoutError
 
-        logger.info('downloading thumbnail from url: %s', vreddit.thumbnail_url)
+        self.log.info('downloading thumbnail from url: %s', vreddit.thumbnail_url)
         vreddit.download_thumbnail()
-        logger.info('thumbnail path: %s', vreddit.thumbnail_path)
+        self.log.info('thumbnail path: %s', vreddit.thumbnail_path)
 
         video_args = dict(
             caption=caption,
@@ -528,29 +529,29 @@ class Sender:
             **video_args
         )
 
-        logger.info('removing downloaded files...')
+        self.log.info('removing downloaded files...')
         vreddit.remove()
 
         return self._sent_message
 
     def _send_video(self, url, caption, reply_markup=None):
-        logger.info('video url: %s', url)
+        self.log.info('video url: %s', url)
 
         video = Downloader(url, identifier=self._s.id)
-        logger.info('video path: %s', video.file_path)
+        self.log.info('video path: %s', video.file_path)
         try:
-            logger.info('downloading video...')
+            self.log.info('downloading video...')
             video.download()
-            logger.info('...download ended. File size: %s', video.size_readable)
+            self.log.info('...download ended. File size: %s', video.size_readable)
         except FileTooBig:
-            logger.info('video is too big to be sent (%s), removing file and sending text...', video.size_readable)
+            self.log.info('video is too big to be sent (%s), removing file and sending text...', video.size_readable)
             video.remove(keep_thumbnail=True)
             
             raise FileTooBig
         
         video.thumbnail_path = 'assets/video_thumb.png'  # generic thumbnail
         
-        logger.debug('opening and sending video...')
+        self.log.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
             self._sent_message = self._bot.send_video(
                 self._chat_id,
@@ -565,16 +566,16 @@ class Sender:
                 reply_markup=reply_markup,
                 timeout=360
             )
-        logger.debug('...upload completed')
+        self.log.debug('...upload completed')
 
-        logger.info('removing downloaded files...')
+        self.log.info('removing downloaded files...')
         video.remove(keep_thumbnail=True)
         # DO NOT DELETE THE GENERIC THUMBNAIL FILE
         
         return self._sent_message
     
     def _send_gif(self, url, caption, reply_markup=None):
-        logger.info('gif url: %s', url)
+        self.log.info('gif url: %s', url)
 
         return self._bot.send_animation(
             self._chat_id,
@@ -587,7 +588,7 @@ class Sender:
 
     def _send_gfycat(self, url, caption, reply_markup=None):
         gfycat = Gfycat(url)
-        logger.info('gfycat url: %s', gfycat.url)
+        self.log.info('gfycat url: %s', gfycat.url)
 
         gfycat.download_thumbnail()
 
@@ -620,7 +621,7 @@ class Sender:
             )
             return sent_message
         except (BadRequest, TelegramError) as e:
-            logger.info('i.reddit gif: TelegramError/BadRequest while sending by url (%s), falling back to self._send_video...', e.message)
+            self.log.info('i.reddit gif: TelegramError/BadRequest while sending by url (%s), falling back to self._send_video...', e.message)
             return self._send_video(url, caption, reply_markup=reply_markup)
 
     def register_post(self):
@@ -651,24 +652,24 @@ class Sender:
     
     def test_filters(self):
         if self._subreddit.ignore_stickied and self._s.stickied:
-            logger.info('tests failed: sticked submission')
+            self.log.info('tests failed: sticked submission')
             return False
         elif self._subreddit.medias_only and not self._s.media_type:
-            logger.info('tests failed: submission is a text and we only want media posts')
+            self.log.info('tests failed: submission is a text and we only want media posts')
             return False
         elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._s.score:
-            logger.info('tests failed: not enough upvotes (%d/%d)', self._s.score, self._subreddit.min_score)
+            self.log.info('tests failed: not enough upvotes (%d/%d)', self._s.score, self._subreddit.min_score)
             return False
         elif self._subreddit.allow_nsfw is not None and self._subreddit.allow_nsfw == False and self._s.over_18:
-            logger.info('tests failed: submission is NSFW')
+            self.log.info('tests failed: submission is NSFW')
             return False
         elif self._subreddit.hide_spoilers and self._s.spoiler == True:
-            logger.info('tests failed: submission is a spoiler')
+            self.log.info('tests failed: submission is a spoiler')
             return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, int) \
                 and self._s.elapsed_minutes < self._subreddit.ignore_if_newer_than:
-            logger.info(
+            self.log.info(
                 'tests failed: too new (submitted: %s, elapsed: %s, ignore_if_newer_than: %d)',
                 self._s.created_utc_formatted,
                 u.pretty_minutes(self._s.elapsed_minutes),

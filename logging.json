@@ -7,6 +7,11 @@
             "formatter": "standard",
             "level": "DEBUG"
         },
+        "console_subreddit": {
+            "class": "logging.StreamHandler",
+            "formatter": "subreddit",
+            "level": "DEBUG"
+        },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "standard",
@@ -55,6 +60,11 @@
         }
     },
     "loggers": {
+        "subreddit": {
+            "handlers": ["console_subreddit"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
         "conversation": {
             "handlers": ["console", "file_conversation_steps"],
             "propagate": false,
@@ -115,6 +125,9 @@
         },
         "conversation_status": {
             "format": "[%(asctime)s][%(levelname)s] %(message)s"
+        },
+        "subreddit": {
+            "format": "[%(asctime)s][%(sub_id)s][%(sub_name)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
         }
     }
 }
