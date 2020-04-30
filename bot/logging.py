@@ -40,6 +40,12 @@ class SubredditLog:
         self._logger: [logging.Logger, logging.LoggerAdapter] = logging.getLogger('subreddit')
         self._generic_logger = logging.getLogger(__name__)
 
+        self._rotating_file_handler_kwargs = dict(
+            maxBytes=1048576,
+            backupCount=20,
+            encoding="utf8"
+        )
+
     @property
     def logger(self):
         return self._logger
@@ -74,7 +80,7 @@ class SubredditLog:
 
         self.subreddit_id = subreddit.id
         self.subreddit_name = subreddit.name
-        self._file_path = os.path.join(self._dir_path, '{s.subreddit_id}_{s.subreddit_name}.log'.format(s=self))
+        self._file_path = os.path.join(self._dir_path, '{s.subreddit_name}_{s.subreddit_id}.log'.format(s=self))
         self._extra = {'sub_id': subreddit.id, 'sub_name': subreddit.name}
 
         self._generic_logger.debug('extra: %s', self._extra)
@@ -87,9 +93,7 @@ class SubredditLog:
 
         file_handler = logging.handlers.RotatingFileHandler(
             filename=self._file_path,
-            maxBytes=1048576,
-            backupCount=20,
-            encoding="utf8"
+            **self._rotating_file_handler_kwargs
         )
         file_handler.setFormatter(logging.Formatter(logging_config['formatters']['subreddit']['format']))
         file_handler.setLevel(logging_config['loggers']['subreddit']['level'])
