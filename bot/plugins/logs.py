@@ -50,6 +50,20 @@ def remffmpeglogs_command(update, _):
 
 @d.restricted
 @d.failwithmessage
+def remsubslogs_command(update, _):
+    logger.info('/remsubslogs command')
+
+    dir_path = os.path.join('logs', 'subreddits')
+    files = [f for f in os.listdir(dir_path) if f != '.gitkeep']
+    for file in files:
+        file_path = os.path.join(dir_path, file)
+        u.remove_file_safe(file_path)
+
+    update.message.reply_text('Removed {} log files'.format(len(files)))
+
+
+@d.restricted
+@d.failwithmessage
 def getlog_command(update, context: CallbackContext):
     logger.info('/getlog command')
 
@@ -64,4 +78,5 @@ def getlog_command(update, context: CallbackContext):
 
 mainbot.add_handler(CommandHandler(['loglines'], loglines_command))
 mainbot.add_handler(CommandHandler(['remffmpeglogs'], remffmpeglogs_command))
+mainbot.add_handler(CommandHandler(['remsubslogs'], remsubslogs_command))
 mainbot.add_handler(CommandHandler(['getlog'], getlog_command))

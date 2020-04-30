@@ -43,6 +43,7 @@ subreddit name
 /log `<log number>`: get the log file. Pass a number as argument if you want to get an archived log file
 /loglines: get the date of the first line of every log file in the logs directory
 /remffmpeglogs: remove ffmpeg log files
+/remsubslogs: remove the single subreddits' log files
 
 *Jobs*
 /force `[job name]`: force that job
