@@ -1,9 +1,10 @@
 import logging
 import os
 
-from telegram.ext import CommandHandler
-from ptbplugins import Plugins
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 
+from bot import mainbot
 from bot.markups import Keyboard
 from reddit import reddit
 from utilities import d
@@ -13,17 +14,16 @@ logger = logging.getLogger(__name__)
 SUBREDDIT_SELECT = 0
 
 
-@Plugins.add(CommandHandler, command=['geticon', 'icon'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def sub_icon(_, update, args):
+def sub_icon(update: Update, context: CallbackContext):
     logger.info('/geticon command')
 
-    if len(args) < 1:
+    if len(context.args) < 1:
         update.message.reply_text('Pass the subreddit name')
         return
 
-    sub_name = args[0]
+    sub_name = context.args[0]
     file_path = reddit.get_icon(sub_name, download=True)
     if not file_path:
         update.message.reply_text('Subreddit "{}" does not have an icon'.format(sub_name))
@@ -35,11 +35,10 @@ def sub_icon(_, update, args):
     os.remove(file_path)
 
 
-@Plugins.add(CommandHandler, command=['setchannelicon'])
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit(answer=True)
-def sub_seticon(bot, update, subreddit=None):
+def sub_set_icon(update: Update, context: CallbackContext, subreddit=None):
     logger.info('/setchannelicon command')
 
     file_path = reddit.get_icon(subreddit.name, download=True)
@@ -49,8 +48,12 @@ def sub_seticon(bot, update, subreddit=None):
         return
 
     with open(file_path, 'rb') as f:
-        bot.set_chat_photo(subreddit.channel.channel_id, f)
+        context.bot.set_chat_photo(subreddit.channel.channel_id, f)
 
     os.remove(file_path)
 
     update.message.reply_text('Icon updated')
+
+
+mainbot.add_handler(CommandHandler(['geticon', 'icon'], sub_icon, pass_args=True))
+mainbot.add_handler(CommandHandler(['setchannelicon'], sub_set_icon))

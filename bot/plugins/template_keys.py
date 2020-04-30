@@ -4,8 +4,8 @@ import os
 from telegram.ext import CommandHandler
 from telegram.error import TelegramError
 from telegram.error import BadRequest
-from ptbplugins import Plugins
 
+from bot import mainbot
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -14,16 +14,15 @@ from reddit import reddit
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['placeholders', 'ph'])
 @d.restricted
 @d.failwithmessage
-def subs_list(bot, update):
+def on_placeholders_command(update, context):
     logger.info('/placeholders command')
 
     sender = None
     subreddit = Subreddit.select().get()
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission)
         break
     
     placeholders = list()
@@ -44,3 +43,6 @@ def subs_list(bot, update):
             update.message.reply_document(f)
         
         os.remove(file_path)
+
+
+mainbot.add_handler(CommandHandler(['placeholders', 'ph'], on_placeholders_command))

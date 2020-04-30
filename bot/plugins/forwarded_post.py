@@ -5,8 +5,8 @@ from telegram import Update
 from telegram.ext import MessageHandler
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import Filters
-from ptbplugins import Plugins
 
+from bot import mainbot
 from bot.markups import InlineKeyboard
 from database.models import Subreddit
 from database.models import Channel
@@ -18,10 +18,9 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(MessageHandler, filters=Filters.forwarded)
 @d.restricted
 @d.failwithmessage
-def on_forwarded_post(bot, update: Update):
+def on_forwarded_post(update: Update, context):
     logger.info('forwarded message')
     
     if not update.message.forward_from_chat:
@@ -50,7 +49,7 @@ def on_forwarded_post(bot, update: Update):
         update.message.reply_text('No subreddit "{}" in the database'.format(submission.subreddit))
         return
 
-    sender = Sender(bot, subreddit, submission)
+    sender = Sender(context.bot, subreddit, submission)
 
     file_path = sender.write_temp_submission_dict()
 
@@ -63,10 +62,9 @@ def on_forwarded_post(bot, update: Update):
     update.message.reply_text('You can upvote/downvote this submission', reply_markup=markup)
 
 
-@Plugins.add(CallbackQueryHandler, pattern=r'(\w+):(.+)', pass_groups=True)
 @d.restricted
 @d.failwithmessage
-def up_down_button(_, update: Update, groups):
+def up_down_button(update: Update, _, groups):
     logger.info('up/down inline button, groups: %s', groups)
 
     vote = groups[0]
@@ -90,3 +88,7 @@ def up_down_button(_, update: Update, groups):
 
     markup = InlineKeyboard.vote(submission_id, vote)
     update.callback_query.edit_message_reply_markup(markup)
+
+
+mainbot.add_handler(MessageHandler(Filters.forwarded, on_forwarded_post))
+mainbot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))

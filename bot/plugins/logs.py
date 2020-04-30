@@ -2,9 +2,9 @@ import logging
 import re
 import os
 
-from telegram.ext import CommandHandler
-from ptbplugins import Plugins
+from telegram.ext import CommandHandler, CallbackContext
 
+from bot import mainbot
 from utilities import u
 from utilities import d
 from config import config
@@ -12,10 +12,9 @@ from config import config
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['loglines'])
 @d.restricted
 @d.failwithmessage
-def loglines_command(_, update):
+def loglines_command(update, _):
     logger.info('/loglines command')
 
     dir_path = os.path.dirname(config.logging.filepath)
@@ -35,10 +34,9 @@ def loglines_command(_, update):
     update.message.reply_html(text)
 
 
-@Plugins.add(CommandHandler, command=['remffmpeglogs'])
 @d.restricted
 @d.failwithmessage
-def remffmpeglogs_command(_, update):
+def remffmpeglogs_command(update, _):
     logger.info('/remffmpeglogs command')
 
     dir_path = os.path.join('logs', 'ffmpeg')
@@ -50,16 +48,20 @@ def remffmpeglogs_command(_, update):
     update.message.reply_text('Removed {} log files'.format(len(files)))
 
 
-@Plugins.add(CommandHandler, command=['getlog', 'log'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def getlog_command(_, update, args):
+def getlog_command(update, context: CallbackContext):
     logger.info('/getlog command')
 
     file_path = config.logging.filepath
-    if args and re.search(r'^\d+$', args[0], re.I):
-        log_file_num = args[0]
+    if context.args and re.search(r'^\d+$', context.args[0], re.I):
+        log_file_num = context.args[0]
         file_path = file_path.replace('.log', '.log.{}'.format(log_file_num))
 
     with open(os.path.normpath(file_path), 'rb') as f:
         update.message.reply_document(f)
+
+
+mainbot.add_handler(CommandHandler(['loglines'], loglines_command))
+mainbot.add_handler(CommandHandler(['remffmpeglogs'], remffmpeglogs_command))
+mainbot.add_handler(CommandHandler(['getlog'], getlog_command))

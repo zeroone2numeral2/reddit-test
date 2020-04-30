@@ -4,8 +4,8 @@ from pprint import pformat
 
 from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
-from ptbplugins import Plugins
 
+from bot import mainbot
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -14,17 +14,16 @@ from reddit import reddit
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['sdict'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def subs_list(bot, update, args):
+def on_sdict_command(update, context):
     logger.info('/sdict command')
     
     sender = None
-    subreddit = Subreddit.fetch(args[0])
+    subreddit = Subreddit.fetch(context.args[0])
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission)
         break
     
     text = pformat(sender.submission_dict)
@@ -37,3 +36,6 @@ def subs_list(bot, update, args):
             update.message.reply_document(f)
         
         os.remove(file_path)
+
+
+mainbot.add_handler(CommandHandler('sdict', on_sdict_command))

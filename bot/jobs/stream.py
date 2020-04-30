@@ -6,8 +6,7 @@ import os
 from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
-from ptbplugins.jobregistration import RUNNERS
-from ptbplugins import Jobs
+from telegram.ext import CallbackContext
 
 from utilities import u
 from utilities import d
@@ -19,7 +18,7 @@ from reddit import reddit
 from reddit import Sender
 from config import config
 
-logger = logging.getLogger('sp')
+logger = logging.getLogger('job')
 
 NOT_VALUES = (None, False)
 
@@ -199,11 +198,10 @@ def process_subreddit(subreddit: Subreddit, bot):
     return messages_posted
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=config.jobs.posts_job.interval * 60, first=config.jobs.posts_job.first * 60, name='posts_job')
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(bot, _):
+def check_posts(context: CallbackContext):
     with db.atomic():
         subreddits = (
             Subreddit.select()
@@ -214,14 +212,14 @@ def check_posts(bot, _):
     for subreddit in subreddits:
         try:
             # l.set_logger_file('subredditprocessor', subreddit.name)
-            posted_messages = process_subreddit(subreddit, bot)
+            posted_messages = process_subreddit(subreddit, context.bot)
             # l.set_logger_file('subredditprocessor')
 
             total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
-            bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+            context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         # time.sleep(1)
 

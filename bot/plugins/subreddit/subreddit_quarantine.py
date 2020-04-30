@@ -1,8 +1,9 @@
 import logging
 
-from telegram.ext import CommandHandler
-from ptbplugins import Plugins
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 
+from bot import mainbot
 from reddit import reddit
 from utilities import u
 from utilities import d
@@ -10,21 +11,20 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['optin', 'oi'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def optin_quarantined(_, update, args):
+def optin_quarantined(update: Update, context: CallbackContext):
     logger.info('/optin command')
 
     # Reference:
     # https://old.reddit.com/r/redditdev/comments/5vutzv/quaranopt_in_doesnt_seem_to_be_working/
     # https://old.reddit.com/r/redditdev/comments/asprwx/api_for_quarantined_subreddits/egw2n7l/
 
-    if len(args) < 1:
+    if len(context.args) < 1:
         update.message.reply_text('Pass the subreddit name')
         return
 
-    sub_name = args[0]
+    sub_name = context.args[0]
     try:
         subreddit = reddit.subreddit(sub_name)
         subreddit.quaran.opt_in()
@@ -32,3 +32,6 @@ def optin_quarantined(_, update, args):
     except Exception as e:
         update.message.reply_text('Exception while trying to opt-in to subreddit {}:'.format(sub_name))
         update.message.reply_html('<code>{}</code>'.format(u.html_escape(str(e))))
+
+
+mainbot.add_handler(CommandHandler(['optin', 'oi'], optin_quarantined, pass_args=True))

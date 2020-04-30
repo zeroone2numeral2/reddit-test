@@ -1,16 +1,15 @@
 import logging
 
 # noinspection PyPackageRequirements
-from telegram import Bot
-from telegram.ext import ConversationHandler
+from telegram.ext import ConversationHandler, CallbackContext
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import Filters
 from telegram.error import BadRequest
 from telegram.error import TelegramError
-from ptbplugins import Plugins
 
+from bot import mainbot
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
@@ -22,23 +21,21 @@ logger = logging.getLogger(__name__)
 CHANNEL_SELECT = range(1)
 
 
-@Plugins.add(CallbackQueryHandler, pattern=r'linkkeep', pass_user_data=True)
-def on_link_keep_button(_, update, user_data):
+def on_link_keep_button(update, context: CallbackContext):
     logger.info('linkkeep inline button')
     update.callback_query.edit_message_text('Fine, we will keep the current invite link')
 
-    user_data.pop('db_channel', None)
+    context.user_data.pop('db_channel', None)
 
 
-@Plugins.add(CallbackQueryHandler, pattern=r'linkrevoke', pass_user_data=True)
-def on_link_revoke_button(bot, update, user_data):
+def on_link_revoke_button(update, context: CallbackContext):
     logger.info('linkrevoke inline button')
     update.callback_query.edit_message_text('Fine, we will keep the current invite link')
 
-    channel = user_data.pop('db_channel', None)
+    channel = context.user_data.pop('db_channel', None)
 
     try:
-        invite_link = bot.export_chat_invite_link(channel.channel_id)
+        invite_link = context.bot.export_chat_invite_link(channel.channel_id)
     except (TelegramError, BadRequest) as e:
         logger.error('error while exporting invite link: %s', e.message)
         update.callback_query.edit_message_text('Error while exporting invite link: {}'.format(e.message))
@@ -56,7 +53,7 @@ def on_link_revoke_button(bot, update, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_exportlink_command(_, update):
+def on_exportlink_command(update, _):
     logger.info('/exportlink command')
 
     channels_list = Channel.get_list()
@@ -72,7 +69,7 @@ def on_exportlink_command(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_export_channel_selected(bot: Bot, update, user_data):
+def on_export_channel_selected(update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -84,18 +81,18 @@ def on_export_channel_selected(bot: Bot, update, user_data):
                                   disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
         update.message.reply_text('Do you want to generate a new one?', reply_markup=inline_markup)
 
-        user_data['db_channel'] = channel
+        context.user_data['db_channel'] = channel
 
         return ConversationHandler.END
 
     try:
         # first: try to revoke the current invite link
-        invite_link = bot.export_chat_invite_link(channel_id)
+        invite_link = context.bot.export_chat_invite_link(channel_id)
     except (TelegramError, BadRequest) as e:
         logger.error('error while exporting invite link: %s', e.message)
 
         # maybe the channel is public and the bot doesn't have the permission to generete an invite link, so we try to get the chat
-        channel_object = bot.get_chat(channel_id)
+        channel_object = context.bot.get_chat(channel_id)
         if channel_object.username:
             invite_link = 'https://t.me/{}'.format(channel_object.username)
         else:
@@ -112,7 +109,7 @@ def on_export_channel_selected(bot: Bot, update, user_data):
 
 @d.restricted
 @d.failwithmessage
-def on_export_channel_selected_incorrect(_, update):
+def on_export_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
@@ -121,28 +118,25 @@ def on_export_channel_selected_incorrect(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_export_cancel(_, update):
+def on_export_cancel(update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
 
-@Plugins.add_conversation_hanlder()
-def exportlink_channel_conv_hanlder():
-
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(command=['exportlink'], callback=on_exportlink_command)],
-        states={
-            CHANNEL_SELECT: [
-                MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_export_channel_selected,
-                               pass_user_data=True),
-                MessageHandler(~Filters.command & Filters.all, callback=on_export_channel_selected_incorrect),
-            ]
-        },
-        fallbacks=[
-            CommandHandler('cancel', on_export_cancel)
+mainbot.add_handler(CallbackQueryHandler(on_link_keep_button, pattern=r'linkkeep', pass_user_data=True))
+mainbot.add_handler(CallbackQueryHandler(on_link_revoke_button, pattern=r'linkrevoke', pass_user_data=True))
+mainbot.add_handler(ConversationHandler(
+    entry_points=[CommandHandler(command=['exportlink'], callback=on_exportlink_command)],
+    states={
+        CHANNEL_SELECT: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_export_channel_selected,
+                           pass_user_data=True),
+            MessageHandler(~Filters.command & Filters.all, callback=on_export_channel_selected_incorrect),
         ]
-    )
-
-    return conv_handler
+    },
+    fallbacks=[
+        CommandHandler('cancel', on_export_cancel)
+    ]
+))

@@ -1,17 +1,16 @@
 import logging
 
 # noinspection PyPackageRequirements
-from telegram import Bot
 from telegram import ParseMode
-from telegram.ext import ConversationHandler
+from telegram.ext import ConversationHandler, CallbackContext
 from telegram.ext import MessageHandler
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import Filters
 from telegram.error import BadRequest
 from telegram.error import TelegramError
-from ptbplugins import Plugins
 
+from bot import mainbot
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
@@ -92,7 +91,7 @@ def pretty_time(total_minutes, sep=', ', round_by=10):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_channel_selected(bot: Bot, update):
+def on_setdesc_channel_selected(update, context: CallbackContext):
     logger.info('setdesc command channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -199,7 +198,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
     subs_text = '\n\n'.join(subs_info_list)
 
-    channel_obj = bot.get_chat(channel_id)
+    channel_obj = context.bot.get_chat(channel_id)
 
     footer = FOOTER.format(
         total_number_of_daily_posts,
@@ -223,7 +222,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
             update.message.reply_text('Failed: {}'.format(str(e)))
 
     try:
-        sent_message = bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+        sent_message = context.bot.send_message(channel_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('Error while posting: {}'.format(e.message))
         update.message.reply_text(text, disable_web_page_preview=True)
@@ -240,11 +239,11 @@ def on_setdesc_channel_selected(bot: Bot, update):
             logger.warning('could not delete old pinned message: %s', e.message)
 
     try:
-        bot.pin_chat_message(channel_id, sent_message.message_id, disable_notification=True)
+        context.bot.pin_chat_message(channel_id, sent_message.message_id, disable_notification=True)
         update.message.reply_text('...message pinned')
         try:
             # try to delete the "message pinned" service message
-            bot.delete_message(channel_id, sent_message.message_id + 1)
+            context.bot.delete_message(channel_id, sent_message.message_id + 1)
             update.message.reply_text('...service message deleted')
         except (TelegramError, BadRequest):
             pass
@@ -256,7 +255,7 @@ def on_setdesc_channel_selected(bot: Bot, update):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_command(_, update):
+def on_setdesc_command(update, _):
     logger.info('/setdesc command')
 
     channels_list = Channel.get_list()
@@ -272,7 +271,7 @@ def on_setdesc_command(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_channel_selected_incorrect(_, update):
+def on_setdesc_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
@@ -281,30 +280,22 @@ def on_setdesc_channel_selected_incorrect(_, update):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_cancel(_, update):
+def on_setdesc_cancel(update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
 
-@Plugins.add_conversation_hanlder()
-def setdesc_channel_conv_hanlder():
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(command=['setdesc'], callback=on_setdesc_command)],
-        states={
-            CHANNEL_SELECT: [
-                MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_setdesc_channel_selected),
-                MessageHandler(~Filters.command & Filters.all, callback=on_setdesc_channel_selected_incorrect),
-            ]
-        },
-        fallbacks=[
-            CommandHandler('cancel', on_setdesc_cancel)
+mainbot.add_handler(ConversationHandler(
+    entry_points=[CommandHandler('setdesc', on_setdesc_command)],
+    states={
+        CHANNEL_SELECT: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), on_setdesc_channel_selected),
+            MessageHandler(~Filters.command & Filters.all, on_setdesc_channel_selected_incorrect),
         ]
-    )
-
-    return conv_handler
-
-
-
-
+    },
+    fallbacks=[
+        CommandHandler('cancel', on_setdesc_cancel)
+    ]
+))

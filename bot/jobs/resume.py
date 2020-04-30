@@ -6,21 +6,18 @@ from pprint import pprint
 from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.error import TelegramError
-from ptbplugins import Jobs
-from ptbplugins.jobregistration import RUNNERS
+from telegram.ext import CallbackContext
 
 from utilities import u
 from utilities import d
-from utilities import l
 from database.models import Subreddit
 from database.models import PostResume
 from database import db
 from reddit import reddit
 from reddit import SenderResume
-# from bot import Jobs
 from config import config
 
-logger = logging.getLogger('sp')
+logger = logging.getLogger('job')
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
@@ -135,11 +132,10 @@ def process_subreddit(subreddit, bot):
     return posted_messages
 
 
-@Jobs.add(RUNNERS.run_repeating, interval=config.jobs.resume_job.interval * 60, first=config.jobs.resume_job.first * 60, name='resume_job')
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('IMMEDIATE')
-def check_daily_resume(bot, _):
+def check_daily_resume(context: CallbackContext):
     with db.atomic():
         subreddits = (
             Subreddit.select()
@@ -150,14 +146,14 @@ def check_daily_resume(bot, _):
     for subreddit in subreddits:
         try:
             # l.set_logger_file('subredditprocessor', subreddit.name)
-            posted_messages = process_subreddit(subreddit, bot)
+            posted_messages = process_subreddit(subreddit, context.bot)
             # l.set_logger_file('subredditprocessor')
 
             total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
-            bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+            context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         # time.sleep(1)
 

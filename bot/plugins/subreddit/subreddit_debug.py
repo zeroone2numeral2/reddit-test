@@ -1,9 +1,10 @@
 import logging
 
-from telegram.ext import CommandHandler
+from telegram import Update
+from telegram.ext import CommandHandler, CallbackContext
 from peewee import DoesNotExist
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Post
 from database.models import PostResume
 from database.models import Subreddit
@@ -13,19 +14,18 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['d'], pass_args=True)
 @d.restricted
 @d.failwithmessage
 @d.knownsubreddit
-def subs_debug(_, update, args):
+def subs_debug(update: Update, context: CallbackContext):
     logger.info('/d command')
 
-    if len(args) < 2:
+    if len(context.args) < 2:
         update.message.reply_text('Usage: /d [subreddit] [sorting]')
         return
 
-    subreddit_name = args[0]
-    sorting = args[1].lower()
+    subreddit_name = context.args[0]
+    sorting = context.args[1].lower()
 
     subreddit = Subreddit.fetch(subreddit_name)
     submissions = reddit.get_submissions(subreddit_name, sorting, limit=subreddit.limit)
@@ -45,3 +45,6 @@ def subs_debug(_, update, args):
         text += '\n• (((<code>{id}</code>/{elapsed_smart}/{score_dotted}/{posted}))) <b>{title_escaped}</b>'.format(**submission, posted=posted)
 
     update.message.reply_html(text)
+
+
+mainbot.add_handler(CommandHandler(['d'], subs_debug, pass_args=True))

@@ -4,8 +4,8 @@ from pprint import pformat
 import os
 
 from telegram.ext import CommandHandler
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Subreddit
 from utilities import u
 from utilities import d
@@ -14,29 +14,26 @@ from config import config
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['getconfig'])
 @d.restricted
 @d.failwithmessage
-def getconfig_command(_, update):
+def getconfig_command(update, _):
     logger.info('/getconfig command')
 
     update.message.reply_html('<code>{}</code>'.format(pformat(config)))
 
 
-@Plugins.add(CommandHandler, command=['getdb', 'db'])
 @d.restricted
 @d.failwithmessage
-def getdb_command(_, update):
+def getdb_command(update, _):
     logger.info('/getdb command')
 
     with open(os.path.normpath(config.sqlite.filename), 'rb') as f:
         update.message.reply_document(f)
 
 
-@Plugins.add(CommandHandler, command=['remdl'])
 @d.restricted
 @d.failwithmessage
-def remdl_command(_, update):
+def remdl_command(update, _):
     logger.info('/remdl command')
 
     files = [f for f in os.listdir('downloads') if f != '.gitkeep']
@@ -47,21 +44,19 @@ def remdl_command(_, update):
     update.message.reply_text('Removed {} files'.format(len(files)))
 
 
-@Plugins.add(CommandHandler, command=['sendv'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def sendv_command(_, update, args):
+def sendv_command(update, context):
     logger.info('/sendv command')
 
-    url = args[0]
+    url = context.args[0]
 
     update.message.reply_video(url)
 
 
-@Plugins.add(CommandHandler, command=['json'])
 @d.restricted
 @d.failwithmessage
-def json_command(_, update):
+def json_command(update, _):
     logger.info('/json command')
 
     data = list()
@@ -81,3 +76,10 @@ def json_command(_, update):
         update.message.reply_document(f)
 
     file.remove()
+
+
+mainbot.add_handler(CommandHandler(['getconfig'], getconfig_command))
+mainbot.add_handler(CommandHandler(['getdb', 'db'], getdb_command))
+mainbot.add_handler(CommandHandler(['remdl'], remdl_command))
+mainbot.add_handler(CommandHandler(['sendv'], sendv_command))
+mainbot.add_handler(CommandHandler(['json'], json_command))

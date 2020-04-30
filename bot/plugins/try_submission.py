@@ -1,10 +1,9 @@
 import logging
 import os
-from pprint import pformat
 
 from telegram.ext import CommandHandler
-from ptbplugins import Plugins
 
+from bot import mainbot
 from database.models import Subreddit
 from database.models import Channel
 from reddit import Sender
@@ -14,13 +13,12 @@ from utilities import d
 logger = logging.getLogger(__name__)
 
 
-@Plugins.add(CommandHandler, command=['try'], pass_args=True)
 @d.restricted
 @d.failwithmessage
-def try_submission(bot, update, args):
+def try_submission(update, context):
     logger.info('/try command')
 
-    submission_id = args[0].strip()
+    submission_id = context.args[0].strip()
 
     submission = reddit.submission(id=submission_id)
 
@@ -39,7 +37,7 @@ def try_submission(bot, update, args):
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
 
-    sender = Sender(bot, tmp_subreddit, submission)
+    sender = Sender(context.bot, tmp_subreddit, submission)
     
     file_path = sender.write_temp_submission_dict()
 
@@ -51,3 +49,6 @@ def try_submission(bot, update, args):
     sender.post(chat_id=update.message.chat.id)
 
     update.message.reply_text('Posted (r/{}, {})'.format(submission.subreddit, submission.title))
+
+
+mainbot.add_handler(CommandHandler('try', try_submission))

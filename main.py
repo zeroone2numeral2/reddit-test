@@ -1,13 +1,11 @@
 import logging
 
-from utilities import l
-from bot import main
+import migrations
+import bot
 from config import config
 
+logging.getLogger('migrations').setLevel(logging.WARNING)
 
-logger = logging.getLogger(__name__)
-l.load_logging_config(config.logging.config)
+migrations.main(config.sqlite.filename)
 
-
-if __name__ == '__main__':
-    main()
+bot.main()

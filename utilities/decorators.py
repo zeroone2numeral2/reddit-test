@@ -3,46 +3,54 @@ import re
 import time
 from functools import wraps
 
-from telegram.ext import ConversationHandler
+from telegram import Update
+from telegram.ext import ConversationHandler, CallbackContext
 
+from bot.conversation import get_status_description
 from database.models import Subreddit
 from database.models import Job
 from database import db
 from sqlite3 import OperationalError
 from utilities import u
-from bot import updater
 from config import config
 
 logger = logging.getLogger(__name__)
+
+
+class Log:
+    conv = logging.getLogger('conversation')
+    handler = logging.getLogger('handler')
+    job = logging.getLogger('job')
+
 
 READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
 
 def restricted(func):
     @wraps(func)
-    def wrapped(bot, update, *args, **kwargs):
+    def wrapped(update, context, *args, **kwargs):
         if update.effective_user.id not in config.telegram.admins:
             if update.effective_chat.id > 0:
                 # only answer in private
                 update.message.reply_text("You can't use this command")
             return
 
-        return func(bot, update, *args, **kwargs)
+        return func(update, context, *args, **kwargs)
 
     return wrapped
 
 
 def failwithmessage(func):
     @wraps(func)
-    def wrapped(bot, update, *args, **kwargs):
+    def wrapped(update, context, *args, **kwargs):
         try:
-            return func(bot, update, *args, **kwargs)
+            return func(update, context, *args, **kwargs)
         except Exception as e:
             exc_info = True
             if 'database is locked' in str(e).lower():
                 exc_info = False  # do not log the whole traceback if the error is 'database is locked'
 
-            logger.error('error during handler execution: %s', str(e), exc_info=exc_info)
+            Log.handler.error('error during handler execution: %s', str(e), exc_info=exc_info)
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
@@ -51,20 +59,20 @@ def failwithmessage(func):
 
 def logerrors(func):
     @wraps(func)
-    def wrapped(bot, job, *args, **kwargs):
+    def wrapped(context, *args, **kwargs):
         try:
-            return func(bot, job, *args, **kwargs)
+            return func(context, *args, **kwargs)
         except Exception as e:
-            logger.error('error during job execution: %s', str(e), exc_info=True)
+            Log.job.error('error during job execution: %s', str(e), exc_info=True)
 
     return wrapped
 
 
 def knownsubreddit(func):
     @wraps(func)
-    def wrapped(bot, update, *args, **kwargs):
-        if 'args' in kwargs:
-            sub_name = kwargs['args'][0]
+    def wrapped(update, context, *args, **kwargs):
+        if context.args:
+            sub_name = context.args[0]
             if not u.is_valid_sub_name(sub_name):
                 update.message.reply_text('r/{} is not a valid subreddit name'.format(sub_name.lower()))
                 return
@@ -72,21 +80,21 @@ def knownsubreddit(func):
                 update.message.reply_text('No r/{} in the database'.format(sub_name.lower()))
                 return
 
-        return func(bot, update, *args, **kwargs)
+        return func(update, context, *args, **kwargs)
 
     return wrapped
 
 
 def log_start_end_dt(func):
     @wraps(func)
-    def wrapped(bot, job, *args, **kwargs):
+    def wrapped(context: CallbackContext, *args, **kwargs):
         job_start_dt = u.now()
-        logger.info('%s job started at %s', job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
+        Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
         with db.atomic():
-            job_row = Job(name=job.name, start=job_start_dt)
+            job_row = Job(name=context.job.name, start=job_start_dt)
 
-        job_result = func(bot, job, *args, **kwargs)
+        job_result = func(context, *args, **kwargs)
         job_row.posted_messages = int(job_result)
 
         job_end_dt = u.now()
@@ -98,23 +106,23 @@ def log_start_end_dt(func):
         with db.atomic():
             job_row.save()
 
-        logger.info(
+        Log.job.info(
             '%s job ended at %s (elapsed seconds: %d (%s))',
-            job.name,
+            context.job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
             elapsed_seconds,
             u.pretty_seconds(elapsed_seconds)
         )
 
-        if elapsed_seconds > (config.jobs[job.name].interval * 60):
+        if elapsed_seconds > (config.jobs[context.job.name].interval * 60):
             text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}))'.format(
-                job.name,
-                config.jobs[job.name].interval,
+                context.job.name,
+                config.jobs[context.job.name].interval,
                 round(elapsed_seconds, 2),
                 u.pretty_seconds(elapsed_seconds)
             )
-            logger.warning(text)
-            bot.send_message(config.telegram.log, text)
+            Log.job.warning(text)
+            context.bot.send_message(config.telegram.log, text)
 
         return job_result
 
@@ -123,7 +131,7 @@ def log_start_end_dt(func):
 
 def deferred_handle_lock(func):
     @wraps(func)
-    def wrapped(bot, update, *args, **kwargs):
+    def wrapped(update, context, *args, **kwargs):
         while True:
             try:
                 logger.debug('acquiring DEFERRED lock...')
@@ -138,7 +146,7 @@ def deferred_handle_lock(func):
                     # everyone ('except for read uncommitted') so there shouldn't be any issue with jobs being blocked by a lock
                     # acquired by an handler because the job will acquire a lock when it start
                     # and will release it only when it ends
-                    return func(bot, update, *args, **kwargs)
+                    return func(update, context, *args, **kwargs)
             except OperationalError as e:
                 if str(e) == 'database is locked':
                     logger.info('database is locked, sleeping')
@@ -152,20 +160,37 @@ def deferred_handle_lock(func):
 def pass_subreddit(answer=False):
     def real_decorator(func):
         @wraps(func)
-        def wrapped(bot, update, *args, **kwargs):
-            ud = updater.dispatcher.user_data.get(update.effective_user.id, {})
+        def wrapped(update, context, *args, **kwargs):
+            ud = context.user_data.get(update.effective_user.id, {})
 
             subreddit = None
-            if ud and ud.get('data', None) and ud['data'].get('subreddit', None):
-                subreddit = ud['data']['subreddit']
+            if context.user_data and context.user_data.get('data', None) and context.user_data['data'].get('subreddit', None):
+                subreddit = context.user_data['data']['subreddit']
 
             if not subreddit and answer:
                 logger.debug('no subreddit previously selected (callback: %s)', func.__name__)
                 update.message.reply_text('Ooops, you need to select a subreddit first. Use the /subreddit command to pick one')
                 return ConversationHandler.END  # just in case we are in a conversation
 
-            return func(bot, update, subreddit=subreddit, *args, **kwargs)
+            return func(update, context, subreddit=subreddit, *args, **kwargs)
 
         return wrapped
 
     return real_decorator
+
+
+def logconversation(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        step_returned = func(update, context, *args, **kwargs) or -10
+        Log.conv.debug(
+            'user %d: function <%s> returned step %d (%s)',
+            update.effective_user.id,
+            func.__name__,
+            step_returned,
+            get_status_description(step_returned)
+        )
+
+        return step_returned
+
+    return wrapped
