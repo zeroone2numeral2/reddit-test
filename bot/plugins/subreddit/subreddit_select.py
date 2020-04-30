@@ -97,7 +97,11 @@ def on_cancel(update: Update, context: CallbackContext):
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 
-    text = 'Exited configuration mode for /r/{s.name} (channel: {s.channel.title})'.format(s=subreddit)
+    channel_title = 'none'
+    if subreddit.channel:
+        channel_title = subreddit.channel.title
+
+    text = 'Exited configuration mode for /r/{s.name} (channel: {channel})'.format(s=subreddit, channel=channel_title)
 
     context.user_data.pop('data', None)
 
