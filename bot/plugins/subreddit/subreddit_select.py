@@ -11,8 +11,6 @@ from bot import mainbot
 from bot.conversation import Status
 from database.models import Subreddit
 from bot.markups import Keyboard
-from bot import updater
-from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')

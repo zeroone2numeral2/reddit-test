@@ -7,4 +7,3 @@ toml
 requests
 Pillow
 imgurpython
-ptbplugins
