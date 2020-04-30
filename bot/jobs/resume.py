@@ -8,6 +8,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
+from bot.logging import slogger
 from utilities import u
 from utilities import d
 from database.models import Subreddit
@@ -23,29 +24,29 @@ READABLE_TIME_FORMAT = '%d/%m/%Y %H:%M:%S'
 
 
 def process_submissions(subreddit, bot):
-    logger.info('fetching submissions')
+    slogger.info('fetching submissions')
 
     i = 0
     if subreddit.sorting == 'hot':
         # we change the sorting way to 'day', because we can't get the 'top' submission from the period 'hot'
-        logger.warning('resume_job: changing "sorting" property of r/%s to "say"', subreddit.name)
+        slogger.warning('resume_job: changing "sorting" property of r/%s to "say"', subreddit.name)
         subreddit.sorting = 'day'
         with db.atomic():
             subreddit.save()
 
     for submission in reddit.iter_top(subreddit.name, limit=15, period=subreddit.sorting):
-        logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
+        slogger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if PostResume.already_posted(subreddit, submission.id):
-            logger.info('...submission %s has already been posted', submission.id)
+            slogger.info('...submission %s has already been posted', submission.id)
             continue
         else:
-            logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
+            slogger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
                         submission.id)
 
             sender = SenderResume(bot, subreddit, submission)
             if not sender.test_filters():
                 # do not return the object if it doesn't pass the filters
-                logger.info('submission DID NOT pass the filters. continuing to the next submission...')
+                slogger.info('submission DID NOT pass the filters. continuing to the next submission...')
                 continue
 
             yield sender
@@ -56,7 +57,7 @@ def process_submissions(subreddit, bot):
 
 
 def process_subreddit(subreddit, bot):
-    logger.info(
+    slogger.info(
         'processing subreddit %s (r/%s) (frequency: %s, sorting: %s)',
         subreddit.subreddit_id,
         subreddit.name,
@@ -67,7 +68,7 @@ def process_subreddit(subreddit, bot):
     now = u.now()
     weekday = datetime.datetime.today().weekday()
     if subreddit.frequency == 'week' and not (weekday == subreddit.weekday and subreddit.hour == now.hour):
-        logger.info(
+        slogger.info(
             'ignoring because -> subreddit.weekday != weekday (%d != %d) and subreddit.hour != current hour (%d != %d)',
             subreddit.weekday,
             weekday,
@@ -76,29 +77,29 @@ def process_subreddit(subreddit, bot):
         )
         return 0
     elif subreddit.frequency == 'day' and now.hour != subreddit.hour:
-        logger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
+        slogger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
         return 0
 
     elapsed_seconds = 999999
     if subreddit.resume_last_posted_submission_dt:
-        logger.info('resume_last_posted_submission_dt is not empty: %s', subreddit.resume_last_posted_submission_dt.strftime('%d/%m/%Y %H:%M:%S'))
+        slogger.info('resume_last_posted_submission_dt is not empty: %s', subreddit.resume_last_posted_submission_dt.strftime('%d/%m/%Y %H:%M:%S'))
         elapsed_seconds = (now - subreddit.resume_last_posted_submission_dt).total_seconds()
 
-    logger.info('now: %s', now.strftime('%d/%m/%Y %H:%M:%S'))
-    logger.info('elapsed seconds from the last resume post: %d seconds (%s)', elapsed_seconds, u.pretty_seconds(elapsed_seconds))
+    slogger.info('now: %s', now.strftime('%d/%m/%Y %H:%M:%S'))
+    slogger.info('elapsed seconds from the last resume post: %d seconds (%s)', elapsed_seconds, u.pretty_seconds(elapsed_seconds))
 
     if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
-        logger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
+        slogger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
         return 0
     elif subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'week' and elapsed_seconds < 60*60*24):
-        logger.info('ignoring subreddit because frequency is "week" and latest has been less than a day ago')
+        slogger.info('ignoring subreddit because frequency is "week" and latest has been less than a day ago')
         return 0
 
     annoucement_posted = False
     posted_messages = 0
     for sender in process_submissions(subreddit, bot):
-        logger.info('submission url: %s', sender.submission.url)
-        logger.info('submission title: %s', sender.submission.title)
+        slogger.info('submission url: %s', sender.submission.url)
+        slogger.info('submission title: %s', sender.submission.title)
 
         if not annoucement_posted and subreddit.template_resume:
             sender.post_resume_announcement()
@@ -109,20 +110,20 @@ def process_subreddit(subreddit, bot):
             sent_message = sender.post()
             posted_messages += 1
         except (BadRequest, TelegramError) as e:
-            logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+            slogger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
             continue
         except Exception as e:
-            logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+            slogger.error('generic error while posting the message: %s', str(e), exc_info=True)
             continue
 
         if sent_message:
             if not subreddit.test:
-                logger.info('creating PostResume row...')
+                slogger.info('creating PostResume row...')
                 sender.register_post()
             else:
-                logger.info('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
+                sinfo('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
 
-            logger.info('updating Subreddit last *resume* post datetime...')
+            slogger.info('updating Subreddit last *resume* post datetime...')
             subreddit.resume_last_posted_submission_dt = u.now()
             with db.atomic():
                 subreddit.save()
@@ -144,11 +145,9 @@ def check_daily_resume(context: CallbackContext):
 
     total_posted_messages = 0
     for subreddit in subreddits:
+        slogger.set_subreddit(subreddit)
         try:
-            # l.set_logger_file('subredditprocessor', subreddit.name)
             posted_messages = process_subreddit(subreddit, context.bot)
-            # l.set_logger_file('subredditprocessor')
-
             total_posted_messages += int(posted_messages)
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)

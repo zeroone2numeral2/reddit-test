@@ -12,7 +12,6 @@ from telegram.ext import CallbackContext
 from bot.logging import slogger
 from utilities import u
 from utilities import d
-from utilities import l
 from database.models import Subreddit
 from database.models import Post
 from database import db
