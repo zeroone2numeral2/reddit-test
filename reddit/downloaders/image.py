@@ -1,11 +1,9 @@
-import logging
 import os
-import urllib.request as urllib
 import tempfile
 
 import requests
 
-logger = logging.getLogger(__name__)
+from bot.logging import slogger
 
 
 class Image:
@@ -76,7 +74,7 @@ class Image:
             if raise_exception:
                 raise e
             else:
-                logger.info('execption while downloading url %s: %s', self._url, str(e), exc_info=True)
+                slogger.info('execption while downloading url %s: %s', self._url, str(e), exc_info=True)
                 return False
 
         return True
@@ -107,9 +105,9 @@ class Image:
             try:
                 os.remove(self._file_path)
             except Exception as e:
-                logger.error('error while trying to delete downloaded file %s: %s', self._file_path, str(e))
+                slogger.error('error while trying to delete downloaded file %s: %s', self._file_path, str(e))
         elif self._use_tempfile:
             try:
                 self._tempfile_downloaded.close()
             except Exception as e:
-                logger.error('error while trying to close downloaded tempfile: %s', str(e))
+                slogger.error('error while trying to close downloaded tempfile: %s', str(e))

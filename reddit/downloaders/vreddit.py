@@ -1,10 +1,10 @@
 import os
 import re
-import logging
 import subprocess
 import urllib.request
 import urllib.error
 
+from bot.logging import slogger
 from reddit.downloaders import Downloader
 from utilities import u
 from config import config
@@ -17,8 +17,6 @@ if os.name == 'nt':  # windows: we expect ffmpeg to be in the main directory of 
     FFMPEG_COMMAND = config.ffmpeg.cmd_path_windows + FFMPEG_COMMAND_ARGS
 else:
     FFMPEG_COMMAND = config.ffmpeg.cmd_path + FFMPEG_COMMAND_ARGS
-
-logger = logging.getLogger(__name__)
 
 
 class FfmpegTimeoutError(Exception):
@@ -64,7 +62,7 @@ class VReddit(Downloader):
             urllib.request.urlopen(self._url_audio)
             return False
         except urllib.error.HTTPError as e:
-            logger.error('audio url validity check: the url is forbidden (%s)', str(e))
+            slogger.error('audio url validity check: the url is forbidden (%s)', str(e))
             return True
 
     def remove(self, keep_thumbnail=False):
@@ -83,12 +81,12 @@ class VReddit(Downloader):
             paths.append(self._thumbnail_path)
 
         for file_path in paths:
-            logger.info('removing %s...', file_path)
+            slogger.info('removing %s...', file_path)
             try:
                 os.remove(file_path)
-                logger.info('...%s removed', file_path)
+                slogger.info('...%s removed', file_path)
             except FileNotFoundError:
-                logger.error('...%s not removed: FileNotFoundError', file_path)
+                slogger.error('...%s not removed: FileNotFoundError', file_path)
 
     def download_audio(self):
         u.download_file_stream(self._url_audio, self._audio_path)
@@ -117,15 +115,15 @@ class VReddit(Downloader):
         sp = subprocess.Popen(cmd, shell=True, stdout=stdout_file, stderr=stderr_file)
         try:
             ffmpeg_start = u.now()
-            logger.debug('ffmpeg command execution started: %s', u.now(string=TIME_FORMAT))
+            slogger.debug('ffmpeg command execution started: %s', u.now(string=TIME_FORMAT))
 
             sp.communicate(timeout=timeout)
 
             ffmpeg_end = u.now()
             ffmpeg_elapsed_seconds = (ffmpeg_end - ffmpeg_start).seconds
-            logger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
+            slogger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
         except subprocess.TimeoutExpired:
-            logger.error(
+            slogger.error(
                 'subprocess.TimeoutExpired (%d seconds) error during ffmpeg command execution (see %s, %s)',
                 timeout,
                 str(stdout_filepath),
@@ -134,7 +132,7 @@ class VReddit(Downloader):
 
             # we have to kill the subprocess, otherwise ffmpeg will keep the file open and we will not be able to delete it
             # https://docs.python.org/3/library/subprocess.html#subprocess.Popen.communicate
-            logger.info('killing subprocess (pid: %d)...', sp.pid)
+            slogger.info('killing subprocess (pid: %d)...', sp.pid)
             sp.kill()
 
             stdout_file.close()
