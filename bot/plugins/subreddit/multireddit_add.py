@@ -56,6 +56,10 @@ def on_addmulti_command(update: Update, context: CallbackContext):
     context.user_data['name'] = multireddit_name
     context.user_data['redditor'] = redditor
 
+    if len(context.args) > 2:
+        channel_title_filter = context.args[2].lower()
+        channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
+
     reply_markup = Keyboard.from_list(channels_list)
     update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
 

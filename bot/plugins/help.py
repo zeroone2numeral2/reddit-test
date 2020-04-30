@@ -23,7 +23,7 @@ HELP_STRING = """\
 
 *Adding a subreddit/multireddit*
 /addsub `[subreddit name] <channel title filter>`: register a subreddit
-/addmulti `[creator] [multireddit name]`: add a multireddit to a channel 
+/addmulti `[creator] [multireddit name] <channel title filter>`: add a multireddit to a channel 
 
 *Managing a subreddit's settings*
 /sub `<filter>`: change a subreddit configuration. Optional filter to filter by subreddit's name the keyboard to \
