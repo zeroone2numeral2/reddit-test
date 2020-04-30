@@ -41,7 +41,7 @@ def process_submissions(subreddit, bot):
             continue
         else:
             slogger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
-                        submission.id)
+                         submission.id)
 
             sender = SenderResume(bot, subreddit, submission)
             if not sender.test_filters():
