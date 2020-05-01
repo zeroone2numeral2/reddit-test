@@ -100,7 +100,7 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
-def process_submissions(subreddit: Subreddit, slogger):
+def process_submissions(subreddit: Subreddit):
     slogger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or config.praw.submissions_limit
@@ -128,7 +128,7 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
         return 0
 
     senders = list()
-    for submission in process_submissions(subreddit, slogger):
+    for submission in process_submissions(subreddit):
         sender = Sender(bot, subreddit, submission, slogger)
         if sender.test_filters():
             slogger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
