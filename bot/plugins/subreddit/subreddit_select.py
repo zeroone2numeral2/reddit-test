@@ -15,7 +15,7 @@ from utilities import d
 
 logger = logging.getLogger('handler')
 
-TEXT = """You are configuring /r/{s.name} (channel: {channel_title})
+TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">/r/{s.name}</a> (channel: {channel_title})
 
 <b>Available commands</b>: \
 /info, \
