@@ -108,6 +108,9 @@
         },
         "pyrogram": {
             "level": "WARNING"
+        },
+        "bot.logging": {
+            "level": "WARNING"
         }
     },
     "formatters": {
