@@ -35,9 +35,6 @@ submissions_limit = 25
 [sqlite]
 filename = "db.sqlite"
 
-[logging]
-config = "logging.json"
-
 [submissions]
 default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
