@@ -14,6 +14,7 @@ from utilities import u
 from utilities import d
 from database.models import Subreddit
 from database.models import Post
+from database.models import InitialTopPost
 from database import db
 from reddit import reddit
 from reddit import Sender
@@ -104,10 +105,15 @@ def process_submissions(subreddit: Subreddit):
     slogger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or config.praw.submissions_limit
-    for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=subreddit.sorting.lower(), limit=limit):
+    sorting = subreddit.sorting.lower()
+    for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
         slogger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if Post.already_posted(subreddit, submission.id):
             slogger.info('...submission %s has already been posted', submission.id)
+            continue
+        elif subreddit.sorting.lower() in ('month', 'all') and InitialTopPost.is_initial_top_post(subreddit.name, submission.id, sorting):
+            slogger.info('...subreddit has sorting "%s" and submission %s is among the initial top posts',
+                         sorting, submission.id)
             continue
         else:
             slogger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
