@@ -67,6 +67,12 @@ class Reddit(praw.Reddit):
         elif sorting == Sorting.timeframe.WEEK:
             iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.WEEK]
+        elif sorting == Sorting.timeframe.MONTH:
+            iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
+            args = [Sorting.timeframe.MONTH]
+        elif sorting == Sorting.timeframe.ALL:
+            iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
+            args = [Sorting.timeframe.ALL]
 
         for submission in iterator(*args, **kwargs):
             yield submission
