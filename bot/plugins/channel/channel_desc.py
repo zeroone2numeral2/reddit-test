@@ -153,7 +153,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
                 ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
-            format_dict['ignored_block'] = '\n• Ignored submissions: {}'.format(', '.join(ignored_list))
+            format_dict['ignored_block'] = '\n• ignored submissions: {}'.format(', '.join(ignored_list))
 
         if subreddit.sorting in ('top', 'day'):
             format_dict['sorting'] = 'top/day'
@@ -169,7 +169,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
-                format_dict['quiet_block'] = '\n• Less frequent posts (frequency x{}) from {} to {} UTC'.format(
+                format_dict['quiet_block'] = '\n• less frequent posts (frequency x{}) from {} to {} UTC'.format(
                     subreddit.quiet_hours_demultiplier,
                     subreddit.quiet_hours_start or config.quiet_hours.start,
                     subreddit.quiet_hours_end or config.quiet_hours.end
