@@ -136,7 +136,7 @@ class SubredditLogNoAdapter(logging.Logger):
 
         self._rotating_file_handler_kwargs = dict(
             maxBytes=1048576,
-            backupCount=20,
+            backupCount=10,
             encoding="utf8"
         )
 
