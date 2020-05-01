@@ -23,7 +23,9 @@ TEXT = """You are configuring /r/{s.name} (channel: {channel_title})
 /setchannel (set the subreddit's channel), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /setchannelicon (use this subreddit's icon as channel icon), \
-/disable (disable the subreddit)
+/disable (disable the subreddit), \
+/savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
+/removetop (remove the saved top posts for this subreddit with the current sorting)
 
 You can also pass one of the subreddit's properties to see or change them, for example:
 • "<code>template</code>" will show the current template
