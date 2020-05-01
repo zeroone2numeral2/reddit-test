@@ -6,6 +6,7 @@ from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
 
 from bot import mainbot
+from bot.logging import slogger
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -22,8 +23,9 @@ def on_sdict_command(update, context):
     
     sender = None
     subreddit = Subreddit.fetch(context.args[0])
+    slogger.set_subreddit(subreddit)
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(context.bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission, slogger)
         break
     
     text = pformat(sender.submission_dict)

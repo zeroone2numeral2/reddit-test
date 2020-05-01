@@ -6,6 +6,7 @@ from telegram.error import TelegramError
 from telegram.error import BadRequest
 
 from bot import mainbot
+from bot.logging import slogger
 from utilities import d
 from database.models import Subreddit
 from reddit import Sender
@@ -21,8 +22,9 @@ def on_placeholders_command(update, context):
 
     sender = None
     subreddit = Subreddit.select().get()
+    slogger.set_subreddit(subreddit)
     for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(context.bot, subreddit, submission)
+        sender = Sender(context.bot, subreddit, submission, slogger)
         break
     
     placeholders = list()
