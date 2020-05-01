@@ -131,9 +131,6 @@
         },
         "subreddit": {
             "format": "[%(asctime)s][%(sub_id)s][%(sub_name)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
-        },
-        "subreddit_no_adapter": {
-            "format": "[%(asctime)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] %(message)s"
         }
     }
 }

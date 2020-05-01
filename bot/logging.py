@@ -37,6 +37,7 @@ class SubredditLog:
         self._dir_path = dir_path
         self._file_path = None
         self._extra = None
+        self._formatter_name = 'subreddit'
         self._logger: [logging.Logger, logging.LoggerAdapter] = logging.getLogger('subreddit')
         self._generic_logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class SubredditLog:
             filename=self._file_path,
             **self._rotating_file_handler_kwargs
         )
-        file_handler.setFormatter(logging.Formatter(logging_config['formatters']['subreddit']['format']))
+        file_handler.setFormatter(logging.Formatter(logging_config['formatters'][self._formatter_name]['format']))
         file_handler.setLevel(logging_config['loggers']['subreddit']['level'])
 
         self.add_handler(file_handler)
@@ -115,4 +116,80 @@ class SubredditLog:
         return self._logger.warning(*args, **kwargs)
 
 
-slogger = SubredditLog()
+class SubredditLogNoAdapter(logging.Logger):
+    def __init__(self, dir_path='logs/subreddits/'):
+        super(SubredditLogNoAdapter, self).__init__('subreddit')
+
+        # NOT NEEDED ANYMORE
+        # WE ADD BOTH THE FILE AND STREAM HANDLER MANUALLY LATER, AND ONLY TAKE
+        # THE FORMATTER AND LOGGING LEVEL FROM logging.json
+        # copy the logging.json's logger handlers (one SreamHandler) to this logger
+        # self.handlers = logging.getLogger('subreddit').handlers
+
+        self.subreddit_name = None
+        self.subreddit_id = None
+        self._dir_path = dir_path
+        self._file_path = None
+        self._formatter_name = 'subreddit'
+        self._extra = dict()
+        self._generic_logger = logging.getLogger(__name__)
+
+        self._rotating_file_handler_kwargs = dict(
+            maxBytes=1048576,
+            backupCount=20,
+            encoding="utf8"
+        )
+
+        self.add_handler(self.get_console_handler())
+
+    def remove_handlers(self, file_handlers_only=False):
+        for handler in self.handlers:
+            if not file_handlers_only or isinstance(handler, (logging.handlers.RotatingFileHandler, logging.FileHandler)):
+                self.removeHandler(handler)
+                self._generic_logger.debug('removed handler %s', handler)
+
+    def add_handler(self, handler):
+        self.addHandler(handler)
+        self._generic_logger.debug('added handler to Logger: %s', handler)
+
+    def get_file_handler(self):
+        handler = logging.handlers.RotatingFileHandler(
+            filename=self._file_path,
+            **self._rotating_file_handler_kwargs
+        )
+        handler.setFormatter(logging.Formatter(logging_config['formatters'][self._formatter_name]['format']))
+        handler.setLevel(logging_config['loggers']['subreddit']['level'])
+
+        return handler
+
+    def get_console_handler(self):
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(logging_config['formatters'][self._formatter_name]['format']))
+        handler.setLevel(logging_config['loggers']['subreddit']['level'])
+
+        return handler
+
+    def set_subreddit(self, subreddit):
+        self._generic_logger.debug('setting subreddit: %s', subreddit.name)
+
+        self.subreddit_id = subreddit.id
+        self.subreddit_name = subreddit.name
+        self._file_path = os.path.join(self._dir_path, '{s.subreddit_name}_{s.subreddit_id}.log'.format(s=self))
+
+        self._extra = {'sub_id': subreddit.id, 'sub_name': subreddit.name}
+
+        # remove every file handler, because we are going to add a new one
+        self.remove_handlers(file_handlers_only=True)
+
+        self.add_handler(self.get_file_handler())
+
+        return self  # return it, just in case
+
+    def _log(self, *args, **kwargs):
+        if self._extra:
+            kwargs["extra"] = self._extra
+
+        super()._log(*args, **kwargs)  # noqa
+
+
+slogger = SubredditLogNoAdapter()
