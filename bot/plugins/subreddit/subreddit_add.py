@@ -66,7 +66,7 @@ def on_addsub_command(update: Update, context: CallbackContext):
 
     reply_markup = Keyboard.from_list(channels_list)
     # noinspection SqlNoDataSourceInspection
-    text = "Select the subreddit's channel from the list ({}), or /cancel (use /skip to add the subreddit without a channel)".format(
+    text = "Select the subreddit's channel from the list ({}) (you can /cancel the operation or /skip the channel selection)".format(
         'filtered list' if len(context.args) > 1 else 'full list'
     )
     update.message.reply_text(text, reply_markup=reply_markup)
