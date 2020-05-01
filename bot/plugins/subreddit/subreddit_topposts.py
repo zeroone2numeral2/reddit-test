@@ -42,6 +42,10 @@ def on_savetop_command(update: Update, _, subreddit):
 def on_removetop_command(update: Update, _, subreddit):
     logger.info('/removetop command')
 
+    if subreddit.sorting not in ('month', 'all'):
+        update.message.reply_text('This subreddit\'s sorting is not "month" or "all"')
+        return
+
     query = InitialTopPost.delete().where(
         InitialTopPost.subreddit_name == subreddit.name,
         InitialTopPost.sorting == subreddit.sorting
@@ -52,8 +56,31 @@ def on_removetop_command(update: Update, _, subreddit):
         s=subreddit,
         removed=removed
     ))
-    update.message.reply('Warning! The initial top posts have been removed for all the channels relying on this subreddit with this sorting')
+    update.message.reply_text('Warning! The initial top posts have been removed for all the channels relying on this subreddit with this sorting')
+
+
+@d.restricted
+@d.failwithmessage
+@d.pass_subreddit(answer=True)
+def on_gettop_command(update: Update, _, subreddit):
+    logger.info('/gettop command')
+
+    if subreddit.sorting not in ('month', 'all'):
+        update.message.reply_text('This subreddit\'s sorting is not "month" or "all"')
+        return
+
+    query = InitialTopPost.select().where(
+        InitialTopPost.subreddit_name == subreddit.name,
+        InitialTopPost.sorting == subreddit.sorting
+    )
+    top_posts = [p for p in query]
+
+    update.message.reply_html('/r/{s.name}: currently saved {saved_n} top posts for current sorting "{s.sorting}", limit: {s.limit}'.format(
+        s=subreddit,
+        saved_n=len(top_posts)
+    ))
 
 
 mainbot.add_handler(CommandHandler(['savetop'], on_savetop_command))
 mainbot.add_handler(CommandHandler(['removetop'], on_removetop_command))
+mainbot.add_handler(CommandHandler(['gettop'], on_gettop_command))

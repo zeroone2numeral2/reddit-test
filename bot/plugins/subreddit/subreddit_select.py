@@ -25,7 +25,8 @@ TEXT = """You are configuring /r/{s.name} (channel: {channel_title})
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
-/removetop (remove the saved top posts for this subreddit with the current sorting)
+/removetop (remove the saved top posts for this subreddit with the current sorting), \
+/gettop (see how many top posts we have saved for the current sorting)
 
 You can also pass one of the subreddit's properties to see or change them, for example:
 • "<code>template</code>" will show the current template
