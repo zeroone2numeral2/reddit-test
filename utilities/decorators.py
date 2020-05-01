@@ -51,7 +51,7 @@ def failwithmessage(func):
                 exc_info = False  # do not log the whole traceback if the error is 'database is locked'
 
             Log.handler.error('error during handler execution: %s', str(e), exc_info=exc_info)
-            logger.error('error during handler execution: %s', str(e), exc_info=exc_info)  # also log to main log file
+            # logger.error('error during handler execution: %s', str(e), exc_info=exc_info)  # also log to main log file
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
             update.message.reply_html(text)
 
@@ -65,7 +65,7 @@ def logerrors(func):
             return func(context, *args, **kwargs)
         except Exception as e:
             Log.job.error('error during job execution: %s', str(e), exc_info=True)
-            logger.error('error during job execution: %s', str(e), exc_info=True)  # also log to main log file
+            # logger.error('error during job execution: %s', str(e), exc_info=True)  # also log to main log file
 
     return wrapped
 
