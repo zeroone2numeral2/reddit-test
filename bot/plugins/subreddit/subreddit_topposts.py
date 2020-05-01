@@ -36,4 +36,24 @@ def on_savetop_command(update: Update, _, subreddit):
     ))
 
 
+@d.restricted
+@d.failwithmessage
+@d.pass_subreddit(answer=True)
+def on_removetop_command(update: Update, _, subreddit):
+    logger.info('/removetop command')
+
+    query = InitialTopPost.delete().where(
+        InitialTopPost.subreddit_name == subreddit.name,
+        InitialTopPost.sorting == subreddit.sorting
+    )
+    removed = query.execute()
+
+    update.message.reply_html('/r/{s.name}: removed {removed}/{s.limit} top posts ("{s.sorting}")'.format(
+        s=subreddit,
+        removed=removed
+    ))
+    update.message.reply('Warning! The initial top posts have been removed for all the channels relying on this subreddit with this sorting')
+
+
 mainbot.add_handler(CommandHandler(['savetop'], on_savetop_command))
+mainbot.add_handler(CommandHandler(['removetop'], on_removetop_command))
