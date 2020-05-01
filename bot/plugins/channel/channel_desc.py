@@ -28,13 +28,13 @@ SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
 
 MULTIREDDIT_URL = 'https://old.reddit.com/user/{redditor}/m/{name}/'
 
-BASE_POST = """📌 <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
-⚡️{number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>\
+BASE_POST = """••• <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+• {number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>\
 {quiet_block}\
 {ignored_block}"""
 
-BASE_RESUME = """📌 <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
-⚡️ top {number_of_posts} {posts_string} from <code>/{sorting}/</code> every {period} at {hour} UTC{weekday_block}\
+BASE_RESUME = """••• <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+•️ top {number_of_posts} {posts_string} from <code>/{sorting}/</code> every {period} at {hour} UTC{weekday_block}\
 {ignored_block}"""
 
 HEADER = '<b>This channel tracks the following subreddits</b>:'
@@ -153,7 +153,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
                 ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
-            format_dict['ignored_block'] = '\n🗑 Ignored submissions: {}'.format(', '.join(ignored_list))
+            format_dict['ignored_block'] = '\n• Ignored submissions: {}'.format(', '.join(ignored_list))
 
         if subreddit.sorting in ('top', 'day'):
             format_dict['sorting'] = 'top/day'
@@ -169,7 +169,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
                 format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
             if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
-                format_dict['quiet_block'] = '\n💤 Less frequent posts (frequency x{}) from {} to {} UTC'.format(
+                format_dict['quiet_block'] = '\n• Less frequent posts (frequency x{}) from {} to {} UTC'.format(
                     subreddit.quiet_hours_demultiplier,
                     subreddit.quiet_hours_start or config.quiet_hours.start,
                     subreddit.quiet_hours_end or config.quiet_hours.end
