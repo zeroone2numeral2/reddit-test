@@ -61,7 +61,10 @@ def on_addmulti_command(update: Update, context: CallbackContext):
         channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
 
     reply_markup = Keyboard.from_list(channels_list)
-    update.message.reply_text('Select the subreddit channel (or /cancel):', reply_markup=reply_markup)
+    update.message.reply_text(
+        'Select the subreddit channel (you can /cancel the operation or /skip the channel selection):',
+        reply_markup=reply_markup
+    )
 
     return Status.CHANNEL_SELECT
 
@@ -72,9 +75,13 @@ def on_addmulti_command(update: Update, context: CallbackContext):
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
-    channel_id = u.expand_channel_id(update.message.text)
-    logger.info('channel_id: %d', channel_id)
-    channel = Channel.get(Channel.channel_id == channel_id)
+    channel = None
+    if update.message.text != '/skip':
+        channel_id = u.expand_channel_id(update.message.text)
+        logger.info('channel_id: %d', channel_id)
+        channel = Channel.get(Channel.channel_id == channel_id)
+    else:
+        logger.info('multireddit will not be associated to a channel')
 
     multireddit_name = context.user_data.pop('name')
     redditor = context.user_data.pop('redditor')
@@ -106,10 +113,10 @@ def on_cancel(update: Update, _):
 
 mainbot.add_handler(ConversationHandler(
     entry_points=[
-        CommandHandler(command=['addmulti'], callback=on_addmulti_command, pass_args=True, pass_user_data=True)],
+        CommandHandler(['addmulti'], on_addmulti_command)],
     states={
         Status.CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected, pass_user_data=True)
+            MessageHandler(Filters.regex(r'^\d+') | Filters.regex(r'^/skip$'), on_channel_selected)
         ]
     },
     fallbacks=[
