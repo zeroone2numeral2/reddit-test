@@ -117,7 +117,7 @@ class SubredditLog:
 
 
 class SubredditLogNoAdapter(logging.Logger):
-    def __init__(self, dir_path='logs/subreddits/'):
+    def __init__(self, dir_path='logs/subreddits/', subreddit=None):
         super(SubredditLogNoAdapter, self).__init__('subreddit')
 
         # NOT NEEDED ANYMORE
@@ -141,6 +141,9 @@ class SubredditLogNoAdapter(logging.Logger):
         )
 
         self.add_handler(self.get_console_handler())
+
+        if subreddit:
+            self.set_subreddit(subreddit)
 
     def remove_handlers(self, file_handlers_only=False):
         for handler in self.handlers:
