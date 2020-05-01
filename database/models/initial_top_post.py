@@ -25,7 +25,7 @@ class InitialTopPost(peewee.Model):
         )
 
     def __repr__(self):
-        return '<TopPost: submission id {}, subreddit id {}, channel id {}>'.format(
+        return '<InitialTopPost: submission id {}, subreddit id {}, channel id {}>'.format(
             self.submission_id,
             self.subreddit_name,
             self.sorting
