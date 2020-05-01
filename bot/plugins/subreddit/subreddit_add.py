@@ -132,10 +132,10 @@ def on_cancel(update: Update, _):
 
 mainbot.add_handler(ConversationHandler(
     entry_points=[
-        CommandHandler(command=['addsub'], callback=on_addsub_command, pass_args=True, pass_user_data=True)],
+        CommandHandler(['addsub'], on_addsub_command)],
     states={
         Status.CHANNEL_SELECT: [
-            MessageHandler(Filters.text | Filters.command, on_channel_selected, pass_user_data=True)
+            MessageHandler(Filters.regex(r'^\d+') | Filters.regex(r'^/skip$'), on_channel_selected)
         ]
     },
     fallbacks=[
