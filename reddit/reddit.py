@@ -64,7 +64,7 @@ class Reddit(praw.Reddit):
             args = [Sorting.timeframe.DAY]
         elif sorting == Sorting.NEW:
             iterator = self.subreddit(name).new if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).new
-        elif sorting== Sorting.timeframe.WEEK:
+        elif sorting == Sorting.timeframe.WEEK:
             iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.WEEK]
 
