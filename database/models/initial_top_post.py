@@ -12,14 +12,13 @@ class InitialTopPost(peewee.Model):
     sorting method, so we can make sure it's not old stuff"""
 
     id = peewee.AutoField()
-    submission_id = peewee.CharField(null=False, primary_key=True)
+    submission_id = peewee.CharField(null=False)
     subreddit_name = peewee.CharField(null=False)
     sorting = peewee.CharField(null=False)
 
     class Meta:
         table_name = 'initial_top_posts'
         database = db
-        primary_key = peewee.CompositeKey('submission_id', 'subreddit')
         indexes = (
             (('submission_id', 'subreddit_name', 'sorting'), True),
         )
