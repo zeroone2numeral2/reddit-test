@@ -15,7 +15,7 @@ from reddit import Sender
 from reddit import reddit
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 
 @d.restricted

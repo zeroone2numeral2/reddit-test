@@ -6,9 +6,7 @@ from telegram.ext import CommandHandler, CallbackContext
 from bot import mainbot
 from utilities import d
 
-logger = logging.getLogger(__name__)
-
-SUBREDDIT_SELECT = 0
+logger = logging.getLogger('handler')
 
 
 @d.restricted

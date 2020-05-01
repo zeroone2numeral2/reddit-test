@@ -8,7 +8,7 @@ from database.models import Subreddit
 from utilities import d
 from utilities import u
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 
 @d.restricted

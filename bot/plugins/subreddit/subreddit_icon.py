@@ -9,7 +9,7 @@ from bot.markups import Keyboard
 from reddit import reddit
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 SUBREDDIT_SELECT = 0
 

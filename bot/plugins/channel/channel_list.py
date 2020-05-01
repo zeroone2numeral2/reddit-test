@@ -9,7 +9,7 @@ from utilities import d
 from utilities import u
 from config import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 STANDARD_TEXT = """Full list of channels here (pinned message)
 

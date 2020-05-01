@@ -20,7 +20,7 @@ from utilities import u
 from utilities import d
 from config import config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 CHANNEL_SELECT = range(1)
 

@@ -5,7 +5,7 @@ from telegram.ext import CommandHandler
 from bot import mainbot
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 HELP_STRING = """\
 *Adding and removing channels*

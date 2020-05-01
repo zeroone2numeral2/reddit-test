@@ -14,7 +14,7 @@ from database.models import Subreddit
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 CLONE_KEYS_TO_IGNORE = (
     'subreddit_id',

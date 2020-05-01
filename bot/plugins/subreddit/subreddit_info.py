@@ -7,7 +7,7 @@ from bot import mainbot
 from utilities import u
 from utilities import d
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('handler')
 
 
 @d.restricted
