@@ -27,7 +27,7 @@ from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
 from database.models import Ignored
-from const import DEFAULT_TEMPLATE
+from const import DEFAULT_TEMPLATES
 from utilities import u
 from config import config
 
@@ -349,7 +349,7 @@ class Sender:
         if not template:
             # if there is no correct template set in the db, use the default one
             self.log.info('no template: using the default one')
-            template = DEFAULT_TEMPLATE
+            template = DEFAULT_TEMPLATES[0]
 
         text = template.format(**self._submission_dict)
         # self.log.info('post text: %s', text)

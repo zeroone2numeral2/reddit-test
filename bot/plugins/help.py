@@ -38,6 +38,7 @@ there some commands can be used to edit its settings
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
+/templates: see all the available templates
 
 *Logs*
 /getlog `<log number>`: get the main log file. Pass a number as argument if you want to get an archived log file

@@ -31,7 +31,7 @@ class Subreddit(peewee.Model):
     sorting = peewee.CharField(default=config.submissions.default_sorting)
     added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     enabled = peewee.BooleanField(default=True)
-    template = peewee.CharField(null=True, default=DEFAULT_TEMPLATE)
+    template = peewee.CharField(null=True, default=DEFAULT_TEMPLATES[0])
     send_medias = peewee.BooleanField(default=True)
     webpage_preview = peewee.BooleanField(default=True)
     # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
