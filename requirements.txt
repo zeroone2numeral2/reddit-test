@@ -7,3 +7,4 @@ toml
 requests
 Pillow
 imgurpython
+youtube-dl

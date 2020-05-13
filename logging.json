@@ -39,6 +39,15 @@
             "filename": "logs/handlers.log",
             "backupCount": 20
         },
+        "file_youtube_dl": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/youtubedl.log",
+            "backupCount": 30
+        },
         "file_jobs": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "standard",
@@ -77,6 +86,11 @@
         },
         "job": {
             "handlers": ["console", "file_jobs"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
+        "ytdl": {
+            "handlers": ["console", "file_youtube_dl"],
             "propagate": false,
             "level": "DEBUG"
         },
