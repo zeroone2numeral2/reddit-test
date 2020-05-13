@@ -46,6 +46,8 @@ class Subreddit(peewee.Model):
     url_button = peewee.BooleanField(default=False)
     comments_button = peewee.BooleanField(default=False)
     template_no_url = peewee.CharField(null=True)
+    youtube_download = peewee.BooleanField(default=False)
+    youtube_download_max_duration = peewee.IntegerField(default=180)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)

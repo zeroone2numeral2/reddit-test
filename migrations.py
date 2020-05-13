@@ -45,6 +45,8 @@ def main(database_path):
     url_button = peewee.BooleanField(default=False)
     comments_button = peewee.BooleanField(default=False)
     template_no_url = peewee.CharField(null=True)
+    youtube_download = peewee.BooleanField(default=False)
+    youtube_download_max_duration = peewee.IntegerField(default=180)
 
     migrations = [
         # 20190318 pt. 1
@@ -106,6 +108,9 @@ def main(database_path):
         migrator.add_column('subreddits', 'template_no_url', template_no_url),
         # 20200428
         migrator.drop_not_null('subreddits', 'channel_id'),
+        # 20200513
+        migrator.add_column('subreddits', 'youtube_download', youtube_download),
+        migrator.add_column('subreddits', 'youtube_download_max_duration', youtube_download_max_duration),
     ]
 
     logger.info('Starting migration....')
