@@ -59,6 +59,7 @@ subreddit name
 calculated at that UTC hour
 /try `[submission id]`: get the submission with that id (the subreddit doesn't need to be saved in the db)
 forward a message posted by the bot in a channel: get that submission's dict
+/updateytdl: update the youtube-dl package using pip
 """
 
 
