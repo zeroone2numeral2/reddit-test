@@ -4,3 +4,4 @@ from .imgur import Imgur
 from .vreddit import VReddit
 from .gfycat import Gfycat
 from .image import Image
+from .youtube import YouTube

@@ -34,7 +34,7 @@ class DloadOpts(object):
     }
 
 
-class DownloadSession:
+class YouTube:
     def __init__(self, url):
         self.url = url
         self.info_dict = dict()
