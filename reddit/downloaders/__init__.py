@@ -5,3 +5,6 @@ from .vreddit import VReddit
 from .gfycat import Gfycat
 from .image import Image
 from .youtube import YouTube
+from .youtube import YouTubeFileTooBig
+from .youtube import YouTubeTooLong
+from .youtube import YouTubeIsStreaming

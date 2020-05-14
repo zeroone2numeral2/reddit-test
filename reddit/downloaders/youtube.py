@@ -8,8 +8,21 @@ import youtube_dl
 
 from .image import Image
 from utilities import u
+from const import MaxSize
 
 logger = logging.getLogger('ytdl')
+
+
+class YouTubeFileTooBig(Exception):
+    pass
+
+
+class YouTubeTooLong(Exception):
+    pass
+
+
+class YouTubeIsStreaming(Exception):
+    pass
 
 
 class DloadOpts(object):
@@ -35,27 +48,28 @@ class DloadOpts(object):
 
 
 class YouTube:
-    def __init__(self, url):
+    def __init__(self, url, max_size=MaxSize.BOT_API, max_duration=0):
         self.url = url
         self.info_dict = dict()
         self.actual_url = None  # actual download url
         self.webpage_url = None  # url of the video webpage
         self.file_path = None
         self.file_name = None
-        self.thumb_url = None  # not used propably
-        self.thumb_path = None  # not used propably
         self.thumb: [None, Image] = None
         self.is_streaming = False
         self.title = None
         self.size = 0
-        self.hr_size = '0 bytes'
+        self.size_readable = '0 bytes'
+        self.max_size = max_size
         self.duration = None
+        self.max_duration = max_duration
         self.skip_download = False  # this is True when 'skip_download' is passed to self.download()
         self.ascii_title = ''
         self.id = None  # video id
         self.last_dl_tick = 0
         self.height = None
         self.width = None
+        self._thumbnail_bo = None
 
     def progress_hook(self, d):
         # print(d)
@@ -90,6 +104,15 @@ class YouTube:
         else:
             logger.info('video %s is not streaming', self.id)
 
+    def check_size(self, raise_exception=True):
+        if self.size > self.max_size:
+            if raise_exception:
+                raise YouTubeFileTooBig('file size is too big for Telegram: {}'.format(self.size_readable))
+            else:
+                return False
+
+        return True
+
     def download(self):
         logger.info('starting download of %s', self.url)
 
@@ -103,7 +126,11 @@ class YouTube:
 
             if self.is_streaming:
                 logger.info('video is streaming: skipping')
-                return False
+                raise YouTubeTooLong('duration too long: {} seconds'.format(self.duration))
+
+            if self.max_duration and self.duration > self.max_duration:
+                logger.info('video is too long (%d vs %d): skipping', self.duration, self.max_duration)
+                raise YouTubeTooLong('this video is a streaming')
 
             ytdl.download([self.url])
 
@@ -116,17 +143,20 @@ class YouTube:
             # logger.info('thumb path: %s', self.thumb_path)
 
         self.size = os.stat(self.file_path).st_size
-        self.hr_size = u.human_readable_size(self.size)
-        logger.info('file size: %d bytes (%s)', self.size, self.hr_size)
+        self.size_readable = u.human_readable_size(self.size)
+        logger.info('file size: %d bytes (%s)', self.size, self.size_readable)
+
+        self.check_size(raise_exception=True)
 
         return True
 
-    def delete(self):
+    def remove(self, keep_thumbnail=False):
         logger.info('deleting song file and thumbnail')
 
         try:
-            os.remove(self.file_path)
-            if self.thumb_path:
-                os.remove(self.thumb_path)
+            if self.file_path:
+                os.remove(self.file_path)
+            if self.thumb:
+                self.thumb.close()
         except Exception as e:
-            logger.info('exception while deleting the file(s): %s', str(e), exc_info=True)
+            logger.info('exception while deleting the file(s): %s', str(e))

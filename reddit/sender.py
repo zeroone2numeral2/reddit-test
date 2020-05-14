@@ -22,6 +22,10 @@ from .downloaders.vreddit import FfmpegTimeoutError
 from .downloaders import Gfycat
 from .downloaders import FileTooBig
 from .downloaders import Image
+from .downloaders import YouTube
+from .downloaders import YouTubeFileTooBig
+from .downloaders import YouTubeTooLong
+from .downloaders import YouTubeIsStreaming
 from pyroutils import PyroClient
 from bot.markups import InlineKeyboard
 from database.models import Post
@@ -73,6 +77,7 @@ class MediaType:
     VREDDIT = 'vreddit'
     GFYCAT = 'gfycat'
     REDDIT_GIF = 'reddit_gif'
+    YOUTUBE = 'youtube'
 
 
 class Media:
@@ -205,6 +210,10 @@ class Sender:
         elif 'gfycat.com' in self._s.domain_parsed:
             self.log.debug('url is a gfycat')
             self._s.media_type = MediaType.GFYCAT
+            self._s.media_url = self._s.url
+        elif ('youtube.com' in self._s.domain_parsed or 'youtu.be' in self._s.domain_parsed) and self._subreddit.youtube_download:
+            self.log.debug('url is a youtube url (and the subreddit config says to download youtube videos)')
+            self._s.media_type = MediaType.YOUTUBE
             self._s.media_url = self._s.url
         elif self._s.is_video and 'reddit_video' in self._s.media:
             self.log.debug('url is a vreddit')
@@ -387,6 +396,9 @@ class Sender:
                 elif self._s.media_type == MediaType.REDDIT_GIF:
                     self.log.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
                     self._sent_message = self._send_i_reddit_gif(self._s.media_url, text, reply_markup=reply_markup)
+                elif self._s.media_type == MediaType.YOUTUBE:
+                    self.log.info('post is a youtube url: using _send_youtube()')
+                    self._sent_message = self._send_youtube(self._s.media_url, text, reply_markup=reply_markup)
                 
                 return self._sent_message
             except Exception as e:
@@ -575,6 +587,53 @@ class Sender:
         video.remove(keep_thumbnail=True)
         # DO NOT DELETE THE GENERIC THUMBNAIL FILE
         
+        return self._sent_message
+
+    def _send_youtube(self, url, caption, reply_markup=None):
+        self.log.info('youtube video url: %s', url)
+
+        ytvideo = YouTube(url, max_duration=self._subreddit.youtube_download_max_duration)
+        # self.log.info('yt downloaded video path: %s', ytvideo.file_path)
+        try:
+            self.log.info('downloading youtube video...')
+            ytvideo.download()
+            self.log.info('...download ended. File size: %s', ytvideo.size_readable)
+        except YouTubeFileTooBig:
+            self.log.info('youtube video is too big to be sent (%s), removing file and sending text...', ytvideo.size_readable)
+            ytvideo.remove()
+
+            raise YouTubeFileTooBig
+        except YouTubeTooLong:
+            self.log.info('youtube video is too long, removing file and sending text...')
+            ytvideo.remove()
+
+            raise YouTubeTooLong
+        except YouTubeIsStreaming:
+            self.log.info('youtube video is a streaming, removing file and sending text...')
+            ytvideo.remove()
+
+            raise YouTubeIsStreaming
+
+        self.log.debug('opening and sending video...')
+        with open(ytvideo.file_path, 'rb') as f:
+            self._sent_message = self._bot.send_video(
+                self._chat_id,
+                f,
+                caption=caption,
+                thumb=ytvideo.thumb.file_bytes,
+                height=None,
+                width=None,
+                duration=None,
+                parse_mode=ParseMode.HTML,
+                supports_streaming=True,
+                reply_markup=reply_markup,
+                timeout=360
+            )
+        self.log.debug('...upload completed')
+
+        self.log.info('removing downloaded files...')
+        ytvideo.remove()
+
         return self._sent_message
     
     def _send_gif(self, url, caption, reply_markup=None):
