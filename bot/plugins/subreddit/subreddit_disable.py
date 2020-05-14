@@ -19,7 +19,11 @@ def on_disable_command(update: Update, _, subreddit):
     subreddit.enabled_resume = False
     subreddit.save()
 
-    update.message.reply_html('/r/{s.name} (channel: {s.channel.title}) has been disabled'.format(s=subreddit))
+    channel_title = 'none'
+    if subreddit.channel:
+        channel_title = subreddit.channel.title
+
+    update.message.reply_html('/r/{s.name} (channel: {title}) has been disabled'.format(s=subreddit, title=channel_title))
 
 
 mainbot.add_handler(CommandHandler(['disable'], on_disable_command))

@@ -17,7 +17,16 @@ def delete_sub(update: Update, context: CallbackContext, subreddit=None):
 
     subreddit.delete_instance()
 
-    update.message.reply_html('/r/{s.name} ({s.channel.title}) has gone, you have also exited the configuring mode for this sub'.format(s=subreddit))
+    channel_title = 'none'
+    if subreddit.channel:
+        channel_title = subreddit.channel.title
+
+    update.message.reply_html(
+        '/r/{s.name} (channel: {title}) has gone, you have also exited the configuring mode for this sub'.format(
+            s=subreddit,
+            title=channel_title
+        )
+    )
 
     context.user_data.pop('data', None)
 
