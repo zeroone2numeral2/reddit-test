@@ -5,6 +5,7 @@ log = -1001141547703 # CHANGEME
 admins = [23646077] # CHANGEME
 index = "reddit_mirrors" # telegram channel with the channels index
 send_images_by_url = true # true: always try to send images by url first, download them only when sendign by url fails
+testing = false # subreddit added when this is 'true' will be considered testing subreddits (the bot won't save posted submissions)
 
 [pyrogram]
 enabled = true

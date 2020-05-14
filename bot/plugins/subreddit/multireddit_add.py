@@ -15,6 +15,7 @@ from database.models import Subreddit
 from reddit import reddit
 from utilities import u
 from utilities import d
+from config import config
 
 logger = logging.getLogger('handler')
 
@@ -93,7 +94,8 @@ def on_channel_selected(update: Update, context: CallbackContext):
         channel=channel,
         name=multireddit_name,
         is_multireddit=True,
-        multireddit_owner=redditor
+        multireddit_owner=redditor,
+        test=config.telegram.get('testing', False)
     )
 
     update.message.reply_text('m/{} saved (channel: {})'.format(multireddit_name, channel.title), reply_markup=Keyboard.REMOVE)
