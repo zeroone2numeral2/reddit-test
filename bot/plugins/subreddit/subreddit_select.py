@@ -61,6 +61,17 @@ def on_sub_command(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+def on_subreddit_selected_wrong(update: Update, _):
+    logger.debug('/sub: subreddit regex failed, text: %s', update.message.text)
+
+    update.message.reply_text('Please select a subreddit from the keyboard')
+
+    return Status.SUBREDDIT_SELECT
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -114,9 +125,12 @@ def on_end(update: Update, context: CallbackContext, subreddit=None):
 
 mainbot.add_handler(CommandHandler(['end'], on_end, pass_user_data=True))
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(command=['sub', 'subreddit'], callback=on_sub_command, pass_args=True)],
+    entry_points=[CommandHandler(['sub', 'subreddit'], on_sub_command)],
     states={
-        Status.SUBREDDIT_SELECT: [MessageHandler(Filters.text, callback=on_subreddit_selected, pass_user_data=True)],
+        Status.SUBREDDIT_SELECT: [
+            MessageHandler(Filters.text & Filters.regex(r'^(\d+).*'), on_subreddit_selected),
+            MessageHandler(Filters.text, on_subreddit_selected_wrong)
+        ],
     },
     fallbacks=[CommandHandler(['cancel', 'done'], on_cancel, pass_user_data=True)]
 ))
