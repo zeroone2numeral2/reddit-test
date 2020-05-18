@@ -69,7 +69,13 @@ def on_origin_subreddit_selected(update: Update, _, subreddit=None):
     logger.debug('cloning r/%s to r/%s...', origin_sub.name, subreddit.name)
     Subreddit.update(**origin_dict).where(Subreddit.id == subreddit.id).execute()
 
-    update.message.reply_text('/r/{} settings cloned to /r/{}'.format(origin_sub.name, subreddit.name), reply_markup=Keyboard.REMOVE)
+    text = '/r/{origin_sub} (channel: {origin_channel}) settings cloned to /r/{dest_sub} (channel: {dest_channel})'.format(
+        origin_sub=origin_sub.name,
+        origin_channel=origin_sub.channel_title(),
+        dest_sub=subreddit.name,
+        dest_channel=subreddit.channel_title(),
+    )
+    update.message.reply_text(text, reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 

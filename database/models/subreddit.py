@@ -71,6 +71,13 @@ class Subreddit(peewee.Model):
         return '<Subreddit {}: {}>'.format(self.subreddit_id, self.name)
 
     @classmethod
+    def channel_title(cls, default='none'):
+        if not cls.channel:
+            return default
+
+        return cls.channel.title
+
+    @classmethod
     def to_dict(cls):
         return model_to_dict(cls)
 
