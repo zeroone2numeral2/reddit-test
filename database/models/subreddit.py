@@ -75,7 +75,7 @@ class Subreddit(peewee.Model):
         if not cls.channel:
             return default
 
-        return str(cls.channel.title)
+        return cls.channel.title
 
     @classmethod
     def to_dict(cls):
