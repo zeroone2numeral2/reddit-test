@@ -33,3 +33,13 @@ class Job(peewee.Model):
 
         return result
 
+    @classmethod
+    def last_job(cls, job_name='%'):
+        job_name = job_name or '%'
+        rows = cls.select().where(cls.name ** job_name).order_by(cls.id.desc()).limit(1)
+
+        if not rows:
+            return None
+
+        return rows[0]
+

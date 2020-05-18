@@ -49,6 +49,7 @@ subreddit name
 *Jobs*
 /force `[job name]`: force that job
 /duration `<job name>`: show the duration of the most recent 100 jobs executed. Can be filtered by job name
+/lastjob: see when each job has ended the last time
 
 *Misc*
 /ph: list template's placeholders
