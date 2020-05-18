@@ -61,7 +61,7 @@ def on_origin_subreddit_selected(update: Update, _, subreddit=None):
     logger.info('subreddit key: %d', subreddit_key)
     origin_sub = Subreddit.get(Subreddit.id == subreddit_key)
 
-    origin_dict = u.model_dict(origin_sub, plain_formatted_string=False)
+    origin_dict = u.model_dict(origin_sub)
     for key in CLONE_KEYS_TO_IGNORE:
         # we don't have to override these fields
         origin_dict.pop(key, None)
