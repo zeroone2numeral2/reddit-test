@@ -76,7 +76,7 @@ class Reddit(praw.Reddit):
 
         for i, submission in enumerate(iterator(*args, **kwargs)):
             if not hasattr(submission, 'current_position'):
-                submission.current_position = i
+                submission.current_position = i + 1
 
             yield submission
 
