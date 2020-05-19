@@ -58,8 +58,8 @@ def on_forwarded_post(update: Update, context):
 
     os.remove(file_path)
 
-    markup = InlineKeyboard.vote(submission_id)
-    update.message.reply_text('You can upvote/downvote this submission', reply_markup=markup)
+    # markup = InlineKeyboard.vote(submission_id)
+    update.message.reply_text('You can upvote/downvote this submission', reply_markup=None)
 
 
 @d.restricted
@@ -91,4 +91,4 @@ def up_down_button(update: Update, _, groups):
 
 
 mainbot.add_handler(MessageHandler(Filters.forwarded, on_forwarded_post))
-mainbot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))
+# mainbot.add_handler(CallbackQueryHandler(up_down_button, pattern=r'(\w+):(.+)', pass_groups=True))
