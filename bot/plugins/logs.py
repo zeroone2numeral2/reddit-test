@@ -76,7 +76,5 @@ def getlog_command(update, context: CallbackContext):
         update.message.reply_document(f)
 
 
-mainbot.add_handler(CommandHandler(['loglines'], loglines_command))
 mainbot.add_handler(CommandHandler(['remffmpeglogs'], remffmpeglogs_command))
 mainbot.add_handler(CommandHandler(['remsubslogs'], remsubslogs_command))
-mainbot.add_handler(CommandHandler(['getlog'], getlog_command))

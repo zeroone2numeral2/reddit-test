@@ -30,8 +30,6 @@ class RedditBot(Updater):
         BotCommand('icon', 'get a subreddit icon'),
         BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
         BotCommand('templates', 'list available preformatted templates'),
-        BotCommand('getlog', 'get the main logfile'),
-        BotCommand('loglines', 'get the date of the first line of every log file in the logs directory'),
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
         BotCommand('remsubslogs', 'remove the subreddits logs'),
         BotCommand('force', 'force a job'),
