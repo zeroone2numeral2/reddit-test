@@ -74,7 +74,10 @@ class Reddit(praw.Reddit):
             iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.ALL]
 
-        for submission in iterator(*args, **kwargs):
+        for i, submission in enumerate(iterator(*args, **kwargs)):
+            if not hasattr(submission, 'current_position'):
+                submission.current_position = i
+
             yield submission
 
     def iter_top(self, name, limit, period='day'):
