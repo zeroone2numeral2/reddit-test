@@ -32,7 +32,6 @@ there some commands can be used to edit its settings
 
 *Other operations with subreddits*
 /subs: list all subreddits
-/d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
 /sdict `[subreddit]`: get the submission dict of the last post in that subreddit
 /links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)

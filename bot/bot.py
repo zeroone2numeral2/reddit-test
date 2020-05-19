@@ -24,7 +24,6 @@ class RedditBot(Updater):
         BotCommand('addmulti', 'add a multireddit'),
         BotCommand('sub', 'manage a subreddit'),
         BotCommand('subs', 'list the subreddits'),
-        BotCommand('d', ' get the last n submission from the subreddit'),
         BotCommand('sdict', 'get the submission dict of the last post in that subreddit'),
         BotCommand('links', 'get a list of channels with their invite link'),
         BotCommand('icon', 'get a subreddit icon'),

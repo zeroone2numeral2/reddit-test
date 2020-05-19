@@ -47,4 +47,4 @@ def subs_debug(update: Update, context: CallbackContext):
     update.message.reply_html(text)
 
 
-mainbot.add_handler(CommandHandler(['d'], subs_debug, pass_args=True))
+# mainbot.add_handler(CommandHandler(['d'], subs_debug, pass_args=True))
