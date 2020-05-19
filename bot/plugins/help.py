@@ -32,7 +32,6 @@ there some commands can be used to edit its settings
 
 *Other operations with subreddits*
 /subs: list all subreddits
-/sdict `[subreddit]`: get the submission dict of the last post in that subreddit
 /links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
@@ -56,6 +55,7 @@ subreddit name
 /now `<utc hour>`: get current UTC time and its localizations. If an hour is passed, times will be \
 calculated at that UTC hour
 /try `[submission id]`: get the submission with that id (the subreddit doesn't need to be saved in the db)
+/sdict `[submission id]`: get the submission dict of the submission (the subreddit doesn't need to be saved in the db)
 forward a message posted by the bot in a channel: get that submission's dict
 /updateytdl: update the youtube-dl package using pip
 """
