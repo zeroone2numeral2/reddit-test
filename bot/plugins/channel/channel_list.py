@@ -18,7 +18,7 @@ STANDARD_TEXT = """Full list of channels here (pinned message)
 
 @d.restricted
 @d.failwithmessage
-def on_channels_list(update, context: CallbackContext):
+def on_channels_updatelist(update, context: CallbackContext):
     logger.info('/updatelist command')
 
     # this whole function and the Subreddit method is a shitshow
@@ -46,7 +46,7 @@ def on_channels_list(update, context: CallbackContext):
         # rebuild the list
         channel['subreddits'] = ['/{}/{}'.format('m' if s.is_multireddit else 'r', s.name) for s in channel_subreddits]
 
-        line = '[{i}][{added}] <a href="{invite_link}">{title}</a> (mirrors: {subreddits})'.format(
+        line = '<b>{i}</b> <a href="{invite_link}">{title}</a> (added on {added}, mirrors: {subreddits})'.format(
             i=i,
             title=u.html_escape(channel['title']),
             added=channel['added'].strftime('%d/%m/%Y'),
@@ -71,4 +71,4 @@ def on_channels_list(update, context: CallbackContext):
         update.message.reply_text('Non-public channels ignored: {}'.format(', '.join(non_public_channels)))
 
 
-mainbot.add_handler(CommandHandler('updatelist', on_channels_list))
+mainbot.add_handler(CommandHandler('updatelist', on_channels_updatelist))
