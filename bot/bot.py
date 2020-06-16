@@ -51,6 +51,7 @@ class RedditBot(Updater):
         BotCommand('removetop', 'remove the saved top submissions'),
         BotCommand('gettop', 'see what we have currently saved as top submission'),
         BotCommand('settemplate', 'set one of the default templates'),
+        BotCommand('end', 'exit a subreddit configuration'),
     ]
 
     @staticmethod
