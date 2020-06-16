@@ -130,6 +130,7 @@ class Sender:
         self._s.text_256 = ''
         self._s.video_size = (None, None)
         self._s.video_duration = 0
+        self._s.upvote_perc = int(self._s.upvote_ratio * 100)
         self._submission_dict = dict()
 
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
