@@ -729,6 +729,13 @@ class Sender:
         elif self._subreddit.hide_spoilers and self._s.spoiler == True:
             self.log.info('tests failed: submission is a spoiler')
             return False
+        elif self._subreddit.min_upvote_perc and self._s.upvote_perc < self._subreddit.min_upvote_perc:
+            self.log.info(
+                'tests failed: submission\'s upvote ratio is not good enough (db: %d, submission: %d)',
+                self._subreddit.upvote_perc,
+                self._s.min_upvote_perc
+            )
+            return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, int) \
                 and self._s.elapsed_minutes < self._subreddit.ignore_if_newer_than:

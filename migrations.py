@@ -48,6 +48,7 @@ def main(database_path):
     youtube_download = peewee.BooleanField(default=False)
     youtube_download_max_duration = peewee.IntegerField(default=180)
     notified_on = peewee.DateTimeField(null=True)
+    min_upvote_perc = peewee.IntegerField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -114,6 +115,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'youtube_download_max_duration', youtube_download_max_duration),
         # 20200520
         migrator.add_column('channels', 'notified_on', notified_on),
+        # 20200617
+        migrator.add_column('subreddits', 'min_upvote_perc', min_upvote_perc),
     ]
 
     logger.info('Starting migration....')
