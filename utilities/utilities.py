@@ -288,6 +288,24 @@ def split_text(strings_list, join_by: str=False):
             yield join_by.join(strings_list[i:i + list_items_per_message])
 
 
+def media_size(message) -> [int, None]:
+    # media.file_size is ok for pyrogram types too
+
+    size = None
+    if message.video:
+        size = message.video.file_size
+    elif message.document:
+        size = message.document.file_size
+    elif message.animation:
+        size = message.animation.file_size
+    elif message.audio:
+        size = message.audio.file_size
+    elif message.photo:
+        size = message.photo[-1].file_size
+
+    return size
+
+
 def number_of_daily_posts(s: Subreddit, print_debug=False):
     n = 0
 

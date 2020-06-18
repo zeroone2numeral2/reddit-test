@@ -9,6 +9,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 from bot.logging import slogger
+from const import JOB_NO_POST
 from utilities import u
 from utilities import d
 from database.models import Subreddit
@@ -16,6 +17,7 @@ from database.models import PostResume
 from database import db
 from reddit import reddit
 from reddit import SenderResume
+from utilities import u
 from config import config
 
 logger = logging.getLogger('job')
@@ -75,10 +77,10 @@ def process_subreddit(subreddit, bot):
             subreddit.hour,
             now.hour
         )
-        return 0
+        return JOB_NO_POST
     elif subreddit.frequency == 'day' and now.hour != subreddit.hour:
         slogger.info('ignoring because -> subreddit.hour != current hour (%d != %d)', subreddit.hour, now.hour)
-        return 0
+        return JOB_NO_POST
 
     elapsed_seconds = 999999
     if subreddit.resume_last_posted_submission_dt:
@@ -90,13 +92,14 @@ def process_subreddit(subreddit, bot):
 
     if subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'day' and elapsed_seconds < 60*60):
         slogger.info('ignoring subreddit because frequency is "day" and latest has been less than an hour ago')
-        return 0
+        return JOB_NO_POST
     elif subreddit.resume_last_posted_submission_dt and (subreddit.frequency == 'week' and elapsed_seconds < 60*60*24):
         slogger.info('ignoring subreddit because frequency is "week" and latest has been less than a day ago')
-        return 0
+        return JOB_NO_POST
 
     annoucement_posted = False
     posted_messages = 0
+    posted_bytes = 0
     for sender in process_submissions(subreddit, bot):
         slogger.info('submission url: %s', sender.submission.url)
         slogger.info('submission title: %s', sender.submission.title)
@@ -108,7 +111,6 @@ def process_subreddit(subreddit, bot):
         try:
             time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
             sent_message = sender.post()
-            posted_messages += 1
         except (BadRequest, TelegramError) as e:
             slogger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
             continue
@@ -121,16 +123,19 @@ def process_subreddit(subreddit, bot):
                 slogger.info('creating PostResume row...')
                 sender.register_post()
             else:
-                sinfo('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
+                slogger.info('not creating PostResume row: r/%s is a testing subreddit', subreddit.name)
 
             slogger.info('updating Subreddit last *resume* post datetime...')
             subreddit.resume_last_posted_submission_dt = u.now()
             with db.atomic():
                 subreddit.save()
 
+            posted_messages += 1
+            posted_bytes += sender.uploaded_bytes
+
         # time.sleep(1)
 
-    return posted_messages
+    return posted_messages, posted_bytes
 
 
 @d.logerrors
@@ -144,11 +149,13 @@ def check_daily_resume(context: CallbackContext):
         )
 
     total_posted_messages = 0
+    total_posted_bytes = 0
     for subreddit in subreddits:
         slogger.set_subreddit(subreddit)
         try:
-            posted_messages = process_subreddit(subreddit, context.bot)
+            posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
             total_posted_messages += int(posted_messages)
+            total_posted_bytes += posted_bytes
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
@@ -156,4 +163,4 @@ def check_daily_resume(context: CallbackContext):
 
         # time.sleep(1)
 
-    return total_posted_messages
+    return total_posted_messages, total_posted_bytes

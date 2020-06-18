@@ -22,16 +22,21 @@ def durations_command(update: Update, context: CallbackContext):
     else:
         job_name = None
 
-    durations = Job.durations(top=100, job_name=job_name)
+    durations = Job.durations(top=50, job_name=job_name)
     if not durations:
         update.message.reply_text('No row in the database')
         return
 
     strings_list = list()
     for duration in durations:
-        strings_list.append('{0}: {2}/{3} ({start})'.format(*duration, start=duration[1].strftime('%d/%m/%Y %H:%M:%S')))
+        uploaded = u.human_readable_size(duration[4] or 0)
+        strings_list.append('{0}: {2}/{3}, {uploaded} ({start})'.format(
+            *duration,
+            uploaded=uploaded,
+            start=duration[1].strftime('%d/%m/%Y %H:%M:%S'))
+        )
 
-    update.message.reply_html('<code>$job_name: $seconds/$messages ($start)\n{}</code>'.format('\n'.join(strings_list)))
+    update.message.reply_html('<code>$job_name: $seconds/$messages, $uploaded_data ($start)\n{}</code>'.format('\n'.join(strings_list)))
 
 
 @d.restricted

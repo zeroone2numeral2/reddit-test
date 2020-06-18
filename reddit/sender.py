@@ -95,7 +95,7 @@ class VRedditMedia(Media):
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_chat_id', '_submission_dict', 'log']
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log']
     
     def __init__(self, bot, subreddit, submission, subreddit_logger=None):
         self._bot: Bot = bot
@@ -107,6 +107,7 @@ class Sender:
             self.log = logger
 
         self._sent_message = None
+        self._uploaded_bytes = 0
         self._chat_id = self._subreddit.channel.channel_id
 
         self._s.is_image = False
@@ -298,6 +299,10 @@ class Sender:
         return self._subreddit
 
     @property
+    def uploaded_bytes(self):
+        return self._uploaded_bytes
+
+    @property
     def template_keys(self):
         return_list = list()
         for key in self._submission_dict.keys():
@@ -412,6 +417,12 @@ class Sender:
 
         return self._sent_message
 
+    def _sum_uploaded_bytes(self, sent_message):
+        uploaded_bytes = u.media_size(sent_message) or 0
+        # logger.debug('registering we sent %d bytes (%s)', uploaded_bytes, u.human_readable_size(uploaded_bytes))
+
+        self._uploaded_bytes += uploaded_bytes
+
     def _upload_video(self, chat_id, file_path, file_size=0, force_bot_api=False, *args, **kwargs):
         if file_size < MaxSize.BOT_API or force_bot_api or not config.pyrogram.enabled:
             self.log.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
@@ -426,13 +437,13 @@ class Sender:
             kwargs.pop('timeout', None)
 
             self.log.info('uploading video using mtproto (file size: %d (%s), max bot API: %d)...', file_size,
-                        u.human_readable_size(file_size), MaxSize.BOT_API)
+                          u.human_readable_size(file_size), MaxSize.BOT_API)
             with mtproto:
                 self.log.debug('mtproto upload started at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
                 sent_message = mtproto.upload_video(chat_id, file_path, *args, **kwargs)
                 self.log.debug('mtproto upload ended at %s', u.now(string='%d/%m/%Y %H:%M:%S'))
 
-                self.log.debug('client.send_video() result: %s', str(sent_message))
+                # self.log.debug('client.send_video() result: %s', str(sent_message))
 
                 return sent_message
 
@@ -466,6 +477,8 @@ class Sender:
 
         self._sent_message = self._send_image_base(image=image.file_bytes, caption=caption, reply_markup=reply_markup)
         image.close()
+
+        self._sum_uploaded_bytes(self._sent_message)
 
         return self._sent_message
 
@@ -548,6 +561,8 @@ class Sender:
         self.log.info('removing downloaded files...')
         vreddit.remove()
 
+        self._sum_uploaded_bytes(self._sent_message)
+
         return self._sent_message
 
     def _send_video(self, url, caption, reply_markup=None):
@@ -587,6 +602,8 @@ class Sender:
         self.log.info('removing downloaded files...')
         video.remove(keep_thumbnail=True)
         # DO NOT DELETE THE GENERIC THUMBNAIL FILE
+
+        self._sum_uploaded_bytes(self._sent_message)
         
         return self._sent_message
 
@@ -634,6 +651,8 @@ class Sender:
 
         self.log.info('removing downloaded files...')
         ytvideo.remove()
+
+        self._sum_uploaded_bytes(self._sent_message)
 
         return self._sent_message
     
@@ -702,6 +721,7 @@ class Sender:
                 channel=self._subreddit.channel,
                 message_id=self._sent_message.message_id if self._sent_message else None,
                 posted_at=u.now() if self._sent_message else None,
+                uploaded_bytes=self._uploaded_bytes,
                 sent_message=sent_message_json
             )
     

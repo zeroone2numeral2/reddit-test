@@ -10,6 +10,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 from bot.logging import slogger
+from const import JOB_NO_POST
 from utilities import u
 from utilities import d
 from database.models import Subreddit
@@ -128,10 +129,10 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
         slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
-        return 0
+        return JOB_NO_POST
 
     if not time_to_post(subreddit, quiet_hours_demultiplier):
-        return 0
+        return JOB_NO_POST
 
     senders = list()
     for submission in process_submissions(subreddit):
@@ -152,11 +153,12 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
 
     if not senders:
         slogger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
-        return 0
+        return JOB_NO_POST
 
     slogger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
-    messages_posted = 0
+    posted_messages = 0
+    posted_bytes = 0
     for sender in senders:
         slogger.info('submission url: %s', sender.submission.url)
         slogger.info('submission title: %s', sender.submission.title)
@@ -171,8 +173,12 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
             slogger.error('generic error while posting the message: %s', str(e), exc_info=True)
             continue
 
-        if sent_message:
-            if not subreddit.test:
+        if not sent_message:
+            slogger.warning('Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
+        else:
+            if subreddit.test:
+                slogger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
+            else:
                 slogger.info('creating Post row...')
                 sender.register_post()
 
@@ -181,16 +187,13 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
 
                 with db.atomic():
                     subreddit.save()
-            else:
-                slogger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
 
-            messages_posted += 1  # we posted one message
-        else:
-            slogger.warning('Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
+            posted_messages += 1  # we posted one message
+            posted_bytes += sender.uploaded_bytes
 
         # time.sleep(1)
 
-    return messages_posted
+    return posted_messages, posted_bytes
 
 
 @d.logerrors
@@ -204,11 +207,13 @@ def check_posts(context: CallbackContext):
         )
 
     total_posted_messages = 0
+    total_posted_bytes = 0
     for subreddit in subreddits:
         slogger.set_subreddit(subreddit)
         try:
-            posted_messages = process_subreddit(subreddit, context.bot)
+            posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
             total_posted_messages += int(posted_messages)
+            total_posted_bytes += posted_bytes
         except Exception as e:
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
@@ -216,4 +221,4 @@ def check_posts(context: CallbackContext):
 
         # time.sleep(1)
 
-    return total_posted_messages
+    return total_posted_messages, total_posted_bytes

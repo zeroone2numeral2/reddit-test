@@ -96,8 +96,9 @@ def log_start_end_dt(func):
         with db.atomic():
             job_row = Job(name=context.job.name, start=job_start_dt)
 
-        job_result = func(context, *args, **kwargs)
-        job_row.posted_messages = int(job_result)
+        job_result = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
+        job_row.posted_messages = int(job_result[0])
+        job_row.uploaded_bytes = int(job_result[1])
 
         job_end_dt = u.now()
         job_row.end = job_end_dt
@@ -109,19 +110,23 @@ def log_start_end_dt(func):
             job_row.save()
 
         Log.job.info(
-            '%s job ended at %s (elapsed seconds: %d (%s))',
+            '%s job ended at %s (elapsed seconds: %d (%s), posted messages: %d, uploaded data: %s)',
             context.job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
             elapsed_seconds,
-            u.pretty_seconds(elapsed_seconds)
+            u.pretty_seconds(elapsed_seconds),
+            job_row.posted_messages,
+            u.human_readable_size(job_row.uploaded_bytes)
         )
 
         if elapsed_seconds > (config.jobs[context.job.name].interval * 60):
-            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}))'.format(
+            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}), posted %d messages and uploaded %s)'.format(
                 context.job.name,
                 config.jobs[context.job.name].interval,
                 round(elapsed_seconds, 2),
-                u.pretty_seconds(elapsed_seconds)
+                u.pretty_seconds(elapsed_seconds),
+                job_row.posted_messages,
+                u.human_readable_size(job_row.uploaded_bytes)
             )
             Log.job.warning(text)
             context.bot.send_message(config.telegram.log, text)
