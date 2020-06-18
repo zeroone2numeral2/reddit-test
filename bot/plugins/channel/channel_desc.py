@@ -153,6 +153,8 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
                 ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
+            if subreddit.min_upvote_perc:
+                ignored_list.append('submissions with an upvotes ratio lower than {}%'.format(subreddit.min_upvote_perc))
             format_dict['ignored_block'] = '\n• ignored submissions: {}'.format(', '.join(ignored_list))
 
         if subreddit.sorting in ('top', 'day'):
