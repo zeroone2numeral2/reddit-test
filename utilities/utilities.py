@@ -306,6 +306,20 @@ def media_size(message) -> [int, None]:
     return size
 
 
+def channel_invite_link(channel, return_on_no_link=None, hyperlink_html: [str, None] = None):
+    if channel.username:
+        channel_url = 'https://t.me/' + channel.username
+    elif channel.invite_link:
+        channel_url = channel.invite_link
+    else:
+        return return_on_no_link
+
+    if not hyperlink_html:
+        return channel_url
+    else:
+        return '<a href="{}">{}</a>'.format(channel_url, html_escape(hyperlink_html))
+
+
 def number_of_daily_posts(s: Subreddit, print_debug=False):
     n = 0
 

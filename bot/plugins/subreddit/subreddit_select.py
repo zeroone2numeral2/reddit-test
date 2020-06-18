@@ -11,11 +11,13 @@ from bot import mainbot
 from bot.conversation import Status
 from database.models import Subreddit
 from bot.markups import Keyboard
+from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
 
-TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">/r/{s.name}</a> (channel: {channel_title})
+TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">/r/{s.name}</a> (channel: {channel_title}, \
+link: {invite_link})
 
 <b>Available commands</b>: \
 /info, \
@@ -85,7 +87,8 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     context.user_data['data']['subreddit'] = subreddit
 
     channel_title = 'no channel' if not subreddit.channel else subreddit.channel.title
-    text = TEXT.format(s=subreddit, channel_title=channel_title)
+    channel_invite_link = u.channel_invite_link(subreddit.channel, return_on_no_link='-', hyperlink_html='here')
+    text = TEXT.format(s=subreddit, channel_title=channel_title, invite_link=channel_invite_link)
 
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 
