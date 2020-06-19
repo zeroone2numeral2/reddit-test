@@ -13,8 +13,11 @@ class AccountManager:
             elif account.get('default', False):
                 self._default = initialized_account
 
-    def by_name(self, name):
-        return self._accounts.get(name.lower(), self._default)
+    def by_name(self, account_name):
+        return self._accounts.get(account_name.lower(), self._default)
+
+    def exists(self, account_name):
+        return account_name.lower in self._accounts
 
     @property
     def default(self):
