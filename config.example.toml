@@ -14,6 +14,13 @@ workers = 0
 api_id = 12345 # CHANGEME
 api_hash = "" # CHANGEME
 
+[[reddit]]
+client_id = "" # CHANGEME
+client_secret = "" # CHANGEME
+user_agent = "" # CHANGEME
+username = "" # CHANGEME
+password = "" # CHANGEME
+
 [jobs]
 posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
 
@@ -25,24 +32,12 @@ first = 0
 interval = 50
 first = 0
 
-[praw]
-client_id = "" # CHANGEME
-client_secret = "" # CHANGEME
-user_agent = "" # CHANGEME
-username = "" # CHANGEME, only needed for private and quarantined subs
-password = "" # CHANGEME, only needed for private and quarantined subs
-submissions_limit = 25
-
 [sqlite]
 filename = "db.sqlite"
 
 [submissions]
 default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
-
-[quiet_hours]
-start = 21 # in UTC. Rome: UTC + 1/2
-end = 6 # in UTC. Rome: UTC + 1/2
 
 [imgur]
 id = "" # CHANGEME

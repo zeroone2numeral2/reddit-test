@@ -36,9 +36,9 @@ class Subreddit(peewee.Model):
     webpage_preview = peewee.BooleanField(default=True)
     # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_demultiplier = peewee.FloatField(null=True, default=1.0)
-    limit = peewee.IntegerField(null=True, default=config.praw.submissions_limit)
-    quiet_hours_start = peewee.IntegerField(null=True, default=config.quiet_hours.start)
-    quiet_hours_end = peewee.IntegerField(null=True, default=config.quiet_hours.end)
+    limit = peewee.IntegerField(null=True, default=25)
+    quiet_hours_start = peewee.IntegerField(null=True, default=21)
+    quiet_hours_end = peewee.IntegerField(null=True, default=6)
     number_of_posts = peewee.IntegerField(default=1)
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
