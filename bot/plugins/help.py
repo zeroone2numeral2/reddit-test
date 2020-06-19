@@ -13,7 +13,7 @@ HELP_STRING = """\
 /remchannel: remove a channel
 
 *Managing channels*
-/updatetitles: update all the chat titles in the database
+/updatechannels: update all the channels (ttitle, username, invite link) in the database
 /setdesc: pin a pre-formatted message that describes the channel
 /members: top 25 channels by number of members
 /exportlink: revoke and regenerate the invite link of a channel

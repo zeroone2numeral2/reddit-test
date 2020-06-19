@@ -13,15 +13,15 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-def on_updatetitles_command(update, context: CallbackContext):
-    logger.info('/titles command')
+def on_updatechannels_command(update, context: CallbackContext):
+    logger.info('/updatechannels command')
 
     channels = Channel.get_all()
     if not channels:
         update.message.reply_text('No saved channel. Use /addchannel to add a channel')
         return
 
-    update.message.reply_text('Updating all channels titles...')
+    update.message.reply_text('Updating all channels...')
     errors = list()
     updated_channels = 0
     for channel in channels:
@@ -32,8 +32,18 @@ def on_updatetitles_command(update, context: CallbackContext):
             errors.append((channel.title, e.message))
             continue
 
+        edited = False
         if channel.title != chat.title:
             channel.title = chat.title
+            edited = True
+        if channel.username != chat.username:
+            channel.username = chat.username
+            edited = True
+        if channel.invite_link != chat.invite_link:
+            channel.invite_link = chat.invite_link
+            edited = True
+
+        if edited:
             channel.save()
             updated_channels += 1
 
@@ -41,4 +51,4 @@ def on_updatetitles_command(update, context: CallbackContext):
     update.message.reply_text('Channels updated: {}/{}\nErrors:\n{}'.format(updated_channels, len(channels), errors_string))
 
 
-mainbot.add_handler(CommandHandler(['updatetitles', 'titles'], on_updatetitles_command))
+mainbot.add_handler(CommandHandler(['updatechannels'], on_updatechannels_command))

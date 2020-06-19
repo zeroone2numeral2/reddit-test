@@ -15,7 +15,7 @@ class RedditBot(Updater):
     COMMANDS_LIST = [
         BotCommand('addchannel', 'add a channel'),
         BotCommand('remchannel', 'remove a channel'),
-        BotCommand('updatetitles', 'update the channels titles'),
+        BotCommand('updatechannels', 'update the channels metadata'),
         BotCommand('setdesc', 'update a channel pinned message'),
         BotCommand('members', 'top 25 channels by members count'),
         BotCommand('exportlink', 'revoke and regenerate a channel invite link'),
