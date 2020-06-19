@@ -120,7 +120,7 @@ def log_start_end_dt(func):
         )
 
         if elapsed_seconds > (config.jobs[context.job.name].interval * 60):
-            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}), posted %d messages and uploaded %s)'.format(
+            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}), posted {} messages and uploaded {})'.format(
                 context.job.name,
                 config.jobs[context.job.name].interval,
                 round(elapsed_seconds, 2),
