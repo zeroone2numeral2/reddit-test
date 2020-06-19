@@ -49,8 +49,9 @@ def main(database_path):
     youtube_download_max_duration = peewee.IntegerField(default=180)
     notified_on = peewee.DateTimeField(null=True)
     min_upvote_perc = peewee.IntegerField(null=True)
-    posted_bytes = peewee.IntegerField(null=True)
     uploaded_bytes = peewee.IntegerField(null=True)
+    reddit_account = peewee.CharField(null=True)
+    reddit_client = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -120,9 +121,11 @@ def main(database_path):
         # 20200617
         migrator.add_column('subreddits', 'min_upvote_perc', min_upvote_perc),
         # 20200618
-        migrator.drop_column('jobs', 'posted_bytes', posted_bytes),
         migrator.add_column('jobs', 'uploaded_bytes', uploaded_bytes),
         migrator.add_column('posts', 'uploaded_bytes', uploaded_bytes),
+        # 20200619
+        migrator.add_column('subreddits', 'reddit_account', reddit_account),
+        migrator.add_column('subreddits', 'reddit_client', reddit_client),
     ]
 
     logger.info('Starting migration....')
