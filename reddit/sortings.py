@@ -1,3 +1,6 @@
+ALL_SORTINGS = ('new', 'hot', 'top', 'hour', 'day', 'week', 'month', 'year', 'all')
+
+
 class Timeframe:
     HOUR = 'hour'
     DAY = 'day'

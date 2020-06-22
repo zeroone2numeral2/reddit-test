@@ -33,7 +33,7 @@ class Reddit(praw.Reddit):
         except (Redirect, NotFound):
             return False
 
-    def get_submissions(self, subreddit, multireddit_owner=False, sorting='hot', limit=config.praw.submissions_limit):
+    def get_submissions(self, subreddit, multireddit_owner=False, sorting='hot', limit=25):
         result = list()
         for submission in self.iter_submissions(subreddit, multireddit_owner=multireddit_owner, sorting=sorting, limit=limit):
             created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
@@ -48,7 +48,7 @@ class Reddit(praw.Reddit):
 
         return result
 
-    def iter_submissions(self, name, multireddit_owner=None, sorting='hot', limit=config.praw.submissions_limit):
+    def iter_submissions(self, name, multireddit_owner=None, sorting='hot', limit=25):
         if not multireddit_owner:
             iterator = self.subreddit(name).hot
         else:
