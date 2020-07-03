@@ -13,6 +13,9 @@ from database.models import Subreddit
 from bot.markups import Keyboard
 from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
+from .subreddit_configuration.remove import subconfig_on_remove_command
+from .subreddit_configuration.settemplate import subconfig_on_settemplate_command
+from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
 from utilities import u
 from utilities import d
 
@@ -153,10 +156,13 @@ mainbot.add_handler(ConversationHandler(
         ],
         Status.WAITING_SUBREDDIT_CONFIG_ACTION: [
             CommandHandler(['info'], subconfig_on_info_command),
-            CommandHandler(['disable'], subconfig_on_disable_command)
+            CommandHandler(['disable'], subconfig_on_disable_command),
+            CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
+            CommandHandler(['settemplate'], subconfig_on_settemplate_command),
+            CommandHandler(['setchannelicon'], subconfig_on_setchannelicon_command),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },
-    fallbacks=[CommandHandler(['end'], on_end)],
-    conversation_timeout=15*60
+    fallbacks=[CommandHandler(['end', 'exit'], on_end)],
+    conversation_timeout=15 * 60
 ))

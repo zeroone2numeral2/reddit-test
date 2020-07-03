@@ -3,6 +3,7 @@ import logging
 from telegram import Update
 
 from bot.conversation import Status
+from database.models import Subreddit
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -11,7 +12,7 @@ logger = logging.getLogger('handler')
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit_2
-def subconfig_on_disable_command(update: Update, _, subreddit):
+def subconfig_on_disable_command(update: Update, _, subreddit: Subreddit):
     logger.info('/disable command')
 
     subreddit.enabled = False
