@@ -3,14 +3,11 @@ import re
 
 from playhouse.shortcuts import model_to_dict
 from telegram import Update
-from telegram.ext import MessageHandler
-from telegram.ext import Filters
 
+from bot.conversation import Status
 from database.models import Subreddit
 from utilities import u
 from utilities import d
-from bot import mainbot
-from bot.customfilters import CustomFilters
 from reddit import accounts
 from reddit.sortings import ALL_SORTINGS
 
@@ -139,20 +136,20 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
             subreddit_dict[setting]
         except KeyError:
             update.message.reply_text('Cannot find field "{}" in the database row'.format(setting))
-            return
+            return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
         value = getattr(subreddit, setting)
 
         update.message.reply_html('Current value of <code>{}</code>:'.format(setting))
         update.message.reply_html('<code>{}</code>'.format(u.escape(str(value))))
 
-        return
+        return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
     # extract values
     match = re.search(r'^(\w+)\s+((?:.|\s)+)$', update.message.text, re.I & re.M)
     if not match:
         update.message.reply_html('Use the following format: <code>[db field] [new value]</code>')
-        return
+        return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
     key = match.group(1)
     value = match.group(2)
@@ -163,7 +160,7 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
         subreddit_dict[key]
     except KeyError:
         update.message.reply_html('Cannot find field <code>{}</code> in the database row'.format(key))
-        return
+        return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
     if key not in VALIDATORS:
         logger.debug('"%s" key does not have a validator, applying standard conversions', key)
@@ -176,7 +173,7 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
             if VALIDATORS[key].get('fail_error', None):
                 error = 'Value not valid: ' + VALIDATORS[key]['fail_error']
             update.message.reply_text(error)
-            return
+            return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
         logger.debug('validation: success')
         if VALIDATORS[key].get('convert', None):
@@ -191,7 +188,7 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
     except Exception as e:
         logger.error('error while setting subreddit object property (%s, %s): %s', key, str(value), str(e), exc_info=True)
         update.message.reply_text('Error while setting the property: {}'.format(str(e)))
-        return
+        return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
     new_value = getattr(subreddit, key)
 
@@ -200,3 +197,5 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
         new_value=u.escape(str(new_value)),
         input_type=u.escape(str(type(value).__name__))
     ))
+
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION

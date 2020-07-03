@@ -3,11 +3,7 @@ import re
 
 from telegram import Update
 from telegram.ext import ConversationHandler, CallbackContext
-from telegram.ext import CommandHandler
-from telegram.ext import MessageHandler
-from telegram.ext import Filters
 
-from bot import mainbot
 from bot.conversation import Status
 from bot.markups import Keyboard
 from database.models import Subreddit
@@ -47,7 +43,7 @@ def subconfig_on_clonestylefrom_command(update: Update, context: CallbackContext
 
     update.message.reply_text('Select the subreddit to copy the style from, or /cancel:', reply_markup=reply_markup)
 
-    return Status.WAITING_ORIGIN_SUBREDDIT
+    return Status.CLONESTYLE_WAITING_ORIGIN_SUBREDDIT
 
 
 @d.restricted
