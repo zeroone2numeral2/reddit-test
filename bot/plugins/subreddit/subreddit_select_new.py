@@ -16,6 +16,9 @@ from .subreddit_configuration.disable import subconfig_on_disable_command
 from .subreddit_configuration.remove import subconfig_on_remove_command
 from .subreddit_configuration.settemplate import subconfig_on_settemplate_command
 from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
+from .subreddit_configuration.topstorage import subconfig_on_savetop_command
+from .subreddit_configuration.topstorage import subconfig_on_gettop_command
+from .subreddit_configuration.topstorage import subconfig_on_removetop_command
 from utilities import u
 from utilities import d
 
@@ -160,6 +163,9 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
             CommandHandler(['settemplate'], subconfig_on_settemplate_command),
             CommandHandler(['setchannelicon'], subconfig_on_setchannelicon_command),
+            CommandHandler(['savetop'], subconfig_on_savetop_command),
+            CommandHandler(['gettop', 'getop'], subconfig_on_gettop_command),
+            CommandHandler(['removetop', 'remtop'], subconfig_on_removetop_command),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },
