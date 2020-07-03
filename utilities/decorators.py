@@ -186,6 +186,15 @@ def pass_subreddit(answer=False):
     return real_decorator
 
 
+def pass_subreddit_2(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        subreddit = context.user_data['data']['subreddit']
+        return func(update, context, subreddit=subreddit, *args, **kwargs)
+
+    return wrapped
+
+
 def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
