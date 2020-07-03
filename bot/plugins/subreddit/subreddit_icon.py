@@ -35,25 +35,4 @@ def sub_icon(update: Update, context: CallbackContext):
     os.remove(file_path)
 
 
-@d.restricted
-@d.failwithmessage
-@d.pass_subreddit(answer=True)
-def sub_set_icon(update: Update, context: CallbackContext, subreddit=None):
-    logger.info('/setchannelicon command')
-
-    file_path = reddit.get_icon(subreddit.name, download=True)
-    if not file_path:
-        update.message.reply_text('Subreddit "{}" does\' exist or doesn\'t have an icon'.format(subreddit.name),
-                                  reply_markup=Keyboard.REMOVE)
-        return
-
-    with open(file_path, 'rb') as f:
-        context.bot.set_chat_photo(subreddit.channel.channel_id, f)
-
-    os.remove(file_path)
-
-    update.message.reply_text('Icon updated')
-
-
 mainbot.add_handler(CommandHandler(['geticon', 'icon'], sub_icon, pass_args=True))
-mainbot.add_handler(CommandHandler(['setchannelicon'], sub_set_icon))

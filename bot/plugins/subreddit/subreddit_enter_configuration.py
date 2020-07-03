@@ -170,7 +170,7 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(['sub2', 'subreddit2'], on_sub_command)],
+    entry_points=[CommandHandler(['sub', 'subreddit'], on_sub_command)],
     states={
         Status.SUBREDDIT_SELECT: [
             MessageHandler(Filters.text & Filters.regex(r'^(\d+).*'), on_subreddit_selected),
