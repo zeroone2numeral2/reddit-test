@@ -349,6 +349,40 @@ class Sender:
         # noinspection PyTypeChecker
         self._submission_dict = OrderedDict(sorted(self._submission_dict.items()))
 
+    def _get_filled_template(self, base_text: [None, str], accept_none_base_text=True):
+        """Fill the passed text with the submission's dict values.
+        accept_none_base_text=False allows to raise an error if the base text is None. Otherwise, by default,
+        if the base text is None, the function will return None"""
+
+        if base_text is None and not accept_none_base_text:
+            raise ValueError('template filling: base text is None')
+        elif base_text is None and accept_none_base_text:
+            return None
+
+        return base_text.format(**self._submission_dict)
+
+    def _generate_reply_markup(self):
+        reply_markup = None
+        if self._subreddit.url_button and self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons_with_labels(
+                url_button_url=self._s.url,
+                url_button_label=self._get_filled_template(self._subreddit.url_button_template),
+                comments_button_url=self._s.comments_url,
+                comments_button_label=self._get_filled_template(self._subreddit.comments_button_template),
+            )
+        elif self._subreddit.url_button and not self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons_with_labels(
+                url_button_url=self._s.url,
+                url_button_label=self._get_filled_template(self._subreddit.url_button_template)
+            )
+        elif not self._subreddit.url_button and self._subreddit.comments_button:
+            reply_markup = InlineKeyboard.post_buttons_with_labels(
+                comments_button_url=self._s.comments_url,
+                comments_button_label=self._get_filled_template(self._subreddit.comments_button_template),
+            )
+
+        return reply_markup
+
     def post(self, chat_id=None):
         if chat_id:
             self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
@@ -366,16 +400,10 @@ class Sender:
             self.log.info('no template: using the default one')
             template = DEFAULT_TEMPLATES[0]
 
-        text = template.format(**self._submission_dict)
+        text = self._get_filled_template(template)
         # self.log.info('post text: %s', text)
 
-        reply_markup = None
-        if self._subreddit.url_button and self._subreddit.comments_button:
-            reply_markup = InlineKeyboard.post_buttons(url=self._s.url, comments=self._s.comments_url, n_comments=self._s.num_comments)
-        elif self._subreddit.url_button and not self._subreddit.comments_button:
-            reply_markup = InlineKeyboard.post_buttons(url=self._s.url)
-        elif not self._subreddit.url_button and self._subreddit.comments_button:
-            reply_markup = InlineKeyboard.post_buttons(comments=self._s.comments_url, n_comments=self._s.num_comments)
+        reply_markup = self._generate_reply_markup()
         
         if self._s.media_type and self._subreddit.send_medias:
             self.log.info('post is a media, sending it as media...')

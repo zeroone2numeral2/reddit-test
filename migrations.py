@@ -52,6 +52,8 @@ def main(database_path):
     uploaded_bytes = peewee.IntegerField(null=True)
     reddit_account = peewee.CharField(null=True)
     reddit_client = peewee.CharField(null=True)
+    url_button_template = peewee.CharField(null=True)
+    comments_button_template = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -126,6 +128,9 @@ def main(database_path):
         # 20200619
         migrator.add_column('subreddits', 'reddit_account', reddit_account),
         migrator.add_column('subreddits', 'reddit_client', reddit_client),
+        # 20200703
+        migrator.add_column('subreddits', 'url_button_template', url_button_template),
+        migrator.add_column('subreddits', 'comments_button_template', comments_button_template),
     ]
 
     logger.info('Starting migration....')
