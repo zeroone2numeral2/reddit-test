@@ -9,8 +9,10 @@ from telegram.ext import ConversationHandler
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.customfilters import CustomFilters
 from database.models import Subreddit
 from bot.markups import Keyboard
+from .subreddit_configuration.dbentry import subconfig_on_entry_change
 from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
 from .subreddit_configuration.remove import subconfig_on_remove_command
@@ -19,6 +21,15 @@ from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
 from .subreddit_configuration.topstorage import subconfig_on_savetop_command
 from .subreddit_configuration.topstorage import subconfig_on_gettop_command
 from .subreddit_configuration.topstorage import subconfig_on_removetop_command
+from .subreddit_configuration.channel import subconfig_on_setchannel_command
+from .subreddit_configuration.channel import subconfig_on_selected_channel
+from .subreddit_configuration.channel import subconfig_on_selected_channel_wrong
+from .subreddit_configuration.clone import subconfig_on_clonefrom_command
+from .subreddit_configuration.clone import subconfig_on_origin_subreddit_selected
+from .subreddit_configuration.clone import subconfig_on_selected_subreddit_wrong
+from .subreddit_configuration.clonestyle import subconfig_on_clonestylefrom_command
+from .subreddit_configuration.clonestyle import subconfig_on_clonestyle_origin_subreddit_selected
+from .subreddit_configuration.clonestyle import subconfig_on_clonestyle_selected_subreddit_wrong
 from utilities import u
 from utilities import d
 
@@ -108,14 +119,22 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-def on_cancel(update: Update, context: CallbackContext):
-    logger.debug('ending conversation')
+@d.pass_subreddit_2
+def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subreddit):
+    # this is used only for sub-conversations
+    logger.info('/cancel command')
 
-    update.message.reply_text('Okay, operation canceled', reply_markup=Keyboard.REMOVE)
+    for k, v in context.user_data['data'].items():
+        if k.lower() != 'subreddit':
+            # remove every temporary data that is NOT the subreddit object
+            context.user_data['data'].pop(k)
 
-    context.user_data.pop('subreddit', None)
+    update.message.reply_html(
+        'Operation canceled.\nBack to /r/{s.name}\'s configuration'.format(s=subreddit),
+        reply_markup=Keyboard.REMOVE
+    )
 
-    return ConversationHandler.END
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
 
 @d.restricted
@@ -158,6 +177,7 @@ mainbot.add_handler(ConversationHandler(
             MessageHandler(Filters.text, on_subreddit_selected_wrong)
         ],
         Status.WAITING_SUBREDDIT_CONFIG_ACTION: [
+            MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, subconfig_on_entry_change),
             CommandHandler(['info'], subconfig_on_info_command),
             CommandHandler(['disable'], subconfig_on_disable_command),
             CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
@@ -166,6 +186,24 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['savetop'], subconfig_on_savetop_command),
             CommandHandler(['gettop', 'getop'], subconfig_on_gettop_command),
             CommandHandler(['removetop', 'remtop'], subconfig_on_removetop_command),
+            CommandHandler(['setchannel'], subconfig_on_setchannel_command),
+            CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
+            CommandHandler(['clonestylefrom'], subconfig_on_clonestylefrom_command),
+        ],
+        Status.SETCHANNEL_WAITING_CHANNEL: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
+            MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_channel_wrong),
+            CommandHandler(['cancel'], on_cancel_command),
+        ],
+        Status.CLONE_WAITING_ORIGIN_SUBREDDIT: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_origin_subreddit_selected),
+            MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_subreddit_wrong),
+            CommandHandler(['cancel'], on_cancel_command),
+        ],
+        Status.CLONESTYLE_WAITING_ORIGIN_SUBREDDIT: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_clonestyle_origin_subreddit_selected),
+            MessageHandler(~Filters.command & Filters.all, subconfig_on_clonestyle_selected_subreddit_wrong),
+            CommandHandler(['cancel'], on_cancel_command),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },

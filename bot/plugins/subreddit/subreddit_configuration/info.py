@@ -12,6 +12,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit_2
 def subconfig_on_info_command(update: Update, _, subreddit: Subreddit):
     logger.info('/info command')

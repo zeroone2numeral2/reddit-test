@@ -13,6 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit_2
 def subconfig_on_settemplate_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/settemplate command')

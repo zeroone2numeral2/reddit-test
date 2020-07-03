@@ -13,6 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit_2
 def subconfig_on_savetop_command(update: Update, _, subreddit: Subreddit):
     logger.info('/savetop command')
@@ -40,6 +41,7 @@ def subconfig_on_savetop_command(update: Update, _, subreddit: Subreddit):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit_2
 def subconfig_on_removetop_command(update: Update, _, subreddit: Subreddit):
     logger.info('/removetop command')
@@ -65,6 +67,7 @@ def subconfig_on_removetop_command(update: Update, _, subreddit: Subreddit):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 @d.pass_subreddit_2
 def subconfig_on_gettop_command(update: Update, _, subreddit: Subreddit):
     logger.info('/gettop command')
