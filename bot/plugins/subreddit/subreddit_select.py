@@ -24,6 +24,7 @@ link: {invite_link})
 /remove (remove the subreddit from the db), \
 /setchannel (set the subreddit's channel), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
+/clonestylefrom (override the style settings of the current subreddit with those from another one), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
@@ -86,9 +87,8 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     context.user_data['data'] = dict()
     context.user_data['data']['subreddit'] = subreddit
 
-    channel_title = 'no channel' if not subreddit.channel else subreddit.channel.title
     channel_invite_link = u.channel_invite_link(subreddit.channel, return_on_no_link='-', hyperlink_html='here')
-    text = TEXT.format(s=subreddit, channel_title=channel_title, invite_link=channel_invite_link)
+    text = TEXT.format(s=subreddit, channel_title=subreddit.channel_title(), invite_link=channel_invite_link)
 
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 

@@ -45,6 +45,7 @@ class RedditBot(Updater):
         BotCommand('remove', 'remove the subreddit'),
         BotCommand('setchannel', 'set the subreddit channel'),
         BotCommand('clonefrom', 'set the subreddit db values by copying them from another subreddit'),
+        BotCommand('clonestylefrom', 'set the subreddit style values by copying them from another subreddit'),
         BotCommand('setchannelicon', 'set the subreddit channel icon using the sub icon'),
         BotCommand('disable', 'disable the subreddit (all jobs)'),
         BotCommand('savetop', 'save the top posts based on the current sorting and limit'),
