@@ -105,7 +105,7 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
 def process_submissions(subreddit: Subreddit):
     slogger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
-    limit = subreddit.limit or config.praw.submissions_limit
+    limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
     for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
         slogger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
