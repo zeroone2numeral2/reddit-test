@@ -91,7 +91,7 @@ def knownsubreddit(func):
 def log_start_end_dt(func):
     @wraps(func)
     def wrapped(context: CallbackContext, *args, **kwargs):
-        job_start_dt = u.now()
+        job_start_dt = u.now(utc=False)
         Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
         with db.atomic():
@@ -102,7 +102,7 @@ def log_start_end_dt(func):
         job_row.posted_messages = int(job_result[0])
         job_row.uploaded_bytes = int(job_result[1])
 
-        job_end_dt = u.now()
+        job_end_dt = u.now(utc=False)
         job_row.end = job_end_dt
 
         elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
@@ -142,7 +142,7 @@ def time_subreddit_processing(job_name=None):
     def real_decorator(func):
         @wraps(func)
         def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
-            processing_start_dt = u.now()
+            processing_start_dt = u.now(utc=False)
 
             with db.atomic():
                 job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
@@ -150,7 +150,7 @@ def time_subreddit_processing(job_name=None):
 
             processing_result = func(subreddit, bot, *args, **kwargs)
 
-            processing_end_dt = u.now()
+            processing_end_dt = u.now(utc=False)
             job_row.end = processing_end_dt
 
             job_row.posted_messages = processing_result[0]

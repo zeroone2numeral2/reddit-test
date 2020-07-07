@@ -29,7 +29,7 @@ DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
 
-tz_DEFAULT = pytz.timezone(config.get('time_zone', 'Europe/Rome'))
+tz_DEFAULT = pytz.timezone('Europe/Rome')
 
 
 def html_escape(string):
