@@ -45,7 +45,6 @@ def lastjob_command(update: Update, _):
     logger.info('/lastjob command')
 
     text = ''
-    now = u.now()
     for job_name, job_info in config.jobs.items():
         job_duration = Job.last_job(job_name=job_name)
         if job_duration:
