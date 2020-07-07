@@ -1,3 +1,5 @@
+time_zone = "Europe/Rome"
+
 [telegram]
 workers = 1
 token = "" #  # CHANGEME

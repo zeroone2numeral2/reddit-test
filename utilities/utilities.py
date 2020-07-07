@@ -21,11 +21,15 @@ from telegram import MAX_MESSAGE_LENGTH
 
 from database.models import Subreddit
 
+from config import config
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
+
+tz_DEFAULT = pytz.timezone(config.get('time_zone', 'Europe/Rome'))
 
 
 def html_escape(string):
@@ -36,15 +40,14 @@ def now(string=False, utc=True):
     """Return a datetime object or a string
 
     :param string: True -> returns current datetime as a string (default format), str -> use the passed string as format
-    :param timezone_aware: 'Europe/Rome' time
-    :param utc: UTC time. Has the priority over 'timezone_aware'
+    :param utc: UTC time
     :return: datetime/string
     """
 
     if utc:
         now = datetime.datetime.utcnow()
     else:
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz_DEFAULT)
 
     if not string:
         return now

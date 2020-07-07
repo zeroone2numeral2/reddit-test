@@ -3,6 +3,10 @@ import json
 import logging
 import logging.config
 from logging.handlers import RotatingFileHandler
+import datetime
+import pytz
+
+from config import config
 
 
 class LoggingConfig:
@@ -23,6 +27,14 @@ def load_logging_config(file_path):
     LoggingConfig.dict = logging_config
 
     logging.config.dictConfig(logging_config)
+
+    def custom_time(*args):
+        utc_dt = pytz.utc.localize(datetime.datetime.utcnow())
+        my_tz = pytz.timezone(config.get('time_zone', 'Europe/Rome'))
+        converted = utc_dt.astimezone(my_tz)
+        return converted.timetuple()
+
+    logging.Formatter.converter = custom_time
 
 
 class SubredditRotatingFileHanlder(RotatingFileHandler):
