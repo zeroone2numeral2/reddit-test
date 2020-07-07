@@ -96,7 +96,7 @@ class Subreddit(peewee.Model):
 
     @property
     def invite_link(self):
-        return self.link()
+        return self.get_invite_link()
 
     @classmethod
     def to_dict(cls):
