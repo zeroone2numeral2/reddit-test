@@ -95,6 +95,7 @@ def log_start_end_dt(func):
 
         with db.atomic():
             job_row = Job(name=context.job.name, start=job_start_dt)
+            job_row.save()
 
         job_result = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
         job_row.posted_messages = int(job_result[0])

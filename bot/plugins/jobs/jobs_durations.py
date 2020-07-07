@@ -49,11 +49,11 @@ def lastjob_command(update: Update, _):
     for job_name, job_info in config.jobs.items():
         job_duration = Job.last_job(job_name=job_name)
         if job_duration:
-            text += '\n\n<b>{}</b>:\n• {}\n• {} ago\n• every {} minutes'.format(
-                job_name,
-                job_duration.end.strftime('%d/%m/%Y %H:%M:%S'),
-                u.pretty_seconds((now - job_duration.end).total_seconds()),
-                job_info['interval']
+            text += '\n\n<b>{name}</b>:\n• {duration}\n• {elapsed} ago\n• every {interval} minutes'.format(
+                name=job_name,
+                duration=job_duration.end.strftime('%d/%m/%Y %H:%M:%S'),
+                elapsed=u.pretty_seconds((now - job_duration.end).total_seconds()) if job_duration.end else '(still running)',
+                interval=job_info['interval']
             )
 
     if not text:
