@@ -6,6 +6,7 @@ from telegram.ext import CallbackContext
 from bot.conversation import Status
 from database.models import Subreddit
 from const import DEFAULT_TEMPLATES
+from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -32,6 +33,6 @@ def subconfig_on_settemplate_command(update: Update, context: CallbackContext, s
     subreddit.save()
 
     update.message.reply_text('Template updated:')
-    update.message.reply_html('<code>{}</code>'.format(template))
+    update.message.reply_html('<code>{}</code>'.format(u.escape(template)))
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION

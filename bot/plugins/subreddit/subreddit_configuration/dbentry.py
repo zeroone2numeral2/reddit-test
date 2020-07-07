@@ -192,7 +192,7 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
 
     new_value = getattr(subreddit, key)
 
-    update.message.reply_html('Done, new value of <code>{setting}</code>: {new_value}\n\nValue type: <code>{input_type}</code>'.format(
+    update.message.reply_html('Done, new value of <code>{setting}</code>:\n<code>{new_value}</code>\n\n<b>Value type</b>: <code>{input_type}</code>'.format(
         setting=key,
         new_value=u.escape(str(new_value)),
         input_type=u.escape(str(type(value).__name__))

@@ -20,7 +20,7 @@ def get_templates(update: Update, _):
 
     strings = list()
     for i, template in enumerate(DEFAULT_TEMPLATES):
-        strings.append('Template #{}:\n<code>{}</code>'.format(i + 1, template))
+        strings.append('Template #{}:\n<code>{}</code>'.format(i + 1, u.escape(template)))
 
     for text in u.split_text(strings, join_by='\n\n'):
         update.message.reply_html(text)
