@@ -53,7 +53,7 @@ def lastjob_command(update: Update, _):
 
         text += '\n\n<b>{name}</b>:\n• ended: {ended}\n• {elapsed} ago\n• every {interval} minutes'.format(
             name=job_name,
-            ended=job_duration.end if job_duration.end else 'unknown',
+            ended=job_duration.end,
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration else '(still running)',
             interval=job_info['interval']
         )
