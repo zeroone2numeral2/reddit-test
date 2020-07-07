@@ -6,8 +6,8 @@ from database import db
 class Job(peewee.Model):
     id = peewee.IntegerField(primary_key=True)
     name = peewee.CharField(null=False)
-    start = peewee.DateTimeField(null=True)
-    end = peewee.DateTimeField(null=True)
+    start = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
+    end = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
     duration = peewee.IntegerField(null=True)
     posted_messages = peewee.IntegerField(null=True)
     uploaded_bytes = peewee.IntegerField(null=True)

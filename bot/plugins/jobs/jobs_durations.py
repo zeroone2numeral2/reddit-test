@@ -47,13 +47,16 @@ def lastjob_command(update: Update, _):
     text = ''
     for job_name, job_info in config.jobs.items():
         job_duration = Job.last_job(job_name=job_name)
-        if job_duration:
-            text += '\n\n<b>{name}</b>:\n• ended: {ended}\n• {elapsed} ago\n• every {interval} minutes'.format(
-                name=job_name,
-                ended=job_duration.end.strftime('%d/%m/%Y %H:%M:%S') if job_duration.end else 'unknown',
-                elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration else '(still running)',
-                interval=job_info['interval']
-            )
+
+        if not job_duration:
+            continue
+
+        text += '\n\n<b>{name}</b>:\n• ended: {ended}\n• {elapsed} ago\n• every {interval} minutes'.format(
+            name=job_name,
+            ended=job_duration.end if job_duration.end else 'unknown',
+            elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration else '(still running)',
+            interval=job_info['interval']
+        )
 
     if not text:
         update.message.reply_text('No row in the database')
