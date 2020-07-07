@@ -24,7 +24,7 @@ class Subreddit(peewee.Model):
     id = peewee.AutoField()
     subreddit_id = peewee.CharField(index=True)
     name = peewee.CharField(null=False, default=0)
-    channel = peewee.ForeignKeyField(Channel, backref='subreddit', on_delete='NO ACTION', null=True)
+    channel: Channel = peewee.ForeignKeyField(Channel, backref='subreddit', on_delete='NO ACTION', null=True)
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
     last_posted_submission_dt = peewee.DateTimeField(null=True)
     sorting = peewee.CharField(default=config.submissions.default_sorting)
@@ -81,6 +81,18 @@ class Subreddit(peewee.Model):
             return default
 
         return self.channel.title
+
+    def link(self, ignore_public_username=False, default=None):
+        if not self.channel:
+            return default
+
+        if not self.channel.username or ignore_public_username:
+            if self.channel.invite_link:
+                return self.channel.invite_link
+            else:
+                return default
+        else:
+            return 'https://t.me/' + self.channel.username
 
     @classmethod
     def to_dict(cls):
