@@ -3,12 +3,13 @@ import re
 import time
 from functools import wraps
 
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import ConversationHandler, CallbackContext
 
 from bot.conversation import get_status_description
 from database.models import Subreddit
 from database.models import Job
+from database.models import SubredditJob
 from database import db
 from sqlite3 import OperationalError
 from utilities import u
@@ -135,6 +136,45 @@ def log_start_end_dt(func):
         return job_result
 
     return wrapped
+
+
+def time_subreddit_processing(job_name=None):
+    def real_decorator(func):
+        @wraps(func)
+        def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
+            processing_start_dt = u.now()
+
+            with db.atomic():
+                job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
+                job_row.save()
+
+            processing_result = func(subreddit, bot, *args, **kwargs)
+
+            processing_end_dt = u.now()
+            job_row.end = processing_end_dt
+
+            job_row.posted_messages = processing_result[0]
+            job_row.uploaded_bytes = processing_result[1]
+
+            elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
+            job_row.duration = elapsed_seconds
+
+            with db.atomic():
+                job_row.save()
+
+            Log.job.info(
+                'processing time for r/%s (id: %d): %d seconds (%s)',
+                subreddit.name,
+                subreddit.id,
+                elapsed_seconds,
+                u.pretty_seconds(round(elapsed_seconds, 2))
+            )
+
+            return processing_result
+
+        return wrapped
+
+    return real_decorator
 
 
 def deferred_handle_lock(func):

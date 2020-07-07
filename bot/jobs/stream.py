@@ -123,6 +123,7 @@ def process_submissions(subreddit: Subreddit):
             yield submission
 
 
+@d.time_subreddit_processing(job_name='stream')
 def process_subreddit(subreddit: Subreddit, bot: Bot):
     logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
 
@@ -209,8 +210,6 @@ def check_posts(context: CallbackContext):
     total_posted_messages = 0
     total_posted_bytes = 0
     for subreddit in subreddits:
-        dt_start = u.now()
-
         slogger.set_subreddit(subreddit)
         try:
             posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
@@ -220,16 +219,6 @@ def check_posts(context: CallbackContext):
             logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
             text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
             context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
-
-        dt_end = u.now()
-        subreddit_processing_duration = (dt_end - dt_start).total_seconds()
-        logger.info(
-            'processing time for r/%s (id: %d): %d seconds (%s)',
-            subreddit.name,
-            subreddit.id,
-            subreddit_processing_duration,
-            u.pretty_seconds(subreddit_processing_duration)
-        )
 
         # time.sleep(1)
 
