@@ -1,7 +1,3 @@
-import json
-import logging
-import logging.config
-
 import database.database   # we need it to initialize the package as soon as possible
 from .logging import logging_config
 from .bot import RedditBot

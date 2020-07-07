@@ -2,11 +2,31 @@ import json
 from logging.handlers import RotatingFileHandler
 import logging.config
 import os
+import pytz
+import datetime
 
-with open('logging.json', 'r') as f:
-    logging_config = json.load(f)
+from config import config
 
-logging.config.dictConfig(logging_config)
+
+def load_logging_config(config_file='logging.json', set_timezone=True):
+    with open(config_file, 'r') as f:
+        logging_config = json.load(f)
+
+    logging.config.dictConfig(logging_config)
+
+    def custom_time(*args):
+        utc_dt = pytz.utc.localize(datetime.datetime.utcnow())
+        my_tz = pytz.timezone(config.get('time_zone', 'Europe/Rome'))
+        converted = utc_dt.astimezone(my_tz)
+        return converted.timetuple()
+
+    if set_timezone:
+        logging.Formatter.converter = custom_time
+
+    return logging_config
+
+
+logging_config = load_logging_config()
 
 
 def get_subreddit_logger(subreddit, dir_path='logs/subreddits/'):
