@@ -63,6 +63,8 @@ def subconfig_on_clonestyle_origin_subreddit_selected(update: Update, _, subredd
         if key.lower() not in KEYS_TO_COPY:
             origin_dict.pop(key, None)
 
+    logger.debug('left keys: %s', str(origin_dict))
+
     logger.debug('copying style of r/%s to r/%s...', origin_sub.name, subreddit.name)
     Subreddit.update(**origin_dict).where(Subreddit.id == subreddit.id).execute()
 
