@@ -8,20 +8,23 @@ import datetime
 from config import config
 
 
-def load_logging_config(config_file='logging.json', set_timezone=True):
+class TIMEZONE:
+    europe_rome = pytz.timezone('Europe/Rome')
+
+
+def load_logging_config(config_file='logging.json', set_rome_timezone=bool(config.get('europe_rome_timezone', True))):
     with open(config_file, 'r') as f:
         logging_config = json.load(f)
 
     logging.config.dictConfig(logging_config)
 
-    def custom_time(*args):
+    def custom_timezone_converter(*args):
         utc_dt = pytz.utc.localize(datetime.datetime.utcnow())
-        my_tz = pytz.timezone(config.get('time_zone', 'Europe/Rome'))
-        converted = utc_dt.astimezone(my_tz)
+        converted = utc_dt.astimezone(TIMEZONE.europe_rome)
         return converted.timetuple()
 
-    if set_timezone:
-        logging.Formatter.converter = custom_time
+    if set_rome_timezone:
+        logging.Formatter.converter = custom_timezone_converter
 
     return logging_config
 

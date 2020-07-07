@@ -1,5 +1,3 @@
-time_zone = "Europe/Rome"
-
 [telegram]
 workers = 1
 token = "" #  # CHANGEME
@@ -48,3 +46,5 @@ secret = "" # CHANGEME
 [ffmpeg]
 cmd_path = "ffmpeg"
 cmd_path_windows = "ffmpeg.exe" # needs the .exe binary file in the main project directory
+
+europe_rome_timezone = false
