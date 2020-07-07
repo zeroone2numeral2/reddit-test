@@ -82,7 +82,7 @@ class Subreddit(peewee.Model):
 
         return self.channel.title
 
-    def link(self, ignore_public_username=False, default=None):
+    def get_invite_link(self, ignore_public_username=False, default=None):
         if not self.channel:
             return default
 
@@ -93,6 +93,10 @@ class Subreddit(peewee.Model):
                 return default
         else:
             return 'https://t.me/' + self.channel.username
+
+    @property
+    def invite_link(self):
+        return self.link()
 
     @classmethod
     def to_dict(cls):
