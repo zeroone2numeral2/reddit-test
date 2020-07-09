@@ -50,7 +50,7 @@ def subconfig_on_clonestylefrom_command(update: Update, context: CallbackContext
 @d.failwithmessage
 @d.logconversation
 @d.pass_subreddit_2
-def subconfig_on_clonestyle_origin_subreddit_selected(update: Update, _, subreddit: Subreddit):
+def subconfig_on_clonestyle_origin_subreddit_selected(update: Update, context, subreddit: Subreddit):
     logger.info('/clonestylefrom command: origin subreddit selected (%s)', update.message.text)
 
     subreddit_key = int(re.search(r'(\d+)\. .*', update.message.text, re.I).group(1))
@@ -66,7 +66,11 @@ def subconfig_on_clonestyle_origin_subreddit_selected(update: Update, _, subredd
     logger.debug('left keys: %s', str(origin_dict))
 
     logger.debug('copying style of r/%s to r/%s...', origin_sub.name, subreddit.name)
-    Subreddit.update(**origin_dict).where(Subreddit.id == subreddit.id).execute()
+    # Subreddit.update(**origin_dict).where(Subreddit.id == subreddit.id).execute()
+    subreddit.update_from_dict(origin_dict)
+
+    # refresh the subreddit object
+    context.user_data['data']['subreddit'] = subreddit
 
     text = '/r/{origin_sub} (channel: {origin_channel}) style applyed to /r/{dest_sub} (channel: {dest_channel})'.format(
         origin_sub=origin_sub.name,

@@ -76,6 +76,15 @@ class Subreddit(peewee.Model):
     def __repr__(self):
         return '<Subreddit {}: {}>'.format(self.subreddit_id, self.name)
 
+    def update_from_dict(self, data: dict):
+        for field, value in data.items():
+            # probably slow af
+            setattr(self, field, value)
+
+        self.save()
+
+        return self
+
     def channel_title(self, default='none'):
         if not self.channel:
             return default
