@@ -36,7 +36,7 @@ def subconfig_on_setchannel_command(update: Update, _):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit_2
+@d.pass_subreddit
 def subconfig_on_selected_channel(update: Update, _, subreddit: Subreddit):
     logger.info('channel selected: %s', update.message.text)
 

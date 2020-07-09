@@ -205,7 +205,7 @@ def deferred_handle_lock(func):
     return wrapped
 
 
-def pass_subreddit(answer=False):
+def pass_subreddit_old(answer=False):
     def real_decorator(func):
         @wraps(func)
         def wrapped(update, context, *args, **kwargs):
@@ -227,7 +227,7 @@ def pass_subreddit(answer=False):
     return real_decorator
 
 
-def pass_subreddit_2(func):
+def pass_subreddit(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         subreddit = context.user_data['data']['subreddit']

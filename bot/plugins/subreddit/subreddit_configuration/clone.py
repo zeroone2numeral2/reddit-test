@@ -27,7 +27,7 @@ CLONE_KEYS_TO_IGNORE = (
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit_2
+@d.pass_subreddit
 def subconfig_on_clonefrom_command(update: Update, context: CallbackContext, _):
     logger.info('/clonefrom command, args: %s', str(context.args))
 
@@ -49,7 +49,7 @@ def subconfig_on_clonefrom_command(update: Update, context: CallbackContext, _):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit_2
+@d.pass_subreddit
 def subconfig_on_origin_subreddit_selected(update: Update, _, subreddit=None):
     logger.info('/clonefrom command: origin subreddit selected (%s)', update.message.text)
 

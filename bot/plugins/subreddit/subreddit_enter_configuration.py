@@ -119,7 +119,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit_2
+@d.pass_subreddit
 def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     # this is used only for sub-conversations
     logger.info('/cancel command')
@@ -139,7 +139,7 @@ def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subre
 
 @d.restricted
 @d.failwithmessage
-@d.pass_subreddit_2
+@d.pass_subreddit
 @d.logconversation
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
@@ -155,7 +155,7 @@ def on_end(update: Update, context: CallbackContext, subreddit=None):
 
 @d.restricted
 @d.failwithmessage
-@d.pass_subreddit_2
+@d.pass_subreddit
 @d.logconversation
 def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.debug('conversation timeout')

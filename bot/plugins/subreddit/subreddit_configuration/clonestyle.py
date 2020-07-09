@@ -49,7 +49,7 @@ def subconfig_on_clonestylefrom_command(update: Update, context: CallbackContext
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit_2
+@d.pass_subreddit
 def subconfig_on_clonestyle_origin_subreddit_selected(update: Update, context, subreddit: Subreddit):
     logger.info('/clonestylefrom command: origin subreddit selected (%s)', update.message.text)
 
