@@ -57,7 +57,7 @@ You can also pass one of the subreddit's properties to see or change them, for e
 • "<code>template</code>" will show the current template
 • "<code>max_frequency 295</code>" will change <code>max_frequency</code> to 295
 
-Use /end when you are done\
+Use /end when you are done, or /sub to change subreddit\
 """
 
 
@@ -119,18 +119,25 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-@d.pass_subreddit
-def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subreddit):
+def on_cancel_command(update: Update, context: CallbackContext):
     # this is used only for sub-conversations
     logger.info('/cancel command')
 
-    for k, v in context.user_data['data'].items():
-        if k.lower() != 'subreddit':
-            # remove every temporary data that is NOT the subreddit object
-            context.user_data['data'].pop(k)
+    if context.user_data.get('data', None):
+        for k, v in context.user_data['data'].items():
+            if k.lower() != 'subreddit':
+                # remove every temporary data that is NOT the subreddit object
+                context.user_data['data'].pop(k)
+
+    if u.get_subreddit_from_userdata(context.user_data):
+        # it might be that we do not have a subreddit saved in user_data yet (for example: user uses /sub and
+        # then /cancel before selecting a subreddit)
+        text = 'Operation canceled.\nBack to {s.r_name}\'s configuration'.format(s=context.user_data['data']['subreddit'])
+    else:
+        text = 'Operation canceled'
 
     update.message.reply_html(
-        'Operation canceled.\nBack to {s.r_name}\'s configuration'.format(s=subreddit),
+        text,
         reply_markup=Keyboard.REMOVE
     )
 
@@ -173,8 +180,9 @@ mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(['sub', 'subreddit'], on_sub_command)],
     states={
         Status.SUBREDDIT_SELECT: [
-            MessageHandler(Filters.text & Filters.regex(r'^(\d+).*'), on_subreddit_selected),
-            MessageHandler(Filters.text, on_subreddit_selected_wrong)
+            MessageHandler(Filters.text & Filters.regex(r'^(\d+).*') & ~Filters.command, on_subreddit_selected),
+            MessageHandler(Filters.text & ~Filters.command, on_subreddit_selected_wrong),
+            CommandHandler(['cancel'], on_cancel_command),
         ],
         Status.WAITING_SUBREDDIT_CONFIG_ACTION: [
             MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, subconfig_on_entry_change),
@@ -189,6 +197,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['setchannel'], subconfig_on_setchannel_command),
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
             CommandHandler(['clonestylefrom', 'copystylefrom'], subconfig_on_clonestylefrom_command),
+            CommandHandler(['sub', 'subreddit'], on_sub_command)
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
