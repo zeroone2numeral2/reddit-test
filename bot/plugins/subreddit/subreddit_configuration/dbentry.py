@@ -91,6 +91,7 @@ VALIDATORS = dict(
     hide_spoilers=Validator.BOOL,
     hour=Validator.HOUR,
     ignore_stickied=Validator.BOOL,
+    ignore_flairless=Validator.BOOL,
     ignore_if_newer_than=Validator.INT_OR_NONE,
     limit=Validator.INT,
     max_frequency=Validator.INT,
