@@ -63,9 +63,9 @@ class Validator:
         convert=lambda value: int(value)
     )
     INT_OR_NONE = dict(
-        test=lambda value: value is None or bool(re.search(r'^\d+$', value)),
+        test=lambda value: value.lower() == 'none' or bool(re.search(r'^\d+$', value)),
         fail_error="not an int/None",
-        convert=lambda value: int(value) if value is not None else None
+        convert=lambda value: int(value) if value.lower() != 'none' else None
     )
     FLOAT = dict(
         convert=lambda value: float(value),
