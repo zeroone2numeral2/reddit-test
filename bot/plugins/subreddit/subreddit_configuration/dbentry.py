@@ -62,6 +62,11 @@ class Validator:
         fail_error="not an int",
         convert=lambda value: int(value)
     )
+    INT_OR_NONE = dict(
+        test=lambda value: value is None or bool(re.search(r'^\d+$', value)),
+        fail_error="not an int/None",
+        convert=lambda value: int(value) if value is not None else None
+    )
     FLOAT = dict(
         convert=lambda value: float(value),
         test=lambda value: bool(re.search(r'^\d+(?:[.,]\d+)?$', value)),
@@ -86,7 +91,7 @@ VALIDATORS = dict(
     hide_spoilers=Validator.BOOL,
     hour=Validator.HOUR,
     ignore_stickied=Validator.BOOL,
-    ignore_if_newer_than=Validator.INT,
+    ignore_if_newer_than=Validator.INT_OR_NONE,
     limit=Validator.INT,
     max_frequency=Validator.INT,
     min_score=Validator.INT,
