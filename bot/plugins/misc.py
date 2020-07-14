@@ -96,6 +96,11 @@ def cleandb_command(update, _):
         subreddit_job=SubredditJob.delete_old(days),
     )
 
+    import sqlite3
+    conn = sqlite3.connect(config.sqlite.filename, isolation_level=None)
+    conn.execute("VACUUM")
+    conn.close()
+
     lines = ['{}: {}'.format(k, v) for k, v in deleted_records.items()]
     update.message.reply_html('Days: {}\n<code>{}</code>'.format(days, '\n'.join(lines)))
 
