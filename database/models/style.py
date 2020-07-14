@@ -11,7 +11,8 @@ class Style(peewee.Model):
     updated = peewee.DateTimeField(null=True)
     # actual style fields
     template = peewee.CharField(null=True)
-    template_no_url = peewee.CharField(null=True)
+    template_no_url = peewee.CharField(null=True)  # when the submission doesn't have an url
+    template_caption = peewee.CharField(null=True)  # when we are going to send a media with a caption
     url_button = peewee.BooleanField(default=False)
     url_button_template = peewee.CharField(null=True)
     comments_button = peewee.BooleanField(default=False)
