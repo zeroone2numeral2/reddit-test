@@ -119,9 +119,8 @@ class Subreddit(peewee.Model):
 
         return self.channel.title
 
-    @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def to_dict(self):
+        return model_to_dict(self)
 
     @classmethod
     def fetch(cls: Type[S], name) -> [S, None]:

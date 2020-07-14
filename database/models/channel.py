@@ -22,9 +22,8 @@ class Channel(peewee.Model):
     def __repr__(self):
         return '<Channel {}: {}>'.format(self.channel_id, self.title)
 
-    @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def to_dict(self):
+        return model_to_dict(self)
 
     @classmethod
     def exists(cls, channel_id):
