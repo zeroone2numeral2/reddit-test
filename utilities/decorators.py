@@ -144,9 +144,8 @@ def time_subreddit_processing(job_name=None):
         def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
             processing_start_dt = u.now(utc=False)
 
-            with db.atomic():
-                job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
-                job_row.save()
+            job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
+            job_row.save()
 
             processing_result = func(subreddit, bot, *args, **kwargs)
 
@@ -159,8 +158,7 @@ def time_subreddit_processing(job_name=None):
             elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
             job_row.duration = elapsed_seconds
 
-            with db.atomic():
-                job_row.save()
+            job_row.save()
 
             Log.job.info(
                 'processing time for r/%s (id: %d): %d seconds (%s)',
