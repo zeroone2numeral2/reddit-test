@@ -188,7 +188,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['removetop', 'remtop'], subconfig_on_removetop_command),
             CommandHandler(['setchannel'], subconfig_on_setchannel_command),
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
-            CommandHandler(['clonestylefrom'], subconfig_on_clonestylefrom_command),
+            CommandHandler(['clonestylefrom', 'copystylefrom'], subconfig_on_clonestylefrom_command),
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
