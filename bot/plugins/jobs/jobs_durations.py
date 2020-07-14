@@ -51,8 +51,9 @@ def lastjob_command(update: Update, _):
         if not job_duration:
             continue
 
-        text += '\n\n<b>{name}</b>:\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes'.format(
+        text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes'.format(
             name=job_name,
+            started=job_duration.start_dt.strftime('%d/%m/%Y %H:%M:%S'),
             ended=job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S') if job_duration.end else 'running',
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration is not None else 'running',
             interval=job_info['interval']
