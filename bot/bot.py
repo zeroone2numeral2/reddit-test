@@ -52,6 +52,7 @@ class RedditBot(Updater):
         BotCommand('removetop', 'remove the saved top submissions'),
         BotCommand('gettop', 'see what we have currently saved as top submission'),
         BotCommand('settemplate', 'set one of the default templates'),
+        BotCommand('clean', 'delete old rows from some tables'),
         BotCommand('end', 'exit a subreddit configuration'),
     ]
 

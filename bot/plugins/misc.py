@@ -7,6 +7,10 @@ from telegram.ext import CommandHandler
 
 from bot import mainbot
 from database.models import Subreddit
+from database.models import Post
+from database.models import PostResume
+from database.models import Job
+from database.models import SubredditJob
 from utilities import u
 from utilities import d
 from config import config
@@ -78,8 +82,27 @@ def json_command(update, _):
     file.remove()
 
 
+@d.restricted
+@d.failwithmessage
+def cleandb_command(update, _):
+    logger.info('/cleandb command')
+
+    days = 31
+
+    deleted_records = dict(
+        post=Post.delete_old(days),
+        post_resume=PostResume.delete_old(days),
+        job=Job.delete_old(days),
+        subreddit_job=SubredditJob.delete_old(days),
+    )
+
+    lines = ['{}: {}'.format(k, v) for k, v in deleted_records.items()]
+    update.message.reply_html('Days: {}\n<code>{}</code>'.format(days, '\n'.join(lines)))
+
+
 mainbot.add_handler(CommandHandler(['getconfig'], getconfig_command))
 mainbot.add_handler(CommandHandler(['getdb', 'db'], getdb_command))
 mainbot.add_handler(CommandHandler(['remdl'], remdl_command))
 mainbot.add_handler(CommandHandler(['sendv'], sendv_command))
 mainbot.add_handler(CommandHandler(['json'], json_command))
+mainbot.add_handler(CommandHandler(['cleandb'], cleandb_command))
