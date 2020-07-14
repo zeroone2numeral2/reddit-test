@@ -94,8 +94,9 @@ def log_start_end_dt(func):
         job_start_dt = u.now(utc=False)
         Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
-        job_row = Job(name=context.job.name, start=job_start_dt)
-        job_row.save()
+        with db.atomic():
+            job_row = Job(name=context.job.name, start=job_start_dt)
+            job_row.save()
 
         job_result = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
         job_row.posted_messages = int(job_result[0])
@@ -107,7 +108,8 @@ def log_start_end_dt(func):
         elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
         job_row.duration = int(elapsed_seconds)
 
-        job_row.save()
+        with db.atomic():
+            job_row.save()
 
         Log.job.info(
             '%s job ended at %s (elapsed seconds: %d (%s), posted messages: %d, uploaded data: %s)',
@@ -142,8 +144,9 @@ def time_subreddit_processing(job_name=None):
         def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
             processing_start_dt = u.now(utc=False)
 
-            job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
-            job_row.save()
+            with db.atomic():
+                job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
+                job_row.save()
 
             processing_result = func(subreddit, bot, *args, **kwargs)
 
@@ -156,7 +159,8 @@ def time_subreddit_processing(job_name=None):
             elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
             job_row.duration = elapsed_seconds
 
-            job_row.save()
+            with db.atomic():
+                job_row.save()
 
             Log.job.info(
                 'processing time for r/%s (id: %d): %d seconds (%s)',
