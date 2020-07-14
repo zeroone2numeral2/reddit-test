@@ -323,6 +323,13 @@ def channel_invite_link(channel, return_on_no_link=None, hyperlink_html: [str, N
         return '<a href="{}">{}</a>'.format(channel_url, html_escape(hyperlink_html))
 
 
+def get_subreddit_from_userdata(user_data: dict):
+    if not user_data.get('data', None):
+        return
+    else:
+        return user_data['data'].get('subreddit', None)
+
+
 def number_of_daily_posts(s: Subreddit, print_debug=False):
     n = 0
 

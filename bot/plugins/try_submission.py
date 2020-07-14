@@ -9,6 +9,7 @@ from database.models import Subreddit
 from database.models import Channel
 from reddit import Sender
 from reddit import reddit
+from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -28,7 +29,9 @@ def try_submission(update, context):
 
     # try to get the real subreddit if we have it saved in the db
     sub_id = submission.subreddit.name
-    if Subreddit.get_safe(subreddit_id=sub_id):
+    if u.get_subreddit_from_userdata(context.user_data):
+        tmp_subreddit = u.get_subreddit_from_userdata(context.user_data)
+    elif Subreddit.get_safe(subreddit_id=sub_id):
         tmp_subreddit = Subreddit.get_safe(subreddit_id=sub_id)
     else:
         tmp_subreddit = Subreddit(
