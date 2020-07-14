@@ -94,9 +94,8 @@ def log_start_end_dt(func):
         job_start_dt = u.now(utc=False)
         Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
-        with db.atomic():
-            job_row = Job(name=context.job.name, start=job_start_dt)
-            job_row.save()
+        job_row = Job(name=context.job.name, start=job_start_dt)
+        job_row.save()
 
         job_result = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
         job_row.posted_messages = int(job_result[0])
@@ -106,10 +105,9 @@ def log_start_end_dt(func):
         job_row.end = job_end_dt
 
         elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
-        job_row.duration = elapsed_seconds
+        job_row.duration = int(elapsed_seconds)
 
-        with db.atomic():
-            job_row.save()
+        job_row.save()
 
         Log.job.info(
             '%s job ended at %s (elapsed seconds: %d (%s), posted messages: %d, uploaded data: %s)',
