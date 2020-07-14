@@ -108,6 +108,17 @@ class Subreddit(peewee.Model):
     def channel_link(self):
         return self.get_channel_invite_link()
 
+    @property
+    def r_name(self):
+        return '/r/{}'.format(self.name)
+
+    @property
+    def ch_title(self):
+        if not self.channel:
+            return 'none'
+
+        return self.channel.title
+
     @classmethod
     def to_dict(cls):
         return model_to_dict(cls)

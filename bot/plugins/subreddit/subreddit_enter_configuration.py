@@ -37,8 +37,8 @@ logger = logging.getLogger('handler')
 
 ENABLED = False
 
-TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">/r/{s.name}</a> (channel: {channel_title}, \
-link: {invite_link})
+TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">{s.r_name}</a> (channel: {s.ch_title}, \
+link: {s.channel_link})
 
 <b>Available commands</b>: \
 /info, \
@@ -109,7 +109,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     context.user_data['data']['subreddit'] = subreddit
 
     channel_invite_link = u.channel_invite_link(subreddit.channel, return_on_no_link='-', hyperlink_html='here')
-    text = TEXT.format(s=subreddit, channel_title=subreddit.channel_title(), invite_link=channel_invite_link)
+    text = TEXT.format(s=subreddit)
 
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 
@@ -130,7 +130,7 @@ def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subre
             context.user_data['data'].pop(k)
 
     update.message.reply_html(
-        'Operation canceled.\nBack to /r/{s.name}\'s configuration'.format(s=subreddit),
+        'Operation canceled.\nBack to {s.r_name}\'s configuration'.format(s=subreddit),
         reply_markup=Keyboard.REMOVE
     )
 
@@ -144,7 +144,7 @@ def on_cancel_command(update: Update, context: CallbackContext, subreddit: Subre
 def on_end(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 
-    text = 'Exited configuration mode for /r/{s.name} (channel: {channel})'.format(s=subreddit, channel=subreddit.channel_title())
+    text = 'Exited configuration mode for {s.r_name} (channel: {s.ch_title})'.format(s=subreddit)
 
     context.user_data.pop('data', None)
 
@@ -160,7 +160,7 @@ def on_end(update: Update, context: CallbackContext, subreddit=None):
 def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.debug('conversation timeout')
 
-    text = 'Timeout: exited configuration mode for /r/{s.name} (channel: {channel})'.format(s=subreddit, channel=subreddit.channel_title())
+    text = 'Timeout: exited configuration mode for {s.r_name} (channel: {s.ch_title})'.format(s=subreddit)
 
     context.user_data.pop('data', None)
 
