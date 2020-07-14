@@ -1,6 +1,7 @@
 import datetime
 
 import peewee
+from pytz import FixedOffset
 
 from database import db
 
@@ -21,6 +22,37 @@ class Job(peewee.Model):
 
     def __repr__(self):
         return '<Job row {}: {}>'.format(self.id, self.name)
+
+    @property
+    def start_dt(self) -> [datetime.datetime, None]:
+        if not isinstance(self.start, str):
+            return self.start
+
+        return self.convert_to_datetime(self.start)
+
+    @property
+    def end_dt(self) -> [datetime.datetime, None]:
+        if not isinstance(self.end, str):
+            return self.end
+
+        return self.convert_to_datetime(self.end)
+
+    @staticmethod
+    def convert_to_datetime(value):
+        datetime_str, zone = value[:-6], value[-6:]  # value.rsplit('+', 1)  # Expected YYYY-mm-dd HH:MM:SS.ffffff-ZH:ZM
+
+        val = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+
+        if zone.startswith('-'):
+            mult = -1
+            zone = zone[1:]
+        else:
+            mult = 1
+
+        zh, zm = int(zone[:2]), int(zone[-2:])
+        offset = FixedOffset(mult * (zh * 60 + zm))
+
+        return val.replace(tzinfo=offset)
 
     @classmethod
     def durations(cls, top=100, job_name='%'):

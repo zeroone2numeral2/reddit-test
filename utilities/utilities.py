@@ -19,8 +19,6 @@ from PIL import Image
 from playhouse.shortcuts import model_to_dict
 from telegram import MAX_MESSAGE_LENGTH
 
-from database.models import Subreddit
-
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -330,7 +328,7 @@ def get_subreddit_from_userdata(user_data: dict):
         return user_data['data'].get('subreddit', None)
 
 
-def number_of_daily_posts(s: Subreddit, print_debug=False):
+def number_of_daily_posts(s, print_debug=False):
     n = 0
 
     if s.enabled:
