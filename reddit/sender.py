@@ -777,6 +777,9 @@ class Sender:
         elif self._subreddit.hide_spoilers and self._s.spoiler == True:
             self.log.info('tests failed: submission is a spoiler')
             return False
+        elif self._subreddit.ignore_flairless and not self._s.flair_normalized:
+            self.log.info('tests failed: submission does not have a flair')
+            return False
         elif self._subreddit.min_upvote_perc and self._s.upvote_perc < self._subreddit.min_upvote_perc:
             self.log.info(
                 'tests failed: submission\'s upvote ratio is not good enough (db: %d, submission: %d)',

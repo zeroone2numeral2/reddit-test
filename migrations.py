@@ -54,6 +54,7 @@ def main(database_path):
     reddit_client = peewee.CharField(null=True)
     url_button_template = peewee.CharField(null=True)
     comments_button_template = peewee.CharField(null=True)
+    ignore_flairless = peewee.BooleanField(default=False, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -131,6 +132,8 @@ def main(database_path):
         # 20200703
         migrator.add_column('subreddits', 'url_button_template', url_button_template),
         migrator.add_column('subreddits', 'comments_button_template', comments_button_template),
+        # 20200714 ignore_flairless
+        migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
     ]
 
     logger.info('Starting migration....')
