@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 
 from database import db
@@ -44,3 +46,7 @@ class Job(peewee.Model):
 
         return rows[0]
 
+    @classmethod
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.start < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows

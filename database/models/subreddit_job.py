@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 
 from database import db
@@ -21,4 +23,9 @@ class SubredditJob(peewee.Model):
 
     def __repr__(self):
         return '<SubredditJob row {}: [{}][{}][start:{}]>'.format(self.id, self.subreddit.name, self.subreddit.id, self.start)
+
+    @classmethod
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.start < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows
 

@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 
 from database import db
@@ -34,4 +36,9 @@ class PostResume(peewee.Model):
             return bool(cls.get(cls.subreddit == subreddit, cls.submission_id == submission_id))
         except peewee.DoesNotExist:
             return False
+
+    @classmethod
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.posted_at < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows
 

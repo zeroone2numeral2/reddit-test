@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 from playhouse.shortcuts import model_to_dict
 
@@ -45,6 +47,10 @@ class Post(peewee.Model):
             return None
 
     @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.posted_at < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows
+
+    def to_dict(self):
+        return model_to_dict(self)
 
