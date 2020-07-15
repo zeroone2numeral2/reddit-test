@@ -52,6 +52,44 @@ def main(database_path):
 
     db.execute_sql("""drop table resume_posts_tmp;""")
 
+    db.execute_sql("""drop table posts_tmp;""")
+
+    db.execute_sql("""CREATE TABLE `posts_tmp` (
+        	`submission_id`	VARCHAR ( 255 ) NOT NULL,
+        	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
+        	`channel_id`	INTEGER NOT NULL,
+        	`message_id`	INTEGER,
+        	`posted_at`	DATETIME,
+        	`sent_message`	VARCHAR ( 255 ),
+        	`uploaded_bytes`	INTEGER
+        );""")
+
+    db.execute_sql("""
+        insert into posts_tmp
+        select *
+        from posts;""")
+
+    db.execute_sql("""drop table posts;""")
+
+    db.execute_sql("""CREATE TABLE `posts` (
+        	`submission_id`	VARCHAR ( 255 ) NOT NULL,
+        	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
+        	`channel_id`	INTEGER NOT NULL,
+        	`message_id`	INTEGER,
+        	`posted_at`	DATETIME,
+        	`sent_message`	VARCHAR ( 255 ),
+        	`uploaded_bytes`	INTEGER,
+        	FOREIGN KEY(`channel_id`) REFERENCES `channels`(`channel_id`),
+        	PRIMARY KEY(`submission_id`,`subreddit_id`),
+        	FOREIGN KEY(`subreddit_id`) REFERENCES `subreddits`(`id`)
+        );""")
+
+    db.execute_sql("""insert into posts
+        select *
+        from posts_tmp;""")
+
+    db.execute_sql("""drop table posts_tmp;""")
+
     logger.info('<migration completed>')
 
 
