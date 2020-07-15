@@ -29,3 +29,10 @@ class Style(peewee.Model):
 
     def to_dict(self):
         return model_to_dict(self)
+
+    @classmethod
+    def default(cls):
+        try:
+            return cls.get(cls.name == 'default')
+        except peewee.DoesNotExist:
+            return
