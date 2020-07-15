@@ -1,7 +1,10 @@
+import datetime
+
 import peewee
 from playhouse.shortcuts import model_to_dict
 
 from database import db
+from const import DEFAULT_TEMPLATES
 
 
 class Style(peewee.Model):
@@ -33,12 +36,23 @@ class Style(peewee.Model):
         return model_to_dict(self)
 
     @classmethod
-    def get_default(cls):
+    def get_default(cls, create_if_missing=True):
         try:
             return cls.get(cls.default == True)
         except peewee.DoesNotExist:
             # raise an error if there is no default style
-            raise peewee.InternalError('no default Style found')
+            if not create_if_missing:
+                raise peewee.InternalError('no default Style found')
+
+            now = datetime.datetime.utcnow()
+            cls.create(
+                name='default_{}'.format(now.strftime('%Y%m%d_%H%M%S')),
+                default=True,
+                template=DEFAULT_TEMPLATES[0],
+                created=now,
+                updated=now
+            )
+            return cls
 
     @classmethod
     def by_name(cls, name):
@@ -70,7 +84,7 @@ class Style(peewee.Model):
         self.default = True
         self.save()
 
-    def update_time(self, dt_object, save=True):
+    def update_time(self, dt_object: datetime, save=True):
         self.updated = dt_object
         if save:
             self.save()
