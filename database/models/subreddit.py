@@ -45,15 +45,6 @@ class Subreddit(peewee.Model):
     youtube_download_max_duration = peewee.IntegerField(default=180)
     reddit_account = peewee.CharField(null=True)
     reddit_client = peewee.CharField(null=True)
-    # STYLE
-    template = peewee.CharField(null=True)
-    template_no_url = peewee.CharField(null=True)
-    url_button = peewee.BooleanField(default=False)
-    url_button_template = peewee.CharField(null=True)
-    comments_button = peewee.BooleanField(default=False)
-    comments_button_template = peewee.CharField(null=True)
-    send_medias = peewee.BooleanField(default=True)
-    webpage_preview = peewee.BooleanField(default=True)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)
@@ -69,8 +60,6 @@ class Subreddit(peewee.Model):
     weekday = peewee.IntegerField(default=5)  # 0-6, from Monday to Sunday
     frequency = peewee.CharField(default='day')
     resume_last_posted_submission_dt = peewee.DateTimeField(null=True)
-    # RESUME STYLE
-    template_resume = peewee.CharField(null=True)
 
     class Meta:
         table_name = 'subreddits'

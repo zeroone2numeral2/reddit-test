@@ -144,6 +144,15 @@ def main(database_path):
         migrator.add_column('styles', 'template_resume', template_resume),
         migrator.add_column('styles', 'template_caption', template_caption),
         migrator.add_column('styles', 'default', default),
+        migrator.drop_not_null('subreddits', 'template_resume'),
+        migrator.drop_not_null('subreddits', 'template'),
+        migrator.drop_not_null('subreddits', 'template_no_url'),
+        migrator.drop_not_null('subreddits', 'url_button'),
+        migrator.drop_not_null('subreddits', 'url_button_template'),
+        migrator.drop_not_null('subreddits', 'comments_button'),
+        migrator.drop_not_null('subreddits', 'comments_button_template'),
+        migrator.drop_not_null('subreddits', 'send_medias'),
+        migrator.drop_not_null('subreddits', 'webpage_preview'),
     ]
 
     logger.info('Starting migration....')
