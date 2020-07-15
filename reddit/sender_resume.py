@@ -18,7 +18,7 @@ class SenderResume(Sender):
         self.gen_submission_dict()
 
     def post_resume_announcement(self):
-        template = self._subreddit.template_resume
+        template = self._subreddit.style.template_resume
         if not template:
             template = DEFAULT_ANNOUNCEMENT_TEMPLATE
 
@@ -28,7 +28,7 @@ class SenderResume(Sender):
             self._subreddit.channel.channel_id,
             text,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=not self._subreddit.webpage_preview
+            disable_web_page_preview=not self._subreddit.style.webpage_preview
         )
 
     def register_post(self):
