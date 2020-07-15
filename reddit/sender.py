@@ -383,11 +383,7 @@ class Sender:
 
         return reply_markup
 
-    def post(self, chat_id=None):
-        if chat_id:
-            self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
-            self._chat_id = chat_id
-
+    def _get_template(self):
         if not self._s.textual or not self._subreddit.style.template_no_url:
             # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
@@ -398,8 +394,16 @@ class Sender:
         if not template:
             # if there is no correct template set in the db, use the default one
             self.log.info('no template: using the default one')
-            template = DEFAULT_TEMPLATES[0]
+            template = DEFAULT_TEMPLATE
 
+        return template
+
+    def post(self, chat_id=None):
+        if chat_id:
+            self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
+            self._chat_id = chat_id
+
+        template = self._get_template()
         text = self._get_filled_template(template)
         # self.log.info('post text: %s', text)
 
