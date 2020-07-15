@@ -383,8 +383,11 @@ class Sender:
 
         return reply_markup
 
-    def _get_template(self):
-        if not self._s.textual or not self._subreddit.style.template_no_url:
+    def _get_template(self, is_caption=False):
+        if is_caption and self._s.style.template_caption:
+            # always use the caption template when we plan to send a media with caption
+            template = self._s.style.template_caption
+        elif not self._s.textual or not self._subreddit.style.template_no_url:
             # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
             template = self._subreddit.style.template
@@ -403,8 +406,11 @@ class Sender:
             self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
             self._chat_id = chat_id
 
-        template = self._get_template()
-        text = self._get_filled_template(template)
+        # generate two texts: one to be used in case we will send the media as caption,
+        # the other one for when we send the media as text (or if sending as media fails)
+        text = self._get_filled_template(self._get_template())
+        caption = self._get_filled_template(self._get_template(is_caption=True))
+
         # self.log.info('post text: %s', text)
 
         reply_markup = self._generate_reply_markup()
@@ -415,28 +421,28 @@ class Sender:
                 if self._s.media_type == MediaType.IMAGE:
                     self.log.info('post is an image: using _send_image()')
                     if config.telegram.get('send_images_by_url', True):
-                        self._sent_message = self._send_image_url(self._s.media_url, text, reply_markup=reply_markup)
+                        self._sent_message = self._send_image_url(self._s.media_url, caption, reply_markup=reply_markup)
                     else:
                         self.log.info('config said to NOT send the image by url: we will try to download it')
-                        self._sent_message = self._send_image_download(self._s.media_url, text, reply_markup=reply_markup)
+                        self._sent_message = self._send_image_download(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VREDDIT:
                     self.log.info('post is a vreddit: using _send_vreddit()')
-                    self._sent_message = self._send_vreddit(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_vreddit(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VIDEO:
                     self.log.info('post is a video: using _send_video()')
-                    self._sent_message = self._send_video(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_video(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GIF:
                     self.log.info('post is a gif: using _send_gif()')
-                    self._sent_message = self._send_gif(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_gif(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GFYCAT:
                     self.log.info('post is a gfycat: using _send_gfycat()')
-                    self._sent_message = self._send_gfycat(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_gfycat(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.REDDIT_GIF:
                     self.log.info('post is a n i.reddit GIF: using _send_i_reddit_gif()')
-                    self._sent_message = self._send_i_reddit_gif(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_i_reddit_gif(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.YOUTUBE:
                     self.log.info('post is a youtube url: using _send_youtube()')
-                    self._sent_message = self._send_youtube(self._s.media_url, text, reply_markup=reply_markup)
+                    self._sent_message = self._send_youtube(self._s.media_url, caption, reply_markup=reply_markup)
                 
                 return self._sent_message
             except Exception as e:
