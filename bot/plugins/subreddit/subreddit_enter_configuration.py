@@ -16,7 +16,6 @@ from .subreddit_configuration.dbentry import subconfig_on_entry_change
 from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
 from .subreddit_configuration.remove import subconfig_on_remove_command
-from .subreddit_configuration.settemplate import subconfig_on_settemplate_command
 from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
 from .subreddit_configuration.topstorage import subconfig_on_savetop_command
 from .subreddit_configuration.topstorage import subconfig_on_gettop_command

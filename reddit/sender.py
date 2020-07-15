@@ -31,7 +31,7 @@ from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
 from database.models import Ignored
-from const import DEFAULT_TEMPLATES
+from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
 
@@ -264,7 +264,7 @@ class Sender:
         created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
-        if self._subreddit.comments_button \
+        if self._subreddit.style.comments_button \
             or (self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
             or (self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
             # calling a subreddit's num_comments property probably executes an API request. Make it
