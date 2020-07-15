@@ -271,7 +271,7 @@ def on_entry_change(update: Update, _, style: Style):
 
 mainbot.add_handler(ConversationHandler(
     entry_points=[
-        CommandHandler(['style'], on_style_command),
+        CommandHandler(['confstyle'], on_style_command),
         CommandHandler(['newstyle'], on_newstyle_command),
     ],
     states={
