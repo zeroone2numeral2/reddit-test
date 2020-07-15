@@ -333,6 +333,9 @@ class Sender:
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
         
         for key in dir(self._subreddit):
+            if key in ('channel', 'style'):
+                continue
+
             if key.startswith('_') or key in ('DoesNotExist',):
                 continue
             
