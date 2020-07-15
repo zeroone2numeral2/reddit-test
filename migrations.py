@@ -181,15 +181,15 @@ def main(database_path):
 	`posted_at`	DATETIME,
 	`sent_message`	VARCHAR ( 255 ),
 	`uploaded_bytes`	INTEGER
-);
-
+);""")
+    db.execute_sql("""
 insert into posts_tmp
 select *
-from posts;
+from posts;""")
 
-drop table posts;
+    db.execute_sql("""drop table posts;""")
 
-CREATE TABLE `posts` (
+    db.execute_sql("""CREATE TABLE `posts` (
 	`submission_id`	VARCHAR ( 255 ) NOT NULL,
 	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
 	`channel_id`	INTEGER NOT NULL,
@@ -200,13 +200,13 @@ CREATE TABLE `posts` (
 	FOREIGN KEY(`channel_id`) REFERENCES `channels`(`channel_id`),
 	PRIMARY KEY(`submission_id`,`subreddit_id`),
 	FOREIGN KEY(`subreddit_id`) REFERENCES `subreddits`(`id`)
-);
+);""")
 
-insert into posts
+    db.execute_sql("""insert into posts
 select *
-from posts_tmp;
+from posts_tmp;""")
 
-drop table posts_tmp;""")
+    db.execute_sql("""drop table posts_tmp;""")
 
     logger.info('<migration completed>')
 
