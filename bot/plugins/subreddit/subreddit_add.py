@@ -10,7 +10,7 @@ from telegram import Update
 from bot import mainbot
 from bot.conversation import Status
 from bot.markups import Keyboard
-from database.models import Channel
+from database.models import Channel, Style
 from database.models import Subreddit
 from reddit import reddit
 from utilities import u
@@ -111,6 +111,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
         subreddit_id=subreddit_id,
         channel=channel,
         name=subreddit_name,
+        style=Style.default(),
         test=config.telegram.get('testing', False)
     )
 
