@@ -213,3 +213,7 @@ class Subreddit(peewee.Model):
         )
 
         return [{**row, 'subreddits': row['subreddits'].split(', ')} for row in rows]
+
+    def set_default_style(self):
+        self.style = Style.default()
+        self.save()
