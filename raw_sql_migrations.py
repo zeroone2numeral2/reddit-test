@@ -14,6 +14,8 @@ parser = argparse.ArgumentParser()
 def main(database_path):
     db = peewee.SqliteDatabase(database_path, pragmas={'journal_mode': 'wal'})
 
+    db.execute_sql("""drop table resume_posts_tmp;""")
+
     db.execute_sql("""CREATE TABLE `resume_posts_tmp` (
     	`submission_id`	VARCHAR ( 255 ) NOT NULL,
     	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
