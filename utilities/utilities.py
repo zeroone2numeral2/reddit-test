@@ -245,9 +245,17 @@ def guess_mimetype(file_path):
     return result[0]
 
 
-def to_ascii(string):
+def to_ascii(string, replace_spaces=False, lowercase=False):
     # return string.encode("ascii", errors="ignore").decode()
-    return re.sub(r'[^\w]', '', string)
+    result_string = re.sub(r'[^\w]', '', string)
+
+    if replace_spaces:
+        result_string = result_string.replace(' ', '_')
+
+    if lowercase:
+        result_string = result_string.lower()
+
+    return result_string
 
 
 def string_to_python_val(value):

@@ -236,8 +236,8 @@ class Sender:
 
         if self._s.link_flair_text is not None:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
-            ascii_flair = re.sub(r'[^a-z_0-9 ]+', '', str(self._s.link_flair_text), flags=re.I)
-            self._s.flair_normalized = ascii_flair.replace(' ', '_').lower()
+            ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
+            self._s.flair_normalized = ascii_flair
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
@@ -280,7 +280,7 @@ class Sender:
 
         self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
-        self._s.channel_invite_link = self._subreddit.channel.invite_link or None
+        self._s.channel_invite_link = self._subreddit.channel_link
 
         # u.print_submission(self._s)
 
