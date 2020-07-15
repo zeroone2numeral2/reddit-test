@@ -9,7 +9,7 @@ from .channel import Channel
 
 class PostResume(peewee.Model):
     submission_id = peewee.CharField(null=False)
-    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts')
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts', on_delete='NO ACTION', null=True)
     channel = peewee.ForeignKeyField(Channel, backref='posts')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
