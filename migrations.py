@@ -141,6 +141,7 @@ def main(database_path):
         migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
         # 20200715
         migrator.add_column('subreddits', 'style', style),
+        migrator.add_column('subreddits', 'style_id', peewee.IntegerField(null=True)),  # workaround, line above doesn't work
         migrator.add_column('styles', 'template_resume', template_resume),
         migrator.add_column('styles', 'template_caption', template_caption),
         migrator.add_column('styles', 'default', default),
