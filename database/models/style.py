@@ -38,3 +38,16 @@ class Style(peewee.Model):
         except peewee.DoesNotExist:
             # raise an error if there is no default style
             raise peewee.InternalError('no default Style found')
+
+    @classmethod
+    def get_list(cls, name_filter=None):
+        styles = (
+            cls.select()
+            .order_by(cls.created)
+        )
+
+        if not name_filter:
+            return [sub for sub in styles]
+        else:
+            name_filter = name_filter.lower()
+            return [sub for sub in styles if name_filter in sub.name.lower()]
