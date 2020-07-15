@@ -35,8 +35,6 @@ from utilities import d
 
 logger = logging.getLogger('handler')
 
-ENABLED = False
-
 TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">{s.r_name}</a> (channel: {s.ch_title}, \
 link: {s.channel_link})
 
