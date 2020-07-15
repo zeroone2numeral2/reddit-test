@@ -1,7 +1,6 @@
 import logging
 import re
 
-from playhouse.shortcuts import model_to_dict
 from telegram import Update
 from telegram.ext import MessageHandler, CommandHandler, CallbackContext
 from telegram.ext import Filters
@@ -10,7 +9,6 @@ from peewee import IntegrityError
 
 from bot import mainbot
 from bot.conversation import Status
-from bot.customfilters import CustomFilters
 from database.models import Subreddit
 from database.models import Style
 from bot.markups import Keyboard
@@ -19,12 +17,47 @@ from utilities import d
 
 logger = logging.getLogger('handler')
 
-STYLE_SELECTED_TEXT = """Now you can configure <code>{}</code>.
+STYLE_SELECTED_TEXT = """Now you can configure <code>{s.name}</code>.
 You can use the following commands: /info, /remove, /default, /subreddits
 
 Pass any field to get its current value, or a field followed by the new value to change it.
 
 Just send the field with the new value. Use /exit to exit"""
+
+
+@d.restricted
+@d.failwithmessage
+def on_newstyle_command(update: Update, context: CallbackContext):
+    logger.info('/newstyle command')
+
+    if not context.args:
+        update.message.reply_text('Please provide the style name')
+        return ConversationHandler.END
+
+    style_name = u.to_ascii(context.args[0].lower())
+    if not style_name:
+        update.message.reply_text('Invalid name')
+        return ConversationHandler.END
+
+    try:
+        style = Style.create(
+            name=style_name,
+            created=u.now(),
+            updated=u.now()
+        )
+    except IntegrityError:
+        update.message.reply_html('The style <code>{}</code> already exists'.format(style_name))
+        return ConversationHandler.END
+
+    update.message.reply_html('Style <code>{}</code> created'.format(style_name))
+
+    text = STYLE_SELECTED_TEXT.format(s=style)
+    update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
+
+    context.user_data['data'] = dict()
+    context.user_data['data']['style'] = style
+
+    return Status.WAITING_STYLE_CONFIG_ACTION
 
 
 @d.restricted
@@ -88,7 +121,7 @@ def on_style_selected(update: Update, context: CallbackContext):
     context.user_data['data'] = dict()
     context.user_data['data']['style'] = style
 
-    text = STYLE_SELECTED_TEXT.format(style.name)
+    text = STYLE_SELECTED_TEXT.format(s=style)
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 
     return Status.WAITING_STYLE_CONFIG_ACTION
@@ -237,7 +270,10 @@ def on_entry_change(update: Update, _, style: Style):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(['style'], on_style_command)],
+    entry_points=[
+        CommandHandler(['style'], on_style_command),
+        CommandHandler(['newstyle'], on_newstyle_command),
+    ],
     states={
         Status.STYLE_SELECT: [MessageHandler(Filters.text & ~Filters.command, on_style_selected)],
         Status.WAITING_STYLE_CONFIG_ACTION: [

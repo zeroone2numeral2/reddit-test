@@ -391,7 +391,7 @@ class Sender:
         if not self._s.textual or not self._subreddit.style.template_no_url:
             # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
-            template = self._subreddit.template
+            template = self._subreddit.style.template
         else:
             template = self._subreddit.style.template_no_url
 
