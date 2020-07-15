@@ -145,15 +145,15 @@ def main(database_path):
         migrator.add_column('styles', 'template_resume', template_resume),
         migrator.add_column('styles', 'template_caption', template_caption),
         migrator.add_column('styles', 'default', default),
-        migrator.drop_not_null('subreddits', 'template_resume'),
-        migrator.drop_not_null('subreddits', 'template'),
-        migrator.drop_not_null('subreddits', 'template_no_url'),
-        migrator.drop_not_null('subreddits', 'url_button'),
-        migrator.drop_not_null('subreddits', 'url_button_template'),
-        migrator.drop_not_null('subreddits', 'comments_button'),
-        migrator.drop_not_null('subreddits', 'comments_button_template'),
-        migrator.drop_not_null('subreddits', 'send_medias'),
-        migrator.drop_not_null('subreddits', 'webpage_preview'),
+        migrator.drop_column('subreddits', 'template_resume'),
+        migrator.drop_column('subreddits', 'template'),
+        migrator.drop_column('subreddits', 'template_no_url'),
+        migrator.drop_column('subreddits', 'url_button'),
+        migrator.drop_column('subreddits', 'url_button_template'),
+        migrator.drop_column('subreddits', 'comments_button'),
+        migrator.drop_column('subreddits', 'comments_button_template'),
+        migrator.drop_column('subreddits', 'send_medias'),
+        migrator.drop_column('subreddits', 'webpage_preview'),
     ]
 
     logger.info('Starting migration....')
@@ -172,6 +172,41 @@ def main(database_path):
         except ValueError as e:
             logger.info('ValueError: %s', str(e))
             continue
+
+    db.execute_sql("""CREATE TABLE `posts_tmp` (
+	`submission_id`	VARCHAR ( 255 ) NOT NULL,
+	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
+	`channel_id`	INTEGER NOT NULL,
+	`message_id`	INTEGER,
+	`posted_at`	DATETIME,
+	`sent_message`	VARCHAR ( 255 ),
+	`uploaded_bytes`	INTEGER
+);
+
+insert into posts_tmp
+select *
+from posts;
+
+drop table posts;
+
+CREATE TABLE `posts` (
+	`submission_id`	VARCHAR ( 255 ) NOT NULL,
+	`subreddit_id`	VARCHAR ( 255 ) NOT NULL,
+	`channel_id`	INTEGER NOT NULL,
+	`message_id`	INTEGER,
+	`posted_at`	DATETIME,
+	`sent_message`	VARCHAR ( 255 ),
+	`uploaded_bytes`	INTEGER,
+	FOREIGN KEY(`channel_id`) REFERENCES `channels`(`channel_id`),
+	PRIMARY KEY(`submission_id`,`subreddit_id`),
+	FOREIGN KEY(`subreddit_id`) REFERENCES `subreddits`(`id`)
+);
+
+insert into posts
+select *
+from posts_tmp;
+
+drop table posts_tmp;""")
 
     logger.info('<migration completed>')
 

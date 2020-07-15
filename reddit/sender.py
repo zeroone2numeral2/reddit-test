@@ -30,7 +30,6 @@ from pyroutils import PyroClient
 from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
-from database.models import Ignored
 from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
@@ -384,9 +383,9 @@ class Sender:
         return reply_markup
 
     def _get_template(self, is_caption=False):
-        if is_caption and self._s.style.template_caption:
+        if is_caption and self._subreddit.style.template_caption:
             # always use the caption template when we plan to send a media with caption
-            template = self._s.style.template_caption
+            template = self._subreddit.style.template_caption
         elif not self._s.textual or not self._subreddit.style.template_no_url:
             # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
@@ -761,14 +760,6 @@ class Sender:
                 posted_at=u.now() if self._sent_message else None,
                 uploaded_bytes=self._uploaded_bytes,
                 sent_message=sent_message_json
-            )
-    
-    def register_ignored(self):
-        with db.atomic():
-            Ignored.create(
-                submission_id=self._s.id,
-                subreddit=self._subreddit,
-                ignored_at=u.now() if self._sent_message else None
             )
     
     def test_filters(self):

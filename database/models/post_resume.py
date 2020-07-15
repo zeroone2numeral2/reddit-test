@@ -8,9 +8,9 @@ from .channel import Channel
 
 
 class PostResume(peewee.Model):
-    submission_id = peewee.CharField(null=False)
-    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts', on_delete='NO ACTION', null=True)
-    channel = peewee.ForeignKeyField(Channel, backref='posts')
+    submission_id = peewee.CharField(null=False, primary_key=True)
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='resume_posts')
+    channel = peewee.ForeignKeyField(Channel, backref='resume_posts')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
     sent_message = peewee.CharField(null=True)
@@ -18,7 +18,6 @@ class PostResume(peewee.Model):
     class Meta:
         table_name = 'resume_posts'
         database = db
-        primary_key = peewee.CompositeKey('submission_id', 'subreddit')
         indexes = (
             (('submission_id', 'subreddit_id', 'channel'), True),
         )

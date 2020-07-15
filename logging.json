@@ -112,7 +112,7 @@
             "level": "WARNING"
         },
         "peewee": {
-            "level": "DEBUG"
+            "level": "WARNING"
         },
         "prawcore": {
             "level": "WARNING"
