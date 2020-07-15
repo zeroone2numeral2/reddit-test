@@ -57,6 +57,7 @@ def main(database_path):
     comments_button_template = peewee.CharField(null=True)
     ignore_flairless = peewee.BooleanField(default=False, null=True)
     style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
+    template_resume = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -137,7 +138,8 @@ def main(database_path):
         # 20200714 ignore_flairless
         migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
         # 20200715
-        migrator.add_column('subreddits', 'style', style)
+        migrator.add_column('subreddits', 'style', style),
+        migrator.add_column('styles', 'template_resume', template_resume),
     ]
 
     logger.info('Starting migration....')
