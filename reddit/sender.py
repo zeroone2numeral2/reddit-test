@@ -265,8 +265,8 @@ class Sender:
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
         if self._subreddit.comments_button \
-            or (self._subreddit.enabled and self._subreddit.template and '{num_comments}' in self._subreddit.template) \
-            or (self._subreddit.enabled_resume and self._subreddit.template_resume and '{num_comments}' in self._subreddit.template_resume):
+            or (self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
+            or (self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
             # calling a subreddit's num_comments property probably executes an API request. Make it
             # an int if we'll need it
             self._s.num_comments = int(self._s.num_comments)
@@ -363,22 +363,22 @@ class Sender:
 
     def _generate_reply_markup(self):
         reply_markup = None
-        if self._subreddit.url_button and self._subreddit.comments_button:
+        if self._subreddit.style.url_button and self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
                 url_button_url=self._s.url,
-                url_button_label=self._get_filled_template(self._subreddit.url_button_template),
+                url_button_label=self._get_filled_template(self._subreddit.style.url_button_template),
                 comments_button_url=self._s.comments_url,
-                comments_button_label=self._get_filled_template(self._subreddit.comments_button_template),
+                comments_button_label=self._get_filled_template(self._subreddit.style.comments_button_template),
             )
-        elif self._subreddit.url_button and not self._subreddit.comments_button:
+        elif self._subreddit.style.url_button and not self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
                 url_button_url=self._s.url,
-                url_button_label=self._get_filled_template(self._subreddit.url_button_template)
+                url_button_label=self._get_filled_template(self._subreddit.style.url_button_template)
             )
-        elif not self._subreddit.url_button and self._subreddit.comments_button:
+        elif not self._subreddit.style.url_button and self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
                 comments_button_url=self._s.comments_url,
-                comments_button_label=self._get_filled_template(self._subreddit.comments_button_template),
+                comments_button_label=self._get_filled_template(self._subreddit.style.comments_button_template),
             )
 
         return reply_markup
@@ -388,12 +388,12 @@ class Sender:
             self.log.info('overriding target chat id (%d) with %d', self._chat_id, chat_id)
             self._chat_id = chat_id
 
-        if not self._s.textual or not self._subreddit.template_no_url:
+        if not self._s.textual or not self._subreddit.style.template_no_url:
             # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
             template = self._subreddit.template
         else:
-            template = self._subreddit.template_no_url
+            template = self._subreddit.style.template_no_url
 
         if not template:
             # if there is no correct template set in the db, use the default one
@@ -405,7 +405,7 @@ class Sender:
 
         reply_markup = self._generate_reply_markup()
         
-        if self._s.media_type and self._subreddit.send_medias:
+        if self._s.media_type and self._subreddit.style.send_medias:
             self.log.info('post is a media, sending it as media...')
             try:
                 if self._s.media_type == MediaType.IMAGE:
@@ -480,7 +480,7 @@ class Sender:
             self._chat_id,
             text,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=not self._subreddit.webpage_preview or self._s.force_disable_link_preview,
+            disable_web_page_preview=not self._subreddit.style.webpage_preview or self._s.force_disable_link_preview,
             reply_markup=reply_markup
         )
 
