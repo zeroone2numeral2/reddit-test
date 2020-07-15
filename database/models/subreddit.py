@@ -26,7 +26,7 @@ class Subreddit(peewee.Model):
     subreddit_id = peewee.CharField(index=True)
     name = peewee.CharField(null=False, default=0)
     channel: Channel = peewee.ForeignKeyField(Channel, backref='subreddit', on_delete='NO ACTION', null=True)
-    # style: Style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
+    style: Style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
     last_posted_submission_dt = peewee.DateTimeField(null=True)
     sorting = peewee.CharField(default=config.submissions.default_sorting)

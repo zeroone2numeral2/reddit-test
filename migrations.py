@@ -8,6 +8,7 @@ import sqlite3
 from playhouse.migrate import *
 
 from const import *
+from database.models import Style
 from config import config
 
 logging.basicConfig(format='[%(asctime)s][%(name)s] %(message)s', level=logging.INFO)
@@ -55,6 +56,7 @@ def main(database_path):
     url_button_template = peewee.CharField(null=True)
     comments_button_template = peewee.CharField(null=True)
     ignore_flairless = peewee.BooleanField(default=False, null=True)
+    style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -134,6 +136,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'comments_button_template', comments_button_template),
         # 20200714 ignore_flairless
         migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
+        # 20200715
+        migrator.add_column('subreddits', 'style', style)
     ]
 
     logger.info('Starting migration....')
