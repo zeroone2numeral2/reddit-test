@@ -6,7 +6,7 @@ from database import db
 
 class Style(peewee.Model):
     style_id = peewee.IntegerField(primary_key=True, index=True)
-    name = peewee.CharField(null=False)
+    name = peewee.CharField(null=False, unique=True)
     created = peewee.DateTimeField(null=True)
     updated = peewee.DateTimeField(null=True)
     # actual style fields
