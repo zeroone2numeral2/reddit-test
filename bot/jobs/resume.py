@@ -152,6 +152,9 @@ def check_daily_resume(context: CallbackContext):
     total_posted_messages = 0
     total_posted_bytes = 0
     for subreddit in subreddits:
+        if not subreddit.style:
+            subreddit.set_default_style()
+
         slogger.set_subreddit(subreddit)
         try:
             posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
