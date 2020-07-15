@@ -246,7 +246,8 @@ def guess_mimetype(file_path):
 
 
 def to_ascii(string):
-    return string.encode("ascii", errors="ignore").decode()
+    # return string.encode("ascii", errors="ignore").decode()
+    return re.sub(r'[^\w]', '', string)
 
 
 def string_to_python_val(value):
