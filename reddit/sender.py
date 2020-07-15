@@ -448,7 +448,7 @@ class Sender:
             except Exception as e:
                 self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e))
         else:
-            self.log.info('post is NOT a media, sending it as text')
+            self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
         
         self.log.info('posting a text...')
         self._sent_message = self._send_text(text, reply_markup=reply_markup)
