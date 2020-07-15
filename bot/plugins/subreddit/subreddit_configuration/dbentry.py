@@ -14,26 +14,6 @@ from reddit.sortings import ALL_SORTINGS
 logger = logging.getLogger('handler')
 
 
-def standard_conversion(value):
-    if value in ('true', 'True'):
-        logger.info('value is True')
-        value = True
-    elif value in ('false', 'False'):
-        logger.info('value is False')
-        value = False
-    elif value in ('none', 'None'):
-        logger.info('value is None')
-        value = None
-    elif re.search(r'^\d+$', value, re.I):
-        logger.info('value is int')
-        value = int(value)
-    elif re.search(r'^\d+\.\d+$', value, re.I):
-        logger.info('value is float')
-        value = float(value)
-
-    return value
-
-
 class TypesMap:
     BOOL_OR_NONE = dict(
         true=True,
@@ -170,7 +150,7 @@ def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
 
     if key not in VALIDATORS:
         logger.debug('"%s" key does not have a validator, applying standard conversions', key)
-        value = standard_conversion(value)
+        value = u.string_to_python_val(value)
     else:
         logger.debug('"%s" key must be validated', key)
         if not VALIDATORS[key]['test'](value):

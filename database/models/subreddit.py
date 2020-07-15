@@ -215,5 +215,17 @@ class Subreddit(peewee.Model):
         return [{**row, 'subreddits': row['subreddits'].split(', ')} for row in rows]
 
     def set_default_style(self):
-        self.style = Style.default()
+        self.style = Style.get_default()
         self.save()
+
+    @classmethod
+    def using_style(cls, style: Style):
+        rows = (
+            cls.select()
+            .where(cls.style == style)
+        )
+
+        if not rows:
+            return None
+
+        return [row for row in rows]

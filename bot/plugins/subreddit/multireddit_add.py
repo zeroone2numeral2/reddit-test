@@ -95,7 +95,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
         name=multireddit_name,
         is_multireddit=True,
         multireddit_owner=redditor,
-        style=Style.default(),
+        style=Style.get_default(),
         test=config.telegram.get('testing', False)
     )
 

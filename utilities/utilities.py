@@ -245,6 +245,26 @@ def to_ascii(string):
     return string.encode("ascii", errors="ignore").decode()
 
 
+def string_to_python_val(value):
+    if value in ('true', 'True'):
+        logger.info('value is True')
+        value = True
+    elif value in ('false', 'False'):
+        logger.info('value is False')
+        value = False
+    elif value in ('none', 'None'):
+        logger.info('value is None')
+        value = None
+    elif re.search(r'^\d+$', value, re.I):
+        logger.info('value is int')
+        value = int(value)
+    elif re.search(r'^\d+\.\d+$', value, re.I):
+        logger.info('value is float')
+        value = float(value)
+
+    return value
+
+
 class FileWriter:
     def __init__(self, file_path, text, write=False):
         self.file_path = file_path

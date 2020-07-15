@@ -59,6 +59,7 @@ def main(database_path):
     style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
     template_resume = peewee.CharField(null=True)
     template_caption = peewee.CharField(null=True)
+    default = peewee.BooleanField(default=False)
 
     migrations = [
         # 20190318 pt. 1
@@ -142,6 +143,7 @@ def main(database_path):
         migrator.add_column('subreddits', 'style', style),
         migrator.add_column('styles', 'template_resume', template_resume),
         migrator.add_column('styles', 'template_caption', template_caption),
+        migrator.add_column('styles', 'default', default),
     ]
 
     logger.info('Starting migration....')

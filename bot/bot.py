@@ -56,6 +56,9 @@ class RedditBot(Updater):
         BotCommand('newstyle', 'create a new style'),
         BotCommand('style', 'manage styles'),
         BotCommand('end', 'exit a subreddit configuration'),
+        BotCommand('exit', 'exit a subreddit configuration'),
+        BotCommand('default', 'make a style the default style'),
+        BotCommand('subredits', 'get the subreddit using a style'),
     ]
 
     @staticmethod

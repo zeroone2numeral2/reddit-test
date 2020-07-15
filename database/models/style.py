@@ -9,6 +9,7 @@ class Style(peewee.Model):
     name = peewee.CharField(null=False, unique=True)
     created = peewee.DateTimeField(null=True)
     updated = peewee.DateTimeField(null=True)
+    default = peewee.BooleanField(default=False)
     # actual style fields
     template = peewee.CharField(null=True)
     template_no_url = peewee.CharField(null=True)  # when the submission doesn't have an url
@@ -32,12 +33,19 @@ class Style(peewee.Model):
         return model_to_dict(self)
 
     @classmethod
-    def default(cls):
+    def get_default(cls):
         try:
-            return cls.get(cls.name == 'default')
+            return cls.get(cls.default == True)
         except peewee.DoesNotExist:
             # raise an error if there is no default style
             raise peewee.InternalError('no default Style found')
+
+    @classmethod
+    def by_name(cls, name):
+        try:
+            return cls.get(cls.name == name.lower())
+        except peewee.DoesNotExist:
+            return None
 
     @classmethod
     def get_list(cls, name_filter=None):
@@ -51,3 +59,25 @@ class Style(peewee.Model):
         else:
             name_filter = name_filter.lower()
             return [sub for sub in styles if name_filter in sub.name.lower()]
+
+    @classmethod
+    def no_default(cls):
+        query = cls.update(default=False).where(cls.default == True)
+        return query.execute()
+
+    def make_default(self):
+        Style.no_default()
+        self.default = True
+        self.save()
+
+    def update_time(self, dt_object, save=True):
+        self.updated = dt_object
+        if save:
+            self.save()
+
+    def field_exists(self, key):
+        try:
+            getattr(self, key)
+            return True
+        except AttributeError:
+            return False

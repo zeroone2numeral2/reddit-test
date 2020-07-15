@@ -111,7 +111,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
         subreddit_id=subreddit_id,
         channel=channel,
         name=subreddit_name,
-        style=Style.default(),
+        style=Style.get_default(),
         test=config.telegram.get('testing', False)
     )
 
