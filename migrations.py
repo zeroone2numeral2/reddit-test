@@ -131,6 +131,7 @@ def main(database_path):
         # 20200618
         migrator.add_column('jobs', 'uploaded_bytes', uploaded_bytes),
         migrator.add_column('posts', 'uploaded_bytes', uploaded_bytes),
+        migrator.add_column('resume_posts', 'uploaded_bytes', uploaded_bytes),
         # 20200619
         migrator.add_column('subreddits', 'reddit_account', reddit_account),
         migrator.add_column('subreddits', 'reddit_client', reddit_client),
