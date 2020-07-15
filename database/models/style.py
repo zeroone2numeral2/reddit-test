@@ -35,4 +35,5 @@ class Style(peewee.Model):
         try:
             return cls.get(cls.name == 'default')
         except peewee.DoesNotExist:
-            return
+            # raise an error if there is no default style
+            raise peewee.InternalError('no default Style found')
