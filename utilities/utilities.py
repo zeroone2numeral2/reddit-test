@@ -69,8 +69,12 @@ def dotted(number):
     return re.sub(r'(\d)(?=(\d{3})+(?!\d))', r'\1.', '{}'.format(number))
 
 
-def model_dict(model_instance, plain_formatted_string=False):
+def model_dict(model_instance, plain_formatted_string=False, ignore_keys: [list, tuple] = None):
     model_instance_dict = model_to_dict(model_instance)
+    if ignore_keys:
+        for key in ignore_keys:
+            model_instance_dict.pop(key, None)
+
     model_instance_dict = OrderedDict(sorted(model_instance_dict.items()))
     if not plain_formatted_string:
         return model_instance_dict

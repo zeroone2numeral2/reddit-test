@@ -27,9 +27,9 @@ from .subreddit_configuration.channel import subconfig_on_selected_channel_wrong
 from .subreddit_configuration.clone import subconfig_on_clonefrom_command
 from .subreddit_configuration.clone import subconfig_on_origin_subreddit_selected
 from .subreddit_configuration.clone import subconfig_on_selected_subreddit_wrong
-from .subreddit_configuration.clonestyle import subconfig_on_clonestylefrom_command
-from .subreddit_configuration.clonestyle import subconfig_on_clonestyle_origin_subreddit_selected
-from .subreddit_configuration.clonestyle import subconfig_on_clonestyle_selected_subreddit_wrong
+from .subreddit_configuration.style import subconfig_on_getstyle_command
+from .subreddit_configuration.style import subconfig_on_setstyle_command
+from .subreddit_configuration.style import subconfig_on_style_selected
 from utilities import u
 from utilities import d
 
@@ -43,13 +43,13 @@ link: {s.channel_link})
 /remove (remove the subreddit from the db), \
 /setchannel (set the subreddit's channel), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
-/clonestylefrom (override the style settings of the current subreddit with those from another one), \
+/setstyle (change this subreddit's style), \
+/getstyle (see the current style), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
 /removetop (remove the saved top posts for this subreddit with the current sorting), \
-/gettop (see how many top posts we have saved for the current sorting), \
-/settemplate (use one of the default templates for this subreddit)
+/gettop (see how many top posts we have saved for the current sorting)
 
 You can also pass one of the subreddit's properties to see or change them, for example:
 • "<code>template</code>" will show the current template
@@ -187,14 +187,14 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['info'], subconfig_on_info_command),
             CommandHandler(['disable'], subconfig_on_disable_command),
             CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
-            CommandHandler(['settemplate'], subconfig_on_settemplate_command),
             CommandHandler(['setchannelicon'], subconfig_on_setchannelicon_command),
             CommandHandler(['savetop'], subconfig_on_savetop_command),
             CommandHandler(['gettop', 'getop'], subconfig_on_gettop_command),
             CommandHandler(['removetop', 'remtop'], subconfig_on_removetop_command),
             CommandHandler(['setchannel'], subconfig_on_setchannel_command),
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
-            CommandHandler(['clonestylefrom', 'copystylefrom'], subconfig_on_clonestylefrom_command),
+            CommandHandler(['getstyle'], subconfig_on_getstyle_command),
+            CommandHandler(['setstyle'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command)
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
@@ -202,14 +202,13 @@ mainbot.add_handler(ConversationHandler(
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_channel_wrong),
             CommandHandler(['cancel'], on_cancel_command),
         ],
+        Status.SUBREDDIT_WAITING_STYLE: [
+            MessageHandler(Filters.text & ~Filters.command, subconfig_on_style_selected),
+            CommandHandler(['cancel'], on_cancel_command),
+        ],
         Status.CLONE_WAITING_ORIGIN_SUBREDDIT: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_origin_subreddit_selected),
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_subreddit_wrong),
-            CommandHandler(['cancel'], on_cancel_command),
-        ],
-        Status.CLONESTYLE_WAITING_ORIGIN_SUBREDDIT: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_clonestyle_origin_subreddit_selected),
-            MessageHandler(~Filters.command & Filters.all, subconfig_on_clonestyle_selected_subreddit_wrong),
             CommandHandler(['cancel'], on_cancel_command),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]

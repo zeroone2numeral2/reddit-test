@@ -28,7 +28,6 @@ class RedditBot(Updater):
         BotCommand('links', 'get a list of channels with their invite link'),
         BotCommand('icon', 'get a subreddit icon'),
         BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
-        BotCommand('templates', 'list available preformatted templates'),
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
         BotCommand('remsubslogs', 'remove the subreddits logs'),
         BotCommand('force', 'force a job'),
@@ -45,13 +44,11 @@ class RedditBot(Updater):
         BotCommand('remove', 'remove the subreddit'),
         BotCommand('setchannel', 'set the subreddit channel'),
         BotCommand('clonefrom', 'set the subreddit db values by copying them from another subreddit'),
-        BotCommand('clonestylefrom', 'set the subreddit style values by copying them from another subreddit'),
         BotCommand('setchannelicon', 'set the subreddit channel icon using the sub icon'),
         BotCommand('disable', 'disable the subreddit (all jobs)'),
         BotCommand('savetop', 'save the top posts based on the current sorting and limit'),
         BotCommand('removetop', 'remove the saved top submissions'),
         BotCommand('gettop', 'see what we have currently saved as top submission'),
-        BotCommand('settemplate', 'set one of the default templates'),
         BotCommand('clean', 'delete old rows from some tables'),
         BotCommand('newstyle', 'create a new style'),
         BotCommand('style', 'manage styles'),
@@ -59,6 +56,7 @@ class RedditBot(Updater):
         BotCommand('exit', 'exit a subreddit configuration'),
         BotCommand('default', 'make a style the default style'),
         BotCommand('subredits', 'get the subreddit using a style'),
+        BotCommand('getstyle', 'see the current subreddit style'),
     ]
 
     @staticmethod

@@ -64,7 +64,7 @@ def on_newstyle_command(update: Update, context: CallbackContext):
 @d.failwithmessage
 @d.logconversation
 def on_style_command(update: Update, context: CallbackContext):
-    logger.debug('/style: selecting subreddit, text: %s', update.message.text)
+    logger.debug('/style: selecting style, text: %s', update.message.text)
 
     name_filter = context.args[0].lower() if context.args else None
 
