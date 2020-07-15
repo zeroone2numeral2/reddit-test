@@ -241,6 +241,10 @@ def guess_mimetype(file_path):
     return result[0]
 
 
+def to_ascii(string):
+    return string.encode("ascii", errors="ignore").decode()
+
+
 class FileWriter:
     def __init__(self, file_path, text, write=False):
         self.file_path = file_path

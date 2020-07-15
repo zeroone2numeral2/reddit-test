@@ -236,6 +236,15 @@ def pass_subreddit(func):
     return wrapped
 
 
+def pass_style(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        style = context.user_data['data']['style']
+        return func(update, context, style=style, *args, **kwargs)
+
+    return wrapped
+
+
 def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):

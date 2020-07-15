@@ -47,6 +47,10 @@ subreddit name
 /duration `<job name>`: show the duration of the most recent 100 jobs executed. Can be filtered by job name
 /lastjob: see when each job has ended the last time
 
+*Styles*
+/newstyle `[name]`: create a new style
+/style `<filter>`: manage a style
+
 *Misc*
 /ph: list template's placeholders
 /getconfig: see config values
