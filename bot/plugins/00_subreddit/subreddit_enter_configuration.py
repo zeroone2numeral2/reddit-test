@@ -54,7 +54,7 @@ You can also pass one of the subreddit's properties to see or change them, for e
 • "<code>template</code>" will show the current template
 • "<code>max_frequency 295</code>" will change <code>max_frequency</code> to 295
 
-Use /end when you are done, or /sub to change subreddit\
+Use /exit when you are done, or /sub to change subreddit\
 """
 
 
@@ -130,11 +130,27 @@ def on_cancel_command(update: Update, context: CallbackContext):
         # it might be that we do not have a subreddit saved in user_data yet (for example: user uses /sub and
         # then /cancel before selecting a subreddit)
         text = 'Operation canceled.\nBack to {s.r_name}\'s configuration'.format(s=context.user_data['data']['subreddit'])
+        step_to_return = Status.WAITING_SUBREDDIT_CONFIG_ACTION
     else:
         text = 'Operation canceled'
+        step_to_return = ConversationHandler.END
 
     update.message.reply_html(
         text,
+        reply_markup=Keyboard.REMOVE
+    )
+
+    return step_to_return
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_fake_cancel_command(update: Update, context: CallbackContext):
+    logger.info('fake /cancel command')
+
+    update.message.reply_html(
+        'There is no operation to be canceled. Use /exit to exit the configuration mode',
         reply_markup=Keyboard.REMOVE
     )
 
@@ -145,7 +161,7 @@ def on_cancel_command(update: Update, context: CallbackContext):
 @d.failwithmessage
 @d.pass_subreddit
 @d.logconversation
-def on_end(update: Update, context: CallbackContext, subreddit=None):
+def on_exit_command(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/end command')
 
     text = 'Exited configuration mode for {s.r_name} (channel: {s.ch_title})'.format(s=subreddit)
@@ -194,7 +210,8 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
             CommandHandler(['getstyle'], subconfig_on_getstyle_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
-            CommandHandler(['sub', 'subreddit'], on_sub_command)
+            CommandHandler(['sub', 'subreddit'], on_sub_command),
+            CommandHandler(['cancel'], on_fake_cancel_command),
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
@@ -212,6 +229,6 @@ mainbot.add_handler(ConversationHandler(
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },
-    fallbacks=[CommandHandler(['end', 'exit'], on_end)],
+    fallbacks=[CommandHandler(['exit'], on_exit_command)],
     conversation_timeout=15 * 60
 ))

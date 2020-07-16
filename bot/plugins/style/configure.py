@@ -22,7 +22,8 @@ You can use the following commands: /info, /remove, /default, /subreddits, /rena
 
 Pass any field to get its current value, or a field followed by the new value to change it.
 
-Just send the field with the new value. Use /exit to exit"""
+Just send the field with the new value. Use /exit to exit the configuration, or /style to change the \
+style to configure"""
 
 
 @d.restricted
@@ -113,14 +114,48 @@ def on_style_command(update: Update, context: CallbackContext):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-def on_cancel_command(update: Update, context: CallbackContext):
-    logger.info('/cancel command')
+def on_exit_command(update: Update, context: CallbackContext):
+    logger.info('/exit command')
 
     context.user_data.pop('data', None)
 
-    update.message.reply_html('Operation canceled', reply_markup=Keyboard.REMOVE)
+    update.message.reply_html('Exited configuration', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_cancel_command(update: Update, context: CallbackContext):
+    logger.info('/cancel command')
+
+    if context.user_data.get('data', None) and context.user_data['data'].get('style', None):
+        text = 'Operation canceled, back to style configuration'
+        step_to_return = Status.WAITING_STYLE_CONFIG_ACTION
+    else:
+        # it might be that the user uses /style and then /cancel before selecting one. If we weren't already
+        # inside a conversation, we should answer in a different way
+        text = 'Operation canceled'
+        step_to_return = ConversationHandler.END
+
+    update.message.reply_html(text, reply_markup=Keyboard.REMOVE)
+
+    return step_to_return
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_fake_cancel_command(update: Update, context: CallbackContext):
+    logger.info('fake /cancel command')
+
+    update.message.reply_html(
+        'There is no operation to be canceled. Use /exit to exit the configuration mode',
+        reply_markup=Keyboard.REMOVE
+    )
+
+    return Status.WAITING_STYLE_CONFIG_ACTION
 
 
 @d.restricted
@@ -304,7 +339,10 @@ mainbot.add_handler(ConversationHandler(
         CommandHandler(['newstyle'], on_newstyle_command),
     ],
     states={
-        Status.STYLE_SELECT: [MessageHandler(Filters.text & ~Filters.command, on_style_selected)],
+        Status.STYLE_SELECT: [
+            MessageHandler(Filters.text & ~Filters.command, on_style_selected),
+            CommandHandler(['cancel'], on_cancel_command)
+        ],
         Status.WAITING_STYLE_CONFIG_ACTION: [
             CommandHandler(['remove', 'rem'], on_remove_command),
             CommandHandler(['default', 'makedefault'], on_makedefault_command),
@@ -313,10 +351,11 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['style'], on_style_command),
             CommandHandler(['newstyle'], on_newstyle_command),
             CommandHandler(['rename'], on_rename_command),
+            CommandHandler(['cancel'], on_fake_cancel_command),
             MessageHandler(Filters.text & ~Filters.command, on_entry_change),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)],
     },
-    fallbacks=[CommandHandler(['cancel', 'end', 'exit'], on_cancel_command)],
+    fallbacks=[CommandHandler(['exit'], on_exit_command)],
     conversation_timeout=15 * 60
 ))
