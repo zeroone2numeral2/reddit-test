@@ -193,7 +193,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['setchannel'], subconfig_on_setchannel_command),
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
             CommandHandler(['getstyle'], subconfig_on_getstyle_command),
-            CommandHandler(['setstyle'], subconfig_on_setstyle_command),
+            CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command)
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
