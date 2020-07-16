@@ -184,7 +184,7 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 
     context.user_data.pop('data', None)
 
-    update.message.reply_text(text)
+    update.message.reply_text(text, reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 

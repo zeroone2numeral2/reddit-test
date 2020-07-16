@@ -166,7 +166,7 @@ def on_timeout(update: Update, context: CallbackContext):
 
     context.user_data.pop('data', None)
 
-    update.message.reply_text('Timeout: exited styles configuration')
+    update.message.reply_text('Timeout: exited styles configuration', reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
