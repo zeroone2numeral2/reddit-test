@@ -43,9 +43,6 @@ def main(database_path):
     public = peewee.BooleanField(default=True)
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
-    url_button = peewee.BooleanField(default=False)
-    comments_button = peewee.BooleanField(default=False)
-    template_no_url = peewee.CharField(null=True)
     youtube_download = peewee.BooleanField(default=False)
     youtube_download_max_duration = peewee.IntegerField(default=180)
     notified_on = peewee.DateTimeField(null=True)
@@ -53,8 +50,6 @@ def main(database_path):
     uploaded_bytes = peewee.IntegerField(null=True)
     reddit_account = peewee.CharField(null=True)
     reddit_client = peewee.CharField(null=True)
-    url_button_template = peewee.CharField(null=True)
-    comments_button_template = peewee.CharField(null=True)
     ignore_flairless = peewee.BooleanField(default=False, null=True)
     style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
     template_resume = peewee.CharField(null=True)
@@ -88,8 +83,6 @@ def main(database_path):
         migrator.add_column('subreddits', 'resume_template', resume_template),
         # 20190404 (resume_last_posted_submission_dt)
         migrator.add_column('subreddits', 'resume_last_posted_submission_dt', resume_last_posted_submission_dt),
-        # 20190410 (rename resume_template to template_resume)
-        migrator.rename_column('subreddits', 'resume_template', 'template_resume'),
         # 20190411 (drop not null)
         migrator.drop_not_null('subreddits', 'template_matrix'),
         # 20190430
@@ -115,11 +108,6 @@ def main(database_path):
         # 20190923
         migrator.add_column('subreddits', 'is_multireddit', is_multireddit),
         migrator.add_column('subreddits', 'multireddit_owner', multireddit_owner),
-        # 20191121
-        migrator.add_column('subreddits', 'url_button', url_button),
-        migrator.add_column('subreddits', 'comments_button', comments_button),
-        # 20200228
-        migrator.add_column('subreddits', 'template_no_url', template_no_url),
         # 20200428
         migrator.drop_not_null('subreddits', 'channel_id'),
         # 20200513
@@ -136,9 +124,6 @@ def main(database_path):
         # 20200619
         migrator.add_column('subreddits', 'reddit_account', reddit_account),
         migrator.add_column('subreddits', 'reddit_client', reddit_client),
-        # 20200703
-        migrator.add_column('subreddits', 'url_button_template', url_button_template),
-        migrator.add_column('subreddits', 'comments_button_template', comments_button_template),
         # 20200714 ignore_flairless
         migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
         # 20200715
