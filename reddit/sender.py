@@ -386,7 +386,10 @@ class Sender:
         return reply_markup
 
     def _get_template(self, is_caption=False):
-        if is_caption and self._subreddit.style.template_caption:
+        if self._subreddit.template_override:
+            # always use the override if it's set
+            template = self._subreddit.template_override
+        elif is_caption and self._subreddit.style.template_caption:
             # always use the caption template when we plan to send a media with caption
             template = self._subreddit.style.template_caption
         elif not self._s.textual or not self._subreddit.style.template_no_url:

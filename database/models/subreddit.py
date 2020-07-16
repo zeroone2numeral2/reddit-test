@@ -45,6 +45,7 @@ class Subreddit(peewee.Model):
     youtube_download_max_duration = peewee.IntegerField(default=180)
     reddit_account = peewee.CharField(null=True)
     reddit_client = peewee.CharField(null=True)
+    template_override = peewee.CharField(null=True)  # when set, will be used instead of any of the style's templates
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)

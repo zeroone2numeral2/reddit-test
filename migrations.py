@@ -60,6 +60,7 @@ def main(database_path):
     template_resume = peewee.CharField(null=True)
     template_caption = peewee.CharField(null=True)
     default = peewee.BooleanField(default=False)
+    template_override = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -155,6 +156,8 @@ def main(database_path):
         migrator.drop_column('subreddits', 'comments_button_template'),
         migrator.drop_column('subreddits', 'send_medias'),
         migrator.drop_column('subreddits', 'webpage_preview'),
+        # 20200716
+        migrator.add_column('subreddits', 'template_override', template_override),
     ]
 
     logger.info('Starting migration....')
