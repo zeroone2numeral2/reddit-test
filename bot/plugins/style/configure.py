@@ -27,6 +27,7 @@ Just send the field with the new value. Use /exit to exit"""
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
 def on_newstyle_command(update: Update, context: CallbackContext):
     logger.info('/newstyle command')
 
@@ -56,6 +57,34 @@ def on_newstyle_command(update: Update, context: CallbackContext):
 
     context.user_data['data'] = dict()
     context.user_data['data']['style'] = style
+
+    return Status.WAITING_STYLE_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+@d.pass_style
+def on_rename_command(update: Update, context: CallbackContext, style: Style):
+    logger.info('/rename command')
+
+    if not context.args:
+        update.message.reply_text('Please provide the new style name')
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    new_name = u.to_ascii(context.args[0].lower())
+    if not new_name:
+        update.message.reply_text('Invalid name')
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    try:
+        style.name = new_name
+        style.save()
+    except IntegrityError:
+        update.message.reply_html('There\'s already a style named <code>{}</code>'.format(new_name))
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    update.message.reply_html('Style renamed to <code>{}</code>'.format(new_name))
 
     return Status.WAITING_STYLE_CONFIG_ACTION
 
@@ -283,6 +312,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['info'], on_info_command),
             CommandHandler(['style'], on_style_command),
             CommandHandler(['newstyle'], on_newstyle_command),
+            CommandHandler(['rename'], on_rename_command),
             MessageHandler(Filters.text & ~Filters.command, on_entry_change),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)],

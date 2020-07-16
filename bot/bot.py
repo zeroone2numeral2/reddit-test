@@ -51,7 +51,7 @@ class RedditBot(Updater):
         BotCommand('gettop', 'see what we have currently saved as top submission'),
         BotCommand('clean', 'delete old rows from some tables'),
         BotCommand('newstyle', 'create a new style'),
-        BotCommand('confstyle', 'manage styles'),
+        BotCommand('style', 'manage styles (or a subreddit style)'),
         BotCommand('setstyle', 'set the subreddit style'),
         BotCommand('end', 'exit a subreddit configuration'),
         BotCommand('exit', 'exit a subreddit configuration'),
