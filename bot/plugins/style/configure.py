@@ -18,7 +18,7 @@ from utilities import d
 logger = logging.getLogger('handler')
 
 STYLE_SELECTED_TEXT = """Now you can configure <code>{s.name}</code>.
-You can use the following commands: /info, /remove, /default, /subreddits
+You can use the following commands: /info, /remove, /default, /subreddits, /rename
 
 Pass any field to get its current value, or a field followed by the new value to change it.
 

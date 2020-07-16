@@ -43,7 +43,7 @@ link: {s.channel_link})
 /setchannel (set the subreddit's channel), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /setstyle (change this subreddit's style), \
-/getstyle (see the current style), \
+/style (see the current style), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \

@@ -58,6 +58,7 @@ class RedditBot(Updater):
         BotCommand('default', 'make a style the default style'),
         BotCommand('subredits', 'get the subreddit using a style'),
         BotCommand('getstyle', 'see the current subreddit style'),
+        BotCommand('rename', 'rename a style'),
     ]
 
     @staticmethod
