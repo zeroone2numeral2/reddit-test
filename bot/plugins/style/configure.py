@@ -140,7 +140,7 @@ def on_remove_command(update: Update, context: CallbackContext, style: Style):
     try:
         style.delete_instance()
     except IntegrityError:
-        update.message.reply_text('You cannot delete a style which is used by some subreddits')
+        update.message.reply_text('You cannot delete a style which is used by some subreddits (see /subreddits)')
         return Status.WAITING_STYLE_CONFIG_ACTION
 
     update.message.reply_html('<code>{s.name}</code> has gone, you have also exited the styles configuration'.format(
