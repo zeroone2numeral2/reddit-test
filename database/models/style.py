@@ -66,7 +66,7 @@ class Style(peewee.Model):
     def get_list(cls, name_filter=None):
         styles = (
             cls.select()
-            .order_by(cls.created)
+            .order_by(cls.name)
         )
 
         if not name_filter:
