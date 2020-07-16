@@ -105,7 +105,7 @@ def process_subreddit(subreddit, bot):
         slogger.info('submission url: %s', sender.submission.url)
         slogger.info('submission title: %s', sender.submission.title)
 
-        if not annoucement_posted and subreddit.template_resume:
+        if not annoucement_posted and subreddit.style.template_resume:
             sender.post_resume_announcement()
             annoucement_posted = True
 
