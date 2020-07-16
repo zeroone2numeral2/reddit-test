@@ -102,7 +102,7 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
-def process_submissions(subreddit: Subreddit):
+def fetch_submissions(subreddit: Subreddit):
     slogger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or 25
@@ -124,19 +124,11 @@ def process_submissions(subreddit: Subreddit):
 
 
 @d.time_subreddit_processing(job_name='stream')
-def process_subreddit(subreddit: Subreddit, bot: Bot):
-    logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
-
-    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
-    if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
-        return JOB_NO_POST
-
-    if not time_to_post(subreddit, quiet_hours_demultiplier):
-        return JOB_NO_POST
+def process_submissions(subreddit: Subreddit, bot: Bot):
+    # this is the function that takes the most time and that should run in a thread
 
     senders = list()
-    for submission in process_submissions(subreddit):
+    for submission in fetch_submissions(subreddit):
         sender = Sender(bot, subreddit, submission, slogger)
         if sender.test_filters():
             slogger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
@@ -175,10 +167,13 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
             continue
 
         if not sent_message:
-            slogger.warning('Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
+            slogger.warning(
+                'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
         else:
             if subreddit.test:
-                slogger.info('not creating Post row and not updating last submission datetime: r/%s is a testing subreddit', subreddit.name)
+                slogger.info(
+                    'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
+                    subreddit.name)
             else:
                 slogger.info('creating Post row...')
                 sender.register_post()
@@ -195,6 +190,20 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
         # time.sleep(1)
 
     return posted_messages, posted_bytes
+
+
+def process_subreddit(subreddit: Subreddit, bot: Bot):
+    logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+
+    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
+    if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
+        slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        return JOB_NO_POST
+
+    if not time_to_post(subreddit, quiet_hours_demultiplier):
+        return JOB_NO_POST
+
+    return process_submissions(subreddit, bot)
 
 
 @d.logerrors
