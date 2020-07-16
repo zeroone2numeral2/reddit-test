@@ -9,8 +9,8 @@ from .channel import Channel
 
 class PostResume(peewee.Model):
     submission_id = peewee.CharField(null=False, primary_key=True)
-    subreddit = peewee.ForeignKeyField(Subreddit, backref='resume_posts')
-    channel = peewee.ForeignKeyField(Channel, backref='resume_posts')
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='resume_posts', on_delete='NO ACTION')
+    channel = peewee.ForeignKeyField(Channel, backref='resume_posts', on_delete='NO ACTION')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
     uploaded_bytes = peewee.IntegerField(null=True)
