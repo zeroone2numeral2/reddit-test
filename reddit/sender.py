@@ -101,7 +101,7 @@ class Sender:
         self._s = submission
         self._subreddit: Subreddit = subreddit
         if subreddit_logger:
-            self.log = subreddit_logger
+            self.log = subreddit.logger
         else:
             self.log = logger
 

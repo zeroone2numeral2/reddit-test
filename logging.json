@@ -115,7 +115,7 @@
             "level": "WARNING"
         },
         "prawcore": {
-            "level": "WARNING"
+            "level": "DEBUG"
         },
         "PIL": {
             "level": "WARNING"
