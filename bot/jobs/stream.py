@@ -3,6 +3,7 @@ import logging.config
 from logging.handlers import RotatingFileHandler
 import time
 import os
+import concurrent.futures
 
 from telegram import ParseMode, Bot
 from telegram.error import BadRequest
@@ -10,6 +11,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 from bot.logging import slogger
+from bot.logging import SubredditLogNoAdapter
 from const import JOB_NO_POST
 from utilities import u
 from utilities import d
@@ -204,6 +206,65 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
         return JOB_NO_POST
 
     return process_submissions(subreddit, bot)
+
+
+def collect_tasks(subreddit: Subreddit):
+    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
+    if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
+        slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        return False
+
+    if not time_to_post(subreddit, quiet_hours_demultiplier):
+        return False
+
+    return True
+
+
+@d.logerrors
+@d.log_start_end_dt
+# @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
+def check_posts(context: CallbackContext):
+    with db.atomic():  # noqa
+        subreddits = (
+            Subreddit.select()
+            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
+        )
+
+    total_posted_messages = 0
+    total_posted_bytes = 0
+    subreddits_to_process = list()
+    for subreddit in subreddits:
+        if not subreddit.style:
+            subreddit.set_default_style()
+
+        if collect_tasks(subreddit):
+            subreddit.logger = SubredditLogNoAdapter()
+            subreddit.logger.set_subreddit(subreddit)
+            subreddits_to_process.append(subreddit)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures_list: [concurrent.futures.Future] = {executor.submit(process_submissions, s, context.bot) for s in subreddits_to_process}
+
+        for future in futures_list:
+            try:
+                posted_messages, posted_bytes = future.result()
+                total_posted_messages += int(posted_messages)
+                total_posted_bytes += posted_bytes
+            except Exception as e:
+                # logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
+                text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
+                context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+
+        """for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            slogger.info("The outcome is %s", result)
+            posted_messages, posted_bytes = result
+            total_posted_messages += int(posted_messages)
+            total_posted_bytes += posted_bytes"""
+
+        # time.sleep(1)
+
+    return total_posted_messages, total_posted_bytes
 
 
 @d.logerrors
