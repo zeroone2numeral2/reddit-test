@@ -12,6 +12,11 @@
             "formatter": "subreddit",
             "level": "DEBUG"
         },
+        "console_info": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "INFO"
+        },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "standard",
@@ -47,6 +52,15 @@
             "maxBytes": 1048576,
             "filename": "logs/youtubedl.log",
             "backupCount": 30
+        },
+        "file_prawcore": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/praw.log",
+            "backupCount": 25
         },
         "file_jobs": {
             "class": "logging.handlers.RotatingFileHandler",
@@ -94,6 +108,11 @@
             "propagate": false,
             "level": "DEBUG"
         },
+        "prawcore": {
+            "handlers": ["console_info", "file_prawcore"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
         "": {
             "handlers": [
                 "console",
@@ -113,9 +132,6 @@
         },
         "peewee": {
             "level": "WARNING"
-        },
-        "prawcore": {
-            "level": "DEBUG"
         },
         "PIL": {
             "level": "WARNING"

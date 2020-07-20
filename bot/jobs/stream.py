@@ -34,23 +34,23 @@ def its_quiet_hours(subreddit: Subreddit):
     now = u.now()
 
     if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
-        subreddit.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
+        logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
                     subreddit.quiet_hours_end)
         if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
             if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
-                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
             if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
-                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         else:
-            subreddit.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
+            logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
             return False
     else:
         # if the subreddit doesn't have the quiet hours configured, we use the config ones
         if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
-            subreddit.logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+            logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
                         config.quiet_hours.start, config.quiet_hours.end, now.hour)
             return True
         else:
@@ -129,9 +129,6 @@ def fetch_submissions(subreddit: Subreddit):
 
 @d.time_subreddit_processing(job_name='stream')
 def process_submissions(subreddit: Subreddit, bot: Bot):
-    if subreddit.name == 'evangelion':
-        time.sleep(61)
-        # raise ValueError('uh')
     # this is the function that takes the most time and that should run in a thread
 
     senders = list()
