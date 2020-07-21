@@ -34,24 +34,27 @@ def its_quiet_hours(subreddit: Subreddit):
     now = u.now()
 
     if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
-        logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
-                    subreddit.quiet_hours_end)
+        subreddit.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
+                              subreddit.quiet_hours_end)
         if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
             if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
-                logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
             if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
-                logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         else:
-            logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
+            subreddit.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
             return False
     else:
         # if the subreddit doesn't have the quiet hours configured, we use the config ones
         if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
-            logger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                        config.quiet_hours.start, config.quiet_hours.end, now.hour)
+            subreddit.logger.info(
+                'quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                config.quiet_hours.start,
+                config.quiet_hours.end, now.hour
+            )
             return True
         else:
             return False
@@ -65,13 +68,13 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
 
     if subreddit.quiet_hours_demultiplier == 1:
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
-        logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
+        subreddit.logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
         return 1
     elif its_quiet_hours(subreddit):
         # if it's quiet hours: return the demultiplier
         return subreddit.quiet_hours_demultiplier
     else:
-        logger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
+        subreddit.logger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
         return 1
 
 
@@ -85,18 +88,18 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
     now_string = u.now(string=True)
 
     if subreddit.last_posted_submission_dt:
-        logger.info(
+        subreddit.logger.info(
             'elapsed time (now -- last post): %s -- %s',
             now_string,
             subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
         )
         elapsed_time_minutes = (now - subreddit.last_posted_submission_dt).total_seconds() / 60
     else:
-        logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
+        subreddit.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
         elapsed_time_minutes = 9999999
 
     if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
-        logger.info(
+        subreddit.logger.info(
             'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
             subreddit.max_frequency,
             quiet_hours_demultiplier
@@ -211,10 +214,10 @@ def process_subreddit(subreddit: Subreddit, bot: Bot):
     return process_submissions(subreddit, bot)
 
 
-def collect_tasks(subreddit: Subreddit):
+def is_time_to_process(subreddit: Subreddit):
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        subreddit.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
         return False
 
     if not time_to_post(subreddit, quiet_hours_demultiplier):
@@ -258,23 +261,26 @@ def check_posts(context: CallbackContext):
         if not subreddit.style:
             subreddit.set_default_style()
 
-        if collect_tasks(subreddit):
-            subreddit.logger = SubredditLogNoAdapter()
-            subreddit.logger.set_subreddit(subreddit)
+        subreddit.logger = SubredditLogNoAdapter(subreddit)
+        # subreddit.logger.set_subreddit(subreddit)
+
+        if is_time_to_process(subreddit):
             subreddits_to_process.append(subreddit)
 
     if not subreddits_to_process:
         logger.info('no subreddit to process, exiting job')
         return total_posted_messages, total_posted_bytes
 
-    logger.info('collected tasks: %d', len(subreddits_to_process))
+    num_collected_subreddits = len(subreddits_to_process)
+    logger.info('collected tasks: %d', num_collected_subreddits)
 
     max_workers = (os.cpu_count() or 1) * 2
     logger.info('max_workers: %d', max_workers)
 
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = set()
-        for subreddit in subreddits_to_process:
+        for i, subreddit in enumerate(subreddits_to_process):
+            logger.info('%d/%d submitting %s (id: %d)...', i+1, num_collected_subreddits, subreddit.r_name, subreddit.id)
             future = executor.submit(process_submissions, subreddit, context.bot)
             future.subreddit = subreddit
             futures.add(future)
@@ -283,6 +289,7 @@ def check_posts(context: CallbackContext):
         for future in futures:
             # noinspection PyBroadException
             try:
+                logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
                 posted_messages, posted_bytes = future.result()  # (timeout=context.job.interval)
                 total_posted_messages += int(posted_messages)
                 total_posted_bytes += posted_bytes
@@ -292,7 +299,7 @@ def check_posts(context: CallbackContext):
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
                 text = '#mirrorbot_error - pool executor timeout - %d seconds'.format(future.subreddit.name, context.job.interval)
                 context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
-            except Exception as e:
+            except Exception:
                 error_description = future.exception()
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
                 text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
