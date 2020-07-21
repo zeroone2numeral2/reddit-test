@@ -125,7 +125,7 @@ def fetch_submissions(subreddit: Subreddit):
             continue
         else:
             subreddit.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
-                         submission.id)
+                                  submission.id)
 
             yield submission
 
@@ -290,7 +290,7 @@ def check_posts(context: CallbackContext):
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
-                posted_messages, posted_bytes = future.result()  # (timeout=context.job.interval)
+                posted_messages, posted_bytes = future.result(timeout=context.job.interval)
                 total_posted_messages += int(posted_messages)
                 total_posted_bytes += posted_bytes
                 logger.info('still %d active pools', executor.get_pool_usage())
