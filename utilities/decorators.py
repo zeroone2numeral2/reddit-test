@@ -141,14 +141,14 @@ def log_start_end_dt(func):
 def time_subreddit_processing(job_name=None):
     def real_decorator(func):
         @wraps(func)
-        def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
+        def wrapped(task, subreddit: Subreddit, bot: Bot, *args, **kwargs):
             processing_start_dt = u.now(utc=False)
 
             with db.atomic():
                 job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
                 job_row.save()
 
-            processing_result = func(subreddit, bot, *args, **kwargs)
+            processing_result = func(task, subreddit, bot, *args, **kwargs)
 
             processing_end_dt = u.now(utc=False)
             job_row.end = processing_end_dt

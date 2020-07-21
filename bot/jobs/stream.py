@@ -130,88 +130,93 @@ def fetch_submissions(subreddit: Subreddit):
             yield submission
 
 
-@d.time_subreddit_processing(job_name='stream')
-def process_submissions(subreddit: Subreddit, bot: Bot):
-    # this is the function that takes the most time and that should run in a thread
+class SubredditTask:
+    def __init__(self):
+        self.interrupt_request = False
 
-    senders = list()
-    for submission in fetch_submissions(subreddit):
-        sender = Sender(bot, subreddit, submission, slogger)
-        if sender.test_filters():
-            subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
-            senders.append(sender)
-            if len(senders) >= subreddit.number_of_posts:
-                subreddit.logger.info('we collected enough posts to post (number_of_posts: %d)', subreddit.number_of_posts)
-                break
-        else:
-            # no need to save ignored submissions in the database, because the next time
-            # they might pass the filters
-            # sender.register_ignored()
-            subreddit.logger.info('submission di NOT pass filters, continuing to next one...')
-            sender = None  # avoid to use a Sender that did not pass the filters
-            continue
+    # noinspection DuplicatedCode
+    @d.time_subreddit_processing(job_name='stream')
+    def __call__(self, subreddit: Subreddit, bot: Bot):
+        if self.interrupt_request:
+            subreddit.logger.warning('received interrupt request: aborting subreddit processing')
+            return JOB_NO_POST
 
-    if not senders:
-        subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
-        return JOB_NO_POST
+        senders = list()
+        for submission in fetch_submissions(subreddit):
+            if self.interrupt_request:
+                subreddit.logger.warning('received interrupt request: aborting subreddit processing')
+                return JOB_NO_POST
 
-    subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
-
-    posted_messages = 0
-    posted_bytes = 0
-    for sender in senders:
-        subreddit.logger.info('submission url: %s', sender.submission.url)
-        subreddit.logger.info('submission title: %s', sender.submission.title)
-
-        try:
-            time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
-            sent_message = sender.post()
-        except (BadRequest, TelegramError) as e:
-            subreddit.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-            continue
-        except Exception as e:
-            subreddit.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
-            continue
-
-        if not sent_message:
-            subreddit.logger.warning(
-                'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
-        else:
-            if subreddit.test:
-                subreddit.logger.info(
-                    'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
-                    subreddit.name)
+            sender = Sender(bot, subreddit, submission, slogger)
+            if sender.test_filters():
+                subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
+                senders.append(sender)
+                if len(senders) >= subreddit.number_of_posts:
+                    subreddit.logger.info('we collected enough posts to post (number_of_posts: %d)',
+                                          subreddit.number_of_posts)
+                    break
             else:
-                subreddit.logger.info('creating Post row...')
-                sender.register_post()
+                # no need to save ignored submissions in the database, because the next time
+                # they might pass the filters
+                # sender.register_ignored()
+                subreddit.logger.info('submission di NOT pass filters, continuing to next one...')
+                sender = None  # avoid to use a Sender that did not pass the filters
+                continue
 
-                subreddit.logger.info('updating Subreddit last post datetime...')
-                subreddit.last_posted_submission_dt = u.now()
+        if not senders:
+            subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
+                                  subreddit.name)
+            return JOB_NO_POST
 
-                with db.atomic():
-                    subreddit.save()
+        subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
-            posted_messages += 1  # we posted one message
-            posted_bytes += sender.uploaded_bytes
+        posted_messages = 0
+        posted_bytes = 0
+        for sender in senders:
+            if self.interrupt_request:
+                subreddit.logger.warning('received cancel request: aborting subreddit processing')
+                return JOB_NO_POST
 
-        # time.sleep(1)
+            subreddit.logger.info('submission url: %s', sender.submission.url)
+            subreddit.logger.info('submission title: %s', sender.submission.title)
 
-    return posted_messages, posted_bytes
+            try:
+                time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
+                sent_message = sender.post()
+            except (BadRequest, TelegramError) as e:
+                subreddit.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+                continue
+            except Exception as e:
+                subreddit.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+                continue
 
+            if not sent_message:
+                subreddit.logger.warning(
+                    'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
+            else:
+                if subreddit.test:
+                    subreddit.logger.info(
+                        'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
+                        subreddit.name)
+                else:
+                    subreddit.logger.info('creating Post row...')
+                    sender.register_post()
 
-def process_subreddit(subreddit: Subreddit, bot: Bot):
-    logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
+                    subreddit.logger.info('updating Subreddit last post datetime...')
+                    subreddit.last_posted_submission_dt = u.now()
 
-    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
-    if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        subreddit.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
-        return JOB_NO_POST
+                    with db.atomic():
+                        subreddit.save()
 
-    if not time_to_post(subreddit, quiet_hours_demultiplier):
-        logger.info('it is not time to post')
-        return JOB_NO_POST
+                posted_messages += 1  # we posted one message
+                posted_bytes += sender.uploaded_bytes
 
-    return process_submissions(subreddit, bot)
+            # time.sleep(1)
+
+        return posted_messages, posted_bytes
+
+    def request_interrupt(self):
+        self.interrupt_request = True
 
 
 def is_time_to_process(subreddit: Subreddit):
@@ -278,15 +283,17 @@ def check_posts(context: CallbackContext):
     logger.info('max_workers: %d', max_workers)
 
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures: {Future} = set()
+        futures: [(SubredditTask, Future)] = list()
         for i, subreddit in enumerate(subreddits_to_process):
             logger.info('%d/%d submitting %s (id: %d)...', i+1, num_collected_subreddits, subreddit.r_name, subreddit.id)
-            future: Future = executor.submit(process_submissions, subreddit, context.bot)
+            # future: Future = executor.submit(process_submissions, subreddit, context.bot)
+            subreddit_task = SubredditTask()  # see https://stackoverflow.com/a/6514268
+            future: Future = executor.submit(subreddit_task, subreddit, context.bot)
             future.subreddit = subreddit
-            futures.add(future)
+            futures.append((subreddit_task, future))
 
         logger.info('harvesting results...')
-        for future in futures:
+        for subreddit_task, future in futures:
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
@@ -295,7 +302,8 @@ def check_posts(context: CallbackContext):
                 total_posted_bytes += posted_bytes
                 logger.info('still %d active pools', executor.get_pool_usage())
             except TimeoutError:
-                future.cancel()  # doesn't work apparently, the callback can't be stopped
+                subreddit_task.request_interrupt()
+                future.cancel()  # doesn't work apparently, the callback can't be stopped. We can only request its interruption
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
                 text = '#mirrorbot_error - pool executor timeout - %d seconds'.format(future.subreddit.name, context.job.interval)
                 context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
