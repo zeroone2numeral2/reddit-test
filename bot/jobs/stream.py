@@ -278,10 +278,10 @@ def check_posts(context: CallbackContext):
     logger.info('max_workers: %d', max_workers)
 
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = set()
+        futures: {Future} = set()
         for i, subreddit in enumerate(subreddits_to_process):
             logger.info('%d/%d submitting %s (id: %d)...', i+1, num_collected_subreddits, subreddit.r_name, subreddit.id)
-            future = executor.submit(process_submissions, subreddit, context.bot)
+            future: Future = executor.submit(process_submissions, subreddit, context.bot)
             future.subreddit = subreddit
             futures.add(future)
 
