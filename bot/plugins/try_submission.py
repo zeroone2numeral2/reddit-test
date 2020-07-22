@@ -4,8 +4,7 @@ import os
 from telegram.ext import CommandHandler
 
 from bot import mainbot
-from bot.logging import slogger
-from database.models import Subreddit
+from database.models import Subreddit, Style
 from database.models import Channel
 from reddit import Sender
 from reddit import reddit
@@ -37,7 +36,8 @@ def try_submission(update, context):
         tmp_subreddit = Subreddit(
             subreddit_id=submission.subreddit.id,
             channel=tmp_channel,
-            name=str(submission.subreddit)
+            name=str(submission.subreddit),
+            style=Style.get_default()
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
 
