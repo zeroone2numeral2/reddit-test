@@ -1,9 +1,7 @@
 import peewee
 
-from .models import Subreddit
-from .models import Channel
-from .models import Job
-from .models import SubredditJob
+from ..models import Subreddit
+from ..models import Channel
 
 
 def subreddits_invite_link() -> [Channel]:
@@ -22,14 +20,3 @@ def subreddits_invite_link() -> [Channel]:
     )
 
     return [{**channel, 'subreddits': channel['subreddits'].split(', ')} for channel in query]
-
-
-def get_channels():
-    query = Channel.select()
-    for channel in query:
-        for subreddit in channel.subreddits.dicts():
-            print(subreddit)
-
-
-
-

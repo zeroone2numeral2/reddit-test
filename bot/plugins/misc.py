@@ -11,7 +11,7 @@ from database.models import Post
 from database.models import PostResume
 from database.models import Job
 from database.models import SubredditJob
-from database.queries import get_channels
+from database.queries.channels import get_channels
 from utilities import u
 from utilities import d
 from config import config
