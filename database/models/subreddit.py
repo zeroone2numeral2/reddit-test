@@ -67,7 +67,7 @@ class Subreddit(peewee.Model):
         database = db
 
     def __repr__(self):
-        return '<Subreddit {}: {}>'.format(self.subreddit_id, self.name)
+        return '<Subreddit {}: {}>'.format(self.id, self.name)
 
     def update_from_dict(self, data: dict):
         for field, value in data.items():
@@ -103,6 +103,10 @@ class Subreddit(peewee.Model):
     @property
     def r_name(self):
         return '/r/{}'.format(self.name)
+
+    @property
+    def r_name_with_id(self):
+        return '[{}] /r/{}'.format(self.id, self.name)
 
     @property
     def ch_title(self):

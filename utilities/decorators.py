@@ -7,6 +7,7 @@ from telegram import Update, Bot
 from telegram.ext import ConversationHandler, CallbackContext
 
 from bot.conversation import get_status_description
+from bot.jobs.common.jobresult import JobResult
 from database.models import Subreddit
 from database.models import Job
 from database.models import SubredditJob
@@ -98,9 +99,9 @@ def log_start_end_dt(func):
             job_row = Job(name=context.job.name, start=job_start_dt)
             job_row.save()
 
-        job_result = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
-        job_row.posted_messages = int(job_result[0])
-        job_row.uploaded_bytes = int(job_result[1])
+        job_result: JobResult = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
+        job_row.posted_messages = job_result.posted_messages
+        job_row.uploaded_bytes = job_result.posted_bytes
 
         job_end_dt = u.now(utc=False)
         job_row.end = job_end_dt
@@ -141,20 +142,20 @@ def log_start_end_dt(func):
 def time_subreddit_processing(job_name=None):
     def real_decorator(func):
         @wraps(func)
-        def wrapped(subreddit: Subreddit, bot: Bot, *args, **kwargs):
+        def wrapped(task, subreddit: Subreddit, bot: Bot, *args, **kwargs):
             processing_start_dt = u.now(utc=False)
 
             with db.atomic():
                 job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
                 job_row.save()
 
-            processing_result = func(subreddit, bot, *args, **kwargs)
+            result: JobResult = func(task, subreddit, bot, *args, **kwargs)
 
             processing_end_dt = u.now(utc=False)
             job_row.end = processing_end_dt
 
-            job_row.posted_messages = processing_result[0]
-            job_row.uploaded_bytes = processing_result[1]
+            job_row.posted_messages = result.posted_messages
+            job_row.uploaded_bytes = result.posted_bytes
 
             elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
             job_row.duration = elapsed_seconds
@@ -163,14 +164,13 @@ def time_subreddit_processing(job_name=None):
                 job_row.save()
 
             Log.job.info(
-                'processing time for r/%s (id: %d): %d seconds (%s)',
-                subreddit.name,
-                subreddit.id,
+                'processing time for %s : %d seconds (%s)',
+                subreddit.r_name_with_id,
                 elapsed_seconds,
                 u.pretty_seconds(round(elapsed_seconds, 2))
             )
 
-            return processing_result
+            return result
 
         return wrapped
 

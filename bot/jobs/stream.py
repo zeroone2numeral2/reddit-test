@@ -3,14 +3,18 @@ import logging.config
 from logging.handlers import RotatingFileHandler
 import time
 import os
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future
+from concurrent.futures import TimeoutError
 
 from telegram import ParseMode, Bot
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
-from bot.logging import slogger
+from .common.task import Task
+from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
+from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
 from const import JOB_NO_POST
 from utilities import u
@@ -32,24 +36,27 @@ def its_quiet_hours(subreddit: Subreddit):
     now = u.now()
 
     if subreddit.quiet_hours_start not in NOT_VALUES and subreddit.quiet_hours_end not in NOT_VALUES:
-        slogger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
-                    subreddit.quiet_hours_end)
+        subreddit.logger.info('subreddit has quiet hours (start/end: %d -> %d)', subreddit.quiet_hours_start,
+                              subreddit.quiet_hours_end)
         if subreddit.quiet_hours_start >= subreddit.quiet_hours_end:
             if now.hour >= subreddit.quiet_hours_start or now.hour <= subreddit.quiet_hours_end:
-                slogger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         elif subreddit.quiet_hours_start < subreddit.quiet_hours_end:
             if subreddit.quiet_hours_start <= now.hour <= subreddit.quiet_hours_end:
-                slogger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
+                subreddit.logger.info('we are in the quiet hours timeframe (now: %d), ignoring...', now.hour)
                 return True
         else:
-            slogger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
+            subreddit.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
             return False
     else:
         # if the subreddit doesn't have the quiet hours configured, we use the config ones
         if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
-            slogger.info('quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                        config.quiet_hours.start, config.quiet_hours.end, now.hour)
+            subreddit.logger.info(
+                'quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
+                config.quiet_hours.start,
+                config.quiet_hours.end, now.hour
+            )
             return True
         else:
             return False
@@ -63,13 +70,13 @@ def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
 
     if subreddit.quiet_hours_demultiplier == 1:
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
-        slogger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
+        subreddit.logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
         return 1
     elif its_quiet_hours(subreddit):
         # if it's quiet hours: return the demultiplier
         return subreddit.quiet_hours_demultiplier
     else:
-        slogger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
+        subreddit.logger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
         return 1
 
 
@@ -83,18 +90,18 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
     now_string = u.now(string=True)
 
     if subreddit.last_posted_submission_dt:
-        slogger.info(
+        subreddit.logger.info(
             'elapsed time (now -- last post): %s -- %s',
             now_string,
             subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
         )
         elapsed_time_minutes = (now - subreddit.last_posted_submission_dt).total_seconds() / 60
     else:
-        slogger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
+        subreddit.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
         elapsed_time_minutes = 9999999
 
     if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
-        slogger.info(
+        subreddit.logger.info(
             'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
             subreddit.max_frequency,
             quiet_hours_demultiplier
@@ -105,113 +112,110 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
 
 
 def fetch_submissions(subreddit: Subreddit):
-    slogger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
+    subreddit.logger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
     for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
-        slogger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
+        subreddit.logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if Post.already_posted(subreddit, submission.id):
-            slogger.info('...submission %s has already been posted', submission.id)
+            subreddit.logger.info('...submission %s has already been posted', submission.id)
             continue
         elif subreddit.sorting.lower() in ('month', 'all') and InitialTopPost.is_initial_top_post(subreddit.name, submission.id, sorting):
-            slogger.info('...subreddit has sorting "%s" and submission %s is among the initial top posts',
+            subreddit.logger.info('...subreddit has sorting "%s" and submission %s is among the initial top posts',
                          sorting, submission.id)
             continue
         else:
-            slogger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
-                         submission.id)
+            subreddit.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
+                                  submission.id)
 
             yield submission
 
 
-@d.time_subreddit_processing(job_name='stream')
-def process_submissions(subreddit: Subreddit, bot: Bot):
-    # this is the function that takes the most time and that should run in a thread
+class SubredditTask(Task):
+    # noinspection DuplicatedCode
+    @d.time_subreddit_processing(job_name='stream')
+    def __call__(self, subreddit: Subreddit, bot: Bot) -> JobResult:
+        if self.interrupt_request:
+            subreddit.logger.warning('received interrupt request: aborting subreddit processing')
+            return JobResult()
 
-    senders = list()
-    for submission in fetch_submissions(subreddit):
-        sender = Sender(bot, subreddit, submission, slogger)
-        if sender.test_filters():
-            slogger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
-            senders.append(sender)
-            if len(senders) >= subreddit.number_of_posts:
-                slogger.info('we collected enough posts to post (number_of_posts: %d)', subreddit.number_of_posts)
-                break
-        else:
-            # no need to save ignored submissions in the database, because the next time
-            # they might pass the filters
-            # sender.register_ignored()
-            slogger.info('submission di NOT pass filters, continuing to next one...')
-            sender = None  # avoid to use a Sender that did not pass the filters
-            continue
+        senders = list()
+        for submission in fetch_submissions(subreddit):
+            if self.interrupt_request:
+                subreddit.logger.warning('received interrupt request: aborting subreddit processing')
+                return JobResult()
 
-    if not senders:
-        slogger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...', subreddit.name)
-        return JOB_NO_POST
-
-    slogger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
-
-    posted_messages = 0
-    posted_bytes = 0
-    for sender in senders:
-        slogger.info('submission url: %s', sender.submission.url)
-        slogger.info('submission title: %s', sender.submission.title)
-
-        try:
-            time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
-            sent_message = sender.post()
-        except (BadRequest, TelegramError) as e:
-            slogger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
-            continue
-        except Exception as e:
-            slogger.error('generic error while posting the message: %s', str(e), exc_info=True)
-            continue
-
-        if not sent_message:
-            slogger.warning(
-                'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
-        else:
-            if subreddit.test:
-                slogger.info(
-                    'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
-                    subreddit.name)
+            sender = Sender(bot, subreddit, submission)
+            if sender.test_filters():
+                subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
+                senders.append(sender)
+                if len(senders) >= subreddit.number_of_posts:
+                    subreddit.logger.info('we collected enough posts to post (number_of_posts: %d)',
+                                          subreddit.number_of_posts)
+                    break
             else:
-                slogger.info('creating Post row...')
-                sender.register_post()
+                # no need to save ignored submissions in the database, because the next time
+                # they might pass the filters
+                # sender.register_ignored()
+                subreddit.logger.info('submission di NOT pass filters, continuing to next one...')
+                sender = None  # avoid to use a Sender that did not pass the filters
+                continue
 
-                slogger.info('updating Subreddit last post datetime...')
-                subreddit.last_posted_submission_dt = u.now()
+        if not senders:
+            subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
+                                  subreddit.name)
+            return JobResult()
 
-                with db.atomic():
-                    subreddit.save()
+        subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
-            posted_messages += 1  # we posted one message
-            posted_bytes += sender.uploaded_bytes
+        job_result = JobResult()
+        for sender in senders:
+            if self.interrupt_request:
+                subreddit.logger.warning('received cancel request: aborting subreddit processing')
+                return job_result
 
-        # time.sleep(1)
+            subreddit.logger.info('submission url: %s', sender.submission.url)
+            subreddit.logger.info('submission title: %s', sender.submission.title)
 
-    return posted_messages, posted_bytes
+            try:
+                time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
+                sent_message = sender.post()
+            except (BadRequest, TelegramError) as e:
+                subreddit.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+                continue
+            except Exception as e:
+                subreddit.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
+                continue
+
+            if not sent_message:
+                subreddit.logger.warning(
+                    'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
+            else:
+                if subreddit.test:
+                    subreddit.logger.info(
+                        'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
+                        subreddit.name)
+                else:
+                    sender.register_post(test=subreddit.test)
+
+                    subreddit.logger.info('updating Subreddit last post datetime...')
+                    subreddit.last_posted_submission_dt = u.now()
+
+                    with db.atomic():
+                        subreddit.save()
+
+                job_result.increment(posted_messages=1, posted_bytes=sender.uploaded_bytes)
+
+            # time.sleep(1)
+
+        return job_result
 
 
-def process_subreddit(subreddit: Subreddit, bot: Bot):
-    logger.info('processing subreddit: %s (r/%s)', subreddit.subreddit_id, subreddit.name)
-
+def is_time_to_process(subreddit: Subreddit):
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
-        return JOB_NO_POST
-
-    if not time_to_post(subreddit, quiet_hours_demultiplier):
-        return JOB_NO_POST
-
-    return process_submissions(subreddit, bot)
-
-
-def collect_tasks(subreddit: Subreddit):
-    quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
-    if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        slogger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        subreddit.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
         return False
 
     if not time_to_post(subreddit, quiet_hours_demultiplier):
@@ -223,76 +227,66 @@ def collect_tasks(subreddit: Subreddit):
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts_new(context: CallbackContext):
+def check_posts(context: CallbackContext) -> JobResult:
     with db.atomic():  # noqa
         subreddits = (
             Subreddit.select()
             .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
         )
 
-    total_posted_messages = 0
-    total_posted_bytes = 0
     subreddits_to_process = list()
     for subreddit in subreddits:
         if not subreddit.style:
             subreddit.set_default_style()
 
-        if collect_tasks(subreddit):
-            subreddit.logger = SubredditLogNoAdapter()
-            subreddit.logger.set_subreddit(subreddit)
+        subreddit.logger = SubredditLogNoAdapter(subreddit)
+        # subreddit.logger.set_subreddit(subreddit)
+
+        if is_time_to_process(subreddit):
             subreddits_to_process.append(subreddit)
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures_list: [concurrent.futures.Future] = {executor.submit(process_submissions, s, context.bot) for s in subreddits_to_process}
+    if not subreddits_to_process:
+        logger.info('no subreddit to process, exiting job')
+        return JobResult()
 
-        for future in futures_list:
+    num_collected_subreddits = len(subreddits_to_process)
+    logger.info('collected tasks: %d', num_collected_subreddits)
+
+    max_workers = (os.cpu_count() or 1) * 2
+    logger.info('max_workers: %d', max_workers)
+
+    stream_job_result = JobResult()
+
+    with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures: [(SubredditTask, Future)] = list()
+        for i, subreddit in enumerate(subreddits_to_process):
+            logger.info('%d/%d submitting %s...', i+1, num_collected_subreddits, subreddit.r_name_with_id)
+            # future: Future = executor.submit(process_submissions, subreddit, context.bot)
+            subreddit_task = SubredditTask()  # see https://stackoverflow.com/a/6514268
+            future: Future = executor.submit(subreddit_task, subreddit, context.bot)
+            future.subreddit = subreddit
+            futures.append((subreddit_task, future))
+
+        logger.info('harvesting results...')
+        for subreddit_task, future in futures:
+            # noinspection PyBroadException
             try:
-                posted_messages, posted_bytes = future.result()
-                total_posted_messages += int(posted_messages)
-                total_posted_bytes += posted_bytes
-            except Exception as e:
-                # logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
-                text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
+                logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
+                subreddit_job_result = future.result(timeout=context.job.interval)
+                stream_job_result += subreddit_job_result
+                logger.info('still %d active pools', executor.get_pool_usage())
+            except TimeoutError:
+                subreddit_task.request_interrupt()
+                future.cancel()  # doesn't work apparently, the callback can't be stopped. We can only request its interruption
+                logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
+                text = '#mirrorbot_error - pool executor timeout - %d seconds'.format(future.subreddit.name, context.job.interval)
+                context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+            except Exception:
+                error_description = future.exception()
+                future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
+                text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
                 context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
-        """for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            slogger.info("The outcome is %s", result)
-            posted_messages, posted_bytes = result
-            total_posted_messages += int(posted_messages)
-            total_posted_bytes += posted_bytes"""
-
         # time.sleep(1)
 
-    return total_posted_messages, total_posted_bytes
-
-
-@d.logerrors
-@d.log_start_end_dt
-# @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(context: CallbackContext):
-    with db.atomic():  # noqa
-        subreddits = (
-            Subreddit.select()
-            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
-        )
-
-    total_posted_messages = 0
-    total_posted_bytes = 0
-    for subreddit in subreddits:
-        if not subreddit.style:
-            subreddit.set_default_style()
-
-        slogger.set_subreddit(subreddit)
-        try:
-            posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
-            total_posted_messages += int(posted_messages)
-            total_posted_bytes += posted_bytes
-        except Exception as e:
-            logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
-            text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
-            context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
-
-        # time.sleep(1)
-
-    return total_posted_messages, total_posted_bytes
+    return stream_job_result
