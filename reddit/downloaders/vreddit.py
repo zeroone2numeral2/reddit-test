@@ -103,8 +103,8 @@ class VReddit(Downloader):
         )
 
         dt_filename = u.now(string='%Y%m%d_%H%M')
-        stdout_filepath = os.path.join('logs', 'ffmpeg', 'ffmpeg_stdout_{}.log'.format(dt_filename))
-        stderr_filepath = os.path.join('logs', 'ffmpeg', 'ffmpeg_stderr_{}.log'.format(dt_filename))
+        stdout_filepath = os.path.join('logs', 'ffmpeg', '{}_ffmpeg_stdout_{}.log'.format(self._identifier, dt_filename))
+        stderr_filepath = os.path.join('logs', 'ffmpeg', '{}_ffmpeg_stderr_{}.log'.format(self._identifier, dt_filename))
 
         stdout_file = open(stdout_filepath, 'wb')
         stderr_file = open(stderr_filepath, 'wb')
