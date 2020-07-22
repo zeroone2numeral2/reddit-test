@@ -143,7 +143,7 @@ class SubredditTask(Task):
         annoucement_posted = False
         posted_messages = 0
         posted_bytes = 0
-        jr = JobResult
+        jr = JobResult()
         for sender in senders:
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
