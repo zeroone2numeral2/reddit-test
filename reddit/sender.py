@@ -548,7 +548,7 @@ class Sender:
         self.log.info('vreddit url: %s', url)
 
         # we set as max_size the max size supported by the bot API, so we can avoid to use pyrogram (see issue #82)
-        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED)
+        vreddit = VReddit(url, thumbnail_url=self._s.thumbnail, identifier=self._s.id, max_size=MaxSize.MTPROTO_LIMITED, logger=self.log)
         self.log.info('vreddit video url: %s', vreddit.url)
         self.log.info('vreddit audio url: %s', vreddit.url_audio)
 
@@ -558,7 +558,7 @@ class Sender:
 
         video_without_audio = False  # we should check here if the audio url is a webpage (issue #91)
         if self._s.is_gif or vreddit.audio_url_forbidden():
-            self.log.info('this vreddit does not have an audio, we will skip the audio download')
+            self.log.info('this vreddit does not have an audio, we will skip the audio download (is_gif: %s)', self._s.is_gif)
             video_without_audio = True
 
         file_path = vreddit.file_path
