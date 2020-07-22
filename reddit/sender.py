@@ -100,7 +100,7 @@ class Sender:
         self._bot: Bot = bot
         self._s = submission
         self._subreddit: Subreddit = subreddit
-        if subreddit_logger:
+        if hasattr(subreddit, 'logger'):
             self.log = subreddit.logger
         else:
             self.log = logger
