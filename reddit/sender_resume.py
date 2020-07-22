@@ -31,14 +31,19 @@ class SenderResume(Sender):
             disable_web_page_preview=not self._subreddit.style.webpage_preview
         )
 
-    def register_post(self):
+    def register_post(self, test=False):
+        if test:
+            self.log.info('not creating PostResume row: %s is a testing subreddit', self._subreddit.r_name_with_id)
+            return
+
         if isinstance(self._sent_message, PtbMessage):
             sent_message_json = self._sent_message.to_json()
         elif isinstance(self._sent_message, PyroMessage):
             sent_message_json = str(self._sent_message)
         else:
             sent_message_json = None
-        
+
+        self.log.info('creating PostResume row...')
         PostResume.create(
             submission_id=self._s.id,
             subreddit=self._subreddit,

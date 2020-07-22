@@ -13,6 +13,7 @@ from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
 from .common.task import Task
+from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
 from bot.logging import SubredditLogNoAdapter
 from const import JOB_NO_POST
 from utilities import u
@@ -196,8 +197,7 @@ class SubredditTask(Task):
                         'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
                         subreddit.name)
                 else:
-                    subreddit.logger.info('creating Post row...')
-                    sender.register_post()
+                    sender.register_post(test=subreddit.test)
 
                     subreddit.logger.info('updating Subreddit last post datetime...')
                     subreddit.last_posted_submission_dt = u.now()
@@ -223,24 +223,6 @@ def is_time_to_process(subreddit: Subreddit):
         return False
 
     return True
-
-
-class MonitoredThreadPoolExecutor(ThreadPoolExecutor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._running_workers = 0
-
-    def submit(self, *args, **kwargs):
-        future = super().submit(*args, **kwargs)
-        self._running_workers += 1
-        future.add_done_callback(self._worker_is_done)
-        return future
-
-    def _worker_is_done(self, future):
-        self._running_workers -= 1
-
-    def get_pool_usage(self):
-        return self._running_workers
 
 
 @d.logerrors

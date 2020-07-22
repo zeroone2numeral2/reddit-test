@@ -749,7 +749,11 @@ class Sender:
             self.log.info('i.reddit gif: TelegramError/BadRequest while sending by url (%s), falling back to self._send_video...', e.message)
             return self._send_video(url, caption, reply_markup=reply_markup)
 
-    def register_post(self):
+    def register_post(self, test=False):
+        if test:
+            self.log.info('not creating Post row: %s is a testing subreddit', self._subreddit.r_name_with_id)
+            return
+
         if isinstance(self._sent_message, PtbMessage):
             sent_message_json = self._sent_message.to_json()
         elif isinstance(self._sent_message, PyroMessage):
@@ -757,6 +761,7 @@ class Sender:
         else:
             sent_message_json = None
 
+        self.log.info('creating Post row...')
         with db.atomic():
             Post.create(
                 submission_id=self._s.id,
