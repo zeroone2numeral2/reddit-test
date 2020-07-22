@@ -175,7 +175,7 @@ class SubredditTask:
         for sender in senders:
             if self.interrupt_request:
                 subreddit.logger.warning('received cancel request: aborting subreddit processing')
-                return JOB_NO_POST
+                return posted_messages, posted_bytes
 
             subreddit.logger.info('submission url: %s', sender.submission.url)
             subreddit.logger.info('submission title: %s', sender.submission.title)
