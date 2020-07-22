@@ -14,6 +14,7 @@ from telegram.ext import CallbackContext
 
 from .common.task import Task
 from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
+from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
 from const import JOB_NO_POST
 from utilities import u
@@ -134,16 +135,16 @@ def fetch_submissions(subreddit: Subreddit):
 class SubredditTask(Task):
     # noinspection DuplicatedCode
     @d.time_subreddit_processing(job_name='stream')
-    def __call__(self, subreddit: Subreddit, bot: Bot):
+    def __call__(self, subreddit: Subreddit, bot: Bot) -> JobResult:
         if self.interrupt_request:
             subreddit.logger.warning('received interrupt request: aborting subreddit processing')
-            return JOB_NO_POST
+            return JobResult()
 
         senders = list()
         for submission in fetch_submissions(subreddit):
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
-                return JOB_NO_POST
+                return JobResult()
 
             sender = Sender(bot, subreddit, submission)
             if sender.test_filters():
@@ -164,16 +165,15 @@ class SubredditTask(Task):
         if not senders:
             subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
                                   subreddit.name)
-            return JOB_NO_POST
+            return JobResult()
 
         subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
-        posted_messages = 0
-        posted_bytes = 0
+        job_result = JobResult()
         for sender in senders:
             if self.interrupt_request:
                 subreddit.logger.warning('received cancel request: aborting subreddit processing')
-                return posted_messages, posted_bytes
+                return job_result
 
             subreddit.logger.info('submission url: %s', sender.submission.url)
             subreddit.logger.info('submission title: %s', sender.submission.title)
@@ -205,12 +205,11 @@ class SubredditTask(Task):
                     with db.atomic():
                         subreddit.save()
 
-                posted_messages += 1  # we posted one message
-                posted_bytes += sender.uploaded_bytes
+                job_result.increment(posted_messages=1, posted_bytes=sender.uploaded_bytes)
 
             # time.sleep(1)
 
-        return posted_messages, posted_bytes
+        return job_result
 
 
 def is_time_to_process(subreddit: Subreddit):
@@ -235,8 +234,6 @@ def check_posts(context: CallbackContext):
             .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
         )
 
-    total_posted_messages = 0
-    total_posted_bytes = 0
     subreddits_to_process = list()
     for subreddit in subreddits:
         if not subreddit.style:
@@ -250,13 +247,15 @@ def check_posts(context: CallbackContext):
 
     if not subreddits_to_process:
         logger.info('no subreddit to process, exiting job')
-        return total_posted_messages, total_posted_bytes
+        return JobResult()
 
     num_collected_subreddits = len(subreddits_to_process)
     logger.info('collected tasks: %d', num_collected_subreddits)
 
     max_workers = (os.cpu_count() or 1) * 2
     logger.info('max_workers: %d', max_workers)
+
+    stream_job_result = JobResult()
 
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
         futures: [(SubredditTask, Future)] = list()
@@ -273,9 +272,8 @@ def check_posts(context: CallbackContext):
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
-                posted_messages, posted_bytes = future.result(timeout=context.job.interval)
-                total_posted_messages += int(posted_messages)
-                total_posted_bytes += posted_bytes
+                subreddit_job_result = future.result(timeout=context.job.interval)
+                stream_job_result += subreddit_job_result
                 logger.info('still %d active pools', executor.get_pool_usage())
             except TimeoutError:
                 subreddit_task.request_interrupt()
@@ -291,4 +289,4 @@ def check_posts(context: CallbackContext):
 
         # time.sleep(1)
 
-    return total_posted_messages, total_posted_bytes
+    return stream_job_result

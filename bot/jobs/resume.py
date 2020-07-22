@@ -109,16 +109,16 @@ def is_time_to_process(subreddit: Subreddit) -> bool:
 class SubredditTask(Task):
     # noinspection DuplicatedCode
     @d.time_subreddit_processing(job_name='resume')
-    def __call__(self, subreddit: Subreddit, bot: Bot):
+    def __call__(self, subreddit: Subreddit, bot: Bot) -> JobResult:
         if self.interrupt_request:
             subreddit.logger.warning('received interrupt request: aborting subreddit processing')
-            return JOB_NO_POST
+            return JobResult()
 
         senders = list()
         for submission in fetch_submissions(subreddit, bot):
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
-                return JOB_NO_POST
+                return JobResult()
 
             subreddit.logger.info('submission url: %s', submission.url)
             subreddit.logger.info('submission title: %s', submission.title)
@@ -138,12 +138,10 @@ class SubredditTask(Task):
             subreddit.logger.info(
                 'no (valid) submission returned for %s, continuing to next subreddit/channel...',
                 subreddit.r_name_with_id)
-            return JOB_NO_POST
+            return JobResult()
 
         annoucement_posted = False
-        posted_messages = 0
-        posted_bytes = 0
-        jr = JobResult()
+        job_result = JobResult()
         for sender in senders:
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
@@ -171,28 +169,23 @@ class SubredditTask(Task):
                 with db.atomic():
                     subreddit.save()
 
-                posted_messages += 1
-                posted_bytes += sender.uploaded_bytes
-                jr.increment(posted_messages=1, posted_bytes=sender.uploaded_bytes)
+                job_result.increment(posted_messages=1, posted_bytes=sender.uploaded_bytes)
 
             # time.sleep(1)
 
-        return posted_messages, posted_bytes
+        return job_result
 
 
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_daily_resume(context: CallbackContext):
+def check_daily_resume(context: CallbackContext) -> JobResult:
     with db.atomic():  # noqa
         subreddits = (
             Subreddit.select()
             .where(Subreddit.enabled_resume == True, Subreddit.channel.is_null(False))
         )
 
-    total_posted_messages = 0
-    total_posted_bytes = 0
-    jr = JobResult()
     subreddits_to_process = list()
     for subreddit in subreddits:
         if not subreddit.style:
@@ -206,7 +199,7 @@ def check_daily_resume(context: CallbackContext):
 
     if not subreddits_to_process:
         logger.info('no subreddit to process, exiting job')
-        return total_posted_messages, total_posted_bytes
+        return JobResult()
 
     num_collected_subreddits = len(subreddits_to_process)
     logger.info('collected tasks: %d', num_collected_subreddits)
@@ -214,6 +207,7 @@ def check_daily_resume(context: CallbackContext):
     max_workers = (os.cpu_count() or 1) * 2
     logger.info('max_workers: %d', max_workers)
 
+    resume_job_result = JobResult()
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
         futures: [(SubredditTask, Future)] = list()
         for i, subreddit in enumerate(subreddits_to_process):
@@ -229,9 +223,8 @@ def check_daily_resume(context: CallbackContext):
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
-                posted_messages, posted_bytes = future.result(timeout=context.job.interval)
-                total_posted_messages += int(posted_messages)
-                total_posted_bytes += posted_bytes
+                subreddit_job_result = future.result(timeout=context.job.interval)
+                resume_job_result += subreddit_job_result
                 logger.info('still %d active pools', executor.get_pool_usage())
             except TimeoutError:
                 subreddit_task.request_interrupt()
@@ -247,5 +240,5 @@ def check_daily_resume(context: CallbackContext):
 
         # time.sleep(1)
 
-    return total_posted_messages, total_posted_bytes
+    return resume_job_result
 

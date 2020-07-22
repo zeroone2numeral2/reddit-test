@@ -106,7 +106,7 @@ class Subreddit(peewee.Model):
 
     @property
     def r_name_with_id(self):
-        return '[{}] /r/{} '.format(self.id, self.name)
+        return '[{}] /r/{}'.format(self.id, self.name)
 
     @property
     def ch_title(self):
