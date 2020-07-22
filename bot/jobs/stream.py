@@ -50,16 +50,7 @@ def its_quiet_hours(subreddit: Subreddit):
             subreddit.logger.info('we are not in the quiet hours timeframe (hour: %d)', now.hour)
             return False
     else:
-        # if the subreddit doesn't have the quiet hours configured, we use the config ones
-        if now.hour >= config.quiet_hours.start or now.hour <= config.quiet_hours.end:
-            subreddit.logger.info(
-                'quiet hours (%d - %d UTC): do not do anything (current hour UTC: %d)',
-                config.quiet_hours.start,
-                config.quiet_hours.end, now.hour
-            )
-            return True
-        else:
-            return False
+        return False
 
 
 def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
