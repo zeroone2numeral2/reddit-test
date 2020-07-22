@@ -58,7 +58,7 @@ def process_submissions(subreddit, bot):
                 break
 
 
-@d.time_subreddit_processing(job_name='resume')
+# @d.time_subreddit_processing(job_name='resume')
 def process_subreddit(subreddit, bot):
     slogger.info(
         'processing subreddit %s (r/%s) (frequency: %s, sorting: %s)',
