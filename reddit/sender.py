@@ -96,7 +96,7 @@ class VRedditMedia(Media):
 class Sender:
     __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log']
     
-    def __init__(self, bot, subreddit, submission, subreddit_logger=None):
+    def __init__(self, bot, subreddit, submission):
         self._bot: Bot = bot
         self._s = submission
         self._subreddit: Subreddit = subreddit

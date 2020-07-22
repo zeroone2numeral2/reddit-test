@@ -147,7 +147,7 @@ class SubredditTask:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
                 return JOB_NO_POST
 
-            sender = Sender(bot, subreddit, submission, slogger)
+            sender = Sender(bot, subreddit, submission)
             if sender.test_filters():
                 subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
                 senders.append(sender)
@@ -312,37 +312,6 @@ def check_posts(context: CallbackContext):
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
                 text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
                 context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
-
-        # time.sleep(1)
-
-    return total_posted_messages, total_posted_bytes
-
-
-@d.logerrors
-@d.log_start_end_dt
-# @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts_old(context: CallbackContext):
-    with db.atomic():  # noqa
-        subreddits = (
-            Subreddit.select()
-            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
-        )
-
-    total_posted_messages = 0
-    total_posted_bytes = 0
-    for subreddit in subreddits:
-        if not subreddit.style:
-            subreddit.set_default_style()
-
-        subreddit.logger.set_subreddit(subreddit)
-        try:
-            posted_messages, posted_bytes = process_subreddit(subreddit, context.bot)
-            total_posted_messages += int(posted_messages)
-            total_posted_bytes += posted_bytes
-        except Exception as e:
-            logger.error('error while processing subreddit r/%s: %s', subreddit.name, str(e), exc_info=True)
-            text = '#mirrorbot_error - {} - <code>{}</code>'.format(subreddit.name, u.escape(str(e)))
-            context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         # time.sleep(1)
 
