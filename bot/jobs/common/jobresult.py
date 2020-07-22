@@ -22,3 +22,6 @@ class JobResult:
             posted_messages=self.posted_messages + other.posted_messages,
             posted_bytes=self.posted_bytes + other.posted_bytes,
         )
+
+    def __repr__(self):
+        return '<JobResult(messages={}, bytes={})>'.format(self.posted_messages, self.posted_bytes)
