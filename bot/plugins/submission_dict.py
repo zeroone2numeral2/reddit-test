@@ -40,8 +40,8 @@ def on_sdict_command(update, context):
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
 
-    slogger.set_subreddit(tmp_subreddit)
-    sender = Sender(context.bot, tmp_subreddit, submission, slogger)
+    tmp_subreddit.logger = logger
+    sender = Sender(context.bot, tmp_subreddit, submission)
     
     text = pformat(sender.submission_dict)
     if len(text) < MAX_MESSAGE_LENGTH:
