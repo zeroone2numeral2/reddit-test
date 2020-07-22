@@ -12,7 +12,7 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 
-from bot.logging import slogger
+from .common.task import Task
 from bot.logging import SubredditLogNoAdapter
 from const import JOB_NO_POST
 from utilities import u
@@ -130,10 +130,7 @@ def fetch_submissions(subreddit: Subreddit):
             yield submission
 
 
-class SubredditTask:
-    def __init__(self):
-        self.interrupt_request = False
-
+class SubredditTask(Task):
     # noinspection DuplicatedCode
     @d.time_subreddit_processing(job_name='stream')
     def __call__(self, subreddit: Subreddit, bot: Bot):
@@ -214,9 +211,6 @@ class SubredditTask:
             # time.sleep(1)
 
         return posted_messages, posted_bytes
-
-    def request_interrupt(self):
-        self.interrupt_request = True
 
 
 def is_time_to_process(subreddit: Subreddit):
