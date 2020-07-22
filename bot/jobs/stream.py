@@ -1,6 +1,5 @@
 import logging
 import logging.config
-from logging.handlers import RotatingFileHandler
 import time
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -16,7 +15,6 @@ from .common.task import Task
 from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
 from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
-from const import JOB_NO_POST
 from utilities import u
 from utilities import d
 from database.models import Subreddit

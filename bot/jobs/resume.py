@@ -14,7 +14,6 @@ from .common.task import Task
 from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
 from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
-from const import JOB_NO_POST
 from utilities import u
 from utilities import d
 from database.models import Subreddit
