@@ -227,7 +227,7 @@ def is_time_to_process(subreddit: Subreddit):
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(context: CallbackContext):
+def check_posts(context: CallbackContext) -> JobResult:
     with db.atomic():  # noqa
         subreddits = (
             Subreddit.select()
