@@ -54,11 +54,6 @@ def its_quiet_hours(subreddit: Subreddit):
 
 
 def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
-    if subreddit.quiet_hours_demultiplier is None:
-        subreddit.quiet_hours_demultiplier = 0
-        with db.atomic():
-            subreddit.save()
-
     if subreddit.quiet_hours_demultiplier == 1:
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
         subreddit.logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')

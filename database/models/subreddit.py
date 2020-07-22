@@ -33,7 +33,7 @@ class Subreddit(peewee.Model):
     added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     enabled = peewee.BooleanField(default=True)
     # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
-    quiet_hours_demultiplier = peewee.FloatField(null=True, default=1.0)
+    quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)
     limit = peewee.IntegerField(null=True, default=25)
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
     quiet_hours_end = peewee.IntegerField(null=True, default=6)
