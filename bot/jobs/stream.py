@@ -260,7 +260,7 @@ def check_posts(context: CallbackContext):
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
         futures: [(SubredditTask, Future)] = list()
         for i, subreddit in enumerate(subreddits_to_process):
-            logger.info('%d/%d submitting %s (id: %d)...', i+1, num_collected_subreddits, subreddit.r_name, subreddit.id)
+            logger.info('%d/%d submitting %s...', i+1, num_collected_subreddits, subreddit.r_name_with_id)
             # future: Future = executor.submit(process_submissions, subreddit, context.bot)
             subreddit_task = SubredditTask()  # see https://stackoverflow.com/a/6514268
             future: Future = executor.submit(subreddit_task, subreddit, context.bot)

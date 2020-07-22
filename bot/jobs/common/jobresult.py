@@ -1,5 +1,5 @@
 class JobResult:
-    def __init__(self, posted_messages=0, posted_bytes=0):
+    def __init__(self, posted_messages=0, posted_bytes=0.0):
         self.posted_messages = posted_messages
         self.posted_bytes = posted_bytes
 
@@ -9,7 +9,7 @@ class JobResult:
     def inc_bytes(self, posted_bytes):
         self.posted_bytes += posted_bytes
 
-    def increment(self, posted_messages=0, posted_bytes=0):
+    def increment(self, posted_messages=0, posted_bytes=0.0):
         self.posted_messages += posted_messages
         self.posted_bytes += posted_bytes
 
