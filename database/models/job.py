@@ -64,7 +64,7 @@ class Job(peewee.Model):
 
         result = list()
         for job in rows[:top]:
-            result.append((job.name, job.start, job.duration, job.posted_messages, job.uploaded_bytes))
+            result.append((job.name, job.start_dt, job.duration, job.posted_messages, job.uploaded_bytes))
 
         return result
 
