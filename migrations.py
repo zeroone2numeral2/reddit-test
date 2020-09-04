@@ -51,7 +51,7 @@ def main(database_path):
     reddit_account = peewee.CharField(null=True)
     reddit_client = peewee.CharField(null=True)
     ignore_flairless = peewee.BooleanField(default=False, null=True)
-    style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='NO ACTION', null=True)
+    style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='RESTRICT', null=True)
     template_resume = peewee.CharField(null=True)
     template_caption = peewee.CharField(null=True)
     default = peewee.BooleanField(default=False)
