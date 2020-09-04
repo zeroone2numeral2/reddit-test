@@ -9,6 +9,8 @@ from database import db
 class Job(peewee.Model):
     id = peewee.IntegerField(primary_key=True)
     name = peewee.CharField(null=False)
+    # total_subreddits = peewee.IntegerField(null=True)
+    # processed_subreddits = peewee.IntegerField(null=True)
     start = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
     end = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
     duration = peewee.IntegerField(null=True)

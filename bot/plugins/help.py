@@ -48,7 +48,7 @@ subreddit name
 
 *Styles*
 /newstyle `[name]`: create a new style
-/confstyle `<filter>`: configure a style
+/style `<filter>`: configure a style
 
 *Misc*
 /ph: list template's placeholders
