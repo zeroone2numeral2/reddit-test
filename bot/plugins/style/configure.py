@@ -11,6 +11,7 @@ from bot import mainbot
 from bot.conversation import Status
 from database.models import Subreddit
 from database.models import Style
+from database.queries import styles
 from bot.markups import Keyboard
 from utilities import u
 from utilities import d
@@ -201,6 +202,12 @@ def on_remove_command(update: Update, context: CallbackContext, style: Style):
     if style.default:
         update.message.reply_text('You cannot delete the default style')
         return Status.WAITING_STYLE_CONFIG_ACTION
+
+    if styles.is_used(style):
+        # for some reason sometime external keys checks don't work
+        update.message.reply_text('You cannot delete a style which is used by some subreddits (see /subreddits)')
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
     try:
         style.delete_instance()
     except IntegrityError:
