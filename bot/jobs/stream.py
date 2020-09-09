@@ -20,6 +20,7 @@ from utilities import d
 from database.models import Subreddit
 from database.models import Post
 from database.models import InitialTopPost
+from database.queries import settings
 from database import db
 from reddit import reddit
 from reddit import Sender
@@ -274,3 +275,13 @@ def check_posts(context: CallbackContext) -> JobResult:
         # time.sleep(1)
 
     return stream_job_result
+
+
+def stream_job(context: CallbackContext) -> JobResult:
+    while True:
+        yield check_posts(context)
+        time.sleep(3)
+
+        while settings.jobs_locked():
+            logger.info('jobs are locked, sleeping for 20 seconds...')
+            time.sleep(20)
