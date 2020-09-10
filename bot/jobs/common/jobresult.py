@@ -1,7 +1,8 @@
 class JobResult:
-    def __init__(self, posted_messages=0, posted_bytes=0.0):
+    def __init__(self, posted_messages=0, posted_bytes=0.0, canceled=False):
         self.posted_messages = posted_messages
         self.posted_bytes = posted_bytes
+        self.canceled = canceled
 
     def inc_messages(self, posted_messages=1):
         self.posted_messages += posted_messages

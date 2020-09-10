@@ -215,7 +215,7 @@ def is_time_to_process(subreddit: Subreddit):
 def check_posts(context: CallbackContext) -> JobResult:
     if settings.jobs_locked():
         logger.info('jobs are locked, skipping this job execution')
-        return JobResult()
+        return JobResult(aborted=True)
 
     bot = context.bot
 
@@ -260,6 +260,11 @@ def check_posts(context: CallbackContext) -> JobResult:
 
         logger.info('harvesting results...')
         for subreddit_task, future in futures:
+            if settings.jobs_locked():
+                logger.info('jobs have been locked, terminating subreddit tasks processing now and returning')
+                stream_job_result.canceled = True
+                return stream_job_result
+
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
