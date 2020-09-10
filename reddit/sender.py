@@ -271,8 +271,8 @@ class Sender:
             self._s.num_comments = int(self._s.num_comments)
 
         self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
-        self._s.elapsed_minutes = self._s.elapsed_seconds / 60
-        self._s.elapsed_hours = self._s.elapsed_minutes / 60
+        self._s.elapsed_minutes = int(round(self._s.elapsed_seconds / 60))
+        self._s.elapsed_hours = int(round(self._s.elapsed_minutes / 60))
 
         # "n hours ago" if hours > 0, else "n minutes ago"
         self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
@@ -280,6 +280,7 @@ class Sender:
         self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.channel_invite_link = self._subreddit.channel_link
+        self._s.channel_username = self._subreddit.channel_username(default='')
 
         # u.print_submission(self._s)
 

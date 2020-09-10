@@ -11,6 +11,17 @@ from telegram import BotCommand
 logger = logging.getLogger(__name__)
 
 
+class DummyJob:
+    def __init__(self, name):
+        self.name = name
+
+
+class DummyContext:
+    def __init__(self, updater, job_name):
+        self.updater = updater
+        self.job = DummyJob(job_name)
+
+
 class RedditBot(Updater):
     COMMANDS_LIST = [
         BotCommand('addchannel', 'add a channel'),

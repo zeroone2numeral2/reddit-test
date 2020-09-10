@@ -84,6 +84,12 @@ class Subreddit(peewee.Model):
 
         return self.channel.title
 
+    def channel_username(self, default=None):
+        if not self.channel or not self.channel.username:
+            return default
+
+        return self.channel.username
+
     def get_channel_invite_link(self, ignore_public_username=False, default=None):
         if not self.channel:
             return default

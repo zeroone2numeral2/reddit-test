@@ -212,7 +212,9 @@ def is_time_to_process(subreddit: Subreddit):
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(context: CallbackContext) -> JobResult:
+def check_posts(context) -> JobResult:
+    bot = context.bot
+
     with db.atomic():  # noqa
         subreddits = (
             Subreddit.select()
@@ -246,9 +248,9 @@ def check_posts(context: CallbackContext) -> JobResult:
         futures: [(SubredditTask, Future)] = list()
         for i, subreddit in enumerate(subreddits_to_process):
             logger.info('%d/%d submitting %s...', i+1, num_collected_subreddits, subreddit.r_name_with_id)
-            # future: Future = executor.submit(process_submissions, subreddit, context.bot)
+            # future: Future = executor.submit(process_submissions, subreddit, bot)
             subreddit_task = SubredditTask()  # see https://stackoverflow.com/a/6514268
-            future: Future = executor.submit(subreddit_task, subreddit, context.bot)
+            future: Future = executor.submit(subreddit_task, subreddit, bot)
             future.subreddit = subreddit
             futures.append((subreddit_task, future))
 
@@ -257,27 +259,35 @@ def check_posts(context: CallbackContext) -> JobResult:
             # noinspection PyBroadException
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
-                subreddit_job_result = future.result(timeout=context.job.interval)
+
+                subreddit_job_result = future.result(timeout=10 * 60)
                 stream_job_result += subreddit_job_result
+
                 logger.info('still %d active pools', executor.get_pool_usage())
             except TimeoutError:
                 subreddit_task.request_interrupt()
                 future.cancel()  # doesn't work apparently, the callback can't be stopped. We can only request its interruption
+
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
-                text = '#mirrorbot_error - pool executor timeout - %d seconds'.format(future.subreddit.name, context.job.interval)
-                context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+
+                text = '#mirrorbot_error - pool executor timeout - %d seconds'.format(future.subreddit.name, 10 * 60)
+                bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
             except Exception:
                 error_description = future.exception()
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
+
                 text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
-                context.bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+                bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         # time.sleep(1)
 
     return stream_job_result
 
 
-def stream_job(context: CallbackContext) -> JobResult:
+def stream_job(context) -> JobResult:
+    print('DIO BOIA LADRO CANE')
+    logger.info('entering job callback')
+
     while True:
         yield check_posts(context)
         time.sleep(3)

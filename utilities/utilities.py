@@ -365,6 +365,15 @@ def get_subreddit_from_userdata(user_data: dict):
         return user_data['data'].get('subreddit', None)
 
 
+def proper_round(num, dec=0):
+    num = str(num)[:str(num).index('.') + dec + 2]
+
+    if num[-1] >= '5':
+        return float(num[:-2 - (not dec)] + str(int(num[-2 - (not dec)]) + 1))
+
+    return float(num[:-1])
+
+
 def number_of_daily_posts(s, print_debug=False):
     n = 0
 
