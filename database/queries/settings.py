@@ -4,7 +4,7 @@ from ..models import Setting
 
 
 def jobs_locked():
-    return bool(Setting.get_key('locked'))
+    return bool(Setting.get_key('locked').value)
 
 
 def change_lock(new_value: bool):
