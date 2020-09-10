@@ -276,6 +276,7 @@ class Sender:
 
         # "n hours ago" if hours > 0, else "n minutes ago"
         self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
+        self._s.elapsed_smart_compact = u.elapsed_smart_compact(self._s.elapsed_seconds)
 
         self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
         self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None

@@ -132,24 +132,60 @@ def pretty_seconds(n_seconds):
     return string
 
 
-def elapsed_time_smart(seconds):
+def elapsed_time_smart(seconds, compact=False):
+    if compact:
+        days_string = 'd'
+        hours_string = 'h'
+        minutes_string = 'm'
+    else:
+        days_string = ' day'
+        hours_string = 'hour'
+        minutes_string = 'minute'
+
     elapsed_minutes = seconds / 60
     elapsed_hours = elapsed_minutes / 60
     elapsed_days = elapsed_hours / 24
 
     # "n hours ago" if hours > 0, else "n minutes ago"
     if elapsed_days >= 1:
-        string = '{} day'.format(floor(elapsed_days))
-        if elapsed_days >= 2:
+        string = '{}{}'.format(floor(elapsed_days), days_string)
+        if elapsed_days >= 2 and not compact:
             string += 's'
     elif elapsed_hours >= 1:
-        string = '{} hour'.format(floor(elapsed_hours))
-        if elapsed_hours >= 2:
+        string = '{}{}'.format(floor(elapsed_hours), hours_string)
+        if elapsed_hours >= 2 and not compact:
             string += 's'
     else:
-        string = '{} minute'.format(floor(elapsed_minutes))
-        if elapsed_minutes >= 2:
+        string = '{}{}'.format(floor(elapsed_minutes), minutes_string)
+        if elapsed_minutes >= 2 and not compact:
             string += 's'
+
+    return string
+
+
+def elapsed_smart_compact(seconds):
+    if seconds < 1:
+        return '{}s'.format(seconds)
+
+    string = ''
+
+    days = seconds // (3600 * 24)
+    seconds %= 3600 * 24
+    print('', 'days', days, 'seconds', seconds)
+    if days:
+        string += '{}d'.format(days)
+
+    hours = seconds // 3600
+    seconds %= 3600
+    print('', 'hours', hours, 'seconds', seconds)
+    if hours:
+        string += '{}h'.format(hours)
+
+    minutes = seconds // 60
+    seconds %= 60
+    print('', 'minutes', minutes, 'seconds', seconds)
+    if minutes:
+        string += '{}m'.format(minutes)
 
     return string
 
