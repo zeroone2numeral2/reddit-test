@@ -213,9 +213,13 @@ def is_time_to_process(subreddit: Subreddit):
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
 def check_posts(context: CallbackContext) -> JobResult:
+    if settings.jobs_locked():
+        logger.info('jobs are locked, skipping this job execution')
+        return JobResult()
+
     bot = context.bot
 
-    with db.atomic():  # noqa
+    with db.atomic():
         subreddits = (
             Subreddit.select()
             .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
