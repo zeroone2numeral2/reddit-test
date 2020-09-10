@@ -13,10 +13,13 @@ class Job(peewee.Model):
     # processed_subreddits = peewee.IntegerField(null=True)
     start = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
     end = peewee.DateTimeField(null=True)  # https://github.com/coleifer/peewee/issues/1427
+    # subreddits_count = peewee.IntegerField(null=True)
+    # subreddits_progress = peewee.IntegerField(null=True)
     duration = peewee.IntegerField(null=True)
     posted_messages = peewee.IntegerField(null=True)
     uploaded_bytes = peewee.IntegerField(null=True)
     result = peewee.CharField(null=True)
+    # canceled = peewee.BooleanField(default=False)
 
     class Meta:
         table_name = 'jobs'
