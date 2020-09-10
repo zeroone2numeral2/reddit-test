@@ -34,5 +34,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        scheduler.shutdown()  # does not interrupt any currently running job
+        # scheduler.shutdown()  # does not interrupt any currently running job
         sys.exit()
