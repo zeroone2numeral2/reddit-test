@@ -8,12 +8,12 @@ from .jobs.stream import check_posts, stream_job
 from .jobs.resume import check_daily_resume
 from config import config
 
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 
 mainbot = RedditBot(token=config.telegram.token, use_context=True, workers=1)
 
-scheduler = BackgroundScheduler(daemon=True)
+# scheduler = BackgroundScheduler(daemon=True)
 
 
 def main():
