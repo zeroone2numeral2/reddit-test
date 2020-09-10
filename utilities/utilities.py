@@ -171,21 +171,18 @@ def elapsed_smart_compact(seconds):
 
     days = seconds // (3600 * 24)
     seconds %= 3600 * 24
-    print('', 'days', days, 'seconds', seconds)
     if days:
-        string += '{}d'.format(days)
+        string += '{}d'.format(int(days))
 
     hours = seconds // 3600
     seconds %= 3600
-    print('', 'hours', hours, 'seconds', seconds)
     if hours:
-        string += '{}h'.format(hours)
+        string += '{}h'.format(int(hours))
 
     minutes = seconds // 60
     seconds %= 60
-    print('', 'minutes', minutes, 'seconds', seconds)
     if minutes:
-        string += '{}m'.format(minutes)
+        string += '{}m'.format(int(minutes))
 
     return string
 
