@@ -69,6 +69,9 @@ class RedditBot(Updater):
         BotCommand('subreddits', 'get the subreddit using a style'),
         BotCommand('getstyle', 'see the current subreddit style'),
         BotCommand('rename', 'rename a style'),
+        BotCommand('lockstatus', 'see whether jobs are locked or not'),
+        BotCommand('lock', 'lock jobs'),
+        BotCommand('unlock', 'unlock jobs'),
     ]
 
     @staticmethod

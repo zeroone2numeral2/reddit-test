@@ -7,12 +7,12 @@ def jobs_locked():
     return bool(Setting.get_key('locked').value)
 
 
-def change_lock(new_value: bool):
+def change_lock(new_value: int):
     setting = Setting.get_key('locked')
 
-    if bool(setting.value) != new_value:
+    if setting.value != new_value:
         # change only if current value is different
-        setting.value = int(not new_value)
+        setting.value = new_value
         setting.save()
         return True
     else:
@@ -20,8 +20,8 @@ def change_lock(new_value: bool):
 
 
 def unlock_jobs():
-    change_lock(False)
+    return change_lock(0)
 
 
 def lock_jobs():
-    change_lock(True)
+    return change_lock(1)
