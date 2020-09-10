@@ -20,7 +20,7 @@ def main():
     # load_logging_config('logging.json')
 
     mainbot.import_handlers(r'bot/plugins/')
-    mainbot.job_queue.run_repeating(check_daily_resume, interval=config.jobs.resume.interval * 60, first=config.jobs.resume.first * 60, name='resume')
+    # mainbot.job_queue.run_repeating(check_daily_resume, interval=config.jobs.resume.interval * 60, first=config.jobs.resume.first * 60, name='resume')
     mainbot.job_queue.run_repeating(check_posts, interval=config.jobs.stream.interval * 60, first=config.jobs.stream.first * 60, name='stream')
 
     # context = DummyContext(mainbot, 'stream')
