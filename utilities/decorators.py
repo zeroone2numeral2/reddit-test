@@ -99,9 +99,10 @@ def log_start_end_dt(func):
             job_row = Job(name=context.job.name, start=job_start_dt)
             job_row.save()
 
-        job_result: JobResult = func(context, *args, **kwargs)  # (posted_messages, uploaded_bytes)
+        job_result: JobResult = func(context, job_row, *args, **kwargs)  # (posted_messages, uploaded_bytes)
         job_row.posted_messages = job_result.posted_messages
         job_row.uploaded_bytes = job_result.posted_bytes
+        job_row.canceled = job_result.canceled
 
         job_end_dt = u.now(utc=False)
         job_row.end = job_end_dt

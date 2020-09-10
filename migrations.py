@@ -56,6 +56,9 @@ def main(database_path):
     template_caption = peewee.CharField(null=True)
     default = peewee.BooleanField(default=False)
     template_override = peewee.CharField(null=True)
+    canceled = peewee.BooleanField(default=False)
+    subreddits_count = peewee.IntegerField(null=True)
+    subreddits_progress = peewee.IntegerField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -143,6 +146,10 @@ def main(database_path):
         migrator.drop_column('subreddits', 'webpage_preview'),
         # 20200716
         migrator.add_column('subreddits', 'template_override', template_override),
+        # 20200910
+        migrator.add_column('jobs', 'canceled', canceled),
+        migrator.add_column('jobs', 'subreddits_count', subreddits_count),
+        migrator.add_column('jobs', 'subreddits_progress', subreddits_progress),
     ]
 
     logger.info('Starting migration....')

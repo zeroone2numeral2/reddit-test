@@ -46,17 +46,19 @@ def lastjob_command(update: Update, _):
 
     text = ''
     for job_name, job_info in config.jobs.items():
-        job_duration = Job.last_job(job_name=job_name)
+        job_duration: Job = Job.last_job(job_name=job_name)
 
         if not job_duration:
             continue
 
-        text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes'.format(
+        text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total}'.format(
             name=job_name,
             started=job_duration.start_dt.strftime('%d/%m/%Y %H:%M:%S'),
             ended=job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S') if job_duration.end else 'running',
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration is not None else 'running',
-            interval=job_info['interval']
+            interval=job_info['interval'],
+            current=job_duration.subreddits_progress,
+            total=job_duration.subreddits_count
         )
 
     if not text:

@@ -17,7 +17,7 @@ from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
 from utilities import u
 from utilities import d
-from database.models import Subreddit
+from database.models import Subreddit, Job
 from database.models import Post
 from database.models import InitialTopPost
 from database.queries import settings
@@ -212,10 +212,10 @@ def is_time_to_process(subreddit: Subreddit):
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(context: CallbackContext) -> JobResult:
+def check_posts(context: CallbackContext, jobs_log_row: Job) -> JobResult:
     if settings.jobs_locked():
         logger.info('jobs are locked, skipping this job execution')
-        return JobResult(aborted=True)
+        return JobResult(canceled=True)
 
     bot = context.bot
 
@@ -242,6 +242,9 @@ def check_posts(context: CallbackContext) -> JobResult:
 
     num_collected_subreddits = len(subreddits_to_process)
     logger.info('collected tasks: %d', num_collected_subreddits)
+
+    jobs_log_row.subreddits_count = num_collected_subreddits
+    jobs_log_row.save()
 
     max_workers = (os.cpu_count() or 1) * 2
     logger.info('max_workers: %d', max_workers)
@@ -287,6 +290,9 @@ def check_posts(context: CallbackContext) -> JobResult:
 
                 text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
                 bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+
+            jobs_log_row.subreddits_progress += 1
+            jobs_log_row.save()
 
         # time.sleep(1)
 
