@@ -111,8 +111,9 @@ class Sender:
 
         self._s.is_image = False
         self._s.media_type = MediaType.NONE
-        self._s.flair_with_space = ''
-        self._s.flair_normalized = ''
+        self._s.flair_with_space = ''  # i don't remember why this is a thing
+        self._s.flair_normalized = ''  # ascii flair
+        self._s.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
         self._s.nsfw = self._s.over_18
         self._s.sorting = self._subreddit.sorting or 'hot'
         self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
@@ -237,6 +238,7 @@ class Sender:
             self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
             ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
             self._s.flair_normalized = ascii_flair
+            self._s.ascii_flair = ascii_flair
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
