@@ -72,6 +72,7 @@ class RedditBot(Updater):
         BotCommand('lockstatus', 'see whether jobs are locked or not'),
         BotCommand('lock', 'lock jobs'),
         BotCommand('unlock', 'unlock jobs'),
+        BotCommand('freq', 'change a subreddit frequency'),
     ]
 
     @staticmethod

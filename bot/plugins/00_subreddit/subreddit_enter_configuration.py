@@ -17,6 +17,7 @@ from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
 from .subreddit_configuration.remove import subconfig_on_remove_command
 from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
+from .subreddit_configuration.frequency import subconfig_on_freq_command
 from .subreddit_configuration.topstorage import subconfig_on_savetop_command
 from .subreddit_configuration.topstorage import subconfig_on_gettop_command
 from .subreddit_configuration.topstorage import subconfig_on_removetop_command
@@ -46,6 +47,7 @@ link: {s.channel_link})
 /getstyle (see the current style), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
+/freq (set the posting frequency), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
 /removetop (remove the saved top posts for this subreddit with the current sorting), \
 /gettop (see how many top posts we have saved for the current sorting)
@@ -202,6 +204,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['info'], subconfig_on_info_command),
             CommandHandler(['disable'], subconfig_on_disable_command),
             CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
+            CommandHandler(['freq'], subconfig_on_freq_command),
             CommandHandler(['setchannelicon'], subconfig_on_setchannelicon_command),
             CommandHandler(['savetop'], subconfig_on_savetop_command),
             CommandHandler(['gettop', 'getop'], subconfig_on_gettop_command),
