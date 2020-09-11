@@ -393,12 +393,18 @@ class Sender:
         if self._subreddit.template_override:
             # always use the override if it's set
             template = self._subreddit.template_override
-        elif is_caption and (self._subreddit.style.template_caption or self._subreddit.style.template_no_url):
-            # always use the caption template when we plan to send a media with caption.
-            # If it doesn't exists, but template_no_url is set, use that instead
-            template = self._subreddit.style.template_caption or self._subreddit.style.template_no_url
+        elif is_caption:
+            if self._subreddit.style.template_caption:
+                # if template_caption is set, use it right away
+                template = self._subreddit.style.template_caption
+            elif self._subreddit.style.template_no_url_for_captions and self._subreddit.style.template_no_url:
+                # if template_caption is NOT set, and template_no_url_for_captions is true, use template_no_url as fallback
+                template = self._subreddit.style.template_no_url
+            else:
+                # ...otherwise, use the normal template as fallback
+                template = self._subreddit.style.template
         elif not self._s.textual or not self._subreddit.style.template_no_url:
-            # if the submission is not a textal thread, or there is no template for textual threads (template_no_url),
+            # if the submission is not a textual (no url) thread, or there is no template for textual threads (template_no_url),
             # use the template saved in the database
             template = self._subreddit.style.template
         else:

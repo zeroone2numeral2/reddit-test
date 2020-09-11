@@ -17,6 +17,7 @@ class Style(peewee.Model):
     template = peewee.CharField(null=True)
     template_no_url = peewee.CharField(null=True)  # when the submission doesn't have an url
     template_caption = peewee.CharField(null=True)  # when we are going to send a media with a caption
+    template_no_url_for_captions = peewee.BooleanField(default=True)  # decides whether to use template_no_url as fallback when template_caption is not set
     template_resume = peewee.CharField(null=True)
     url_button = peewee.BooleanField(default=False)
     url_button_template = peewee.CharField(null=True)
