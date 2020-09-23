@@ -139,8 +139,8 @@ def elapsed_time_smart(seconds, compact=False):
         minutes_string = 'm'
     else:
         days_string = ' day'
-        hours_string = 'hour'
-        minutes_string = 'minute'
+        hours_string = ' hour'
+        minutes_string = ' minute'
 
     elapsed_minutes = seconds / 60
     elapsed_hours = elapsed_minutes / 60
