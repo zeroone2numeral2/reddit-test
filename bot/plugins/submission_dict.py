@@ -6,7 +6,6 @@ from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
 
 from bot import mainbot
-from bot.logging import slogger
 from utilities import d
 from database.models import Subreddit
 from database.models import Channel
