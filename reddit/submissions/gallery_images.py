@@ -4,7 +4,7 @@ class GalleryImages:
 
     @staticmethod
     def test(submission):
-        if not hasattr(submission, 'gallery_data'):
+        if not submission.is_gallery:
             return False
 
         for media_id, media_metadata in submission.media_metadata.items():
