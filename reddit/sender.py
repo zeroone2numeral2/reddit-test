@@ -448,7 +448,7 @@ class Sender:
                         self._sent_message = self._send_image_download(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GALLERY_IMAGES:
                     self.log.info('post is a reddit gallery with images only: using _send_gallery_images()')
-                    self._sent_message = self._send_gallery_images(caption, reply_markup=reply_markup)
+                    self._sent_message = self._send_gallery_images_url(caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VREDDIT:
                     self.log.info('post is a vreddit: using _send_vreddit()')
                     self._sent_message = self._send_vreddit(self._s.media_url, caption, reply_markup=reply_markup)
@@ -569,7 +569,9 @@ class Sender:
         for media_id, media_metadata in media_metadata.items():
             if not use_largest_preview:
                 # 's': dicts that contains the actual image
-                image_url = media_metadata['s']['u']
+                # image_url = media_metadata['s']['u']
+                # alternative way of getting the image url:
+                image_url = 'https://i.redd.it/{}.jpg'.format(media_id)
             else:
                 # 'p': dicts that contains a list of previews (we use the largest one)
                 image_url = media_metadata['p'][-1]['u']
@@ -581,25 +583,52 @@ class Sender:
 
         return urls
 
-    def _send_gallery_images(self, caption, reply_markup=None):
+    def _send_gallery_images_base(self, media, reply_markup=None):
+        kwargs = dict(chat_id=self._chat_id, media=media, reply_markup=reply_markup, timeout=360)
+        return self._bot.send_media_group(**kwargs)
+
+    def _send_gallery_images_download(self, caption, reply_markup=None):
+        self.log.info('downloading and sending images gallery (gallery url: %s)', self._s.url)
+
+        media_group = list()
+        urls = self._gallery_fetch_urls(self._s.media_metadata)
+
+        for url in urls:
+            image = Image(url)
+            success = image.download(raise_exception=False)
+            if not success:
+                self.log.error('failed to send by url and to download file')
+                continue
+
+            media_group.append(InputMediaPhoto(media=image.file_bytes, caption=None if len(media_group) != 0 else caption, parse_mode=ParseMode.HTML))
+
+        if not media_group:
+            # raise an exception if the gallery is empty
+            raise ValueError('sending gallery by downloading its images: MediaGroup is empty')
+
+        self._sent_message = self._send_gallery_images_base(media=media_group, reply_markup=reply_markup)
+
+        self._sum_uploaded_bytes(self._sent_message)
+
+        return self._sent_message
+
+    def _send_gallery_images_url(self, caption, reply_markup=None):
         self.log.info('sending gallery of images by url (gallery url: %s)', self._s.url)
 
         urls = self._gallery_fetch_urls(self._s.media_metadata)
         media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption, parse_mode=ParseMode.HTML) for i, url in enumerate(urls)]
 
-        kwargs = dict(chat_id=self._chat_id, media=media_group, reply_markup=reply_markup)
-
         try:
-            sent_message = self._bot.send_media_group(**kwargs)
+            self._sent_message = self._send_gallery_images_base(media=media_group, reply_markup=reply_markup)
         except TelegramError as e:
-            self.log.info('TelegramError while sending "large" media group: %s (sending smaller version...)', e.message)
+            # if sending by url fails, try to download the images and post them
+            if 'failed to get http url content' not in e.message.lower() and 'wrong file identifier/http url specified' not in e.message.lower():
+                raise e
 
-            urls = self._gallery_fetch_urls(self._s.media_metadata, use_largest_preview=True)
-            kwargs['media'] = [InputMediaPhoto(media=url, caption=None if i != 0 else caption, parse_mode=ParseMode.HTML) for i, url in enumerate(urls)]
+            self.log.info('sending by url failed: trying to dowload gallery from its urls')
+            self._sent_message = self._send_gallery_images_download(caption=caption, reply_markup=reply_markup)
 
-            sent_message = self._bot.send_media_group(**kwargs)
-
-        return sent_message
+        return self._sent_message
 
     def _send_vreddit(self, url, caption, reply_markup=None):
         self.log.info('vreddit url: %s', url)

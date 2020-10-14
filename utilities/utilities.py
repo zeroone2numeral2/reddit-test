@@ -359,20 +359,23 @@ def split_text(strings_list, join_by: str=False):
             yield join_by.join(strings_list[i:i + list_items_per_message])
 
 
-def media_size(message) -> [int, None]:
+def media_size(messages) -> [int, None]:
     # media.file_size is ok for pyrogram types too
+    if not isinstance(messages, list):
+        messages = [messages]
 
-    size = None
-    if message.video:
-        size = message.video.file_size
-    elif message.document:
-        size = message.document.file_size
-    elif message.animation:
-        size = message.animation.file_size
-    elif message.audio:
-        size = message.audio.file_size
-    elif message.photo:
-        size = message.photo[-1].file_size
+    size = 0
+    for message in messages:
+        if message.video:
+            size += message.video.file_size
+        elif message.document:
+            size += message.document.file_size
+        elif message.animation:
+            size += message.animation.file_size
+        elif message.audio:
+            size += message.audio.file_size
+        elif message.photo:
+            size += message.photo[-1].file_size
 
     return size
 
