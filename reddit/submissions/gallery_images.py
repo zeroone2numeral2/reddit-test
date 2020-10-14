@@ -1,4 +1,3 @@
-from telegram import Message
 from telegram import InputMediaPhoto
 from telegram import ParseMode
 from telegram import TelegramError

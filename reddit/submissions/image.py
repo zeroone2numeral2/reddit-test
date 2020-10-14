@@ -19,8 +19,16 @@ class Image(BaseSenderType):
 
         if url_lower.endswith(('.jpg', '.png', '.jpeg')) or re.search(r'.+(?:\.jpg\?.+|\.jpeg\?.+|\.png\?.+)', url_lower):
             return True
-
-        return False
+        elif 'https://instagram.' in url_lower and '.jpg' in url_lower:
+            return True
+        elif 'artstation.com' in url_lower:
+            return True
+        elif 'images-wixmp' in url_lower:
+            return True
+        elif 'i.reddituploads.com' in url_lower:
+            return True
+        else:
+            return False
 
     def _send_image_base(self, image, caption=None, reply_markup=None):
         return self._bot.send_photo(
