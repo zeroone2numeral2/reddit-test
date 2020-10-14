@@ -584,20 +584,19 @@ class Sender:
     def _send_gallery_images(self, caption, reply_markup=None):
         self.log.info('sending gallery of images by url (gallery url: %s)', self._s.url)
 
-        small_urls = self._gallery_fetch_urls(self._s.media_metadata, use_largest_preview=True)
-        large_urls = self._gallery_fetch_urls(self._s.media_metadata)
+        urls = self._gallery_fetch_urls(self._s.media_metadata)
+        media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(urls)]
 
-        small_media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(small_urls)]
-        large_media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(large_urls)]
-
-        kwargs = dict(chat_id=self._chat_id, media=large_media_group, reply_markup=reply_markup)
+        kwargs = dict(chat_id=self._chat_id, media=media_group, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
 
         try:
             sent_message = self._bot.send_media_group(**kwargs)
         except TelegramError as e:
             self.log.info('TelegramError while sending "large" media group: %s (sending smaller version...)', e.message)
 
-            kwargs['media'] = small_media_group
+            urls = self._gallery_fetch_urls(self._s.media_metadata, use_largest_preview=True)
+            kwargs['media'] = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(urls)]
+
             sent_message = self._bot.send_media_group(**kwargs)
 
         return sent_message
