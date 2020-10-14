@@ -7,12 +7,16 @@ class Gif(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url
-        self._ulr = self._url.lower().replace('.gifv', '.mp4')
+
+        if self._url.endswith('.gifv'):
+            self._url = self._url.lower().replace('.gifv', '.mp4')
+        elif self._url.endswith('.gif'):
+            self._url = self._url.lower().replace('.gif', '.mp4')
 
     @staticmethod
     def test(submission):
         url_lower = submission.url.lower()
-        if url_lower.endswith('.gifv'):
+        if 'imgur.com' in url_lower and url_lower.endswith(('.gifv', '.gif')):
             return True
 
         return False
