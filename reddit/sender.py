@@ -841,7 +841,6 @@ class Sender:
             self.log.info('not creating Post row: %s is a testing subreddit', self._subreddit.r_name_with_id)
             return
 
-        message_id = self._sent_message.message_id
         if isinstance(self._sent_message, list):
             message_id = self._sent_message[0].message_id
             sent_message_json = json.dumps([m.to_dict() for m in self._sent_message])
@@ -849,8 +848,10 @@ class Sender:
             message_id = self._sent_message.message_id
             sent_message_json = self._sent_message.to_json()
         elif isinstance(self._sent_message, PyroMessage):
+            message_id = self._sent_message.message_id
             sent_message_json = str(self._sent_message)
         else:
+            message_id = self._sent_message.message_id
             sent_message_json = None
 
         self.log.info('creating Post row...')
