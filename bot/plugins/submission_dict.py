@@ -17,7 +17,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.knownsubreddit
+# @d.knownsubreddit
 def on_sdict_command(update, context):
     logger.info('/sdict command')
 
