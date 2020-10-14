@@ -288,7 +288,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job) -> JobResult:
                 error_description = future.exception()
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
 
-                text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(error_description))
+                text = '#mirrorbot_error - {} - <code>{}</code>'.format(future.subreddit.name, u.escape(str(error_description)))
                 bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
             jobs_log_row.subreddits_progress += 1
