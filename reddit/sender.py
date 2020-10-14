@@ -6,7 +6,7 @@ from collections import OrderedDict
 from pprint import pformat
 from urllib.parse import urlparse
 
-from telegram import Bot
+from telegram import Bot, InputMediaPhoto
 from telegram import ParseMode
 from telegram import Message as PtbMessage
 from telegram.error import BadRequest
@@ -15,6 +15,7 @@ from pyrogram import Message as PyroMessage
 
 from const import MaxSize
 from database import db
+from .submissions import GalleryImages
 from .downloaders import Imgur
 from .downloaders import Downloader
 from .downloaders import VReddit
@@ -77,6 +78,7 @@ class MediaType:
     GFYCAT = 'gfycat'
     REDDIT_GIF = 'reddit_gif'
     YOUTUBE = 'youtube'
+    GALLERY_IMAGES = 'gallery_images'
 
 
 class Media:
@@ -201,6 +203,9 @@ class Sender:
             self.log.debug('url is an mp4: submission is a video')
             self._s.media_type = MediaType.VIDEO
             self._s.media_url = self._s.url
+        elif GalleryImages.test(self._s):
+            self.log.debug('submission.gallery_data: submission is a gallery')
+            self._s.media_type = MediaType.GALLERY_IMAGES
         elif self._s.domain == 'i.redd.it' and self._s.url.endswith('.gif'):
             self.log.debug('url is an i.redd.it gif')
             self._s.media_type = MediaType.REDDIT_GIF
@@ -444,6 +449,9 @@ class Sender:
                 elif self._s.media_type == MediaType.VREDDIT:
                     self.log.info('post is a vreddit: using _send_vreddit()')
                     self._sent_message = self._send_vreddit(self._s.media_url, caption, reply_markup=reply_markup)
+                elif self._s.media_type == MediaType.GALLERY_IMAGES:
+                    self.log.info('post is a reddit gallery with images only: using _send_gallery_images()')
+                    self._sent_message = self._send_gallery_images(caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VIDEO:
                     self.log.info('post is a video: using _send_video()')
                     self._sent_message = self._send_video(self._s.media_url, caption, reply_markup=reply_markup)
@@ -554,6 +562,23 @@ class Sender:
         self.log.debug('it took %d seconds to send the photo (%s)', (end - start).total_seconds(), image_url)
         
         return self._sent_message
+
+    def _send_gallery_images(self, caption, reply_markup=None):
+        self.log.info('sending gallery of images by url (gallery url: %s)', self._s.url)
+
+        urls = list()
+        for media_id, media_metadata in self._s.media_metadata.items():
+            image_url = media_metadata['p'][-1]['u']
+            urls.append(image_url)
+
+        media_group = list()
+        for i, url in enumerate(urls):
+            media_group.append(InputMediaPhoto(media=url, caption=None if i != 0 else caption))
+            if i == 9:
+                # max 10 medias
+                break
+
+        return self._bot.send_media_group(self._chat_id, media=media_group, caption=caption, reply_markup=reply_markup)
 
     def _send_vreddit(self, url, caption, reply_markup=None):
         self.log.info('vreddit url: %s', url)
