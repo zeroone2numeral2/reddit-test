@@ -585,9 +585,9 @@ class Sender:
         self.log.info('sending gallery of images by url (gallery url: %s)', self._s.url)
 
         urls = self._gallery_fetch_urls(self._s.media_metadata)
-        media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(urls)]
+        media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption, parse_mode=ParseMode.HTML) for i, url in enumerate(urls)]
 
-        kwargs = dict(chat_id=self._chat_id, media=media_group, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
+        kwargs = dict(chat_id=self._chat_id, media=media_group, reply_markup=reply_markup)
 
         try:
             sent_message = self._bot.send_media_group(**kwargs)
@@ -595,7 +595,7 @@ class Sender:
             self.log.info('TelegramError while sending "large" media group: %s (sending smaller version...)', e.message)
 
             urls = self._gallery_fetch_urls(self._s.media_metadata, use_largest_preview=True)
-            kwargs['media'] = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(urls)]
+            kwargs['media'] = [InputMediaPhoto(media=url, caption=None if i != 0 else caption, parse_mode=ParseMode.HTML) for i, url in enumerate(urls)]
 
             sent_message = self._bot.send_media_group(**kwargs)
 
