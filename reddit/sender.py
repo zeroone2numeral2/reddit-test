@@ -470,7 +470,7 @@ class Sender:
                 
                 return self._sent_message
             except Exception as e:
-                self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e))
+                self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e), exc_info=False)
         else:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
         
