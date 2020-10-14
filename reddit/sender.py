@@ -446,12 +446,12 @@ class Sender:
                     else:
                         self.log.info('config said to NOT send the image by url: we will try to download it')
                         self._sent_message = self._send_image_download(self._s.media_url, caption, reply_markup=reply_markup)
-                elif self._s.media_type == MediaType.VREDDIT:
-                    self.log.info('post is a vreddit: using _send_vreddit()')
-                    self._sent_message = self._send_vreddit(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.GALLERY_IMAGES:
                     self.log.info('post is a reddit gallery with images only: using _send_gallery_images()')
                     self._sent_message = self._send_gallery_images(caption, reply_markup=reply_markup)
+                elif self._s.media_type == MediaType.VREDDIT:
+                    self.log.info('post is a vreddit: using _send_vreddit()')
+                    self._sent_message = self._send_vreddit(self._s.media_url, caption, reply_markup=reply_markup)
                 elif self._s.media_type == MediaType.VIDEO:
                     self.log.info('post is a video: using _send_video()')
                     self._sent_message = self._send_video(self._s.media_url, caption, reply_markup=reply_markup)
@@ -563,22 +563,44 @@ class Sender:
         
         return self._sent_message
 
+    @staticmethod
+    def _gallery_fetch_urls(media_metadata, use_largest_preview=False, limit=10):
+        urls = list()
+        for media_id, media_metadata in media_metadata.items():
+            if not use_largest_preview:
+                # 's': dicts that contains the actual image
+                image_url = media_metadata['s']['u']
+            else:
+                # 'p': dicts that contains a list of previews (we use the largest one)
+                image_url = media_metadata['p'][-1]['u']
+
+            urls.append(image_url)
+
+            if limit and len(urls) == limit:
+                break
+
+        return urls
+
     def _send_gallery_images(self, caption, reply_markup=None):
         self.log.info('sending gallery of images by url (gallery url: %s)', self._s.url)
 
-        urls = list()
-        for media_id, media_metadata in self._s.media_metadata.items():
-            image_url = media_metadata['p'][-1]['u']
-            urls.append(image_url)
+        small_urls = self._gallery_fetch_urls(self._s.media_metadata, use_largest_preview=True)
+        large_urls = self._gallery_fetch_urls(self._s.media_metadata)
 
-        media_group = list()
-        for i, url in enumerate(urls):
-            media_group.append(InputMediaPhoto(media=url, caption=None if i != 0 else caption))
-            if i == 9:
-                # max 10 medias
-                break
+        small_media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(small_urls)]
+        large_media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption) for i, url in enumerate(large_urls)]
 
-        return self._bot.send_media_group(self._chat_id, media=media_group, caption=caption, reply_markup=reply_markup)
+        kwargs = dict(chat_id=self._chat_id, media=large_media_group, reply_markup=reply_markup)
+
+        try:
+            sent_message = self._bot.send_media_group(**kwargs)
+        except TelegramError as e:
+            self.log.info('TelegramError while sending "large" media group: %s (sending smaller version...)', e.message)
+
+            kwargs['media'] = small_media_group
+            sent_message = self._bot.send_media_group(**kwargs)
+
+        return sent_message
 
     def _send_vreddit(self, url, caption, reply_markup=None):
         self.log.info('vreddit url: %s', url)

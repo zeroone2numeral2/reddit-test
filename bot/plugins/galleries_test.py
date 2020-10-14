@@ -30,7 +30,9 @@ def on_gallery_command(update, context):
 
         pprint('=' * 100)
 
-        image_url = media_metadata['p'][-1]['u']
+        # 's': dicts that contains the actual image
+        image_url = media_metadata['s']['u']
+
         urls.append(image_url)
 
     media_group = list()
