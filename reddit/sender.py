@@ -152,6 +152,63 @@ class Sender:
             self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
             self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
 
+        if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
+            # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
+            self._s.thumbnail = DEFAULT_THUMBNAILS[self._s.thumbnail.lower()]
+        elif not self._s.thumbnail:
+            self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
+
+        if self._s.link_flair_text is not None:
+            self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
+            ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
+            self._s.flair_normalized = ascii_flair
+            self._s.ascii_flair = ascii_flair
+
+        # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
+        # and "comments" inline urls
+        if self._s.comments_url == self._s.url:
+            self._s.textual = True
+            self._s.thread_or_urls = '<a href="{}">thread</a>'.format(self._s.comments_url)
+            self._s.force_disable_link_preview = True
+        else:
+            self._s.textual = False
+            self._s.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
+                self._s.url,
+                self._s.comments_url
+            )
+            self._s.force_disable_link_preview = False
+
+        if self._s.selftext:
+            text_len = len(self._s.selftext)
+            self._s.text = self._s.selftext
+            self._s.text_32 = '{}{}'.format(self._s.selftext[:32], '' if text_len <= 32 else ' [...]')
+            self._s.text_160 = '{}{}'.format(self._s.selftext[:160], '' if text_len <= 160 else ' [...]')
+            self._s.text_200 = '{}{}'.format(self._s.selftext[:200], '' if text_len <= 200 else ' [...]')
+            self._s.text_256 = '{}{}'.format(self._s.selftext[:256], '' if text_len <= 256 else ' [...]')
+
+        created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
+        self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
+
+        if self._subreddit.style.comments_button \
+            or (self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
+            or (self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
+            # calling a subreddit's num_comments property probably executes an API request. Make it
+            # an int if we'll need it
+            self._s.num_comments = int(self._s.num_comments)
+
+        self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
+        self._s.elapsed_minutes = int(round(self._s.elapsed_seconds / 60))
+        self._s.elapsed_hours = int(round(self._s.elapsed_minutes / 60))
+
+        # "n hours ago" if hours > 0, else "n minutes ago"
+        self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
+        self._s.elapsed_smart_compact = u.elapsed_smart_compact(self._s.elapsed_seconds)
+
+        self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
+        self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
+        self._s.channel_invite_link = self._subreddit.channel_link
+        self._s.channel_username = self._subreddit.channel_username(default='')
+
         # this whole shit should have its own method
         url_lower = self._s.url.lower()
         if url_lower.endswith(('.jpg', '.png', '.jpeg')) or re.search(r'.+(?:\.jpg\?.+|\.jpeg\?.+|\.png\?.+)', url_lower):
@@ -233,63 +290,6 @@ class Sender:
             )
             self._s.video_duration = self._s.media['reddit_video']['duration']
             self._s.is_gif = self._s.media['reddit_video'].get('is_gif', False)  # some v.reddit might not have audio
-
-        if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
-            # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
-            self._s.thumbnail = DEFAULT_THUMBNAILS[self._s.thumbnail.lower()]
-        elif not self._s.thumbnail:
-            self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
-
-        if self._s.link_flair_text is not None:
-            self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
-            ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
-            self._s.flair_normalized = ascii_flair
-            self._s.ascii_flair = ascii_flair
-
-        # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
-        # and "comments" inline urls
-        if self._s.comments_url == self._s.url:
-            self._s.textual = True
-            self._s.thread_or_urls = '<a href="{}">thread</a>'.format(self._s.comments_url)
-            self._s.force_disable_link_preview = True
-        else:
-            self._s.textual = False
-            self._s.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
-                self._s.url,
-                self._s.comments_url
-            )
-            self._s.force_disable_link_preview = False
-
-        if self._s.selftext:
-            text_len = len(self._s.selftext)
-            self._s.text = self._s.selftext
-            self._s.text_32 = '{}{}'.format(self._s.selftext[:32], '' if text_len <= 32 else ' [...]')
-            self._s.text_160 = '{}{}'.format(self._s.selftext[:160], '' if text_len <= 160 else ' [...]')
-            self._s.text_200 = '{}{}'.format(self._s.selftext[:200], '' if text_len <= 200 else ' [...]')
-            self._s.text_256 = '{}{}'.format(self._s.selftext[:256], '' if text_len <= 256 else ' [...]')
-
-        created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
-        self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
-
-        if self._subreddit.style.comments_button \
-            or (self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
-            or (self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
-            # calling a subreddit's num_comments property probably executes an API request. Make it
-            # an int if we'll need it
-            self._s.num_comments = int(self._s.num_comments)
-
-        self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
-        self._s.elapsed_minutes = int(round(self._s.elapsed_seconds / 60))
-        self._s.elapsed_hours = int(round(self._s.elapsed_minutes / 60))
-
-        # "n hours ago" if hours > 0, else "n minutes ago"
-        self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
-        self._s.elapsed_smart_compact = u.elapsed_smart_compact(self._s.elapsed_seconds)
-
-        self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
-        self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
-        self._s.channel_invite_link = self._subreddit.channel_link
-        self._s.channel_username = self._subreddit.channel_username(default='')
 
         # u.print_submission(self._s)
 
