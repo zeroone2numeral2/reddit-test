@@ -1,3 +1,4 @@
+import json
 import logging
 import datetime
 import os
@@ -840,7 +841,12 @@ class Sender:
             self.log.info('not creating Post row: %s is a testing subreddit', self._subreddit.r_name_with_id)
             return
 
-        if isinstance(self._sent_message, PtbMessage):
+        message_id = self._sent_message.message_id
+        if isinstance(self._sent_message, list):
+            message_id = self._sent_message[0].message_id
+            sent_message_json = json.dumps([m.to_dict() for m in self._sent_message])
+        elif isinstance(self._sent_message, PtbMessage):
+            message_id = self._sent_message.message_id
             sent_message_json = self._sent_message.to_json()
         elif isinstance(self._sent_message, PyroMessage):
             sent_message_json = str(self._sent_message)
@@ -853,7 +859,7 @@ class Sender:
                 submission_id=self._s.id,
                 subreddit=self._subreddit,
                 channel=self._subreddit.channel,
-                message_id=self._sent_message.message_id if self._sent_message else None,
+                message_id=message_id if self._sent_message else None,
                 posted_at=u.now() if self._sent_message else None,
                 uploaded_bytes=self._uploaded_bytes,
                 sent_message=sent_message_json
