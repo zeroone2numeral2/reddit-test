@@ -2,7 +2,6 @@ import logging
 import os
 import re
 from copy import deepcopy
-from pprint import pformat
 
 import youtube_dl
 
@@ -150,7 +149,7 @@ class YouTube:
 
         return True
 
-    def remove(self, keep_thumbnail=False):
+    def remove(self):
         logger.info('deleting song file and thumbnail')
 
         try:
