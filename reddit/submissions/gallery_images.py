@@ -1,6 +1,7 @@
 from telegram import InputMediaPhoto
 from telegram import ParseMode
 from telegram import TelegramError
+from telegram.error import BadRequest
 
 from .base_submission import BaseSenderType
 from ..downloaders import Image
@@ -81,12 +82,14 @@ class GalleryImages(BaseSenderType):
 
         try:
             sent_messages = self._send_gallery_images_base(media=media_group, reply_markup=reply_markup)
-        except TelegramError as e:
+        except (TelegramError, BadRequest) as e:
             # if sending by url fails, try to download the images and post them
-            if 'failed to get http url content' not in e.message.lower() and 'wrong file identifier/http url specified' not in e.message.lower():
+            # common error (BadRequest): "Group send failed"
+            error_message = str(e).lower()  # works for TelegramError and BadRequest (BadRequest doesn't have .message)
+            if 'failed to get http url content' not in error_message and 'wrong file identifier/http url specified' not in error_message and 'group send failed' not in error_message:
                 raise e
 
-            self.log.info('sending by url failed: trying to dowload gallery from its urls')
+            self.log.info('sending by url failed ("%s" error): trying to dowload gallery from its urls', error_message)
             sent_messages = self.send_gallery_images_download(caption=caption, reply_markup=reply_markup)
 
         return sent_messages
