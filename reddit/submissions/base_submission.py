@@ -50,7 +50,7 @@ class BaseSenderType:
         self.sent_messages = self._entry_point(*args, **kwargs)
         self.sent_messages_to_list()
 
-        return True
+        return self.sent_messages
 
     def _sum_uploaded_bytes(self, sent_message):
         uploaded_bytes = u.media_size(sent_message) or 0
