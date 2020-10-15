@@ -17,7 +17,8 @@ class ImgurGallery(BaseSenderType):
 
     @staticmethod
     def test(submission):
-        if 'imgur.com/gallery' in submission.url.lower():
+        url_lower = submission.url.lower()
+        if 'imgur.com/gallery' in url_lower or 'imgur.com/a/' in url_lower:
             return True
 
         return False

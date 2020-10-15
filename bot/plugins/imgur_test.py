@@ -6,9 +6,7 @@ from telegram import InputMediaPhoto, InputMediaVideo
 
 from bot import mainbot
 from utilities import d
-from reddit import reddit
 from reddit.downloaders import Imgur
-from reddit.submissions.imgur import imgur
 from config import config
 
 logger = logging.getLogger('handler')
