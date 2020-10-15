@@ -2,7 +2,6 @@ import json
 import logging
 import datetime
 import os
-import re
 from collections import OrderedDict
 from pprint import pformat
 from urllib.parse import urlparse
@@ -48,8 +47,9 @@ DEFAULT_THUMBNAILS = {
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log', 'sender']
-    
+    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
+                 'sender']
+
     def __init__(self, bot, subreddit, submission):
         self._bot: Bot = bot
         self._s = submission
@@ -97,7 +97,8 @@ class Sender:
         if hasattr(self._s, 'crosspost_parent') and len(self._s.crosspost_parent_list) > 0:
             self._s.is_xpost = True
             # sometimes submissions has the 'crosspost_parent' but there's no item in 'crosspost_parent_list'
-            self.log.info('note: submission is a crosspost of %s (overriding media attributes...)', self._s.crosspost_parent)
+            self.log.info('note: submission is a crosspost of %s (overriding media attributes...)',
+                          self._s.crosspost_parent)
             self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
             self._s.media = self._s.crosspost_parent_list[0].get('media', None)
             self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
@@ -142,8 +143,10 @@ class Sender:
         self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
         if self._subreddit.style.comments_button \
-            or (self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
-            or (self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
+                or (
+                self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
+                or (
+                self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
             # calling a subreddit's num_comments property probably executes an API request. Make it
             # an int if we'll need it
             self._s.num_comments = int(self._s.num_comments)
@@ -156,8 +159,11 @@ class Sender:
         self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
         self._s.elapsed_smart_compact = u.elapsed_smart_compact(self._s.elapsed_seconds)
 
-        self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
-        self._s.index_channel_username = '@{}'.format(config.telegram.index) if config.telegram.get('index', None) else None
+        self._s.index_channel_link = None
+        self._s.index_channel_username = None
+        if config.telegram.get('index', False):
+            self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index)
+            self._s.index_channel_username = '@{}'.format(config.telegram.index)
         self._s.channel_invite_link = self._subreddit.channel_link
         self._s.channel_username = self._subreddit.channel_username(default='')
 
@@ -207,7 +213,7 @@ class Sender:
     @property
     def submission_dict(self):
         return self._submission_dict
-    
+
     @property
     def subreddit(self):
         return self._subreddit
@@ -222,9 +228,9 @@ class Sender:
         for key in self._submission_dict.keys():
             if not key.startswith('_') and isinstance(self._submission_dict[key], (datetime.datetime, str, int)):
                 return_list.append(key)
-        
+
         return return_list
-        
+
     def __getitem__(self, item):
         return self._submission_dict[item]
 
@@ -234,33 +240,33 @@ class Sender:
         for key in dir(self._s):
             if key.startswith('_'):
                 continue
-                
+
             val = getattr(self._s, key)
             # try to stringify val, otherwise continue
             try:
                 str(val)
             except ValueError:
                 continue
-                
+
             self._submission_dict[key] = val
             if key in KEY_MAPPER_DICT:
                 # replace the key in the dict of the mapping object edits that value
                 self._submission_dict[key] = KEY_MAPPER_DICT[key](val)
-        
+
         for key in dir(self._subreddit):
             if key in ('channel', 'style'):
                 continue
 
             if key.startswith('_') or key in ('DoesNotExist',):
                 continue
-            
+
             val = getattr(self._subreddit, key)
             # try to stringify val, otherwise continue
             try:
                 str(val)  # no need to convert to string, we just have to try to
             except ValueError:
                 continue
-                
+
             self._submission_dict[key] = val
 
         # noinspection PyTypeChecker
@@ -346,7 +352,7 @@ class Sender:
         # self.log.info('post text: %s', text)
 
         reply_markup = self._generate_reply_markup()
-        
+
         if not isinstance(self.sender, Text) and not self._subreddit.force_text:
             self.log.info('post is a media, sending it as media...')
             try:
@@ -354,10 +360,11 @@ class Sender:
 
                 return self._sent_message
             except Exception as e:
-                self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e), exc_info=False)
+                self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e),
+                               exc_info=False)
         else:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
-        
+
         self.log.info('posting a text...')
         self._sent_message = self.sender.post(text, reply_markup=reply_markup)
 
@@ -374,6 +381,7 @@ class Sender:
             self.log.info('not creating Post row: %s is a testing subreddit', self._subreddit.r_name_with_id)
             return
 
+        sent_message_json = None
         if isinstance(self._sent_message, list):
             message_id = self._sent_message[0].message_id
             if isinstance(self._sent_message[0], PtbMessage):
@@ -388,7 +396,6 @@ class Sender:
             sent_message_json = str(self._sent_message)
         else:
             message_id = self._sent_message.message_id
-            sent_message_json = None
 
         self.log.info('creating Post row...')
         with db.atomic():
@@ -401,7 +408,7 @@ class Sender:
                 uploaded_bytes=self._uploaded_bytes,
                 sent_message=sent_message_json
             )
-    
+
     def test_filters(self):
         if self._subreddit.ignore_stickied and self._s.stickied:
             self.log.info('tests failed: sticked submission')
@@ -440,12 +447,12 @@ class Sender:
             return False
         else:
             return True
-    
+
     def write_temp_submission_dict(self):
         text = pformat(self.submission_dict)
         file_path = os.path.join('downloads', '{}.temp.txt'.format(self._s.id))
-    
+
         with open(file_path, 'w+') as f:
             f.write(text)
-            
+
         return file_path

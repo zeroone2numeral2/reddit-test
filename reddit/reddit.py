@@ -110,5 +110,3 @@ class Reddit(praw.Reddit):
             return file_path
         else:
             return icon_url
-
-

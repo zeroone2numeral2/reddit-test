@@ -1,5 +1,3 @@
-import re
-
 from telegram import ParseMode
 
 from ..downloaders import FileTooBig
@@ -48,7 +46,7 @@ class VReddit(BaseSenderType):
                           self._submission.is_gif)
             video_without_audio = True
 
-        file_path = vreddit.file_path
+        # file_path = vreddit.file_path
         self.log.info('file that will be used for the merged audio/video: %s', vreddit.merged_path)
         try:
             self.log.info('downloading video/audio and merging them...')
