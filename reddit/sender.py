@@ -187,6 +187,7 @@ class Sender:
         elif VReddit.test(self._s):
             self.log.debug('url is a vreddit')
             self.sender = VReddit(**sender_kwargs)
+        # these two are at the end because the test performs a network request (imgur api)
         elif ImgurNonDirectUrlImage.test(self._s):
             self.log.debug('url is an imgur non-direct url (image)')
             self.sender = ImgurNonDirectUrlImage(**sender_kwargs)
