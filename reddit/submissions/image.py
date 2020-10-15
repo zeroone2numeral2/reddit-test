@@ -32,7 +32,7 @@ class Image(BaseSenderType):
 
     def _send_image_base(self, image, caption=None, reply_markup=None):
         return self._bot.send_photo(
-            self._chat_id,
+            self.chat_id,
             photo=image,
             caption=caption,
             parse_mode=ParseMode.HTML,

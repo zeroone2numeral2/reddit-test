@@ -26,7 +26,7 @@ class RedditGif(Video):
     def _entry_point(self, caption, reply_markup=None):
         try:
             return self._bot.send_video(
-                self._chat_id,
+                self.chat_id,
                 self._url,
                 caption=caption,
                 parse_mode=ParseMode.HTML,

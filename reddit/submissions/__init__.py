@@ -1,4 +1,12 @@
+from .text import Text
 from .gallery_images import GalleryImages
-# from .gallery_images import Image
-# from .vreddit import VReddit
+from .image import Image
+from .vreddit import VReddit
 from .video import Video
+from .gfycat import Gfycat
+from .gif import Gif
+from .reddit_gif import RedditGif
+from .youtube import YouTube
+from .imgur import ImgurGallery
+from .imgur import ImgurNonDirectUrlImage
+from .imgur import ImgurNonDirectUrlVideo

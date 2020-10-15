@@ -2,7 +2,7 @@ import logging
 from pprint import pprint
 
 from telegram.ext import CommandHandler
-from telegram import InputMediaPhoto, InputMediaVideo
+from telegram import InputMediaPhoto, InputMediaVideo, InputMediaAnimation
 
 from bot import mainbot
 from utilities import d
@@ -34,6 +34,7 @@ def on_imgur_command(update, context):
             input_media = InputMediaVideo(media=url)
         elif url.endswith('.gif'):
             url = url.replace('.gif', '.mp4')
+            # sometimes some .gif urls, when converted to .mp4, return a static image
             input_media = InputMediaVideo(media=url)
         else:
             continue

@@ -23,7 +23,6 @@ class Style(peewee.Model):
     url_button_template = peewee.CharField(null=True)
     comments_button = peewee.BooleanField(default=False)
     comments_button_template = peewee.CharField(null=True)
-    send_medias = peewee.BooleanField(default=True)
     webpage_preview = peewee.BooleanField(default=True)
 
     class Meta:

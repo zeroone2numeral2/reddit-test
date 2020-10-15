@@ -38,7 +38,7 @@ class Video(BaseSenderType):
         self.log.debug('opening and sending video...')
         with open(video.file_path, 'rb') as f:
             sent_message = self._bot.send_video(
-                self._chat_id,
+                self.chat_id,
                 f,
                 caption=caption,
                 thumb=video.get_thumbnail_bo(),
