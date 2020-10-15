@@ -108,7 +108,7 @@ def fetch_submissions(subreddit: Subreddit):
             continue
         elif subreddit.sorting.lower() in ('month', 'all') and InitialTopPost.is_initial_top_post(subreddit.name, submission.id, sorting):
             subreddit.logger.info('...subreddit has sorting "%s" and submission %s is among the initial top posts',
-                         sorting, submission.id)
+                                  sorting, submission.id)
             continue
         else:
             subreddit.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
