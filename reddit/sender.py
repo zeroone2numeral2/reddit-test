@@ -91,17 +91,18 @@ class Sender:
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
         # We can get the parent submission of the crosspost from `submission.crosspost_parent_list[0]`
         # and then we can add it to the crossposted submission
+        self._s.is_xpost = False
         self._s.xpost_from = ''
         self._s.xpost_from_string = ''
         if hasattr(self._s, 'crosspost_parent') and len(self._s.crosspost_parent_list) > 0:
+            self._s.is_xpost = True
             # sometimes submissions has the 'crosspost_parent' but there's no item in 'crosspost_parent_list'
-            self.log.info('note: submission is a crosspost of %s', self._s.crosspost_parent)
+            self.log.info('note: submission is a crosspost of %s (overriding media attributes...)', self._s.crosspost_parent)
             self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
-            self._s.xpost_from_string = 'xpost from /r/{}'.format(self._s.xpost_from)
-            self._s.xpost_from_string_dotted = '• {}'.format(self._s.xpost_from_string)
             self._s.media = self._s.crosspost_parent_list[0].get('media', None)
             self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
             self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
+            self._s.media_metadata = self._s.crosspost_parent_list[0].get('media_metadata', None)
 
         if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
             # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
@@ -303,6 +304,10 @@ class Sender:
         if self._subreddit.template_override:
             # always use the override if it's set
             template = self._subreddit.template_override
+        elif self._s.is_xpost:
+            # if the submission is an xpost, use the template we would use with submissions containing an url (so the
+            # post will have a direct reference to the xposted thread)
+            template = self._subreddit.style.template
         elif is_caption:
             if self._subreddit.style.template_caption:
                 # if template_caption is set, use it right away
@@ -314,10 +319,11 @@ class Sender:
                 # ...otherwise, use the normal template as fallback
                 template = self._subreddit.style.template
         elif not self._s.textual or not self._subreddit.style.template_no_url:
-            # if the submission is not a textual (no url) thread, or there is no template for textual threads (template_no_url),
-            # use the template saved in the database
+            # if the submission has an url, or there is no template for textual threads (template_no_url), use the
+            # template saved in the database
             template = self._subreddit.style.template
         else:
+            # else (template_no_url is set and the submission is a textaul post), use template_no_url
             template = self._subreddit.style.template_no_url
 
         if not template:
