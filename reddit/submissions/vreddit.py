@@ -82,7 +82,7 @@ class VReddit(BaseSenderType):
         )
 
         sent_message = self._upload_video(
-            self._chat_id, file_path,
+            self.chat_id, file_path,
             file_size=vreddit.size,
             force_bot_api=False,  # True is used because of issue #82
             **video_args

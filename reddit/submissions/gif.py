@@ -9,9 +9,9 @@ class Gif(BaseSenderType):
         self._url = self._submission.url
 
         if self._url.endswith('.gifv'):
-            self._url = self._url.lower().replace('.gifv', '.mp4')
+            self._url = self._url.replace('.gifv', '.mp4')
         elif self._url.endswith('.gif'):
-            self._url = self._url.lower().replace('.gif', '.mp4')
+            self._url = self._url.replace('.gif', '.mp4')
 
     @staticmethod
     def test(submission):
@@ -25,7 +25,7 @@ class Gif(BaseSenderType):
         self.log.info('gif url: %s', self._url)
 
         return self._bot.send_animation(
-            self._chat_id,
+            self.chat_id,
             self._url,
             caption=caption,
             parse_mode=ParseMode.HTML,

@@ -43,7 +43,7 @@ class GalleryImages(BaseSenderType):
         return urls
 
     def _send_gallery_images_base(self, media, reply_markup=None):
-        kwargs = dict(chat_id=self._chat_id, media=media, reply_markup=reply_markup, timeout=360)
+        kwargs = dict(chat_id=self.chat_id, media=media, reply_markup=reply_markup, timeout=360)
         return self._bot.send_media_group(**kwargs)
 
     def send_gallery_images_download(self, caption, reply_markup=None):
