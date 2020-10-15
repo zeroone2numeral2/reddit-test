@@ -376,7 +376,10 @@ class Sender:
 
         if isinstance(self._sent_message, list):
             message_id = self._sent_message[0].message_id
-            sent_message_json = json.dumps([m.to_dict() for m in self._sent_message])
+            if isinstance(self._sent_message[0], PtbMessage):
+                sent_message_json = json.dumps([m.to_dict() for m in self._sent_message])
+            elif isinstance(self._sent_message[0], PyroMessage):
+                sent_message_json = json.dumps([str(m) for m in self._sent_message])
         elif isinstance(self._sent_message, PtbMessage):
             message_id = self._sent_message.message_id
             sent_message_json = self._sent_message.to_json()
