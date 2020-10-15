@@ -28,7 +28,7 @@ class VReddit(Downloader):
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
 
         # self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
-        self._url_audio = re.sub(r'\/DASH_.*$', '/DASH_audio.mp4', self._url)
+        self._url_audio = re.sub(r'/DASH_.*$', '/DASH_audio.mp4', self._url)
         self._audio_size = 0
         self._audio_path = os.path.normpath(os.path.join('downloads', '{}.mp3'.format(self._identifier)))
         self._video_path = self._file_path
