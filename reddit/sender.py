@@ -64,8 +64,6 @@ class Sender:
         sender_kwargs = dict(submission=self._s, subreddit=self._subreddit, bot=self._bot)
         self.sender = Text(**sender_kwargs)
 
-        self._s.is_image = False
-        self._s.flair_with_space = ''  # i don't remember why this is a thing
         self._s.flair_normalized = ''  # ascii flair
         self._s.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
         self._s.nsfw = self._s.over_18
@@ -112,7 +110,6 @@ class Sender:
             self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
 
         if self._s.link_flair_text is not None:
-            self._s.flair_with_space = '[{}] '.format(self._s.link_flair_text)
             ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
             self._s.flair_normalized = ascii_flair
             self._s.ascii_flair = ascii_flair
@@ -313,6 +310,11 @@ class Sender:
         elif self._s.is_xpost:
             # if the submission is an xpost, use the template we would use with submissions containing an url (so the
             # post will have a direct reference to the xposted thread)
+            template = self._subreddit.style.template
+        elif self.sender.EXTERNAL_CONTENT and self._subreddit.respect_external_content_flag:
+            # if we are sending a type of media that is flagged as EXTERNAL_CONTENT, and the subreddit is set to respect
+            # this flag, then we use the template for url submissions, so it will include the submission url to
+            # the external service (eg. YouTube/Twitter)
             template = self._subreddit.style.template
         elif is_caption:
             if self._subreddit.style.template_caption:

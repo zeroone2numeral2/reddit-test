@@ -61,6 +61,7 @@ def main(database_path):
     subreddits_progress = peewee.IntegerField(null=True)
     template_no_url_for_captions = peewee.BooleanField(default=True)
     force_text = peewee.BooleanField(default=False, null=True)
+    respect_external_content_flag = peewee.BooleanField(default=False, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -157,6 +158,7 @@ def main(database_path):
         # 20201015
         migrator.drop_column('styles', 'send_medias', template_no_url_for_captions),
         migrator.add_column('subreddits', 'force_text', force_text),
+        migrator.add_column('subreddits', 'respect_external_content_flag', respect_external_content_flag),
     ]
 
     logger.info('Starting migration....')

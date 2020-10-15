@@ -8,6 +8,8 @@ from .base_submission import BaseSenderType
 
 
 class YouTube(BaseSenderType):
+    EXTERNAL_CONTENT = True
+
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url

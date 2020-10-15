@@ -47,6 +47,7 @@ class Subreddit(peewee.Model):
     reddit_client = peewee.CharField(null=True)
     template_override = peewee.CharField(null=True)  # when set, will be used instead of any of the style's templates
     force_text = peewee.BooleanField(default=False, null=True)  # when True, submissions will be always sent as text
+    respect_external_content_flag = peewee.BooleanField(default=False, null=True)  # will mainly be used to decide which template to use
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)

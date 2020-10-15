@@ -19,6 +19,13 @@ mtproto = PyroClient(
 
 
 class BaseSenderType:
+    # The EXTERNAL_CONTENT flag signals whether this class is used for url that link to some content which is
+    # supposed to be consumed outiside of Reddit. For example, Twitter links and YouTube links are external content,
+    # but vreddit urls/direct urls to images/imgur urls (imgur is a social, but on reddit it is mainly used as an images hosting service)
+    # are ment to link some content that doesn't live on external platforms. This will be used to decide which
+    # template to use
+    EXTERNAL_CONTENT = False
+
     def __init__(self, submission, subreddit, bot):
         self._submission = submission
         self._subreddit = subreddit
