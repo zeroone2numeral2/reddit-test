@@ -60,6 +60,7 @@ def main(database_path):
     subreddits_count = peewee.IntegerField(null=True)
     subreddits_progress = peewee.IntegerField(null=True)
     template_no_url_for_captions = peewee.BooleanField(default=True)
+    force_text = peewee.BooleanField(default=False, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -153,6 +154,9 @@ def main(database_path):
         migrator.add_column('jobs', 'subreddits_progress', subreddits_progress),
         # 20200911
         migrator.add_column('styles', 'template_no_url_for_captions', template_no_url_for_captions),
+        # 20201015
+        migrator.drop_column('styles', 'send_medias', template_no_url_for_captions),
+        migrator.add_column('subreddits', 'force_text', force_text),
     ]
 
     logger.info('Starting migration....')

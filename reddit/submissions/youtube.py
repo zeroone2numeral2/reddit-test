@@ -48,7 +48,7 @@ class YouTube(BaseSenderType):
         self.log.debug('opening and sending video...')
         with open(ytvideo.file_path, 'rb') as f:
             sent_message = self._bot.send_video(
-                self._chat_id,
+                self.chat_id,
                 f,
                 caption=caption,
                 thumb=ytvideo.thumb.file_bytes,

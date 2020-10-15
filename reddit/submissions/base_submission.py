@@ -22,7 +22,7 @@ class BaseSenderType:
     def __init__(self, submission, subreddit, bot):
         self._submission = submission
         self._subreddit = subreddit
-        self._chat_id = self._subreddit.channel.channel_id
+        self.chat_id = self._subreddit.channel.channel_id
         self._bot = bot
         self._uploaded_bytes = 0
         self.sent_messages: list = []
@@ -31,6 +31,10 @@ class BaseSenderType:
             self.log = subreddit.logger
         else:
             self.log = logger
+
+    @property
+    def uploaded_bytes(self):
+        return self._uploaded_bytes
 
     def sent_messages_to_list(self):
         if isinstance(self.sent_messages, list):

@@ -5,7 +5,7 @@ from ..downloaders import FileTooBig
 from .base_submission import BaseSenderType
 
 
-class Video(BaseSenderType):
+class Gfycat(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url
@@ -24,7 +24,7 @@ class Video(BaseSenderType):
         gfycat.download_thumbnail()
 
         sent_message = self._bot.send_video(
-            self._chat_id,
+            self.chat_id,
             gfycat.url,
             caption=caption,
             parse_mode=ParseMode.HTML,
