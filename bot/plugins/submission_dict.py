@@ -7,7 +7,7 @@ from telegram import MAX_MESSAGE_LENGTH
 
 from bot import mainbot
 from utilities import d
-from database.models import Subreddit
+from database.models import Subreddit, Style
 from database.models import Channel
 from reddit import Sender
 from reddit import reddit
@@ -35,7 +35,8 @@ def on_sdict_command(update, context):
         tmp_subreddit = Subreddit(
             subreddit_id=submission.subreddit.id,
             channel=tmp_channel,
-            name=str(submission.subreddit)
+            name=str(submission.subreddit),
+            style=Style.get_default()
         )
         update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
 
