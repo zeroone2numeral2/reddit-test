@@ -53,6 +53,15 @@
             "filename": "logs/youtubedl.log",
             "backupCount": 30
         },
+        "file_reddit_galleries": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/reddit_galleries.log",
+            "backupCount": 30
+        },
         "file_prawcore": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "standard",
@@ -107,6 +116,11 @@
             "handlers": ["console", "file_youtube_dl"],
             "propagate": false,
             "level": "DEBUG"
+        },
+        "reddit_galleries": {
+            "handlers": ["console", "file_reddit_galleries"],
+            "propagate": false,
+            "level": "INFO"
         },
         "prawcore": {
             "handlers": ["console_info", "file_prawcore"],

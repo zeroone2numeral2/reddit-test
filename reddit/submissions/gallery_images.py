@@ -1,3 +1,5 @@
+import logging
+
 from telegram import InputMediaPhoto
 from telegram import ParseMode
 from telegram import TelegramError
@@ -5,6 +7,8 @@ from telegram.error import BadRequest
 
 from .base_submission import BaseSenderType
 from ..downloaders import ImageDownloader
+
+rg_logger = logging.getLogger('reddit_galleries')
 
 
 class GalleryImages(BaseSenderType):
@@ -28,17 +32,22 @@ class GalleryImages(BaseSenderType):
 
     @staticmethod
     def _fetch_urls(media_metadata, use_largest_preview=False, limit=10):
+        rg_logger.debug('fetching urls (use_largest_preview: %s)', use_largest_preview)
+
         urls = list()
         for media_id, media_metadata in media_metadata.items():
+            rg_logger.debug('media_id: %s', media_id)
+
             if not use_largest_preview:
                 # 's': dicts that contains the actual image
-                # image_url = media_metadata['s']['u']
+                image_url = media_metadata['s']['u']
                 # alternative way of getting the image url:
-                image_url = 'https://i.redd.it/{}.jpg'.format(media_id)
+                # image_url = 'https://i.redd.it/{}.jpg'.format(media_id)  # not really reliable
             else:
                 # 'p': dicts that contains a list of previews (we use the largest one)
                 image_url = media_metadata['p'][-1]['u']
 
+            rg_logger.debug('image url: %s', image_url)
             urls.append(image_url)
 
             if limit and len(urls) == limit:
@@ -52,6 +61,7 @@ class GalleryImages(BaseSenderType):
 
     def send_gallery_images_download(self, caption, reply_markup=None):
         self.log.info('downloading and sending images gallery (gallery url: %s)', self._submission.url)
+        rg_logger.debug('processing library of submission %s (gallery url: %s)', self._submission.id, self._submission.url)
 
         media_group = list()
         urls = self._fetch_urls(self._submission.media_metadata)

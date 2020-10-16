@@ -9,6 +9,7 @@ from utilities import d
 from reddit import reddit
 
 logger = logging.getLogger('handler')
+rg_logger = logging.getLogger('reddit_galleries')
 
 
 @d.restricted
@@ -23,10 +24,10 @@ def on_gallery_command(update, context):
     for media_id, media_metadata in submission.media_metadata.items():
         # pprint(media_metadata)
         # print(submission.media_metadata[media_id]['p'][-1]['u'])
-        print('type: {e}, id: {id}, mime: {m}'.format(**media_metadata))
+        rg_logger.debug('type: {e}, id: {id}, mime: {m}'.format(**media_metadata))
 
         for size in media_metadata['p']:
-            print('{x}x{y}: {u}'.format(**size))
+            rg_logger.debug('{x}x{y}: {u}'.format(**size))
 
         pprint('=' * 100)
 
@@ -38,6 +39,8 @@ def on_gallery_command(update, context):
     media_group = list()
     for i, url in enumerate(urls):
         media_group.append(InputMediaPhoto(media=url))
+        if i == 9:
+            break
 
     update.message.reply_media_group(media=media_group)
 
