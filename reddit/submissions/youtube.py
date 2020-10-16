@@ -1,6 +1,6 @@
 from telegram import ParseMode
 
-from ..downloaders import YouTube as YouTubeDownloader
+from ..downloaders import YouTubeDownloader
 from ..downloaders import YouTubeFileTooBig
 from ..downloaders import YouTubeTooLong
 from ..downloaders import YouTubeIsStreaming

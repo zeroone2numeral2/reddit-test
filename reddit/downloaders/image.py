@@ -6,7 +6,7 @@ import requests
 from bot.logging import slogger
 
 
-class Image:
+class ImageDownloader:
     def __init__(self, image_url, use_stream=False, use_tempfile=True, file_name=None):
         self._url = image_url
         self._use_stream = use_stream

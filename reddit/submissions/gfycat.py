@@ -1,6 +1,6 @@
 from telegram import ParseMode
 
-from ..downloaders import Gfycat as GfycatDownloader
+from ..downloaders import GfycatDownloader
 from .base_submission import BaseSenderType
 
 

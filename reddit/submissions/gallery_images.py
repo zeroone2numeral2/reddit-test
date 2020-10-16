@@ -4,7 +4,7 @@ from telegram import TelegramError
 from telegram.error import BadRequest
 
 from .base_submission import BaseSenderType
-from ..downloaders import Image
+from ..downloaders import ImageDownloader
 
 
 class GalleryImages(BaseSenderType):
@@ -54,7 +54,7 @@ class GalleryImages(BaseSenderType):
         urls = self._fetch_urls(self._submission.media_metadata)
 
         for url in urls:
-            image = Image(url)
+            image = ImageDownloader(url)
             success = image.download(raise_exception=False)
             if not success:
                 self.log.error('failed to send by url and to download file')

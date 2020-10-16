@@ -5,7 +5,7 @@ from telegram import TelegramError
 
 from utilities import u
 from .base_submission import BaseSenderType
-from ..downloaders import Image as ImageDownloader
+from ..downloaders import ImageDownloader
 
 
 class Image(BaseSenderType):

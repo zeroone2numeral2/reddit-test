@@ -7,7 +7,7 @@ from reddit.downloaders import Downloader
 GFYCAT_API = 'https://api.gfycat.com/v1/gfycats/'
 
 
-class Gfycat(Downloader):
+class GfycatDownloader(Downloader):
     def __init__(self, url, *args, **kwargs):
         Downloader.__init__(self, url, *args, **kwargs)
 

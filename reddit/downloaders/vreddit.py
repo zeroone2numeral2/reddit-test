@@ -22,7 +22,7 @@ class FfmpegTimeoutError(Exception):
     pass
 
 
-class VReddit(Downloader):
+class VRedditDownloader(Downloader):
     def __init__(self, url, *args, **kwargs):
         Downloader.__init__(self, url, *args, **kwargs)
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))

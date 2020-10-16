@@ -1,7 +1,7 @@
 from telegram import ParseMode
 
 from ..downloaders import FileTooBig
-from ..downloaders import VReddit as VRedditDownloader
+from ..downloaders import VRedditDownloader
 from ..downloaders.vreddit import FfmpegTimeoutError
 from const import MaxSize
 from .base_submission import BaseSenderType

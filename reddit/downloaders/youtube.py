@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import youtube_dl
 
-from .image import Image
+from .image import ImageDownloader
 from utilities import u
 from const import MaxSize
 
@@ -46,7 +46,7 @@ class DloadOpts(object):
     }
 
 
-class YouTube:
+class YouTubeDownloader:
     def __init__(self, url, max_size=MaxSize.BOT_API, max_duration=0):
         self.url = url
         self.info_dict = dict()
@@ -54,7 +54,7 @@ class YouTube:
         self.webpage_url = None  # url of the video webpage
         self.file_path = None
         self.file_name = None
-        self.thumb: [None, Image] = None
+        self.thumb: [None, ImageDownloader] = None
         self.is_streaming = False
         self.title = None
         self.size = 0
@@ -137,7 +137,7 @@ class YouTube:
 
         if self.thumb_url:
             logger.info('thumb url: %s', self.thumb_url)
-            self.thumb = Image(self.thumb_url, use_tempfile=True)
+            self.thumb = ImageDownloader(self.thumb_url, use_tempfile=True)
             self.thumb.download()
             # logger.info('thumb path: %s', self.thumb_path)
 
