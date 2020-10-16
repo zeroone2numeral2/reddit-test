@@ -13,7 +13,7 @@ class GalleryImages(BaseSenderType):
 
     @staticmethod
     def test(submission):
-        if not hasattr(submission, 'gallery_data'):
+        if not hasattr(submission, 'gallery_data') and submission.gallery_data:
             return False
 
         for media_id, media_metadata in submission.media_metadata.items():
