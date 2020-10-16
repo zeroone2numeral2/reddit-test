@@ -50,7 +50,7 @@ class Sender:
     __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
                  'sender']
 
-    def __init__(self, bot, subreddit, submission):
+    def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
         self._bot: Bot = bot
         self._s = submission
         self._subreddit: Subreddit = subreddit
@@ -164,6 +164,20 @@ class Sender:
         self._s.channel_invite_link = self._subreddit.channel_link
         self._s.channel_username = self._subreddit.channel_username(default='')
 
+        if not skip_sender_type_detection and not self._subreddit.force_text:
+            self._detect_sender_type(sender_kwargs)
+        else:
+            self.log.info(
+                'skipping sender type detection (skip_sender_type_detection: %s, self._subreddit.force_text: %s)',
+                skip_sender_type_detection,
+                self._subreddit.force_text
+            )
+
+        # u.print_submission(self._s)
+
+        self.gen_submission_dict()
+
+    def _detect_sender_type(self, sender_kwargs):
         if Image.test(self._s):
             self.log.debug('url is a jpg/png')
             self.sender = Image(**sender_kwargs)
@@ -198,10 +212,6 @@ class Sender:
         elif ImgurNonDirectUrlVideo.test(self._s):
             self.log.debug('url is an imgur non-direct url (video/gif/gifv)')
             self.sender = ImgurNonDirectUrlVideo(**sender_kwargs)
-
-        # u.print_submission(self._s)
-
-        self.gen_submission_dict()
 
     @property
     def submission(self):
