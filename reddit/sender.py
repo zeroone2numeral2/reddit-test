@@ -162,6 +162,7 @@ class Sender:
         if config.telegram.get('index', False):
             self._submission.index_channel_link = 'https://t.me/{}'.format(config.telegram.index)
             self._submission.index_channel_username = '@{}'.format(config.telegram.index)
+
         self._submission.channel_invite_link = self._subreddit.channel_link
         self._submission.channel_username = self._subreddit.channel_username(default='')
 
