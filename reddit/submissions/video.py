@@ -5,7 +5,7 @@ from ..downloaders import FileTooBig
 from .base_submission import BaseSenderType
 
 
-class Video(BaseSenderType):
+class VideoHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url

@@ -7,7 +7,7 @@ from const import MaxSize
 from .base_submission import BaseSenderType
 
 
-class VReddit(BaseSenderType):
+class VRedditHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.media['reddit_video']['fallback_url']

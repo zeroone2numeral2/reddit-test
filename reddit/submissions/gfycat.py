@@ -4,7 +4,7 @@ from ..downloaders import GfycatDownloader
 from .base_submission import BaseSenderType
 
 
-class Gfycat(BaseSenderType):
+class GfycatHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url

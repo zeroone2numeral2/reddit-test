@@ -3,7 +3,7 @@ from telegram import ParseMode
 from .base_submission import BaseSenderType
 
 
-class Gif(BaseSenderType):
+class GifHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
         self._url = self._submission.url

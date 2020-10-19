@@ -7,7 +7,7 @@ from ..downloaders import YouTubeIsStreaming
 from .base_submission import BaseSenderType
 
 
-class YouTube(BaseSenderType):
+class YouTubeHandler(BaseSenderType):
     EXTERNAL_CONTENT = True
 
     def __init__(self, *args, **kwargs):

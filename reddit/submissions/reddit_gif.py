@@ -3,12 +3,12 @@ from pprint import pformat
 from telegram import ParseMode, TelegramError
 from telegram.error import BadRequest
 
-from .video import Video
+from .video import VideoHandler
 
 
-class RedditGif(Video):
+class RedditGifHandler(VideoHandler):
     def __init__(self, *args, **kwargs):
-        Video.__init__(self, *args, **kwargs)
+        VideoHandler.__init__(self, *args, **kwargs)
 
         try:
             self._url = self._submission.preview['images'][0]['variants']['mp4']['resolutions'][-1]['url']

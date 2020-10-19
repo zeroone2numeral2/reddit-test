@@ -11,16 +11,16 @@ from telegram import Message as PtbMessage
 from pyrogram import Message as PyroMessage
 
 from database import db
-from .submissions import Text
-from .submissions import GalleryImages
-from .submissions import Image
-from .submissions import VReddit
-from .submissions import Video
-from .submissions import Gfycat
-from .submissions import Gif
-from .submissions import ImgurGallery, ImgurNonDirectUrlImage, ImgurNonDirectUrlVideo
-from .submissions import RedditGif
-from .submissions import YouTube
+from .submissions import TextHandler
+from .submissions import GalleryImagesHandler
+from .submissions import ImageHandler
+from .submissions import VRedditHandler
+from .submissions import VideoHandler
+from .submissions import GfycatHandler
+from .submissions import GifHandler
+from .submissions import ImgurGalleryHandler, ImgurNonDirectUrlImageHandler, ImgurNonDirectUrlVideoHandler
+from .submissions import RedditGifHandler
+from .submissions import YouTubeHandler
 from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
@@ -48,7 +48,7 @@ DEFAULT_THUMBNAILS = {
 
 class Sender:
     __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
-                 'sender']
+                 'submission_handler']
 
     def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
         self._bot: Bot = bot
@@ -62,7 +62,7 @@ class Sender:
         self._sent_message = None
         self._uploaded_bytes = 0
         sender_kwargs = dict(submission=self._s, subreddit=self._subreddit, bot=self._bot)
-        self.sender = Text(**sender_kwargs)
+        self.submission_handler = TextHandler(**sender_kwargs)
 
         self._s.flair_normalized = ''  # ascii flair
         self._s.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
@@ -179,40 +179,40 @@ class Sender:
         self.gen_submission_dict()
 
     def _detect_sender_type(self, sender_kwargs):
-        if Image.test(self._s):
+        if ImageHandler.test(self._s):
             self.log.debug('url is a jpg/png')
-            self.sender = Image(**sender_kwargs)
-        elif Gif.test(self._s):
+            self.submission_handler = ImageHandler(**sender_kwargs)
+        elif GifHandler.test(self._s):
             self.log.debug('url is an imgur direct url to gif/gifv')
-            self.sender = Gif(**sender_kwargs)
-        elif ImgurGallery.test(self._s):
+            self.submission_handler = GifHandler(**sender_kwargs)
+        elif ImgurGalleryHandler.test(self._s):
             self.log.debug('url is an imgur gallery')
-            self.sender = ImgurGallery(**sender_kwargs)
-        elif Video.test(self._s):
+            self.submission_handler = ImgurGalleryHandler(**sender_kwargs)
+        elif VideoHandler.test(self._s):
             self.log.debug('url is an mp4')
-            self.sender = Video(**sender_kwargs)
-        elif GalleryImages.test(self._s):
+            self.submission_handler = VideoHandler(**sender_kwargs)
+        elif GalleryImagesHandler.test(self._s):
             self.log.debug('submission has submission.gallery_data')
-            self.sender = GalleryImages(**sender_kwargs)
-        elif RedditGif.test(self._s):
+            self.submission_handler = GalleryImagesHandler(**sender_kwargs)
+        elif RedditGifHandler.test(self._s):
             self.log.debug('url is an i.redd.it gif')
-            self.sender = RedditGif(**sender_kwargs)
-        elif Gfycat.test(self._s):
+            self.submission_handler = RedditGifHandler(**sender_kwargs)
+        elif GfycatHandler.test(self._s):
             self.log.debug('url is a gfycat')
-            self.sender = Gfycat(**sender_kwargs)
-        elif YouTube.test(self._s, self._subreddit):
+            self.submission_handler = GfycatHandler(**sender_kwargs)
+        elif YouTubeHandler.test(self._s, self._subreddit):
             self.log.debug('url is a youtube url (and the subreddit config says to download youtube videos)')
-            self.sender = YouTube(**sender_kwargs)
-        elif VReddit.test(self._s):
+            self.submission_handler = YouTubeHandler(**sender_kwargs)
+        elif VRedditHandler.test(self._s):
             self.log.debug('url is a vreddit')
-            self.sender = VReddit(**sender_kwargs)
+            self.submission_handler = VRedditHandler(**sender_kwargs)
         # these two are at the end because the test performs a network request (imgur api)
-        elif ImgurNonDirectUrlImage.test(self._s):
+        elif ImgurNonDirectUrlImageHandler.test(self._s):
             self.log.debug('url is an imgur non-direct url (image)')
-            self.sender = ImgurNonDirectUrlImage(**sender_kwargs)
-        elif ImgurNonDirectUrlVideo.test(self._s):
+            self.submission_handler = ImgurNonDirectUrlImageHandler(**sender_kwargs)
+        elif ImgurNonDirectUrlVideoHandler.test(self._s):
             self.log.debug('url is an imgur non-direct url (video/gif/gifv)')
-            self.sender = ImgurNonDirectUrlVideo(**sender_kwargs)
+            self.submission_handler = ImgurNonDirectUrlVideoHandler(**sender_kwargs)
 
     @property
     def submission(self):
@@ -322,7 +322,7 @@ class Sender:
             # if the submission is an xpost, use the template we would use with submissions containing an url (so the
             # post will have a direct reference to the xposted thread)
             template = self._subreddit.style.template
-        elif self.sender.EXTERNAL_CONTENT and self._subreddit.respect_external_content_flag:
+        elif self.submission_handler.EXTERNAL_CONTENT and self._subreddit.respect_external_content_flag:
             # if we are sending a type of media that is flagged as EXTERNAL_CONTENT, and the subreddit is set to respect
             # this flag, then we use the template for url submissions, so it will include the submission url to
             # the external service (eg. YouTube/Twitter)
@@ -354,8 +354,8 @@ class Sender:
 
     def post(self, chat_id=None):
         if chat_id:
-            self.log.info('overriding target chat id (%d) with %d', self.sender.chat_id, chat_id)
-            self.sender.chat_id = chat_id
+            self.log.info('overriding target chat id (%d) with %d', self.submission_handler.chat_id, chat_id)
+            self.submission_handler.chat_id = chat_id
 
         # generate two texts: one to be used in case we will send the media as caption,
         # the other one for when we send the media as text (or if sending as media fails)
@@ -366,10 +366,10 @@ class Sender:
 
         reply_markup = self._generate_reply_markup()
 
-        if not isinstance(self.sender, Text) and not self._subreddit.force_text:
+        if not isinstance(self.submission_handler, TextHandler) and not self._subreddit.force_text:
             self.log.info('post is a media, sending it as media...')
             try:
-                self._sent_message = self.sender.post(caption, reply_markup=reply_markup)
+                self._sent_message = self.submission_handler.post(caption, reply_markup=reply_markup)
 
                 return self._sent_message
             except Exception as e:
@@ -379,7 +379,7 @@ class Sender:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
 
         self.log.info('posting a text...')
-        self._sent_message = self.sender.post(text, reply_markup=reply_markup)
+        self._sent_message = self.submission_handler.post(text, reply_markup=reply_markup)
 
         return self._sent_message
 

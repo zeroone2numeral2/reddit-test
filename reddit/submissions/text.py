@@ -3,7 +3,7 @@ from telegram import ParseMode
 from .base_submission import BaseSenderType
 
 
-class Text(BaseSenderType):
+class TextHandler(BaseSenderType):
     @staticmethod
     def test(submission):
         raise NotImplementedError

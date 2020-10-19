@@ -7,9 +7,9 @@ from imgurpython.helpers.error import ImgurClientError
 
 from ..downloaders import Imgur as ImgurDownloader
 from .base_submission import BaseSenderType
-from .image import Image
-from .gif import Gif
-from .video import Video
+from .image import ImageHandler
+from .gif import GifHandler
+from .video import VideoHandler
 from config import config
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 imgur = ImgurDownloader(config.imgur.id, config.imgur.secret)
 
 
-class ImgurGallery(BaseSenderType):
+class ImgurGalleryHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
 
@@ -77,7 +77,7 @@ class ImgurNonDirectUrl:
 
     @staticmethod
     def extract_direct_url(url):
-        imgur_id = re.search(ImgurNonDirectUrlImage.NON_DIRECT_URL_PATTERN, url, re.I).group(1)
+        imgur_id = re.search(ImgurNonDirectUrlImageHandler.NON_DIRECT_URL_PATTERN, url, re.I).group(1)
         direct_url = imgur.get_url(imgur_id)
 
         return direct_url
@@ -86,10 +86,10 @@ class ImgurNonDirectUrl:
     def test(cls, submission):
         url = submission.url
         url_lower = url.lower()
-        if re.search(ImgurNonDirectUrlImage.NON_DIRECT_URL_PATTERN, url_lower):
+        if re.search(ImgurNonDirectUrlImageHandler.NON_DIRECT_URL_PATTERN, url_lower):
             # noinspection PyBroadException
             try:
-                url = ImgurNonDirectUrlImage.extract_direct_url(url)
+                url = ImgurNonDirectUrlImageHandler.extract_direct_url(url)
             except ImgurClientError as e:
                 logger.error('could not extract direct imgur url (%s): %s', url, str(e), exc_info=False)
                 return False
@@ -100,27 +100,27 @@ class ImgurNonDirectUrl:
         return False
 
 
-class ImgurNonDirectUrlImage(ImgurNonDirectUrl, Image):
+class ImgurNonDirectUrlImageHandler(ImgurNonDirectUrl, ImageHandler):
     EXTENSIONS = ('.jpg', '.png')
 
     def __init__(self, *args, **kwargs):
-        Image.__init__(self, *args, **kwargs)
+        ImageHandler.__init__(self, *args, **kwargs)
         ImgurNonDirectUrl.__init__(self, self._url)
 
 
-class ImgurNonDirectUrlGif(ImgurNonDirectUrl, Gif):
+class ImgurNonDirectUrlGifHandler(ImgurNonDirectUrl, GifHandler):
     EXTENSIONS = ('.gifv', '.gif')
 
     def __init__(self, *args, **kwargs):
-        Gif.__init__(self, *args, **kwargs)
+        GifHandler.__init__(self, *args, **kwargs)
         ImgurNonDirectUrl.__init__(self, self._url)
 
 
-class ImgurNonDirectUrlVideo(ImgurNonDirectUrl, Video):
+class ImgurNonDirectUrlVideoHandler(ImgurNonDirectUrl, VideoHandler):
     EXTENSIONS = ('.mp4', '.gifv', '.gif')
 
     def __init__(self, *args, **kwargs):
-        Video.__init__(self, *args, **kwargs)
+        VideoHandler.__init__(self, *args, **kwargs)
         ImgurNonDirectUrl.__init__(self, self._url)
 
         self._url = self._url.replace('.gifv', '.mp4').replace('.gif', '.mp4')

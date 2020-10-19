@@ -11,7 +11,7 @@ from ..downloaders import ImageDownloader
 rg_logger = logging.getLogger('reddit_galleries')
 
 
-class GalleryImages(BaseSenderType):
+class GalleryImagesHandler(BaseSenderType):
     def __init__(self, *args, **kwargs):
         BaseSenderType.__init__(self, *args, **kwargs)
 
