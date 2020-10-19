@@ -47,12 +47,12 @@ DEFAULT_THUMBNAILS = {
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_s', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
+    __slots__ = ['_bot', '_subreddit', '_submission', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
                  'submission_handler']
 
     def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
         self._bot: Bot = bot
-        self._s = submission
+        self._submission = submission
         self._subreddit: Subreddit = subreddit
         if hasattr(subreddit, 'logger'):
             self.log = subreddit.logger
@@ -61,84 +61,84 @@ class Sender:
 
         self._sent_message = None
         self._uploaded_bytes = 0
-        sender_kwargs = dict(submission=self._s, subreddit=self._subreddit, bot=self._bot)
+        sender_kwargs = dict(submission=self._submission, subreddit=self._subreddit, bot=self._bot)
         self.submission_handler = TextHandler(**sender_kwargs)
 
-        self._s.flair_normalized = ''  # ascii flair
-        self._s.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
-        self._s.nsfw = self._s.over_18
-        self._s.sorting = self._subreddit.sorting or 'hot'
-        self._s.comments_url = 'https://www.reddit.com{}'.format(self._s.permalink)
-        self._s.hidden_char = HIDDEN_CHAR  # we might need it for some templates
-        self._s.hidden_url_comments = '<a href="{}">{}</a>'.format(self._s.comments_url, HIDDEN_CHAR)
-        self._s.hidden_url = '<a href="{}">{}</a>'.format(self._s.url, HIDDEN_CHAR)
-        self._s.score_dotted = u.dotted(self._s.score or 0)
-        self._s.num_comments_dotted = u.dotted(self._s.num_comments or 0)
-        self._s.domain_parsed = urlparse(self._s.url).netloc
-        self._s.title_escaped = u.escape(self._s.title)
-        self._s.text = ''
-        self._s.text_32 = ''
-        self._s.text_160 = ''
-        self._s.text_200 = ''
-        self._s.text_256 = ''
-        self._s.video_size = (None, None)
-        self._s.video_duration = 0
-        self._s.upvote_perc = int(self._s.upvote_ratio * 100)
+        self._submission.flair_normalized = ''  # ascii flair
+        self._submission.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
+        self._submission.nsfw = self._submission.over_18
+        self._submission.sorting = self._subreddit.sorting or 'hot'
+        self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
+        self._submission.hidden_char = HIDDEN_CHAR  # we might need it for some templates
+        self._submission.hidden_url_comments = '<a href="{}">{}</a>'.format(self._submission.comments_url, HIDDEN_CHAR)
+        self._submission.hidden_url = '<a href="{}">{}</a>'.format(self._submission.url, HIDDEN_CHAR)
+        self._submission.score_dotted = u.dotted(self._submission.score or 0)
+        self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
+        self._submission.domain_parsed = urlparse(self._submission.url).netloc
+        self._submission.title_escaped = u.escape(self._submission.title)
+        self._submission.text = ''
+        self._submission.text_32 = ''
+        self._submission.text_160 = ''
+        self._submission.text_200 = ''
+        self._submission.text_256 = ''
+        self._submission.video_size = (None, None)
+        self._submission.video_duration = 0
+        self._submission.upvote_perc = int(self._submission.upvote_ratio * 100)
         self._submission_dict = dict()
 
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
         # We can get the parent submission of the crosspost from `submission.crosspost_parent_list[0]`
         # and then we can add it to the crossposted submission
-        self._s.is_xpost = False
-        self._s.xpost_from = ''
-        self._s.xpost_from_string = ''
-        if hasattr(self._s, 'crosspost_parent') and len(self._s.crosspost_parent_list) > 0:
-            self._s.is_xpost = True
+        self._submission.is_xpost = False
+        self._submission.xpost_from = ''
+        self._submission.xpost_from_string = ''
+        if hasattr(self._submission, 'crosspost_parent') and len(self._submission.crosspost_parent_list) > 0:
+            self._submission.is_xpost = True
             # sometimes submissions has the 'crosspost_parent' but there's no item in 'crosspost_parent_list'
             self.log.info('note: submission is a crosspost of %s (overriding media attributes...)',
-                          self._s.crosspost_parent)
-            self._s.xpost_from = self._s.crosspost_parent_list[0].get('subreddit', '')
-            self._s.media = self._s.crosspost_parent_list[0].get('media', None)
-            self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
-            self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
-            self._s.gallery_data = self._s.crosspost_parent_list[0].get('gallery_data', None)
-            self._s.media_metadata = self._s.crosspost_parent_list[0].get('media_metadata', None)
+                          self._submission.crosspost_parent)
+            self._submission.xpost_from = self._submission.crosspost_parent_list[0].get('subreddit', '')
+            self._submission.media = self._submission.crosspost_parent_list[0].get('media', None)
+            self._submission.is_video = self._submission.crosspost_parent_list[0].get('is_video', False)
+            self._submission.thumbnail = self._submission.crosspost_parent_list[0].get('thumbnail', None)
+            self._submission.gallery_data = self._submission.crosspost_parent_list[0].get('gallery_data', None)
+            self._submission.media_metadata = self._submission.crosspost_parent_list[0].get('media_metadata', None)
 
-        if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
+        if self._submission.thumbnail and self._submission.thumbnail.lower() in DEFAULT_THUMBNAILS:
             # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
-            self._s.thumbnail = DEFAULT_THUMBNAILS[self._s.thumbnail.lower()]
-        elif not self._s.thumbnail:
-            self._s.thumbnail = 'https://www.reddit.com/static/noimage.png'
+            self._submission.thumbnail = DEFAULT_THUMBNAILS[self._submission.thumbnail.lower()]
+        elif not self._submission.thumbnail:
+            self._submission.thumbnail = 'https://www.reddit.com/static/noimage.png'
 
-        if self._s.link_flair_text is not None:
-            ascii_flair = u.to_ascii(str(self._s.link_flair_text), replace_spaces=True, lowercase=True)
-            self._s.flair_normalized = ascii_flair
-            self._s.ascii_flair = ascii_flair
+        if self._submission.link_flair_text is not None:
+            ascii_flair = u.to_ascii(str(self._submission.link_flair_text), replace_spaces=True, lowercase=True)
+            self._submission.flair_normalized = ascii_flair
+            self._submission.ascii_flair = ascii_flair
 
         # if the post is a textual post, it will contain a "thread" inline url. Otherwise it will contain the "url"
         # and "comments" inline urls
-        if self._s.comments_url == self._s.url:
-            self._s.textual = True
-            self._s.thread_or_urls = '<a href="{}">thread</a>'.format(self._s.comments_url)
-            self._s.force_disable_link_preview = True
+        if self._submission.comments_url == self._submission.url:
+            self._submission.textual = True
+            self._submission.thread_or_urls = '<a href="{}">thread</a>'.format(self._submission.comments_url)
+            self._submission.force_disable_link_preview = True
         else:
-            self._s.textual = False
-            self._s.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
-                self._s.url,
-                self._s.comments_url
+            self._submission.textual = False
+            self._submission.thread_or_urls = '<a href="{}">url</a> • <a href="{}">comments</a>'.format(
+                self._submission.url,
+                self._submission.comments_url
             )
-            self._s.force_disable_link_preview = False
+            self._submission.force_disable_link_preview = False
 
-        if self._s.selftext:
-            text_len = len(self._s.selftext)
-            self._s.text = self._s.selftext
-            self._s.text_32 = '{}{}'.format(self._s.selftext[:32], '' if text_len <= 32 else ' [...]')
-            self._s.text_160 = '{}{}'.format(self._s.selftext[:160], '' if text_len <= 160 else ' [...]')
-            self._s.text_200 = '{}{}'.format(self._s.selftext[:200], '' if text_len <= 200 else ' [...]')
-            self._s.text_256 = '{}{}'.format(self._s.selftext[:256], '' if text_len <= 256 else ' [...]')
+        if self._submission.selftext:
+            text_len = len(self._submission.selftext)
+            self._submission.text = self._submission.selftext
+            self._submission.text_32 = '{}{}'.format(self._submission.selftext[:32], '' if text_len <= 32 else ' [...]')
+            self._submission.text_160 = '{}{}'.format(self._submission.selftext[:160], '' if text_len <= 160 else ' [...]')
+            self._submission.text_200 = '{}{}'.format(self._submission.selftext[:200], '' if text_len <= 200 else ' [...]')
+            self._submission.text_256 = '{}{}'.format(self._submission.selftext[:256], '' if text_len <= 256 else ' [...]')
 
-        created_utc_dt = datetime.datetime.utcfromtimestamp(self._s.created_utc)
-        self._s.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
+        created_utc_dt = datetime.datetime.utcfromtimestamp(self._submission.created_utc)
+        self._submission.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
 
         if self._subreddit.style.comments_button \
                 or (
@@ -147,23 +147,23 @@ class Sender:
                 self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
             # calling a subreddit's num_comments property probably executes an API request. Make it
             # an int if we'll need it
-            self._s.num_comments = int(self._s.num_comments)
+            self._submission.num_comments = int(self._submission.num_comments)
 
-        self._s.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
-        self._s.elapsed_minutes = int(round(self._s.elapsed_seconds / 60))
-        self._s.elapsed_hours = int(round(self._s.elapsed_minutes / 60))
+        self._submission.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
+        self._submission.elapsed_minutes = int(round(self._submission.elapsed_seconds / 60))
+        self._submission.elapsed_hours = int(round(self._submission.elapsed_minutes / 60))
 
         # "n hours ago" if hours > 0, else "n minutes ago"
-        self._s.elapsed_smart = u.elapsed_time_smart(self._s.elapsed_seconds)
-        self._s.elapsed_smart_compact = u.elapsed_smart_compact(self._s.elapsed_seconds)
+        self._submission.elapsed_smart = u.elapsed_time_smart(self._submission.elapsed_seconds)
+        self._submission.elapsed_smart_compact = u.elapsed_smart_compact(self._submission.elapsed_seconds)
 
-        self._s.index_channel_link = None
-        self._s.index_channel_username = None
+        self._submission.index_channel_link = None
+        self._submission.index_channel_username = None
         if config.telegram.get('index', False):
-            self._s.index_channel_link = 'https://t.me/{}'.format(config.telegram.index)
-            self._s.index_channel_username = '@{}'.format(config.telegram.index)
-        self._s.channel_invite_link = self._subreddit.channel_link
-        self._s.channel_username = self._subreddit.channel_username(default='')
+            self._submission.index_channel_link = 'https://t.me/{}'.format(config.telegram.index)
+            self._submission.index_channel_username = '@{}'.format(config.telegram.index)
+        self._submission.channel_invite_link = self._subreddit.channel_link
+        self._submission.channel_username = self._subreddit.channel_username(default='')
 
         if not skip_sender_type_detection and not self._subreddit.force_text:
             self._detect_sender_type(sender_kwargs)
@@ -179,44 +179,44 @@ class Sender:
         self.gen_submission_dict()
 
     def _detect_sender_type(self, sender_kwargs):
-        if ImageHandler.test(self._s):
+        if ImageHandler.test(self._submission):
             self.log.debug('url is a jpg/png')
             self.submission_handler = ImageHandler(**sender_kwargs)
-        elif GifHandler.test(self._s):
+        elif GifHandler.test(self._submission):
             self.log.debug('url is an imgur direct url to gif/gifv')
             self.submission_handler = GifHandler(**sender_kwargs)
-        elif ImgurGalleryHandler.test(self._s):
+        elif ImgurGalleryHandler.test(self._submission):
             self.log.debug('url is an imgur gallery')
             self.submission_handler = ImgurGalleryHandler(**sender_kwargs)
-        elif VideoHandler.test(self._s):
+        elif VideoHandler.test(self._submission):
             self.log.debug('url is an mp4')
             self.submission_handler = VideoHandler(**sender_kwargs)
-        elif GalleryImagesHandler.test(self._s):
+        elif GalleryImagesHandler.test(self._submission):
             self.log.debug('submission has submission.gallery_data')
             self.submission_handler = GalleryImagesHandler(**sender_kwargs)
-        elif RedditGifHandler.test(self._s):
+        elif RedditGifHandler.test(self._submission):
             self.log.debug('url is an i.redd.it gif')
             self.submission_handler = RedditGifHandler(**sender_kwargs)
-        elif GfycatHandler.test(self._s):
+        elif GfycatHandler.test(self._submission):
             self.log.debug('url is a gfycat')
             self.submission_handler = GfycatHandler(**sender_kwargs)
-        elif YouTubeHandler.test(self._s, self._subreddit):
+        elif YouTubeHandler.test(self._submission, self._subreddit):
             self.log.debug('url is a youtube url (and the subreddit config says to download youtube videos)')
             self.submission_handler = YouTubeHandler(**sender_kwargs)
-        elif VRedditHandler.test(self._s):
+        elif VRedditHandler.test(self._submission):
             self.log.debug('url is a vreddit')
             self.submission_handler = VRedditHandler(**sender_kwargs)
         # these two are at the end because the test performs a network request (imgur api)
-        elif ImgurNonDirectUrlImageHandler.test(self._s):
+        elif ImgurNonDirectUrlImageHandler.test(self._submission):
             self.log.debug('url is an imgur non-direct url (image)')
             self.submission_handler = ImgurNonDirectUrlImageHandler(**sender_kwargs)
-        elif ImgurNonDirectUrlVideoHandler.test(self._s):
+        elif ImgurNonDirectUrlVideoHandler.test(self._submission):
             self.log.debug('url is an imgur non-direct url (video/gif/gifv)')
             self.submission_handler = ImgurNonDirectUrlVideoHandler(**sender_kwargs)
 
     @property
     def submission(self):
-        return self._s
+        return self._submission
 
     @property
     def submission_dict(self):
@@ -245,11 +245,11 @@ class Sender:
     def gen_submission_dict(self):
         self._submission_dict = dict()
 
-        for key in dir(self._s):
+        for key in dir(self._submission):
             if key.startswith('_'):
                 continue
 
-            val = getattr(self._s, key)
+            val = getattr(self._submission, key)
             # try to stringify val, otherwise continue
             try:
                 str(val)
@@ -296,19 +296,19 @@ class Sender:
         reply_markup = None
         if self._subreddit.style.url_button and self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
-                url_button_url=self._s.url,
+                url_button_url=self._submission.url,
                 url_button_label=self._get_filled_template(self._subreddit.style.url_button_template),
-                comments_button_url=self._s.comments_url,
+                comments_button_url=self._submission.comments_url,
                 comments_button_label=self._get_filled_template(self._subreddit.style.comments_button_template),
             )
         elif self._subreddit.style.url_button and not self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
-                url_button_url=self._s.url,
+                url_button_url=self._submission.url,
                 url_button_label=self._get_filled_template(self._subreddit.style.url_button_template)
             )
         elif not self._subreddit.style.url_button and self._subreddit.style.comments_button:
             reply_markup = InlineKeyboard.post_buttons_with_labels(
-                comments_button_url=self._s.comments_url,
+                comments_button_url=self._submission.comments_url,
                 comments_button_label=self._get_filled_template(self._subreddit.style.comments_button_template),
             )
 
@@ -318,7 +318,7 @@ class Sender:
         if self._subreddit.template_override:
             # always use the override if it's set
             template = self._subreddit.template_override
-        elif self._s.is_xpost:
+        elif self._submission.is_xpost:
             # if the submission is an xpost, use the template we would use with submissions containing an url (so the
             # post will have a direct reference to the xposted thread)
             template = self._subreddit.style.template
@@ -337,7 +337,7 @@ class Sender:
             else:
                 # ...otherwise, use the normal template as fallback
                 template = self._subreddit.style.template
-        elif not self._s.textual or not self._subreddit.style.template_no_url:
+        elif not self._submission.textual or not self._subreddit.style.template_no_url:
             # if the submission has an url, or there is no template for textual threads (template_no_url), use the
             # template saved in the database
             template = self._subreddit.style.template
@@ -413,7 +413,7 @@ class Sender:
         self.log.info('creating Post row...')
         with db.atomic():
             Post.create(
-                submission_id=self._s.id,
+                submission_id=self._submission.id,
                 subreddit=self._subreddit,
                 channel=self._subreddit.channel,
                 message_id=message_id if self._sent_message else None,
@@ -423,38 +423,38 @@ class Sender:
             )
 
     def test_filters(self):
-        if self._subreddit.ignore_stickied and self._s.stickied:
+        if self._subreddit.ignore_stickied and self._submission.stickied:
             self.log.info('tests failed: sticked submission')
             return False
-        elif self._subreddit.medias_only and not self._s.media_type:
+        elif self._subreddit.medias_only and not self._submission.media_type:
             self.log.info('tests failed: submission is a text and we only want media posts')
             return False
-        elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._s.score:
-            self.log.info('tests failed: not enough upvotes (%d/%d)', self._s.score, self._subreddit.min_score)
+        elif self._subreddit.min_score and isinstance(self._subreddit.min_score, int) and self._subreddit.min_score > self._submission.score:
+            self.log.info('tests failed: not enough upvotes (%d/%d)', self._submission.score, self._subreddit.min_score)
             return False
-        elif self._subreddit.allow_nsfw is not None and self._subreddit.allow_nsfw == False and self._s.over_18:
+        elif self._subreddit.allow_nsfw is not None and self._subreddit.allow_nsfw == False and self._submission.over_18:
             self.log.info('tests failed: submission is NSFW')
             return False
-        elif self._subreddit.hide_spoilers and self._s.spoiler == True:
+        elif self._subreddit.hide_spoilers and self._submission.spoiler == True:
             self.log.info('tests failed: submission is a spoiler')
             return False
-        elif self._subreddit.ignore_flairless and not self._s.flair_normalized:
+        elif self._subreddit.ignore_flairless and not self._submission.flair_normalized:
             self.log.info('tests failed: submission does not have a flair')
             return False
-        elif self._subreddit.min_upvote_perc and self._s.upvote_perc < self._subreddit.min_upvote_perc:
+        elif self._subreddit.min_upvote_perc and self._submission.upvote_perc < self._subreddit.min_upvote_perc:
             self.log.info(
                 'tests failed: submission\'s upvote ratio is not good enough (db: %d, submission: %d)',
                 self._subreddit.min_upvote_perc,
-                self._s.upvote_perc
+                self._submission.upvote_perc
             )
             return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, int) \
-                and self._s.elapsed_minutes < self._subreddit.ignore_if_newer_than:
+                and self._submission.elapsed_minutes < self._subreddit.ignore_if_newer_than:
             self.log.info(
                 'tests failed: too new (submitted: %s, elapsed: %s, ignore_if_newer_than: %d)',
-                self._s.created_utc_formatted,
-                u.pretty_minutes(self._s.elapsed_minutes),
+                self._submission.created_utc_formatted,
+                u.pretty_minutes(self._submission.elapsed_minutes),
                 self._subreddit.ignore_if_newer_than
             )
             return False
@@ -463,7 +463,7 @@ class Sender:
 
     def write_temp_submission_dict(self):
         text = pformat(self.submission_dict)
-        file_path = os.path.join('downloads', '{}.temp.txt'.format(self._s.id))
+        file_path = os.path.join('downloads', '{}.temp.txt'.format(self._submission.id))
 
         with open(file_path, 'w+') as f:
             f.write(text)

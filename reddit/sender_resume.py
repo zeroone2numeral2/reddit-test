@@ -12,8 +12,8 @@ class SenderResume(Sender):
     def __init__(self, *args, **kwargs):
         Sender.__init__(self, *args, **kwargs)
 
-        self._s.resume_frequency = self._subreddit.frequency
-        self._s.resume_posts = self._subreddit.number_of_posts
+        self._submission.resume_frequency = self._subreddit.frequency
+        self._submission.resume_posts = self._subreddit.number_of_posts
 
         self.gen_submission_dict()
 
@@ -45,7 +45,7 @@ class SenderResume(Sender):
 
         self.log.info('creating PostResume row...')
         PostResume.create(
-            submission_id=self._s.id,
+            submission_id=self._submission.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,
             message_id=self._sent_message.message_id if self._sent_message else None,
