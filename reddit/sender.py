@@ -47,7 +47,7 @@ DEFAULT_THUMBNAILS = {
 
 
 class Sender:
-    __slots__ = ['_bot', '_subreddit', '_submission', '_sent_message', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
+    __slots__ = ['_bot', '_subreddit', '_submission', '_sent_messages', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
                  'submission_handler']
 
     def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
@@ -59,7 +59,7 @@ class Sender:
         else:
             self.log = logger
 
-        self._sent_message = None
+        self._sent_messages = []
         self._uploaded_bytes = 0
         sender_kwargs = dict(submission=self._submission, subreddit=self._subreddit, bot=self._bot)
         self.submission_handler = TextHandler(**sender_kwargs)
@@ -370,10 +370,10 @@ class Sender:
         if not isinstance(self.submission_handler, TextHandler) and not self._subreddit.force_text:
             self.log.info('post is a media, sending it as media...')
             try:
-                self._sent_message = self.submission_handler.post(caption, reply_markup=reply_markup)
-                self._sum_uploaded_bytes(self._sent_message)
+                self._sent_messages = self.submission_handler.post(caption, reply_markup=reply_markup)
+                self._sum_uploaded_bytes(self._sent_messages)
 
-                return self._sent_message
+                return self._sent_messages
             except Exception as e:
                 self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e),
                                exc_info=False)
@@ -381,9 +381,9 @@ class Sender:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
 
         self.log.info('posting a text...')
-        self._sent_message = self.submission_handler.post(text, reply_markup=reply_markup)
+        self._sent_messages = self.submission_handler.post(text, reply_markup=reply_markup)
 
-        return self._sent_message
+        return self._sent_messages
 
     def _sum_uploaded_bytes(self, sent_message):
         uploaded_bytes = u.media_size(sent_message) or 0
@@ -397,20 +397,20 @@ class Sender:
             return
 
         sent_message_json = None
-        if isinstance(self._sent_message, list):
-            message_id = self._sent_message[0].message_id
-            if isinstance(self._sent_message[0], PtbMessage):
-                sent_message_json = json.dumps([m.to_dict() for m in self._sent_message])
-            elif isinstance(self._sent_message[0], PyroMessage):
-                sent_message_json = json.dumps([str(m) for m in self._sent_message])
-        elif isinstance(self._sent_message, PtbMessage):
-            message_id = self._sent_message.message_id
-            sent_message_json = self._sent_message.to_json()
-        elif isinstance(self._sent_message, PyroMessage):
-            message_id = self._sent_message.message_id
-            sent_message_json = str(self._sent_message)
+        if isinstance(self._sent_messages, list):
+            message_id = self._sent_messages[0].message_id
+            if isinstance(self._sent_messages[0], PtbMessage):
+                sent_message_json = json.dumps([m.to_dict() for m in self._sent_messages])
+            elif isinstance(self._sent_messages[0], PyroMessage):
+                sent_message_json = json.dumps([str(m) for m in self._sent_messages])
+        elif isinstance(self._sent_messages, PtbMessage):
+            message_id = self._sent_messages.message_id
+            sent_message_json = self._sent_messages.to_json()
+        elif isinstance(self._sent_messages, PyroMessage):
+            message_id = self._sent_messages.message_id
+            sent_message_json = str(self._sent_messages)
         else:
-            message_id = self._sent_message.message_id
+            message_id = self._sent_messages.message_id
 
         self.log.info('creating Post row...')
         with db.atomic():
@@ -418,8 +418,8 @@ class Sender:
                 submission_id=self._submission.id,
                 subreddit=self._subreddit,
                 channel=self._subreddit.channel,
-                message_id=message_id if self._sent_message else None,
-                posted_at=u.now() if self._sent_message else None,
+                message_id=message_id if self._sent_messages else None,
+                posted_at=u.now() if self._sent_messages else None,
                 uploaded_bytes=self._uploaded_bytes,
                 sent_message=sent_message_json
             )

@@ -36,10 +36,10 @@ class SenderResume(Sender):
             self.log.info('not creating PostResume row: %s is a testing subreddit', self._subreddit.r_name_with_id)
             return
 
-        if isinstance(self._sent_message, PtbMessage):
-            sent_message_json = self._sent_message.to_json()
-        elif isinstance(self._sent_message, PyroMessage):
-            sent_message_json = str(self._sent_message)
+        if isinstance(self._sent_messages, PtbMessage):
+            sent_message_json = self._sent_messages.to_json()
+        elif isinstance(self._sent_messages, PyroMessage):
+            sent_message_json = str(self._sent_messages)
         else:
             sent_message_json = None
 
@@ -48,7 +48,7 @@ class SenderResume(Sender):
             submission_id=self._submission.id,
             subreddit=self._subreddit,
             channel=self._subreddit.channel,
-            message_id=self._sent_message.message_id if self._sent_message else None,
-            posted_at=u.now() if self._sent_message else None,
+            message_id=self._sent_messages.message_id if self._sent_messages else None,
+            posted_at=u.now() if self._sent_messages else None,
             sent_message=sent_message_json
         )
