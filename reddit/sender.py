@@ -101,6 +101,7 @@ class Sender:
             self._s.media = self._s.crosspost_parent_list[0].get('media', None)
             self._s.is_video = self._s.crosspost_parent_list[0].get('is_video', False)
             self._s.thumbnail = self._s.crosspost_parent_list[0].get('thumbnail', None)
+            self._s.gallery_data = self._s.crosspost_parent_list[0].get('gallery_data', None)
             self._s.media_metadata = self._s.crosspost_parent_list[0].get('media_metadata', None)
 
         if self._s.thumbnail and self._s.thumbnail.lower() in DEFAULT_THUMBNAILS:
