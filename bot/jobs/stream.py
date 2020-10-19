@@ -165,7 +165,7 @@ class SubredditTask(Task):
 
             try:
                 time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
-                sent_message = sender.post()
+                sent_messages = sender.post()
             except (BadRequest, TelegramError) as e:
                 subreddit.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
                 continue
@@ -173,7 +173,7 @@ class SubredditTask(Task):
                 subreddit.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
                 continue
 
-            if not sent_message:
+            if not sent_messages:
                 subreddit.logger.warning(
                     'Sender.post() did not return any sent message, so we are NOT registering this submission and the last post datetime')
             else:
