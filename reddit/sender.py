@@ -371,6 +371,7 @@ class Sender:
             self.log.info('post is a media, sending it as media...')
             try:
                 self._sent_message = self.submission_handler.post(caption, reply_markup=reply_markup)
+                self._sum_uploaded_bytes(self._sent_message)
 
                 return self._sent_message
             except Exception as e:
