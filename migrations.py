@@ -159,6 +159,8 @@ def main(database_path):
         migrator.drop_column('styles', 'send_medias', template_no_url_for_captions),
         migrator.add_column('subreddits', 'force_text', force_text),
         migrator.add_column('subreddits', 'respect_external_content_flag', respect_external_content_flag),
+        # 20201020
+        migrator.rename_column('subreddits', 'last_posted_submission_dt', 'last_post_datetime'),
     ]
 
     logger.info('Starting migration....')

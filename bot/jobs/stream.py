@@ -74,18 +74,18 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
     now = u.now()
     now_string = u.now(string=True)
 
-    if subreddit.last_posted_submission_dt:
+    if subreddit.last_post_datetime:
         subreddit.logger.info(
             'elapsed time (now -- last post): %s -- %s',
             now_string,
-            subreddit.last_posted_submission_dt.strftime('%d/%m/%Y %H:%M')
+            subreddit.last_post_datetime.strftime('%d/%m/%Y %H:%M')
         )
-        elapsed_time_minutes = (now - subreddit.last_posted_submission_dt).total_seconds() / 60
+        elapsed_time_minutes = (now - subreddit.last_post_datetime).total_seconds() / 60
     else:
         subreddit.logger.info('(elapsed time cannot be calculated: no last submission datetime for the subreddit)')
         elapsed_time_minutes = 9999999
 
-    if subreddit.last_posted_submission_dt and elapsed_time_minutes < calculated_max_frequency:
+    if subreddit.last_post_datetime and elapsed_time_minutes < calculated_max_frequency:
         subreddit.logger.info(
             'elapsed time is lower than max_frequency (%d*%d minutes), continuing to next subreddit...',
             subreddit.max_frequency,
@@ -185,7 +185,7 @@ class SubredditTask(Task):
                     sender.register_post(test=subreddit.test)
 
                     subreddit.logger.info('updating Subreddit last post datetime...')
-                    subreddit.last_posted_submission_dt = u.now()
+                    subreddit.last_post_datetime = u.now()
 
                     with db.atomic():
                         subreddit.save()

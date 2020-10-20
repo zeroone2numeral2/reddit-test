@@ -26,28 +26,31 @@ class Subreddit(peewee.Model):
     subreddit_id = peewee.CharField(index=True)
     name = peewee.CharField(null=False, default=0)
     channel: Channel = peewee.ForeignKeyField(Channel, backref='subreddits', on_delete='RESTRICT', null=True)
-    style: Style = peewee.ForeignKeyField(Style, backref='subreddits', on_delete='RESTRICT', null=True)
-    max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency, help_text='Max frequency in minutes')
-    last_posted_submission_dt = peewee.DateTimeField(null=True)
-    sorting = peewee.CharField(default=config.submissions.default_sorting)
-    added = peewee.DateTimeField(default=datetime.datetime.utcnow)
+    # PROPERTIES THAT DICTATE WHETHER TO POST OR NOT AT A GIVEN TIME
     enabled = peewee.BooleanField(default=True)
-    # quiet_hours_demultiplier: 0 -> do not post during quiet hours, 1 -> same frequency as normal period
-    quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)
-    limit = peewee.IntegerField(null=True, default=25)
+    last_post_datetime = peewee.DateTimeField(null=True)
+    max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency)  # in minutes
+    quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)  # 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
     quiet_hours_end = peewee.IntegerField(null=True, default=6)
+    # HOW TO FETCH SUBMISSIONS
+    sorting = peewee.CharField(default=config.submissions.default_sorting)
+    limit = peewee.IntegerField(null=True, default=25)
     number_of_posts = peewee.IntegerField(default=1)
-    is_multireddit = peewee.BooleanField(default=False)
-    multireddit_owner = peewee.CharField(null=True)
-    test = peewee.BooleanField(default=False)
-    youtube_download = peewee.BooleanField(default=False)
-    youtube_download_max_duration = peewee.IntegerField(default=180)
-    reddit_account = peewee.CharField(null=True)
-    reddit_client = peewee.CharField(null=True)
+    # PER-RECORD STYLE
+    style: Style = peewee.ForeignKeyField(Style, backref='subreddits', on_delete='RESTRICT', null=True)
     template_override = peewee.CharField(null=True)  # when set, will be used instead of any of the style's templates
     force_text = peewee.BooleanField(default=False, null=True)  # when True, submissions will be always sent as text
     respect_external_content_flag = peewee.BooleanField(default=False, null=True)  # will mainly be used to decide which template to use
+    youtube_download = peewee.BooleanField(default=False)
+    youtube_download_max_duration = peewee.IntegerField(default=180)
+    # MISC
+    added = peewee.DateTimeField(default=datetime.datetime.utcnow)
+    is_multireddit = peewee.BooleanField(default=False)
+    multireddit_owner = peewee.CharField(null=True)
+    test = peewee.BooleanField(default=False)
+    reddit_account = peewee.CharField(null=True)
+    reddit_client = peewee.CharField(null=True)
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)
