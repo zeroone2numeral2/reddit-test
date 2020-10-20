@@ -55,8 +55,8 @@ class GalleryImagesHandler(BaseSenderType):
 
         return urls
 
-    def _send_gallery_images_base(self, media, reply_markup=None):
-        kwargs = dict(chat_id=self.chat_id, media=media, reply_markup=reply_markup, timeout=360)
+    def _send_gallery_images_base(self, media):
+        kwargs = dict(chat_id=self.chat_id, media=media, timeout=360)
         return self._bot.send_media_group(**kwargs)
 
     def send_gallery_images_download(self, caption, reply_markup=None):
@@ -80,7 +80,7 @@ class GalleryImagesHandler(BaseSenderType):
             # raise an exception if the gallery is empty
             raise ValueError('sending gallery by downloading its images: MediaGroup is empty')
 
-        sent_messages = self._send_gallery_images_base(media=media_group, reply_markup=reply_markup)
+        sent_messages = self._send_gallery_images_base(media=media_group)
 
         self._sum_uploaded_bytes(sent_messages)
 
@@ -94,7 +94,7 @@ class GalleryImagesHandler(BaseSenderType):
                        i, url in enumerate(urls)]
 
         try:
-            sent_messages = self._send_gallery_images_base(media=media_group, reply_markup=reply_markup)
+            sent_messages = self._send_gallery_images_base(media=media_group)
         except (TelegramError, BadRequest) as e:
             # if sending by url fails, try to download the images and post them
             # common error (BadRequest): "Group send failed"
