@@ -32,8 +32,8 @@ class ImgurGalleryHandler(BaseSenderType):
 
         return False
 
-    def _send_album_base(self, media, reply_markup=None):
-        kwargs = dict(chat_id=self.chat_id, media=media, reply_markup=reply_markup, timeout=360)
+    def _send_album_base(self, media):
+        kwargs = dict(chat_id=self.chat_id, media=media, timeout=360)
         return self._bot.send_media_group(**kwargs)
 
     def _entry_point(self, caption, reply_markup=None):
@@ -63,7 +63,7 @@ class ImgurGalleryHandler(BaseSenderType):
         if not media_group:
             raise ValueError('media_group is empty')
 
-        sent_messages = self._send_album_base(media=media_group, reply_markup=reply_markup)
+        sent_messages = self._send_album_base(media=media_group)  # reply markups are not supported by send_media_group
 
         return sent_messages
 
