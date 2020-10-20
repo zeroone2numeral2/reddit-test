@@ -1,5 +1,7 @@
 import logging
 
+from telegram import Bot
+
 from const import MaxSize
 from utilities import u
 from pyroutils import PyroClient
@@ -30,7 +32,7 @@ class BaseSenderType:
         self._submission = submission
         self._subreddit = subreddit
         self.chat_id = self._subreddit.channel.channel_id
-        self._bot = bot
+        self._bot: Bot = bot
         self._uploaded_bytes = 0
         self.sent_messages: list = []
 
@@ -69,6 +71,7 @@ class BaseSenderType:
         if file_size < MaxSize.BOT_API or force_bot_api or not config.pyrogram.enabled:
             self.log.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
             kwargs['thumb'] = kwargs['thumb_bo']
+            kwargs.pop('thumb_path', None)  # remove kwargs send_video doesn't accept
             with open(file_path, 'rb') as f:
                 self.log.info('uploading video using the bot API...')
                 return self._bot.send_video(chat_id, f, *args, **kwargs)
