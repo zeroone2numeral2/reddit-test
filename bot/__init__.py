@@ -5,7 +5,6 @@ from .logging import logging_config
 from .bot import RedditBot
 from .bot import DummyContext
 from .jobs.stream import check_posts, stream_job
-from .jobs.resume import check_daily_resume
 from config import config
 
 # from apscheduler.schedulers.background import BackgroundScheduler
