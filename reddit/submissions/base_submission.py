@@ -71,7 +71,11 @@ class BaseSenderType:
         if file_size < MaxSize.BOT_API or force_bot_api or not config.pyrogram.enabled:
             self.log.debug('sending using the bot API because: file size is small OR method caller asked to use the bot api OR mtproto uploads disabled from config')
             kwargs['thumb'] = kwargs['thumb_bo']
-            kwargs.pop('thumb_path', None)  # remove kwargs send_video doesn't accept
+
+            # remove kwargs send_video doesn't accept
+            kwargs.pop('thumb_path', None)
+            kwargs.pop('thumb_bo', None)
+
             with open(file_path, 'rb') as f:
                 self.log.info('uploading video using the bot API...')
                 return self._bot.send_video(chat_id, f, *args, **kwargs)
