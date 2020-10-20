@@ -1,10 +1,10 @@
 # noinspection PyPackageRequirements
-from telegram.ext import BaseFilter
+from telegram.ext import MessageFilter
 
 from bot import mainbot as updater
 
 
-class SubredditSet(BaseFilter):
+class SubredditSet(MessageFilter):
     def filter(self, message):
         if message.from_user:
             # print('ud get:', updater.dispatcher.user_data)
