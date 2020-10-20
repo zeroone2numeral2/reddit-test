@@ -1,4 +1,4 @@
-python-telegram-bot==12.6.1
+python-telegram-bot==13.0
 pyrogram[fast]==0.16.0
 praw
 pytz
