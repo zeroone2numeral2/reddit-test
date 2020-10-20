@@ -180,7 +180,8 @@ class SubredditTask(Task):
                 if subreddit.test:
                     subreddit.logger.info(
                         'not creating Post row and not updating last submission datetime: r/%s is a testing subreddit',
-                        subreddit.name)
+                        subreddit.name
+                    )
                 else:
                     sender.register_post(test=subreddit.test)
 
