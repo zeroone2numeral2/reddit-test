@@ -212,7 +212,7 @@ def is_time_to_process(subreddit: Subreddit):
 @d.logerrors
 @d.log_start_end_dt
 # @db.atomic('EXCLUSIVE')  # http://docs.peewee-orm.com/en/latest/peewee/database.html#set-locking-mode-for-transaction
-def check_posts(context: CallbackContext, jobs_log_row: Job) -> JobResult:
+def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult:
     if settings.jobs_locked():
         logger.info('jobs are locked, skipping this job execution')
         return JobResult(canceled=True)
