@@ -85,7 +85,7 @@ mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['remchannel'], callback=on_remchannel_command)],
     states={
         CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected)
+            MessageHandler(Filters.text & ~Filters.command, callback=on_channel_selected)
         ]
     },
     fallbacks=[
