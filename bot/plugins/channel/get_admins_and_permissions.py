@@ -49,13 +49,23 @@ def on_channel_selected(update: Update, context: CallbackContext):
 
     admins: [ChatMember] = context.bot.get_chat_administrators(channel_id)
     users = list()
+    bot_chat_member_dict: [ChatMember, None] = None
     for admin in admins:
         if admin.status == ChatMember.CREATOR:
             users.insert(0, 'owner: ' + admin.user.mention_html())
         else:
             users.append(admin.user.mention_html())
 
-    update.message.reply_html('\n'.join(users), reply_markup=Keyboard.REMOVE)
+        if admin.user.id == mainbot.bot.id:
+            bot_chat_member_dict = admin.to_dict()
+
+    text = '\n'.join(users) + '\n\n<b>Bot permissions</b>:'
+
+    for k, v in bot_chat_member_dict.items():
+        if k.startswith('can_'):
+            text += '\n<code>{}</code>: {}'.format(k, str(v).lower())
+
+    update.message.reply_html(text, reply_markup=Keyboard.REMOVE)
 
     return ConversationHandler.END
 
@@ -73,7 +83,7 @@ mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['getadmins'], callback=on_getadmins_command)],
     states={
         CHANNEL_SELECT: [
-            MessageHandler(Filters.text, callback=on_channel_selected)
+            MessageHandler(Filters.text & ~Filters.command, callback=on_channel_selected)
         ]
     },
     fallbacks=[
