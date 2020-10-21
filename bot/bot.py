@@ -73,6 +73,7 @@ class RedditBot(Updater):
         BotCommand('lock', 'lock jobs'),
         BotCommand('unlock', 'unlock jobs'),
         BotCommand('freq', 'change a subreddit frequency'),
+        BotCommand('getadmins', 'get the admins list of a channel'),
     ]
 
     @staticmethod

@@ -17,6 +17,7 @@ HELP_STRING = """\
 /setdesc: pin a pre-formatted message that describes the channel
 /members: top 25 channels by number of members
 /exportlink: revoke and regenerate the invite link of a channel
+/getadmins: get the admins list of a channel
 
 *Managing the channels catalogue*
 /updatelist: update the catalogue channel's subreddits list
