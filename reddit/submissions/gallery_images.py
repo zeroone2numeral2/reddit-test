@@ -23,12 +23,17 @@ class GalleryImagesHandler(BaseSenderType):
         if not submission.gallery_data:
             return False
 
+        has_valid_medias = False
         for media_id, media_metadata in submission.media_metadata.items():
-            if media_metadata['e'] != 'Image':
-                # if even a single media is not an image, the test fails
-                return False
+            if media_metadata['status'] == 'failed' or media_metadata['e'] != 'Image':
+                # sometimes the media status is 'failed' (otherwise it's 'valid')
+                # also if even a single media is not an image, the test fails
+                continue
 
-        return True
+            # return true even when the gallery only has one valid media
+            has_valid_medias = True
+
+        return has_valid_medias  # if there is no valid media, fail the test
 
     @staticmethod
     def _fetch_urls(media_metadata, use_largest_preview=False, limit=10):
@@ -36,7 +41,9 @@ class GalleryImagesHandler(BaseSenderType):
 
         urls = list()
         for media_id, media_metadata in media_metadata.items():
-            rg_logger.debug('media_id: %s', media_id)
+            rg_logger.debug('media_id (status: %s): %s', media_metadata['status'], media_id)
+            if media_metadata['status'] == 'failed':
+                continue
 
             if not use_largest_preview:
                 # 's': dicts that contains the actual image
