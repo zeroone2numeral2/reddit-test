@@ -1,0 +1,25 @@
+[[accounts]] # needs to be fixed
+default = true
+username = "example_account_1"
+password = ""
+
+[[accounts]]
+default = false
+username = "example_account_2"
+password = ""
+
+
+
+[[clients]]
+default = true
+name = "example-client-1"
+id = ""
+secret = ""
+user_agent = "test script by -"
+
+[[clients]]
+default = false
+name = "example-client-2"
+id = ""
+secret = ""
+user_agent = "test script by -"
