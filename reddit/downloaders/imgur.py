@@ -1,6 +1,7 @@
 import re
 
 from imgurpython import ImgurClient
+from imgurpython.helpers.error import ImgurClientError
 
 from config import config
 
@@ -17,10 +18,14 @@ class MediaTooMuch(Exception):
 
 class Imgur(ImgurClient):
     def __init__(self, keys_from_config=False, *args, **kwargs):
-        if not keys_from_config:
-            ImgurClient.__init__(self, *args, **kwargs)
-        else:
-            ImgurClient.__init__(self, config.imgur.id, config.imgur.secret, *args, **kwargs)
+
+        try:
+            if not keys_from_config:
+                ImgurClient.__init__(self, *args, **kwargs)
+            else:
+                ImgurClient.__init__(self, config.imgur.id, config.imgur.secret, *args, **kwargs)
+        except ImgurClientError:
+            pass
     
     def get_url(self, image_id):
         return self.get_image(image_id).link
