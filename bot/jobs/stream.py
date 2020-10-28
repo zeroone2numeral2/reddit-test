@@ -104,8 +104,6 @@ def fetch_submissions(subreddit: Subreddit):
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
 
-    reddit_request.least_stressed_account(['fake_account_1'])
-    reddit_request.least_stressed_client(['fake_client_1'])
     reddit_request.save_request(subreddit, 'fake_account_2', 'fake_client_2')
 
     for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):

@@ -1,25 +1,23 @@
-[[accounts]] # needs to be fixed
+[[reddit.accounts]]
 default = true
 username = "example_account_1"
 password = ""
 
-[[accounts]]
-default = false
+[[reddit.accounts]]
 username = "example_account_2"
 password = ""
 
 
 
-[[clients]]
+[[reddit.clients]]
 default = true
 name = "example-client-1"
-id = ""
-secret = ""
+client_id = ""
+client_secret = ""
 user_agent = "test script by -"
 
-[[clients]]
-default = false
+[[reddit.clients]]
 name = "example-client-2"
-id = ""
-secret = ""
+client_id = ""
+client_secret = ""
 user_agent = "test script by -"
