@@ -73,6 +73,7 @@ class Sender:
         self._submission.hidden_url_comments = '<a href="{}">{}</a>'.format(self._submission.comments_url, HIDDEN_CHAR)
         self._submission.hidden_url = '<a href="{}">{}</a>'.format(self._submission.url, HIDDEN_CHAR)
         self._submission.score_dotted = u.dotted(self._submission.score or 0)
+        self._submission.num_comments = int(self._submission.num_comments)
         self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
         self._submission.domain_parsed = urlparse(self._submission.url).netloc
         self._submission.title_escaped = u.escape(self._submission.title)
@@ -139,15 +140,6 @@ class Sender:
 
         created_utc_dt = datetime.datetime.utcfromtimestamp(self._submission.created_utc)
         self._submission.created_utc_formatted = created_utc_dt.strftime('%d/%m/%Y, %H:%M')
-
-        if self._subreddit.style.comments_button \
-                or (
-                self._subreddit.enabled and self._subreddit.style.template and '{num_comments}' in self._subreddit.style.template) \
-                or (
-                self._subreddit.enabled_resume and self._subreddit.style.template_resume and '{num_comments}' in self._subreddit.style.template_resume):
-            # calling a subreddit's num_comments property probably executes an API request. Make it
-            # an int if we'll need it
-            self._submission.num_comments = int(self._submission.num_comments)
 
         self._submission.elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
         self._submission.elapsed_minutes = int(round(self._submission.elapsed_seconds / 60))
