@@ -5,10 +5,10 @@ from .accounts import AccountManager, CredentialsManager
 from config import config
 
 
-accounts = AccountManager(config.reddit)  # will be deprecated
+# accounts = AccountManager(config.reddit)  # will be deprecated
 
 _accounts = CredentialsManager('accounts')
 _clients = CredentialsManager('clients')
 
 # reddit = Reddit(**config.praw)
-reddit = accounts.default
+# reddit = accounts.default

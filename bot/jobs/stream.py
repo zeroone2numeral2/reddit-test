@@ -99,7 +99,7 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
-def get_reddit_instance(subreddit):
+def get_reddit_instance(subreddit, enforce_account_login=True):
     if subreddit.reddit_account and subreddit.reddit_account in _accounts.names:
         account = _accounts.by_name(subreddit.reddit_account)
     else:
@@ -112,15 +112,42 @@ def get_reddit_instance(subreddit):
         client_name = reddit_request.least_stressed('client', _clients.names)
         client = _clients.by_name(client_name, default_on_one=True)
 
-    reddit = Reddit(
-        username=account['username'],
-        password=account['password'],
-        client_id=client['client_id'],
-        client_secret=client['client_secret'],
-        user_agent=client['user_agent']
-    )
+    if client['owner'].lower() == account['username'].lower():
+        # a client can only be used with the account that owns it
+        reddit = Reddit(
+            username=account['username'],
+            password=account['password'],
+            client_id=client['client_id'],
+            client_secret=client['client_secret'],
+            user_agent=client['user_agent']
+        )
 
-    return reddit, account['username'], client['name']
+        return reddit, account['username'], client['name']
+    elif enforce_account_login:
+        logger.warning('client and account mismatch, but enforce_account_login is true: using the client\'s account')
+        logger.info('client: %s, owner: %s', client['name'], client['owner'])
+
+        account = _accounts.by_name(client['owner'])
+
+        reddit = Reddit(
+            username=account['username'],
+            password=account['password'],
+            client_id=client['client_id'],
+            client_secret=client['client_secret'],
+            user_agent=client['user_agent']
+        )
+
+        return reddit, account['username'], client['name']
+    else:
+        # else, do not login with an account
+
+        reddit = Reddit(
+            client_id=client['client_id'],
+            client_secret=client['client_secret'],
+            user_agent=client['user_agent']
+        )
+
+        return reddit, None, client['name']
 
 
 def fetch_submissions(subreddit: Subreddit):
