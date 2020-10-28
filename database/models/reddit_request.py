@@ -22,7 +22,7 @@ class RedditRequest(peewee.Model):
         return '<RedditRequest row {}: [{}][{}][dt:{}]>'.format(self.id, self.subreddit.name, self.subreddit.id, self.request_datetime)
 
     @classmethod
-    def delete_old(cls, days=31):
-        query = cls.delete().where(cls.start < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+    def delete_old(cls, days=14):
+        query = cls.delete().where(cls.request_datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
         return query.execute()  # returns the number of deleted rows
 
