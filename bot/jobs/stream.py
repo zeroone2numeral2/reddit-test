@@ -24,7 +24,8 @@ from database.models import RedditRequest
 from database.queries import settings
 from database.queries import reddit_request
 from database import db
-from reddit import reddit
+from reddit import Reddit
+from reddit import _accounts, _clients
 from reddit import Sender
 from config import config
 
@@ -98,13 +99,40 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
+def get_reddit_instance(subreddit):
+    if subreddit.reddit_account and subreddit.reddit_account in _accounts.names:
+        account = _accounts.by_name(subreddit.reddit_account)
+    else:
+        account_name = reddit_request.least_stressed('account', _accounts.names)
+        account = _accounts.by_name(account_name, default_on_one=True)
+
+    if subreddit.reddit_client and subreddit.reddit_client in _clients.names:
+        client = _clients.by_name(subreddit.reddit_client)
+    else:
+        client_name = reddit_request.least_stressed('client', _clients.names)
+        client = _clients.by_name(client_name, default_on_one=True)
+
+    reddit = Reddit(
+        username=account['username'],
+        password=account['password'],
+        client_id=client['client_id'],
+        client_secret=client['client_secret'],
+        user_agent=client['user_agent']
+    )
+
+    return reddit, account['username'], client['name']
+
+
 def fetch_submissions(subreddit: Subreddit):
     subreddit.logger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
 
-    reddit_request.save_request(subreddit, 'fake_account_2', 'fake_client_2')
+    reddit, account_name, client_name = get_reddit_instance(subreddit)
+    subreddit.logger.info('using account: %s, client: %s', account_name, client_name)
+
+    reddit_request.save_request(subreddit, account_name, client_name)
 
     for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
         subreddit.logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])

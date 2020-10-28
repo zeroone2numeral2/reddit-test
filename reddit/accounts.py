@@ -54,11 +54,17 @@ class CredentialsManager:
             name = item.get('name', item.get('username', None))
 
             self._credentials[name] = item
-            if item['default']:
+            if item.get('default', False):
                 self._default_name = name
 
-    def by_name(self, name, return_default_on_missing=False):
-        return self._credentials.get(name, self.default if return_default_on_missing else None)
+    def by_name(self, name, default_on_missing=False, default_on_one=False):
+        if name is None:
+            if not default_on_one:
+                raise ValueError('name cannot be None')
+            else:
+                return self.default
+
+        return self._credentials.get(name, self.default if default_on_missing else None)
 
     def exists(self, name):
         return name in self._credentials
@@ -69,3 +75,7 @@ class CredentialsManager:
     @property
     def default(self):
         return self._credentials[self._default_name]
+
+    @property
+    def names(self):
+        return list(self._credentials.keys())

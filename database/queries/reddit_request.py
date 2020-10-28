@@ -24,34 +24,46 @@ def save_request(subreddit, account_name, client_name, dt=None):
     reddit_request.save()
 
 
-def least_stressed_account(valid_names, days=2):
+def least_stressed(creds_type, valid_names, days=2):
     delta = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+    if creds_type == 'account':
+        group_by = RedditRequest.account_name
+    elif creds_type == 'client':
+        group_by = RedditRequest.client_name
+    else:
+        raise ValueError
 
     query = (
-        RedditRequest.select(RedditRequest.account_name, fn.Count(RedditRequest.id).alias('count'))
-        .where(RedditRequest.request_datetime_utc > delta and RedditRequest.account_name in valid_names)
-        .group_by(RedditRequest.account_name)
+        RedditRequest.select(group_by.alias('name'), fn.Count(RedditRequest.id).alias('count'))
+        .where(RedditRequest.request_datetime_utc > delta, group_by << valid_names)
+        .group_by(group_by)
         .order_by(fn.Count(RedditRequest.id))  # ascending by default
     )
 
-    for account in query:
-        print('', account.account_name, account.count)
+    if not query:
+        return
 
-    return query[0].account_name
+    # if valid_names contains a name that we haven't used yet (not in the db), use that one
+    db_items = [item.name for item in query]
+    unused_config_items = list(set(valid_names) - set(db_items))
+    if unused_config_items:
+        return unused_config_items[0]
+
+    return query[0].name
 
 
-def least_stressed_client(valid_names, days=2):
+def creds_usage(valid_accouns=None, valid_clients=None, days=2):
     delta = datetime.datetime.utcnow() - datetime.timedelta(days=days)
 
     query = (
-        RedditRequest.select(RedditRequest.client_name, fn.Count(RedditRequest.id).alias('count'))
-        .where(RedditRequest.request_datetime_utc > delta and RedditRequest.client_name in valid_names)
-        .group_by(RedditRequest.client_name)
-        .order_by(fn.Count(RedditRequest.id))  # ascending by default
-    )
+        RedditRequest.select(RedditRequest.account_name, RedditRequest.client_name, fn.Count(RedditRequest.id).alias('count'))
+        .where(
+            RedditRequest.request_datetime_utc > delta,
+            RedditRequest.account_name << valid_accouns if valid_accouns else True,
+            RedditRequest.client_name << valid_clients if valid_clients else True
+        )
+        .group_by(RedditRequest.account_name, RedditRequest.client_name)
+        .order_by(fn.Count(RedditRequest.id).desc())  # ascending by default
+    ).dicts()
 
-    for client in query:
-        print('', client.client_name, client.count)
-
-    return query[0].client_name
-
+    return [row for row in query]
