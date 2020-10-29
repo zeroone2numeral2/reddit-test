@@ -200,6 +200,8 @@ class SubredditLogNoAdapter(logging.Logger):
 
         self.subreddit_id = subreddit.id
         self.subreddit_name = subreddit.name
+        self._dir_path = os.path.join(self._dir_path, '{}_{}'.format(subreddit.name, subreddit.id))
+        self._ensure_dir(self._dir_path)
         self._file_path = os.path.join(self._dir_path, '{s.subreddit_name}_{s.subreddit_id}.log'.format(s=self))
 
         self._extra = {'sub_id': subreddit.id, 'sub_name': subreddit.name}
@@ -216,6 +218,11 @@ class SubredditLogNoAdapter(logging.Logger):
             kwargs["extra"] = self._extra
 
         super()._log(*args, **kwargs)  # noqa
+
+    @staticmethod
+    def _ensure_dir(dir_path):
+        if not os.path.isdir(dir_path):
+            os.mkdir(dir_path)
 
 
 slogger = SubredditLogNoAdapter()
