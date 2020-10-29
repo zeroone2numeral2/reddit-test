@@ -114,6 +114,12 @@ def get_reddit_instance(subreddit):
 
         client = creds.get_client_by_name(subreddit.reddit_client)
         account = creds.get_client_parent_account(subreddit.reddit_client)
+    elif subreddit.reddit_account and creds.account_exists(subreddit.reddit_account):
+        subreddit.logger.info('using subreddit account with least stressed client: %s', subreddit.reddit_account)
+        account = creds.get_account_by_name(subreddit.reddit_account)
+
+        client_name = reddit_request.least_stressed('client', account.client_names_list)[0]
+        client = creds.get_client_by_name(client_name)
     elif reddit_config.general.prefer_default_account:
         # use the least used client of the default account
         subreddit.logger.info('using the default account and its least used client')

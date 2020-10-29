@@ -49,8 +49,8 @@ class Subreddit(peewee.Model):
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
     test = peewee.BooleanField(default=False)
-    reddit_account = peewee.CharField(null=True)
-    reddit_client = peewee.CharField(null=True)
+    reddit_account = peewee.CharField(null=True)  # if set, we will use this account and its least used client to preform request for the subreddit
+    reddit_client = peewee.CharField(null=True)  # if set, we will use this client to preform request for the subreddit
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)
