@@ -35,6 +35,10 @@ def remsubslogs_command(update, _):
     files = [f for f in os.listdir(dir_path) if f != '.gitkeep']
     for file in files:
         file_path = os.path.join(dir_path, file)
+        if os.path.isdir(file_path):
+            # ignore directories
+            continue
+
         u.remove_file_safe(file_path)
 
     update.message.reply_text('Removed {} log files'.format(len(files)))
