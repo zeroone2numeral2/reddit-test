@@ -21,6 +21,7 @@ class VRedditHandler(BaseSenderType):
     @staticmethod
     def test(submission):
         if submission.is_video and submission.media and 'reddit_video' in submission.media:
+            # with crossposts, for some reasons, even if is_video is true, submission.media is None
             return True
 
         return False
