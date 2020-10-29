@@ -104,6 +104,17 @@ def serialize(obj):
 
 class Credentials:
     def __init__(self, reddit_config):
+        ensure_mode = ['prefer_least_used_account', 'prefer_least_used_client', 'prefer_default_account']
+        count_true = 0
+        for k, v in reddit_config.general.items():
+            if k in ensure_mode and v:
+                count_true += 1
+
+        if count_true > 1:
+            raise ValueError('reddit.toml: only one between {} can be true'.format(', '.join(ensure_mode)))
+        elif count_true == 0:
+            raise ValueError('reddit.toml: one between {} can be true'.format(', '.join(ensure_mode)))
+
         self.accounts = {}
 
         for account_dict in reddit_config['accounts']:
