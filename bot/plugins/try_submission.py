@@ -7,7 +7,7 @@ from bot import mainbot
 from database.models import Subreddit, Style
 from database.models import Channel
 from reddit import Sender
-from reddit import reddit
+from reddit import Reddit, creds
 from utilities import u
 from utilities import d
 
@@ -21,6 +21,8 @@ def try_submission(update, context):
 
     submission_id = context.args[0].strip()
 
+    account = creds.default_account
+    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
     submission = reddit.submission(id=submission_id)
 
     # pick a random channel to pass to Sender

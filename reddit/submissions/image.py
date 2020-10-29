@@ -2,6 +2,7 @@ import re
 
 from telegram import ParseMode
 from telegram import TelegramError
+from telegram.error import BadRequest
 
 from utilities import u
 from .base_submission import BaseSenderType
@@ -40,6 +41,23 @@ class ImageHandler(BaseSenderType):
             timeout=360
         )
 
+    def _send_document(self, image, caption=None, reply_markup=None):
+        url_lower = self._url.lower()
+        if '.png' in url_lower:
+            extension = '.png'
+        else:
+            extension = '.jpg'
+
+        return self._bot.send_document(
+            self.chat_id,
+            document=image.file_bytes,
+            caption=caption,
+            filename='large_image' + extension,
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
+            timeout=360
+        )
+
     def _send_image_download(self, image_url, caption, reply_markup=None):
         self.log.info('downloading and sending image (image url: %s)', image_url)
 
@@ -49,7 +67,14 @@ class ImageHandler(BaseSenderType):
             # failed to download: raise an exception
             raise BaseException('failed to send by url and to download file')
 
-        sent_message = self._send_image_base(image=image.file_bytes, caption=caption, reply_markup=reply_markup)
+        try:
+            sent_message = self._send_image_base(image=image.file_bytes, caption=caption, reply_markup=reply_markup)
+        except BadRequest as e:
+            if 'too big for a photo' not in e.message:
+                raise e
+
+            sent_message = self._send_document(image=image, caption=caption, reply_markup=reply_markup)
+
         image.close()
 
         self._sum_uploaded_bytes(sent_message)
