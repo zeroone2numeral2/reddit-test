@@ -75,6 +75,7 @@ class RedditBot(Updater):
         BotCommand('freq', 'change a subreddit frequency'),
         BotCommand('getadmins', 'get the admins list of a channel and the bot permissions'),
         BotCommand('credsusage', 'get the usage of each account/client credentials'),
+        BotCommand('usagemode', 'get or change the usage mode'),
     ]
 
     @staticmethod

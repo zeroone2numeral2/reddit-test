@@ -1,4 +1,5 @@
 [general]
+# preferred mode can be changed using /usagemode
 prefer_default_account = true
 prefer_least_used_account = false # to execute requests, prefere the least used account instead of the default one
 prefer_least_used_client = false # to execute requests, prefere the least used client(and its account) instead of the default one

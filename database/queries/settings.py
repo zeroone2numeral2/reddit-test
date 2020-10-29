@@ -25,3 +25,16 @@ def unlock_jobs():
 
 def lock_jobs():
     return change_lock(1)
+
+
+def get_accounts_usage_mode():
+    return Setting.get_key('accounts_usage_mode').value
+
+
+def change_accounts_usage_mode(value=None):
+    if value not in (1, 2, 3, 0, None):
+        raise ValueError('invalid usage mode passed')
+
+    setting = Setting.get_key('accounts_usage_mode')
+    setting.value = value
+    setting.save()
