@@ -1,5 +1,5 @@
 [general]
-prefer_least_used_account = false # to execute requests, always prefere the least used account
+prefer_least_used_account = false # to execute requests, prefere the least used account instead of the default one
 stress_threshold_hours = 48 # when calculating the least used account, consider the requests sent in the past n hours
 
 [[accounts]]
