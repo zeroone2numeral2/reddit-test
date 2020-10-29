@@ -12,7 +12,7 @@ from bot.conversation import Status
 from bot.markups import Keyboard
 from database.models import Channel, Style
 from database.models import Subreddit
-from reddit import reddit
+from reddit import Reddit, creds
 from utilities import u
 from utilities import d
 from config import config
@@ -40,6 +40,8 @@ def on_addsub_command(update: Update, context: CallbackContext):
 
     subreddit_name = clean_name
 
+    account = creds.default_account
+    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
     name_from_request = reddit.subreddit_exists(subreddit_name)
     if not name_from_request:
         logger.info('non existing subreddit: %s', subreddit_name)

@@ -1,23 +1,34 @@
-[[reddit.accounts]]
+[general]
+prefer_least_used_account = false # to execute requests, always prefere the least used account
+stress_threshold_hours = 48 # when calculating the least used account, consider the requests sent in the past n hours
+
+[[accounts]]
 default = true
-username = "example_account_1"
+username = ""
 password = ""
 
-[[reddit.accounts]]
-username = "example_account_2"
+[[accounts.clients]]
+default = true
+name = "unique-name-1"
+client_id = ""
+client_secret = ""
+user_agent = ""
+
+[[accounts.clients]]
+name = "unique-name-1"
+client_id = ""
+client_secret = ""
+user_agent = ""
+
+
+
+[[accounts]]
+username = "username"
 password = ""
 
-
-
-[[reddit.clients]]
+[[accounts.clients]]
+name = "unique-name-1"
 default = true
-name = "example-client-1"
 client_id = ""
 client_secret = ""
-user_agent = "test script by -"
-
-[[reddit.clients]]
-name = "example-client-2"
-client_id = ""
-client_secret = ""
-user_agent = "test script by -"
+user_agent = ""

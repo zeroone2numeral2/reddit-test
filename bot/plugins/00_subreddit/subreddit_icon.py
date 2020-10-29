@@ -6,7 +6,7 @@ from telegram.ext import CommandHandler, CallbackContext
 
 from bot import mainbot
 from bot.markups import Keyboard
-from reddit import reddit
+from reddit import Reddit, creds
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -24,6 +24,9 @@ def sub_icon(update: Update, context: CallbackContext):
         return
 
     sub_name = context.args[0]
+
+    account = creds.default_account
+    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
     file_path = reddit.get_icon(sub_name, download=True)
     if not file_path:
         update.message.reply_text('Subreddit "{}" does not have an icon'.format(sub_name))

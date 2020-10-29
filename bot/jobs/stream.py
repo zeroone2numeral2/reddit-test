@@ -25,9 +25,9 @@ from database.queries import settings
 from database.queries import reddit_request
 from database import db
 from reddit import Reddit
-from reddit import _accounts, _clients
+from reddit import creds
 from reddit import Sender
-from config import config
+from config import config, reddit as reddit_config
 
 logger = logging.getLogger('job')
 
@@ -99,55 +99,30 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
-def get_reddit_instance(subreddit, enforce_account_login=True):
-    if subreddit.reddit_account and subreddit.reddit_account in _accounts.names:
-        account = _accounts.by_name(subreddit.reddit_account)
+def get_reddit_instance(subreddit):
+    if subreddit.reddit_client and creds.client_exists(subreddit.reddit_client):
+        subreddit.logger.info('using subreddit client: %s', subreddit.reddit_client)
+
+        client = creds.get_client_by_name(subreddit.reddit_client)
+        account = creds.get_client_parent_account(subreddit.reddit_client)
+    elif not reddit_config.general.prefer_least_used_account:
+        # use the least used client of the default account
+        subreddit.logger.info('using the default account and its least used client')
+
+        account = creds.default_account
+        client_name = reddit_request.least_stressed('client', account.client_names_list)[0]
+        client = creds.get_client_by_name(client_name)
     else:
-        account_name = reddit_request.least_stressed('account', _accounts.names)
-        account = _accounts.by_name(account_name, default_on_one=True)
+        subreddit.logger.info('using the least used account and its least used client')
 
-    if subreddit.reddit_client and subreddit.reddit_client in _clients.names:
-        client = _clients.by_name(subreddit.reddit_client)
-    else:
-        client_name = reddit_request.least_stressed('client', _clients.names)
-        client = _clients.by_name(client_name, default_on_one=True)
+        account_name = reddit_request.least_stressed('account', creds.account_names_list)[0]
+        account = creds.get_account_by_name(account_name)
+        client_name = reddit_request.least_stressed('client', account.client_names_list)[0]
+        client = creds.get_client_by_name(client_name)
 
-    if client['owner'].lower() == account['username'].lower():
-        # a client can only be used with the account that owns it
-        reddit = Reddit(
-            username=account['username'],
-            password=account['password'],
-            client_id=client['client_id'],
-            client_secret=client['client_secret'],
-            user_agent=client['user_agent']
-        )
+    reddit = Reddit(**account.creds_dict(), **client.creds_dict())
 
-        return reddit, account['username'], client['name']
-    elif enforce_account_login:
-        logger.warning('client and account mismatch, but enforce_account_login is true: using the client\'s account')
-        logger.info('client: %s, owner: %s', client['name'], client['owner'])
-
-        account = _accounts.by_name(client['owner'])
-
-        reddit = Reddit(
-            username=account['username'],
-            password=account['password'],
-            client_id=client['client_id'],
-            client_secret=client['client_secret'],
-            user_agent=client['user_agent']
-        )
-
-        return reddit, account['username'], client['name']
-    else:
-        # else, do not login with an account
-
-        reddit = Reddit(
-            client_id=client['client_id'],
-            client_secret=client['client_secret'],
-            user_agent=client['user_agent']
-        )
-
-        return reddit, None, client['name']
+    return reddit, account.username, client.name
 
 
 def fetch_submissions(subreddit: Subreddit):
