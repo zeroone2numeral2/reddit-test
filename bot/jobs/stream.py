@@ -99,6 +99,15 @@ def time_to_post(subreddit: Subreddit, quiet_hours_demultiplier):
         return True
 
 
+def get_default_reddit_instance():
+    account = creds.default_account
+    client = account.default_client
+
+    reddit = Reddit(**account.creds_dict(), **client.creds_dict())
+
+    return reddit, account.username, client.name
+
+
 def get_reddit_instance(subreddit):
     if subreddit.reddit_client and creds.client_exists(subreddit.reddit_client):
         subreddit.logger.info('using subreddit client: %s', subreddit.reddit_client)
