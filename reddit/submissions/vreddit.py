@@ -20,7 +20,7 @@ class VRedditHandler(BaseSenderType):
 
     @staticmethod
     def test(submission):
-        if submission.is_video and 'reddit_video' in submission.media:
+        if submission.is_video and submission.media and 'reddit_video' in submission.media:
             return True
 
         return False
