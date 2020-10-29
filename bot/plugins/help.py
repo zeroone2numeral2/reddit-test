@@ -61,6 +61,7 @@ calculated at that UTC hour
 /try `[submission id]`: get the submission with that id (the subreddit doesn't need to be saved in the db)
 /sdict `[submission id]`: get the submission dict of the submission (the subreddit doesn't need to be saved in the db)
 forward a message posted by the bot in a channel: get that submission's dict
+/credsusage: get the usage of each account/client credentials
 /updateytdl: update the youtube-dl package using pip
 /cleandb: delete old rows from some tables
 """

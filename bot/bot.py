@@ -74,6 +74,7 @@ class RedditBot(Updater):
         BotCommand('unlock', 'unlock jobs'),
         BotCommand('freq', 'change a subreddit frequency'),
         BotCommand('getadmins', 'get the admins list of a channel and the bot permissions'),
+        BotCommand('credsusage', 'get the usage of each account/client credentials'),
     ]
 
     @staticmethod
