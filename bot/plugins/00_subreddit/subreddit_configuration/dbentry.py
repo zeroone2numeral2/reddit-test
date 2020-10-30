@@ -8,7 +8,7 @@ from bot.conversation import Status
 from database.models import Subreddit
 from utilities import u
 from utilities import d
-from reddit import accounts
+from reddit import credentials
 from reddit.sortings import ALL_SORTINGS
 
 logger = logging.getLogger('handler')

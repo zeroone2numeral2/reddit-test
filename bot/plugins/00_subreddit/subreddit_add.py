@@ -100,6 +100,8 @@ def on_channel_selected(update: Update, context: CallbackContext):
         logger.info('we are adding r/all')
         subreddit_id = 'frontpage'
     else:
+        account = creds.default_account
+        reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
         for submission in reddit.subreddit(subreddit_name).new(limit=1):
             # u.print_submission(submission)
 
