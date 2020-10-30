@@ -5,6 +5,7 @@ from telegram.ext import CommandHandler, CallbackContext
 
 from bot import mainbot
 from database.models import Job
+from database.queries import jobs
 from utilities import d
 from utilities import u
 from config import config
@@ -17,26 +18,25 @@ logger = logging.getLogger('handler')
 def durations_command(update: Update, context: CallbackContext):
     logger.info('/duration command')
 
+    hours = 24 * 7
     if context.args:
-        job_name = context.args[0]
-    else:
-        job_name = None
+        hours = int(context.args[0])
 
-    durations = Job.durations(top=50, job_name=job_name)
-    if not durations:
-        update.message.reply_text('No row in the database')
-        return
+    jobs_grouped = jobs.average(hours)
+    if not jobs_grouped:
+        update.message.reply_text('No job')
 
-    strings_list = list()
-    for duration in durations:
-        uploaded = u.human_readable_size(duration[4] or 0)
-        strings_list.append('{0}: {2}/{3}, {uploaded} ({start})'.format(
-            *duration,
-            uploaded=uploaded,
-            start=duration[1].strftime('%d/%m/%Y %H:%M:%S'))
+    text = 'Last {} hours:\n'.format(hours)
+    for job in jobs_grouped:
+        text += '\n- avg <code>{name}</code>: <b>{duration}</b>, {uploaded}, {subs} subs, {messages} msgs'.format(
+            name=job.name,
+            duration=u.pretty_seconds(job.avg_duration),
+            uploaded=u.human_readable_size(job.avg_uploaded_bytes or 0),
+            subs=job.avg_subreddits_count,
+            messages=job.avg_posted_messages
         )
 
-    update.message.reply_html('<code>$job_name: $seconds/$messages, $uploaded_data ($start)\n{}</code>'.format('\n'.join(strings_list)))
+    update.message.reply_html(text)
 
 
 @d.restricted

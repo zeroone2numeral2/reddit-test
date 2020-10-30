@@ -44,7 +44,7 @@ subreddit name
 
 *Jobs*
 /force `[job name]`: force that job
-/duration `<job name>`: show the duration of the most recent 100 jobs executed. Can be filtered by job name
+/duration `<hours>`: show the average data of all jobs in the last week (or hours, if passed)
 /lastjob: see when each job has ended the last time
 
 *Styles*

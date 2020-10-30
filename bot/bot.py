@@ -42,7 +42,7 @@ class RedditBot(Updater):
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
         BotCommand('remlogs', 'remove all log files'),
         BotCommand('force', 'force a job'),
-        BotCommand('duration', 'get how much the last 100 jobs lasted'),
+        BotCommand('duration', 'show average stats for recent jobs'),
         BotCommand('lastjob', 'see when each job ran for the last time'),
         BotCommand('ph', 'list template placeholders'),
         BotCommand('getconfig', 'get the current config'),
