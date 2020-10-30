@@ -32,7 +32,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/conversations.log",
+            "filename": "logs/conversations/conversations.log",
             "backupCount": 20
         },
         "file_dispatcher_handlers": {
@@ -41,7 +41,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/handlers.log",
+            "filename": "logs/handlers/handlers.log",
             "backupCount": 20
         },
         "file_youtube_dl": {
@@ -50,7 +50,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/youtubedl.log",
+            "filename": "logs/youtubedl/youtubedl.log",
             "backupCount": 30
         },
         "file_reddit_galleries": {
@@ -68,7 +68,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/praw.log",
+            "filename": "logs/praw/praw.log",
             "backupCount": 25
         },
         "file_jobs": {
@@ -77,7 +77,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/jobs.log",
+            "filename": "logs/jobs/jobs.log",
             "backupCount": 20
         },
         "timed_file_test": {

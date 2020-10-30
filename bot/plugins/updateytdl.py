@@ -31,8 +31,8 @@ def update_ytdl(update, context: CallbackContext):
 
         update.message.reply_text('Executing: {}'.format(cmd))
 
-        stdout_filepath = os.path.join('logs', 'updateytdl_stdout_{}_{}.log'.format(dt_filename, pip_v))
-        stderr_filepath = os.path.join('logs', 'updateytdl_stderr_{}_{}.log'.format(dt_filename, pip_v))
+        stdout_filepath = os.path.join('logs/youtubedl', 'updateytdl_stdout_{}_{}.log'.format(dt_filename, pip_v))
+        stderr_filepath = os.path.join('logs/youtubedl', 'updateytdl_stderr_{}_{}.log'.format(dt_filename, pip_v))
 
         stdout_file = open(stdout_filepath, 'wb')
         stderr_file = open(stderr_filepath, 'wb')
