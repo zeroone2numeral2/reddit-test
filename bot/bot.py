@@ -60,7 +60,7 @@ class RedditBot(Updater):
         BotCommand('savetop', 'save the top posts based on the current sorting and limit'),
         BotCommand('removetop', 'remove the saved top submissions'),
         BotCommand('gettop', 'see what we have currently saved as top submission'),
-        BotCommand('clean', 'delete old rows from some tables'),
+        BotCommand('cleandb', 'delete old rows from some tables'),
         BotCommand('newstyle', 'create a new style'),
         BotCommand('style', 'manage styles (or a subreddit style)'),
         BotCommand('setstyle', 'set the subreddit style'),

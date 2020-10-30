@@ -11,6 +11,7 @@ from database.models import Post
 from database.models import PostResume
 from database.models import Job
 from database.models import SubredditJob
+from database.models import RedditRequest
 from database.queries.channels import get_channels
 from utilities import u
 from utilities import d
@@ -88,6 +89,7 @@ def cleandb_command(update, _):
         post_resume=PostResume.delete_old(days),
         job=Job.delete_old(days),
         subreddit_job=SubredditJob.delete_old(days),
+        reddit_request=RedditRequest.delete_old(days),
     )
 
     import sqlite3
