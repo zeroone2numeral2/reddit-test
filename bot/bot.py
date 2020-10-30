@@ -40,7 +40,7 @@ class RedditBot(Updater):
         BotCommand('icon', 'get a subreddit icon'),
         BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
-        BotCommand('remsubslogs', 'remove the subreddits logs'),
+        BotCommand('remlogs', 'remove all log files'),
         BotCommand('force', 'force a job'),
         BotCommand('duration', 'get how much the last 100 jobs lasted'),
         BotCommand('lastjob', 'see when each job ran for the last time'),

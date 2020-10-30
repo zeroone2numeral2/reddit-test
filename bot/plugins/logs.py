@@ -28,21 +28,22 @@ def remffmpeglogs_command(update, _):
 
 @d.restricted
 @d.failwithmessage
-def remsubslogs_command(update, _):
-    logger.info('/remsubslogs command')
+def remalllogs_command(update, _):
+    logger.info('/remalllogs command')
 
-    dir_path = os.path.join('logs', 'subreddits')
-    files = [f for f in os.listdir(dir_path) if f != '.gitkeep']
-    for file in files:
-        file_path = os.path.join(dir_path, file)
-        if os.path.isdir(file_path):
-            # ignore directories
-            continue
+    count = 0
+    for dir_path, dir_names, file_names in os.walk('logs'):
+        for file_name in file_names:
+            if file_name.startswith('.'):
+                continue
 
-        u.remove_file_safe(file_path)
+            file_path = os.path.join(dir_path, file_name)
+            u.remove_file_safe(file_path)
 
-    update.message.reply_text('Removed {} log files'.format(len(files)))
+            count += 1
+
+    update.message.reply_text('Removed {} log files'.format(count))
 
 
 mainbot.add_handler(CommandHandler(['remffmpeglogs'], remffmpeglogs_command))
-mainbot.add_handler(CommandHandler(['remsubslogs'], remsubslogs_command))
+mainbot.add_handler(CommandHandler(['remlogs'], remalllogs_command))

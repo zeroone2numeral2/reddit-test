@@ -40,7 +40,7 @@ subreddit name
 
 *Logs*
 /remffmpeglogs: remove ffmpeg log files
-/remsubslogs: remove the single subreddits' log files
+/remlogs: remove log files
 
 *Jobs*
 /force `[job name]`: force that job
