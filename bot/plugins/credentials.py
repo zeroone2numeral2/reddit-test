@@ -7,8 +7,10 @@ from telegram.ext import CommandHandler
 from bot import mainbot
 from reddit import creds
 from database.queries import reddit_request
+from database.queries import jobs
 from database.queries import settings
 from utilities import d
+from utilities import u
 from config import reddit
 
 logger = logging.getLogger('handler')
@@ -28,11 +30,22 @@ def creds_stats(update, context):
         text += '\n<code>{account_name} + {client_name}</code>: {count}'.format(**usage)
 
     actual_total = total * 2  # submission + comments
-    text += '\n\n<b>Total</b>: {}*2: {} ({}/hour,{}/minute)'.format(
+    total_duration = jobs.total_duration(reddit.general.stress_threshold_hours)
+
+    text += '\n\n<b>Total</b>: {}*2: {}'.format(
         total,
-        actual_total,
+        actual_total
+    )
+
+    text += '\nAverage: {}/hour, {}/minute'.format(
         int(actual_total / reddit.general.stress_threshold_hours),
-        int(actual_total / reddit.general.stress_threshold_hours / 60)
+        int(actual_total / reddit.general.stress_threshold_hours / 60),
+    )
+
+    text += '\nActual job time: {} (requests: {}/hour, {}/minute)'.format(
+        u.pretty_seconds(total_duration),
+        int(actual_total / (total_duration / 60**2)),
+        int(actual_total / (total_duration / 60)),
     )
 
     update.message.reply_html(text)
