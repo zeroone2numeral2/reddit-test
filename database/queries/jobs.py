@@ -27,11 +27,11 @@ def average(hours=7*24) -> [None, list]:
     return list(query)
 
 
-def total_duration(hours=7*24) -> int:
+def total_duration(valid_jobs, hours=7*24) -> int:
     delta = datetime.datetime.utcnow() - datetime.timedelta(hours=hours)
     query = (
         Job.select(fn.SUM(Job.duration).alias('total_duration'))
-        .where(Job.start > delta, Job.duration.is_null(False), Job.name == 'stream')
+        .where(Job.start > delta, Job.duration.is_null(False), Job.name << valid_jobs)
         .group_by(Job.name)
     ).first()
 

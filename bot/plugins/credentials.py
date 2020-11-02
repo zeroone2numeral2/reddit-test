@@ -30,19 +30,19 @@ def creds_stats(update, context):
         text += '\n<code>{account_name} + {client_name}</code>: {count}'.format(**usage)
 
     actual_total = total * 2  # submission + comments
-    total_duration = jobs.total_duration(reddit.general.stress_threshold_hours)
+    total_duration = jobs.total_duration(['stream'], hours=reddit.general.stress_threshold_hours)
 
     text += '\n\n<b>Total</b>: {}*2: {}'.format(
         total,
         actual_total
     )
 
-    text += '\nAverage: {}/hour, {}/minute'.format(
+    text += '\n<b>Average</b>: {}/hour, {}/minute'.format(
         int(actual_total / reddit.general.stress_threshold_hours),
         int(actual_total / reddit.general.stress_threshold_hours / 60),
     )
 
-    text += '\nActual job time: {} (requests: {}/hour, {}/minute)'.format(
+    text += '\n<b>Actual job time</b>: {} (requests: {}/hour, {}/minute)'.format(
         u.pretty_seconds(total_duration),
         int(actual_total / (total_duration / 60**2)),
         int(actual_total / (total_duration / 60)),
