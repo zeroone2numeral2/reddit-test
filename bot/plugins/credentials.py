@@ -17,13 +17,21 @@ logger = logging.getLogger('handler')
 @d.restricted
 @d.failwithmessage
 def creds_stats(update, context):
-    logger.info('/credsusage command')
+    logger.info('/credstats command')
 
     totals = reddit_request.creds_usage(valid_clients=creds.client_names_list)
 
+    total = 0
     text = 'Last {} hours:\n'.format(reddit.general.stress_threshold_hours)
     for usage in totals:
+        total += usage['count']
         text += '\n<code>{account_name} + {client_name}</code>: {count}'.format(**usage)
+
+    text += '\n\n<b>Total</b>: {}*2: {} ({}/hour)'.format(
+        total,
+        total*2,  # submission + comments
+        int(total*2/reddit.general.stress_threshold_hours)
+    )
 
     update.message.reply_html(text)
 
@@ -31,7 +39,7 @@ def creds_stats(update, context):
 @d.restricted
 @d.failwithmessage
 def on_usage_mode(update: Update, context: CallbackContext):
-    logger.info('/usagemode command')
+    logger.info('/credsusagemode command')
 
     if context.args:
         value = int(context.args[0])
