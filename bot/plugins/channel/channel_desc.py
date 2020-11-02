@@ -213,7 +213,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
     text = '{}\n\n{}\n\n\n{}'.format(HEADER, subs_text, footer)
 
     if include_short_template_legend_footer:
-        text += '{}\n\n{}'.format(text, ADDITIONAL_FOOTER_SHORT_INFO_LEGEND)
+        text += '\n\n{}'.format(ADDITIONAL_FOOTER_SHORT_INFO_LEGEND)
 
     if channel_obj.pinned_message:
         # do not try to edit the pinned message if the channel doesn't have one
