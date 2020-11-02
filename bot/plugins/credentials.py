@@ -27,10 +27,12 @@ def creds_stats(update, context):
         total += usage['count']
         text += '\n<code>{account_name} + {client_name}</code>: {count}'.format(**usage)
 
-    text += '\n\n<b>Total</b>: {}*2: {} ({}/hour)'.format(
+    actual_total = total * 2  # submission + comments
+    text += '\n\n<b>Total</b>: {}*2: {} ({}/hour,{}/minute)'.format(
         total,
-        total*2,  # submission + comments
-        int(total*2/reddit.general.stress_threshold_hours)
+        actual_total,
+        int(actual_total / reddit.general.stress_threshold_hours),
+        int(actual_total / reddit.general.stress_threshold_hours / 60)
     )
 
     update.message.reply_html(text)
