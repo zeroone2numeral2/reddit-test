@@ -11,18 +11,18 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from bot import mainbot
+from bot.conversation import Status
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
 from database.models import Subreddit
-from reddit import reddit
+from reddit import Reddit, creds
+from .select_channel import channel_selection_handler
 from utilities import u
 from utilities import d
 from config import config
 
 logger = logging.getLogger('handler')
-
-CHANNEL_SELECT = range(1)
 
 SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
 
@@ -39,10 +39,16 @@ BASE_RESUME = """••• <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_
 
 HEADER = '<b>This channel tracks the following subreddits</b>:'
 
-FOOTER = """📬 Number of daily posts: <b>~{}</b>
-📣 More subreddit mirrors: @{}"""
+FOOTER = """- number of daily posts: <b>~{}</b>
+- more subreddit mirrors: @{}"""
 
-ADDITIONAL_FOOTER_PRIVATE_CHANNEL = """🔗 This channel's invite link <a href="{}">here</a>"""
+ADDITIONAL_FOOTER_PRIVATE_CHANNEL = """- this channel's invite link <a href="{}">here</a>"""
+
+ADDITIONAL_FOOTER_SHORT_INFO_LEGEND = """<b>Legend</b>:
+<code>v</code>: current score (upvotes)
+<code>c</code>: number of comments
+<code>%</code>: upvotes ratio
+<code>d/h/m</code>: thread age"""
 
 WEEKDAYS = (
     'Monday',
@@ -103,7 +109,11 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
 
     subs_info_list = []
     total_number_of_daily_posts = 0
+    include_short_template_legend_footer = False
     for i, subreddit in enumerate(subreddits):
+        if not subreddit.enabled:
+            continue
+
         format_dict = dict(
             name=subreddit.name,
             number_of_posts=subreddit.number_of_posts if subreddit.number_of_posts > 1 else 'one',
@@ -120,20 +130,18 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
             # i=i + 1
         )
 
-        ################
-        # COMMON PARTS #
-        ################
-
         if subreddit.is_multireddit:
             format_dict['sub_multi_prefix'] = 'm'
             format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
 
-            if (subreddit.template and '#{subreddit}' in subreddit.template) or (subreddit.template_resume and '#{subreddit}' in subreddit.template_resume):
+            if subreddit.template_has_hashtag():
                 # decide how to prefix the multireddit's subreddits list
                 sub_prefix = '#'
             else:
                 sub_prefix = '/r/'
 
+            account = creds.default_account
+            reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
             format_dict['multi_subs'] = ' ({first_sub_prefix}{subs_list})'.format(
                 first_sub_prefix=sub_prefix,
                 subs_list=', {}'.format(sub_prefix).join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name))
@@ -163,42 +171,32 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
             format_dict['sorting'] = 'top/day'
         elif subreddit.sorting == 'week':
             format_dict['sorting'] = 'top/week'
+        elif subreddit.sorting == 'month':
+            format_dict['sorting'] = 'top/month'
+        elif subreddit.sorting == 'all':
+            format_dict['sorting'] = 'top/alltime'
 
-        ######################
-        # TYPE-SPECIFIC PART #
-        ######################
+        if not subreddit.is_multireddit and subreddit.template_has_hashtag():
+            # we do not do this with multireddits because we decide whether to use
+            # hashtags or not to list its subreddit above
+            format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
-        if subreddit.enabled:
-            if not subreddit.is_multireddit and subreddit.template and '#{subreddit}' in subreddit.template:
-                format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
+        if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
+            format_dict['quiet_block'] = '\n• less frequent posts (frequency x{}) from {} to {} UTC'.format(
+                subreddit.quiet_hours_demultiplier,
+                subreddit.quiet_hours_start or config.quiet_hours.start,
+                subreddit.quiet_hours_end or config.quiet_hours.end
+            )
 
-            if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
-                format_dict['quiet_block'] = '\n• less frequent posts (frequency x{}) from {} to {} UTC'.format(
-                    subreddit.quiet_hours_demultiplier,
-                    subreddit.quiet_hours_start or config.quiet_hours.start,
-                    subreddit.quiet_hours_end or config.quiet_hours.end
-                )
-
-            subs_info_list.append(BASE_POST.format(**format_dict))
-
-        elif subreddit.enabled_resume:
-            format_dict['i'] = i + 1
-
-            if not subreddit.is_multireddit and subreddit.template_resume and '#{subreddit}' in subreddit.template_resume:
-                format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
-
-            format_dict['period'] = subreddit.frequency
-            format_dict['hour'] = subreddit.hour
-            format_dict['weekday_block'] = ''
-            if subreddit.frequency == 'week':
-                format_dict['weekday_block'] = ' (on {})'.format(WEEKDAYS[subreddit.weekday])
-
-            subs_info_list.append(BASE_RESUME.format(**format_dict))
+        subs_info_list.append(BASE_POST.format(**format_dict))
 
         try:
             total_number_of_daily_posts += u.number_of_daily_posts(subreddit)
         except Exception as e:
             logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e))
+
+        if subreddit.style.name.startswith('short_'):
+            include_short_template_legend_footer = True
 
     subs_text = '\n\n'.join(subs_info_list)
 
@@ -213,6 +211,9 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
         footer += '\n' + ADDITIONAL_FOOTER_PRIVATE_CHANNEL.format(subreddits[0].channel.invite_link or '')
 
     text = '{}\n\n{}\n\n\n{}'.format(HEADER, subs_text, footer)
+
+    if include_short_template_legend_footer:
+        text += '{}\n\n{}'.format(text, ADDITIONAL_FOOTER_SHORT_INFO_LEGEND)
 
     if channel_obj.pinned_message:
         # do not try to edit the pinned message if the channel doesn't have one
@@ -259,31 +260,11 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_command(update: Update, context: CallbackContext):
-    logger.info('/setdesc command')
-
-    channels_list = Channel.get_list()
-    if not channels_list:
-        update.message.reply_text('No saved channel. Use /addchannel to add a channel')
-        return ConversationHandler.END
-
-    if len(context.args) > 0:
-        channel_title_filter = context.args[0].lower()
-        channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
-
-    reply_markup = Keyboard.from_list(channels_list)
-    update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
-
-    return CHANNEL_SELECT
-
-
-@d.restricted
-@d.failwithmessage
 def on_setdesc_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
-    return CHANNEL_SELECT
+    return Status.CHANNEL_SELECTED
 
 
 @d.restricted
@@ -296,10 +277,10 @@ def on_setdesc_cancel(update, _):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler('setdesc', on_setdesc_command)],
+    entry_points=[CommandHandler('updatepin', channel_selection_handler)],
     states={
-        CHANNEL_SELECT: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), on_setdesc_channel_selected),
+        Status.CHANNEL_SELECTED: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_setdesc_channel_selected),
             MessageHandler(~Filters.command & Filters.all, on_setdesc_channel_selected_incorrect),
         ]
     },

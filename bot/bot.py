@@ -27,7 +27,7 @@ class RedditBot(Updater):
         BotCommand('addchannel', 'add a channel'),
         BotCommand('remchannel', 'remove a channel'),
         BotCommand('updatechannels', 'update the channels metadata'),
-        BotCommand('setdesc', 'update a channel pinned message'),
+        BotCommand('updatepin', 'update a channel pinned message'),
         BotCommand('members', 'top 25 channels by members count'),
         BotCommand('exit', 'exit from a configuration mode'),
         BotCommand('updatelist', 'update the list of channels in the main channel'),

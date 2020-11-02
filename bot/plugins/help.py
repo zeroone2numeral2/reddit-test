@@ -14,7 +14,7 @@ HELP_STRING = """\
 
 *Managing channels*
 /updatechannels: update all the channels (ttitle, username, invite link) in the database
-/setdesc: pin a pre-formatted message that describes the channel
+/updatepin: pin a pre-formatted message that describes the channel
 /members: top 25 channels by number of members
 /exportlink: revoke and regenerate the invite link of a channel
 /getadmins: get the admins list of a channel, and the bot permissions in that channel

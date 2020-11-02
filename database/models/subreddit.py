@@ -216,3 +216,18 @@ class Subreddit(peewee.Model):
             return None
 
         return [row for row in rows]
+
+    def template_has_hashtag(self):
+        if self.template_override and '#{subreddit}' in self.template_override:
+            return True
+
+        if self.style.template and '#{subreddit}' in self.style.template:
+            return True
+
+        if self.style.template_no_url and '#{subreddit}' in self.style.template_no_url:
+            return True
+
+        if self.style.template_caption and '#{subreddit}' in self.style.template_caption:
+            return True
+
+        return False
