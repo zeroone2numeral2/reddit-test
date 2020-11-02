@@ -10,15 +10,15 @@ from telegram.error import BadRequest
 from telegram.error import TelegramError
 
 from bot import mainbot
+from bot.conversation import Status
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
+from .select_channel import channel_selection_handler
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
-
-CHANNEL_SELECT = range(1)
 
 
 def on_link_keep_button(update, context: CallbackContext):
@@ -49,22 +49,6 @@ def on_link_revoke_button(update, context: CallbackContext):
         reply_markup=InlineKeyboard.REMOVE,
         disable_web_page_preview=True
     )
-
-
-@d.restricted
-@d.failwithmessage
-def on_exportlink_command(update, _):
-    logger.info('/exportlink command')
-
-    channels_list = Channel.get_list()
-    if not channels_list:
-        update.message.reply_text('No saved channel. Use /addchannel to add a channel')
-        return ConversationHandler.END
-
-    reply_markup = Keyboard.from_list(channels_list)
-    update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
-
-    return CHANNEL_SELECT
 
 
 @d.restricted
@@ -113,7 +97,7 @@ def on_export_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
-    return CHANNEL_SELECT
+    return Status.CHANNEL_SELECTED
 
 
 @d.restricted
@@ -128,11 +112,10 @@ def on_export_cancel(update, _):
 mainbot.add_handler(CallbackQueryHandler(on_link_keep_button, pattern=r'linkkeep', pass_user_data=True))
 mainbot.add_handler(CallbackQueryHandler(on_link_revoke_button, pattern=r'linkrevoke', pass_user_data=True))
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(command=['exportlink'], callback=on_exportlink_command)],
+    entry_points=[CommandHandler(command=['exportlink'], callback=channel_selection_handler)],
     states={
-        CHANNEL_SELECT: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_export_channel_selected,
-                           pass_user_data=True),
+        Status.CHANNEL_SELECTED: [
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_export_channel_selected),
             MessageHandler(~Filters.command & Filters.all, callback=on_export_channel_selected_incorrect),
         ]
     },

@@ -10,6 +10,7 @@ class Status:
     STYLE_SELECT = 90
     WAITING_STYLE_CONFIG_ACTION = 100
     SUBREDDIT_WAITING_STYLE = 110
+    CHANNEL_SELECTED = 130
     END = -1
     TIMEOUT = -2
     NONE_RETURNED = -10  # this is for handlers that are not part of a conversation, so they return None
@@ -29,6 +30,7 @@ STATUSES_DICT = {
     Status.STYLE_SELECT: 'STYLE_SELECT',
     Status.WAITING_STYLE_CONFIG_ACTION: 'WAITING_STYLE_CONFIG_ACTION',
     Status.SUBREDDIT_WAITING_STYLE: 'SUBREDDIT_WAITING_STYLE',
+    Status.CHANNEL_SELECTED: 'CHANNEL_SELECTED',
     Status.NONE_RETURNED: 'no next status returned'
 }
 

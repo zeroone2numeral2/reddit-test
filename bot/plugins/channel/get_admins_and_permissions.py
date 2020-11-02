@@ -7,36 +7,15 @@ from telegram.ext import CommandHandler
 from telegram.ext import Filters
 
 from bot import mainbot
+from bot.conversation import Status
 from bot.markups import Keyboard
-from database.models import Channel
+from .select_channel import channel_selection_handler
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
 
-CHANNEL_SELECT = range(1)
-
 VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
-
-
-@d.restricted
-@d.failwithmessage
-def on_getadmins_command(update: Update, context: CallbackContext):
-    logger.info('/getadmins command')
-
-    channels_list = Channel.get_list()
-    if not channels_list:
-        update.message.reply_text('No saved channel. Use /addchannel to add a channel')
-        return ConversationHandler.END
-
-    if len(context.args) > 0:
-        channel_title_filter = context.args[0].lower()
-        channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
-
-    reply_markup = Keyboard.from_list(channels_list)
-    update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
-
-    return CHANNEL_SELECT
 
 
 @d.restricted
@@ -80,9 +59,9 @@ def on_cancel(update, _):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(command=['getadmins'], callback=on_getadmins_command)],
+    entry_points=[CommandHandler(command=['getadmins'], callback=channel_selection_handler)],
     states={
-        CHANNEL_SELECT: [
+        Status.CHANNEL_SELECTED: [
             MessageHandler(Filters.text & ~Filters.command, callback=on_channel_selected)
         ]
     },
