@@ -30,6 +30,7 @@ from .subreddit_configuration.clone import subconfig_on_selected_subreddit_wrong
 from .subreddit_configuration.style import subconfig_on_getstyle_command
 from .subreddit_configuration.style import subconfig_on_setstyle_command
 from .subreddit_configuration.style import subconfig_on_style_selected
+from .subreddit_configuration.see_submissions import subconfig_on_submissions_command
 from utilities import u
 from utilities import d
 
@@ -42,6 +43,7 @@ link: {s.channel_link})
 /info, \
 /remove (remove the subreddit from the db), \
 /setchannel (set the subreddit's channel), \
+/submissions (get the sub's submission based on teh current config), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /style (change this subreddit's style), \
 /getstyle (see the current style), \
@@ -212,6 +214,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['setchannel'], subconfig_on_setchannel_command),
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
             CommandHandler(['getstyle'], subconfig_on_getstyle_command),
+            CommandHandler(['submissions'], subconfig_on_submissions_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['cancel'], on_fake_cancel_command),

@@ -35,6 +35,7 @@ class RedditBot(Updater):
         BotCommand('addmulti', 'add a multireddit'),
         BotCommand('sub', 'manage a subreddit'),
         BotCommand('subs', 'list the subreddits'),
+        BotCommand('submissions', 'see the current sub frontpage based on its settings'),
         BotCommand('sdict', 'get the submission dict of the last post in that subreddit'),
         BotCommand('links', 'get a list of channels with their invite link'),
         BotCommand('icon', 'get a subreddit icon'),
