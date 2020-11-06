@@ -66,9 +66,6 @@ def on_forwarded_message(update, context: CallbackContext):
         Channel.create_from_chat(channel)
         update.message.reply_text('Channel {} ({}) has been saved'.format(channel.title, channel.id))
 
-    if channel.invite_link:
-        update.message.reply_text('Exported invite link/public link: {}'.format(channel.invite_link), disable_web_page_preview=True)
-
     return ConversationHandler.END
 
 
