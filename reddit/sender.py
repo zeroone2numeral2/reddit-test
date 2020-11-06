@@ -452,6 +452,16 @@ class Sender:
                 self._subreddit.ignore_if_newer_than
             )
             return False
+        elif self._subreddit.ignore_if_older_than \
+                and isinstance(self._subreddit.ignore_if_older_than, int) \
+                and self._submission.elapsed_minutes > self._subreddit.ignore_if_older_than:
+            self.log.info(
+                'tests failed: too old (submitted: %s, elapsed: %s, ignore_if_older_than: %d)',
+                self._submission.created_utc_formatted,
+                u.pretty_minutes(self._submission.elapsed_minutes),
+                self._subreddit.ignore_if_older_than
+            )
+            return False
         else:
             return True
 

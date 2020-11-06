@@ -54,7 +54,8 @@ class Subreddit(peewee.Model):
     # FILTERS
     ignore_stickied = peewee.BooleanField(default=True)
     min_score = peewee.IntegerField(null=True)
-    ignore_if_newer_than = peewee.IntegerField(null=True)
+    ignore_if_newer_than = peewee.IntegerField(null=True)  # in minutes
+    ignore_if_older_than = peewee.IntegerField(default=3 * 24 * 60, null=True)  # in minutes
     allow_nsfw = peewee.BooleanField(default=True, null=True)
     hide_spoilers = peewee.BooleanField(default=False, null=True)
     medias_only = peewee.BooleanField(default=False, null=True)

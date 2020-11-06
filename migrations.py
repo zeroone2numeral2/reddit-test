@@ -62,6 +62,7 @@ def main(database_path):
     template_no_url_for_captions = peewee.BooleanField(default=True)
     force_text = peewee.BooleanField(default=False, null=True)
     respect_external_content_flag = peewee.BooleanField(default=False, null=True)
+    ignore_if_older_than = peewee.IntegerField(default=3 * 24 * 60, null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -161,6 +162,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'respect_external_content_flag', respect_external_content_flag),
         # 20201020
         migrator.rename_column('subreddits', 'last_posted_submission_dt', 'last_post_datetime'),
+        # 20201106
+        migrator.add_column('subreddits', 'ignore_if_older_than', ignore_if_older_than),
     ]
 
     logger.info('Starting migration....')
