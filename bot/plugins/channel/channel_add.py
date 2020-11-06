@@ -1,6 +1,7 @@
 import logging
 
 # noinspection PyPackageRequirements
+from telegram import Update, ChatMember, Bot, Chat
 from telegram.ext import ConversationHandler
 from telegram.ext import CallbackContext
 from telegram.ext import MessageHandler
@@ -18,14 +19,55 @@ from utilities import d
 logger = logging.getLogger('handler')
 
 
+def save_or_update_channel(bot: Bot, channel: Chat) -> str:
+    try:
+        invite_link = bot.export_chat_invite_link(channel.id)
+        channel.invite_link = invite_link
+    except (TelegramError, BadRequest) as e:
+        logger.error('error while exporting invite link: %s', e.message)
+        if channel.username:
+            channel.invite_link = 'https://t.me/{}'.format(channel.username)
+        else:
+            channel.invite_link = None
+
+    if Channel.exists(channel.id):
+        Channel.update_channel(channel)
+        return 'This channel was already saved (its infos has been updated). Operation completed'
+    else:
+        Channel.create_from_chat(channel)
+        return 'Channel {} ({}) has been saved'.format(channel.title, channel.id)
+
+
 @d.restricted
 @d.failwithmessage
-def on_addchannel_command(update, _):
+def on_addchannel_command(update: Update, context: CallbackContext):
     logger.info('/addchannel command')
 
-    update.message.reply_text('Forward me a message from the channel you want to add, or /cancel')
+    if not context.args:
+        logger.info('no username passed')
+        update.message.reply_text('Forward me a message from the channel you want to add, or /cancel')
 
-    return Status.WAITING_FORWARDED_MESSAGE
+        return Status.WAITING_FORWARDED_MESSAGE
+
+    username = context.args[0].replace('@', '')
+    logger.info('username: @%s', username)
+
+    try:
+        chat_member: ChatMember = context.bot.get_chat_member('@' + username, context.bot.id)
+    except (BadRequest, TelegramError) as e:
+        update.message.reply_text('Add me to the channel as administrators first. Try again or /cancel ({})'.format(e.message))
+        return ConversationHandler.END
+
+    if chat_member.status != 'administrator':
+        update.message.reply_text('I am not administrator of this channel, try again or /cancel')
+        return ConversationHandler.END
+
+    channel = context.bot.get_chat('@' + username)
+
+    text = save_or_update_channel(context.bot, channel)
+    update.message.reply_text(text)
+
+    return ConversationHandler.END
 
 
 @d.restricted
@@ -49,22 +91,8 @@ def on_forwarded_message(update, context: CallbackContext):
 
     channel = update.message.forward_from_chat
 
-    try:
-        invite_link = context.bot.export_chat_invite_link(channel.id)
-        channel.invite_link = invite_link
-    except (TelegramError, BadRequest) as e:
-        logger.error('error while exporting invite link: %s', e.message)
-        if channel.username:
-            channel.invite_link = 'https://t.me/{}'.format(channel.username)
-        else:
-            channel.invite_link = None
-
-    if Channel.exists(channel.id):
-        Channel.update_channel(channel)
-        update.message.reply_text('This channel was already saved (its infos has been updated). Operation completed')
-    else:
-        Channel.create_from_chat(channel)
-        update.message.reply_text('Channel {} ({}) has been saved'.format(channel.title, channel.id))
+    text = save_or_update_channel(context.bot, channel)
+    update.message.reply_text(text)
 
     return ConversationHandler.END
 

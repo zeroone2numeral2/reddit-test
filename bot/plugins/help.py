@@ -9,7 +9,7 @@ logger = logging.getLogger('handler')
 
 HELP_STRING = """\
 *Adding and removing channels*
-/addchannel: save a channel (if already saved: updates its info)
+/addchannel `<username>`: save a channel (if already saved: updates its info)
 /remchannel: remove a channel
 
 *Managing channels*
