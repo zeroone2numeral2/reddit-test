@@ -26,7 +26,7 @@ def durations_command(update: Update, context: CallbackContext):
     if not jobs_grouped:
         update.message.reply_text('No job')
 
-    text = 'Last {} hours:\n'.format(hours)
+    text = 'Last {}:\n'.format(u.pretty_seconds(hours * 60 * 60))
     for job in jobs_grouped:
         text += '\n- avg <code>{name}</code>: <b>{duration}</b>, {uploaded}, {subs} subs, {messages} msgs'.format(
             name=job.name,
