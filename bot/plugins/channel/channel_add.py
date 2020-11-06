@@ -55,11 +55,11 @@ def on_addchannel_command(update: Update, context: CallbackContext):
     try:
         chat_member: ChatMember = context.bot.get_chat_member('@' + username, context.bot.id)
     except (BadRequest, TelegramError) as e:
-        update.message.reply_text('Add me to the channel as administrators first. Try again or /cancel ({})'.format(e.message))
+        update.message.reply_text('Add me to the channel as administrator first, then use this command again'.format(e.message))
         return ConversationHandler.END
 
     if chat_member.status != 'administrator':
-        update.message.reply_text('I am not administrator of this channel, try again or /cancel')
+        update.message.reply_text('I am not administrator of this channel')
         return ConversationHandler.END
 
     channel = context.bot.get_chat('@' + username)
@@ -82,7 +82,7 @@ def on_forwarded_message(update, context: CallbackContext):
     try:
         chat_member = update.message.forward_from_chat.get_member(context.bot.id)
     except (BadRequest, TelegramError) as e:
-        update.message.reply_text('Add me to the channel as administrators first. Try again or /cancel ({})'.format(e.message))
+        update.message.reply_text('Add me to the channel as administrator first. Try again or /cancel ({})'.format(e.message))
         return Status.WAITING_FORWARDED_MESSAGE
 
     if chat_member.status != 'administrator':
