@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext
 from bot.conversation import Status
 from database.models import Subreddit
 from bot.markups import Keyboard
-from reddit import reddit
+from reddit import Reddit, creds
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -19,6 +19,9 @@ logger = logging.getLogger('handler')
 @d.pass_subreddit
 def subconfig_on_setchannelicon_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/setchannelicon command')
+
+    account = creds.default_account
+    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
 
     file_path = reddit.get_icon(subreddit.name, download=True)
     if not file_path:
