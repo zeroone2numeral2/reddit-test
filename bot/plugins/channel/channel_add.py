@@ -41,7 +41,7 @@ def save_or_update_channel(bot: Bot, channel: Chat) -> str:
 @d.restricted
 @d.failwithmessage
 def on_addchannel_command(update: Update, context: CallbackContext):
-    logger.info('/addchannel command')
+    logger.info('/addchannel command, args: %s', context.args)
 
     if not context.args:
         logger.info('no username passed')
