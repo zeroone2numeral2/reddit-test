@@ -24,6 +24,7 @@ class DummyContext:
 
 class RedditBot(Updater):
     COMMANDS_LIST = [
+        BotCommand('help', 'see help message'),
         BotCommand('addchannel', 'add a channel'),
         BotCommand('remchannel', 'remove a channel'),
         BotCommand('updatechannels', 'update the channels metadata'),
