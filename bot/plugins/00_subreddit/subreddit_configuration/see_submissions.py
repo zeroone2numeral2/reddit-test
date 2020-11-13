@@ -34,6 +34,8 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     client = account.default_client
     reddit = Reddit(**account.creds_dict(), **client.creds_dict())
 
+    reddit_request.save_request(subreddit, account.username, client.name)
+
     lines = list()
     for i, submission in enumerate(reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,
                                                            sorting=sorting, limit=limit)):
@@ -56,7 +58,6 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
             shortlink=submission.shortlink
         ))
 
-    reddit_request.save_request(subreddit, account.username, client.name)
 
     update.message.reply_html('\n'.join(lines))
 
