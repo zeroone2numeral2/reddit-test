@@ -58,7 +58,6 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
             shortlink=submission.shortlink
         ))
 
-
     update.message.reply_html('\n'.join(lines))
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION
