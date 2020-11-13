@@ -152,18 +152,13 @@ def get_reddit_instance(subreddit):
     return reddit, account.username, client.name
 
 
-def fetch_submissions(subreddit: Subreddit):
+def fetch_submissions(subreddit: Subreddit, reddit):
     subreddit.logger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
 
-    reddit, account_name, client_name = get_reddit_instance(subreddit)
-    subreddit.logger.info('using account: %s, client: %s', account_name, client_name)
-
-    reddit_request.save_request(subreddit, account_name, client_name)
-
-    for submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
+    for position, submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
         subreddit.logger.info('checking submission: %s (%s...)...', submission.id, submission.title[:64])
         if Post.already_posted(subreddit, submission.id):
             subreddit.logger.info('...submission %s has already been posted', submission.id)
@@ -176,6 +171,11 @@ def fetch_submissions(subreddit: Subreddit):
             subreddit.logger.info('...submission %s has NOT been posted yet, we will post this one if it passes checks',
                                   submission.id)
 
+            # this is when we first send the request to fetch the comments: accessing a submission property
+            # makes praw populate its attributes, and to do that it sends a request to the 'comments' endpoint
+            if not hasattr(submission, 'current_position'):
+                submission.current_position = position
+
             yield submission
 
 
@@ -187,8 +187,17 @@ class SubredditTask(Task):
             subreddit.logger.warning('received interrupt request: aborting subreddit processing')
             return JobResult()
 
+        reddit, account_name, client_name = get_reddit_instance(subreddit)
+        subreddit.logger.info('using account: %s, client: %s', account_name, client_name)
+
+        # one reddit.iter_submissions() -> one request
+        reddit_request.save_request(subreddit, account_name, client_name)
+
         senders = list()
-        for submission in fetch_submissions(subreddit):
+        comments_requests_count = 0  # we keep track of how many requests to fetch the comments we are going to send
+        for submission in fetch_submissions(subreddit, reddit):
+            comments_requests_count += 1  # we send it when we create the submission's 'current_position' attribute
+
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
                 return JobResult()
@@ -213,6 +222,9 @@ class SubredditTask(Task):
             subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
                                   subreddit.name)
             return JobResult()
+
+        # for each submission fetched, we have executed an additional request to fetch the comments
+        reddit_request.save_request(subreddit, account_name, client_name, weight=comments_requests_count)
 
         subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 

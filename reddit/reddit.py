@@ -33,21 +33,6 @@ class Reddit(praw.Reddit):
         except (Redirect, NotFound):
             return False
 
-    def get_submissions(self, subreddit, multireddit_owner=False, sorting='hot', limit=25):
-        result = list()
-        for submission in self.iter_submissions(subreddit, multireddit_owner=multireddit_owner, sorting=sorting, limit=limit):
-            created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
-
-            result.append(dict(
-                subreddit_id=submission.subreddit_id,
-                id=submission.id,
-                title_escaped=u.escape(submission.title),
-                score_dotted=u.dotted(submission.score or 0),
-                elapsed_smart=u.elapsed_time_smart((u.now() - created_utc_dt).seconds)
-            ))
-
-        return result
-
     def iter_submissions(self, name, multireddit_owner=None, sorting='hot', limit=25):
         if not multireddit_owner:
             iterator = self.subreddit(name).hot
@@ -74,11 +59,8 @@ class Reddit(praw.Reddit):
             iterator = self.subreddit(name).top if not multireddit_owner else self.multireddit(redditor=multireddit_owner, name=name).top
             args = [Sorting.timeframe.ALL]
 
-        for i, submission in enumerate(iterator(*args, **kwargs)):
-            if not hasattr(submission, 'current_position'):
-                submission.current_position = i + 1
-
-            yield submission
+        for position, submission in enumerate(iterator(*args, **kwargs)):
+            yield position + 1, submission
 
     def iter_top(self, name, limit, period='day'):
         for submission in self.subreddit(name).top(period, limit=limit):

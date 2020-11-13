@@ -43,7 +43,7 @@ def least_stressed(creds_type, valid_names, hours=None) -> list:
         raise ValueError
 
     query = (
-        RedditRequest.select(group_by.alias('name'), fn.Count(RedditRequest.id).alias('count'))
+        RedditRequest.select(group_by.alias('name'), fn.SUM(RedditRequest.weight.is_null(1)).alias('count'))
         .where(RedditRequest.request_datetime_utc > delta, group_by << valid_names)
         .group_by(group_by)
         .order_by(fn.Count(RedditRequest.id))  # ascending by default

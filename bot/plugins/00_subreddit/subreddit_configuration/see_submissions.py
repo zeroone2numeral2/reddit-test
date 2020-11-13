@@ -37,8 +37,8 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     reddit_request.save_request(subreddit, account.username, client.name)
 
     lines = list()
-    for i, submission in enumerate(reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,
-                                                           sorting=sorting, limit=limit)):
+    for position, submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,
+                                                 sorting=sorting, limit=limit):
         created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
         elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
         elapsed_smart_compact = u.elapsed_smart_compact(elapsed_seconds)
@@ -49,7 +49,7 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
             posted = ' '
 
         lines.append(BASE_STRING.format(
-            i=i + 1,
+            i=position,
             id=submission.id,
             title=submission.title,
             score=submission.score,
