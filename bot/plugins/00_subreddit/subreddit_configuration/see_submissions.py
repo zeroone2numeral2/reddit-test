@@ -6,7 +6,7 @@ from telegram import Update
 
 from bot.conversation import Status
 from database.models import Subreddit, Post
-from database.models import InitialTopPost
+from database.queries import reddit_request
 from reddit import Reddit, creds
 from utilities import d
 from utilities import u
@@ -31,7 +31,8 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     update.message.reply_text('Fetching submissions ({} from {})...'.format(limit, sorting))
 
     account = creds.default_account
-    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
+    client = account.default_client
+    reddit = Reddit(**account.creds_dict(), **client.creds_dict())
 
     lines = list()
     for i, submission in enumerate(reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,
@@ -54,6 +55,8 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
             posted=posted,
             shortlink=submission.shortlink
         ))
+
+    reddit_request.save_request(subreddit, account.username, client.name)
 
     update.message.reply_html('\n'.join(lines))
 
