@@ -64,6 +64,7 @@ def main(database_path):
     respect_external_content_flag = peewee.BooleanField(default=False, null=True)
     ignore_if_older_than = peewee.IntegerField(default=3 * 24 * 60, null=True)
     weight = peewee.IntegerField(default=1)
+    description = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -167,6 +168,8 @@ def main(database_path):
         migrator.add_column('subreddits', 'ignore_if_older_than', ignore_if_older_than),
         # 20201113
         migrator.add_column('reddit_requests', 'weight', weight),
+        # 20201116
+        migrator.add_column('reddit_requests', 'description', description),
     ]
 
     logger.info('Starting migration....')

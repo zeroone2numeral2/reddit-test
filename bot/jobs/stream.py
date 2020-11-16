@@ -191,7 +191,7 @@ class SubredditTask(Task):
         subreddit.logger.info('using account: %s, client: %s', account_name, client_name)
 
         # one reddit.iter_submissions() -> one request
-        reddit_request.save_request(subreddit, account_name, client_name)
+        reddit_request.save_request(subreddit, account_name, client_name, description='submissions')
 
         senders = list()
         comments_requests_count = 0  # we keep track of how many requests to fetch the comments we are going to send
@@ -224,7 +224,7 @@ class SubredditTask(Task):
             return JobResult()
 
         # for each submission fetched, we have executed an additional request to fetch the comments
-        reddit_request.save_request(subreddit, account_name, client_name, weight=comments_requests_count)
+        reddit_request.save_request(subreddit, account_name, client_name, weight=comments_requests_count, description='comments')
 
         subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 

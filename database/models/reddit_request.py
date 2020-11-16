@@ -12,6 +12,7 @@ class RedditRequest(peewee.Model):
     subreddit_name = peewee.CharField(null=True)  # this is just to make search easier
     account_name = peewee.CharField(null=True)
     client_name = peewee.CharField(null=True)
+    description = peewee.CharField(null=True)  # generic chat field
     weight = peewee.IntegerField(default=1)  # the "weight" of the request, eg. how many submissions have been fetched
     request_datetime_utc = peewee.DateTimeField(null=True)
 

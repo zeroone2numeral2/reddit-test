@@ -34,7 +34,7 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     client = account.default_client
     reddit = Reddit(**account.creds_dict(), **client.creds_dict())
 
-    reddit_request.save_request(subreddit, account.username, client.name)
+    reddit_request.save_request(subreddit, account.username, client.name, description='submissions')
 
     lines = list()
     for position, submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,

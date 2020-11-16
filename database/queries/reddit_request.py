@@ -11,7 +11,7 @@ def delete_old(days=14):
     return query.execute()  # returns the number of deleted rows
 
 
-def save_request(subreddit, account_name, client_name, weight=1, dt=None):
+def save_request(subreddit, account_name, client_name, weight=1, description=None, dt=None):
     if not dt:
         dt = datetime.datetime.utcnow()
 
@@ -20,6 +20,7 @@ def save_request(subreddit, account_name, client_name, weight=1, dt=None):
         subreddit_name=subreddit.name,
         account_name=account_name,
         client_name=client_name,
+        description=description,
         weight=weight,
         request_datetime_utc=dt
     )
