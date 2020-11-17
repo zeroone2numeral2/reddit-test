@@ -5,7 +5,7 @@ from telegram import Update
 from bot.conversation import Status
 from database.models import Subreddit
 from database.models import InitialTopPost
-from reddit import reddit
+from reddit import Reddit, creds
 from utilities import d
 
 logger = logging.getLogger('handler')
@@ -17,6 +17,10 @@ logger = logging.getLogger('handler')
 @d.pass_subreddit
 def subconfig_on_savetop_command(update: Update, _, subreddit: Subreddit):
     logger.info('/savetop command')
+
+    account = creds.default_account
+    client = account.default_client
+    reddit = Reddit(**account.creds_dict(), **client.creds_dict())
 
     if subreddit.sorting not in ('month', 'all'):
         update.message.reply_text('This subreddit\'s sorting is not "month" or "all"')
