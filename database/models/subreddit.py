@@ -75,6 +75,9 @@ class Subreddit(peewee.Model):
     def __repr__(self):
         return '<Subreddit {}: {}>'.format(self.id, self.name)
 
+    def to_dict(self):
+        return model_to_dict(self)
+
     def update_from_dict(self, data: dict):
         for field, value in data.items():
             # probably slow af
@@ -127,9 +130,6 @@ class Subreddit(peewee.Model):
 
         return self.channel.title
 
-    def to_dict(self):
-        return model_to_dict(self)
-
     @classmethod
     def fetch(cls: Type[S], name) -> [S, None]:
         try:
@@ -143,6 +143,68 @@ class Subreddit(peewee.Model):
             return cls.get(*args, **kwargs)
         except peewee.DoesNotExist:
             return None
+
+    def daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
+        n = 0
+
+        hours_of_reduced_frequency = 0
+        if self.quiet_hours_demultiplier != 1.0:
+            if self.quiet_hours_start > self.quiet_hours_end:
+                hours_of_reduced_frequency += 24 - self.quiet_hours_start
+                hours_of_reduced_frequency += self.quiet_hours_end + 1
+            elif self.quiet_hours_start < self.quiet_hours_end:
+                hours_of_reduced_frequency += self.quiet_hours_end - self.quiet_hours_start + 1
+
+        hours_of_normal_frequency = 24 - hours_of_reduced_frequency
+
+        minutes_of_normal_frequencies = hours_of_normal_frequency * 60
+        minutes_of_reduced_frequency = hours_of_reduced_frequency * 60
+
+        # number of messages during normal hours
+        n_during_normal_hours = (minutes_of_normal_frequencies / self.max_frequency)
+        if not ignore_number_of_posts:
+            n_during_normal_hours = n_during_normal_hours * self.number_of_posts
+
+        n_during_quiet_hours = 0
+        if minutes_of_reduced_frequency:
+            # number of messages during quiet hours
+            if self.quiet_hours_demultiplier != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
+                reduced_frequency = self.max_frequency * self.quiet_hours_demultiplier
+                n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency)
+
+                if not ignore_number_of_posts:
+                    n_during_quiet_hours = n_during_quiet_hours * self.number_of_posts
+
+        n += n_during_normal_hours + n_during_quiet_hours
+
+        n_rounded = round(days * n)
+
+        if print_debug:
+            print('hours_of_normal_frequency', hours_of_normal_frequency)
+            print('minutes_of_normal_frequencies', minutes_of_normal_frequencies)
+            print()
+            print('hours_of_reduced_frequency', hours_of_reduced_frequency)
+            print('minutes_of_reduced_frequency', minutes_of_reduced_frequency)
+            print()
+            print('n_during_normal_hours', n_during_normal_hours)
+            print('n_during_quiet_hours', n_during_quiet_hours)
+            print()
+            print('n', n)
+            print('n_rounded', n_rounded)
+
+        return n_rounded
+
+    @property
+    def daily_fetched_submissions(self):
+        limit = self.limit or Subreddit.limit.default
+
+        # daily_posts: how many times we are supposed to fetch the subreddit's frontepage
+        daily_fetches = self.daily_posts(days=1, ignore_number_of_posts=True)
+
+        # this number actually might be lower in some cases (eg. no new submissions to post)
+        # requests_number = daily_fetches * self.number_of_posts  # submissions * comments
+
+        return daily_fetches * limit
 
     @classmethod
     def set_field(cls, field, value):
