@@ -63,7 +63,7 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     update.message.reply_html('Sending answer ({} bytes)...'.format(sys.getsizeof('\n'.join(lines))))
 
     for text in u.text_messages_from_list(lines):
-        update.message.reply_html(text)
+        update.message.reply_text(text)
         time.sleep(1)
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION
