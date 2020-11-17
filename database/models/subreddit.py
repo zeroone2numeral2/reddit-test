@@ -138,7 +138,7 @@ class Subreddit(peewee.Model):
             return None
 
     @classmethod
-    def get_safe(cls: Type[S], *args, **kwargs):
+    def get_safe(cls: Type[S], *args, **kwargs) -> [S, None]:
         try:
             return cls.get(*args, **kwargs)
         except peewee.DoesNotExist:
@@ -159,7 +159,8 @@ class Subreddit(peewee.Model):
         if not name_filter:
             return [sub for sub in subs]
         else:
-            return [sub for sub in subs if name_filter.lower() in sub.name.lower()]
+            name_filter_lower = name_filter.lower()
+            return [sub for sub in subs if name_filter_lower in sub.name.lower()]
     
     @classmethod
     def linked_to_channel(cls, channel):
