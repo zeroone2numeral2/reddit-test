@@ -46,6 +46,7 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
         else:
             posted = ' '
 
+        # line length: around 140 characters
         lines.append(BASE_STRING.format(
             i=position,
             id=submission.id,
