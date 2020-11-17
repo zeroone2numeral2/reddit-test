@@ -9,6 +9,7 @@ from reddit import creds
 from database.queries import reddit_request
 from database.queries import jobs
 from database.queries import settings
+from database.queries import subreddits
 from utilities import d
 from utilities import u
 from config import reddit
@@ -46,6 +47,18 @@ def creds_stats(update, context):
         u.pretty_seconds(total_duration),
         int(actual_total / (total_duration / 60**2)),
         int(actual_total / (total_duration / 60)),
+    )
+
+    enabled_subreddits_count = subreddits.enabled_count()
+    avg_frequency = subreddits.avg_value('max_frequency')
+    avg_limit = subreddits.avg_value('limit')
+    avg_number_of_posts = subreddits.avg_value('number_of_posts')
+
+    text += '\n<b>Enabled subreddits</b>: {} (avg frequency: {}, avg limit: {}, avg number of posts: {})'.format(
+        enabled_subreddits_count,
+        u.elapsed_smart_compact(avg_frequency * 60),
+        avg_limit,
+        avg_number_of_posts,
     )
 
     update.message.reply_html(text)
