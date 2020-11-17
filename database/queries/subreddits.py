@@ -31,9 +31,6 @@ def enabled_count():
 def avg_value(column_name):
     if column_name == 'max_frequency':
         column = Subreddit.max_frequency
-    elif column_name == 'limit':
-        # column = fn.IF(Subreddit.limit == None, Subreddit.limit.default)
-        column = Case(None, [((Subreddit.limit==None), Subreddit.limit.default)], Subreddit.limit)
     elif column_name == 'number_of_posts':
         column = Subreddit.number_of_posts
     else:
@@ -41,6 +38,24 @@ def avg_value(column_name):
 
     query = Subreddit.select(column.alias('name')).where(Subreddit.enabled == True)
     items = [int(s.name) for s in query]
+
+    average = sum(items) / len(items)
+    return int(average)
+
+
+def avg_limit():
+    column = Case(None, [((Subreddit.limit == None), Subreddit.limit.default)], Subreddit.limit)
+
+    query = Subreddit.select(column).where(Subreddit.enabled == True)
+    items = [int(s.name) for s in query]
+
+    average = sum(items) / len(items)
+    return int(average)
+
+
+def avg_daily_fetched_submissions():
+    query = Subreddit.select().where(Subreddit.enabled == True)
+    items = [s.daily_fetched_submissions for s in query]
 
     average = sum(items) / len(items)
     return int(average)

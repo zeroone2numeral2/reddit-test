@@ -49,16 +49,12 @@ def creds_stats(update, context):
         int(actual_total / (total_duration / 60)),
     )
 
-    enabled_subreddits_count = subreddits.enabled_count()
-    avg_frequency = subreddits.avg_value('max_frequency')
-    avg_limit = subreddits.avg_value('limit')
-    avg_number_of_posts = subreddits.avg_value('number_of_posts')
-
-    text += '\n<b>Enabled subreddits</b>: {} (avg frequency: {}, avg limit: {}, avg number of posts: {})'.format(
-        enabled_subreddits_count,
-        u.elapsed_smart_compact(avg_frequency * 60),
-        avg_limit,
-        avg_number_of_posts,
+    text += '\n<b>Enabled subreddits</b>: {} (avg frequency: {}, avg limit: {}, avg fetched submissions (daily): {}, avg number of posts: {})'.format(
+        subreddits.enabled_count(),
+        u.elapsed_smart_compact(subreddits.avg_value('max_frequency') * 60),
+        subreddits.avg_limit(),
+        subreddits.avg_daily_fetched_submissions(),
+        subreddits.avg_value('number_of_posts'),
     )
 
     update.message.reply_html(text)
