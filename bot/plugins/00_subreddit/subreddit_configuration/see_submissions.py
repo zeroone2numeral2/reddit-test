@@ -1,6 +1,6 @@
 import datetime
 import logging
-import time
+import sys
 
 from telegram import Update
 
@@ -38,7 +38,7 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
 
     lines = list()
     for position, submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner,
-                                                 sorting=sorting, limit=limit):
+                                                        sorting=sorting, limit=limit):
         created_utc_dt = datetime.datetime.utcfromtimestamp(submission.created_utc)
         elapsed_seconds = (u.now() - created_utc_dt).total_seconds()
         elapsed_smart_compact = u.elapsed_smart_compact(elapsed_seconds)
@@ -51,13 +51,18 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
         lines.append(BASE_STRING.format(
             i=position,
             id=submission.id,
-            title=submission.title,
+            title=submission.title[:60],
             score=submission.score,
             elapsed=elapsed_smart_compact,
             posted=posted,
             shortlink=submission.shortlink
         ))
 
-    update.message.reply_html('\n'.join(lines))
+    reddit_request.save_request(subreddit, account.username, client.name, description='comments', weight=limit)
+
+    text = '\n'.join(lines)
+
+    update.message.reply_html('Sending answer ({} bytes)...'.format(sys.getsizeof(text)))
+    update.message.reply_html(text)
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION
