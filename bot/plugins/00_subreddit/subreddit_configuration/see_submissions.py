@@ -23,8 +23,6 @@ BASE_STRING = '<a href="{shortlink}">{i}</a>. [{posted}][<code>{id}</code>] {tit
 def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     logger.info('/submissions command')
 
-    update.message.reply_text('Fetching submissions...')
-
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
 
