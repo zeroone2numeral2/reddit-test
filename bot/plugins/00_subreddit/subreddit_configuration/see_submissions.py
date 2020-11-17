@@ -47,7 +47,6 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
         else:
             posted = ' '
 
-        # line length: around 140 characters
         lines.append(BASE_STRING.format(
             i=position,
             id=submission.id,
@@ -62,8 +61,10 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
 
     update.message.reply_html('Sending answer ({} bytes)...'.format(sys.getsizeof('\n'.join(lines))))
 
-    for text in u.text_messages_from_list(lines):
-        update.message.reply_text(text)
+    for lines in u.text_messages_from_list(lines):
+        text = '\n'.join(lines)
+
+        update.message.reply_html(text, disable_web_page_preview=True)
         time.sleep(1)
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION
