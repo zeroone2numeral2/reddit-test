@@ -249,6 +249,7 @@ def resize_thumbnail(image_path):
 
 
 def remove_file_safe(file_path):
+    # noinspection PyBroadException
     try:
         os.remove(file_path)
     except:
