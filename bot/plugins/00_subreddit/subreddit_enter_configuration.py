@@ -43,7 +43,7 @@ link: {s.channel_link})
 /info, \
 /remove (remove the subreddit from the db), \
 /setchannel (set the subreddit's channel), \
-/submissions (get the sub's submission based on teh current config), \
+/submissions (get the sub's frontpage based on the current sorting/limit, and see what has been already posted), \
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /style (change this subreddit's style), \
 /getstyle (see the current style), \
