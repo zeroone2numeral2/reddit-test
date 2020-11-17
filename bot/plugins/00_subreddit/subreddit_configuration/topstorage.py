@@ -5,6 +5,7 @@ from telegram import Update
 from bot.conversation import Status
 from database.models import Subreddit
 from database.models import InitialTopPost
+from database.queries import reddit_request
 from reddit import Reddit, creds
 from utilities import d
 
@@ -25,6 +26,8 @@ def subconfig_on_savetop_command(update: Update, _, subreddit: Subreddit):
     if subreddit.sorting not in ('month', 'all'):
         update.message.reply_text('This subreddit\'s sorting is not "month" or "all"')
         return Status.WAITING_SUBREDDIT_CONFIG_ACTION
+
+    reddit_request.save_request(subreddit, account.username, client.name, description='submissions')
 
     duplicates = 0
     for submission in reddit.iter_top(name=subreddit.name, limit=subreddit.limit, period=subreddit.sorting):
