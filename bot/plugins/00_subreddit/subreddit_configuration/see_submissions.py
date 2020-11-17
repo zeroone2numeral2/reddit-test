@@ -1,6 +1,7 @@
 import datetime
 import logging
 import sys
+import time
 
 from telegram import Update
 
@@ -59,9 +60,10 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
 
     reddit_request.save_request(subreddit, account.username, client.name, description='comments', weight=limit)
 
-    text = '\n'.join(lines)
+    update.message.reply_html('Sending answer ({} bytes)...'.format(sys.getsizeof('\n'.join(lines))))
 
-    update.message.reply_html('Sending answer ({} bytes)...'.format(sys.getsizeof(text)))
-    update.message.reply_html(text)
+    for text in u.text_messages_from_list(lines):
+        update.message.reply_html(text)
+        time.sleep(1)
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION

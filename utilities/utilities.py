@@ -410,6 +410,15 @@ def proper_round(num, dec=0):
     return float(num[:-1])
 
 
+def text_messages_from_list(strings_list: list):
+    total_len = sum(map(len, strings_list))
+    avg_len = total_len / len(strings_list)
+    elements_per_msg = int(MAX_MESSAGE_LENGTH / avg_len)
+
+    for i in range(0, len(strings_list), elements_per_msg):
+        yield strings_list[i:i + elements_per_msg]
+
+
 def number_of_daily_posts(s, print_debug=False):
     n = 0
 
