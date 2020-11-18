@@ -43,7 +43,6 @@ class RedditBot(Updater):
         BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
         BotCommand('remlogs', 'remove all log files'),
-        BotCommand('force', 'force a job'),
         BotCommand('duration', 'show average stats for recent jobs'),
         BotCommand('lastjob', 'see when each job ran for the last time'),
         BotCommand('ph', 'list template placeholders'),

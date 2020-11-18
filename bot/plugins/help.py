@@ -43,7 +43,6 @@ subreddit name
 /remlogs: remove log files
 
 *Jobs*
-/force `[job name]`: force that job
 /duration `<hours>`: show the average data of all jobs in the last week (or hours, if passed)
 /lastjob: see when each job has ended the last time
 
