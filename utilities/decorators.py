@@ -55,7 +55,11 @@ def failwithmessage(func):
             Log.handler.error('error during handler execution: %s', str(e), exc_info=exc_info)
             # logger.error('error during handler execution: %s', str(e), exc_info=exc_info)  # also log to main log file
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
-            update.message.reply_html(text)
+
+            if update.callback_query:
+                update.callback_query.message.reply_html(text)
+            else:
+                update.message.reply_html(text)
 
     return wrapped
 

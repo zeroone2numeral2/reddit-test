@@ -23,6 +23,14 @@ class InlineKeyboard:
         return InlineKeyboardMarkup(keyboard)
 
     @staticmethod
+    def configure_subreddit(subreddit_id):
+        keyboard = [[
+            InlineKeyboardButton('configure', callback_data='configsub:{}'.format(subreddit_id))
+        ]]
+
+        return InlineKeyboardMarkup(keyboard)
+
+    @staticmethod
     def post_buttons(url=None, comments=None, n_comments=None):
         if url and comments and url.lower() == comments.lower():
             keyboard = [[InlineKeyboardButton('thread • {}'.format(n_comments), url=comments)]]

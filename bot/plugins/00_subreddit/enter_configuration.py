@@ -2,8 +2,8 @@ import logging
 import re
 
 from playhouse.shortcuts import model_to_dict
-from telegram import Update
-from telegram.ext import MessageHandler, CommandHandler, CallbackContext
+from telegram import Update, ParseMode
+from telegram.ext import MessageHandler, CommandHandler, CallbackContext, CallbackQueryHandler
 from telegram.ext import Filters
 from telegram.ext import ConversationHandler
 
@@ -12,7 +12,7 @@ from bot.conversation import Status
 from bot.plugins.commands import Command
 from bot.customfilters import CustomFilters
 from database.models import Subreddit
-from bot.markups import Keyboard
+from bot.markups import Keyboard, InlineKeyboard
 from .subreddit_configuration.dbentry import subconfig_on_entry_change
 from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
@@ -84,6 +84,27 @@ def on_sub_command(update: Update, context: CallbackContext):
     return Status.SUBREDDIT_SELECT
 
 
+@d.failwithmessage
+@d.logconversation
+def on_configure_inline_button(update, context: CallbackContext):
+    logger.info('configure inline button')
+
+    subreddit = Subreddit.get(id=int(context.matches[0].group(1)))
+
+    context.user_data['data'] = dict()
+    context.user_data['data']['subreddit'] = subreddit
+
+    text = TEXT.format(s=subreddit)
+    update.callback_query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboard.REMOVE,
+        disable_web_page_preview=True,
+        parse_mode=ParseMode.HTML
+    )
+
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION
+
+
 @d.restricted
 @d.failwithmessage
 @d.logconversation
@@ -110,9 +131,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     context.user_data['data'] = dict()
     context.user_data['data']['subreddit'] = subreddit
 
-    channel_invite_link = u.channel_invite_link(subreddit.channel, return_on_no_link='-', hyperlink_html='here')
     text = TEXT.format(s=subreddit)
-
     update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION
@@ -261,7 +280,10 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command)],
+    entry_points=[
+        CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command),
+        CallbackQueryHandler(on_configure_inline_button, pattern=r'configsub:(\d+)', pass_groups=True)
+    ],
     states={
         Status.SUBREDDIT_SELECT: [
             MessageHandler(Filters.text & Filters.regex(r'^(\d+).*') & ~Filters.command, on_subreddit_selected),

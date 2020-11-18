@@ -9,7 +9,7 @@ from telegram import Update
 
 from bot import mainbot
 from bot.conversation import Status
-from bot.markups import Keyboard
+from bot.markups import Keyboard, InlineKeyboard
 from database.models import Channel, Style
 from database.models import Subreddit
 from reddit import Reddit, creds
@@ -111,7 +111,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
             break
 
     logger.info('saving subreddit...')
-    Subreddit.create(
+    subreddit = Subreddit.create(
         subreddit_id=subreddit_id,
         channel=channel,
         name=subreddit_name,
@@ -119,9 +119,11 @@ def on_channel_selected(update: Update, context: CallbackContext):
         test=config.telegram.get('testing', False)
     )
 
+    update.message.reply_text('Saving subreddit...', reply_markup=Keyboard.REMOVE)
+
     update.message.reply_text(
         'r/{} saved (channel: {})'.format(subreddit_name, channel.title if channel else 'none'),
-        reply_markup=Keyboard.REMOVE
+        reply_markup=InlineKeyboard.configure_subreddit(subreddit.id)
     )
 
     return ConversationHandler.END
