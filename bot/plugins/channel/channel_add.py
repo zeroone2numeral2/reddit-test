@@ -12,6 +12,8 @@ from telegram.error import TelegramError
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.plugins.commands import Command
+from bot.customfilters import CustomFilters
 from bot.markups import Keyboard
 from database.models import Channel
 from utilities import d
@@ -108,6 +110,19 @@ def on_non_forwarded_message(update, _):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
+def on_waiting_forwarded_message_unknown_message(update: Update, context: CallbackContext):
+    logger.info('WAITING_FORWARDED_MESSAGE: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Forward a message or use /cancel to cancel the operation"
+    )
+
+    return Status.WAITING_FORWARDED_MESSAGE
+
+
+@d.restricted
+@d.failwithmessage
 def on_cancel(update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
@@ -121,9 +136,10 @@ mainbot.add_handler(ConversationHandler(
         Status.WAITING_FORWARDED_MESSAGE: [
             MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
             MessageHandler(~Filters.forwarded & ~Filters.command, callback=on_non_forwarded_message),
+            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_forwarded_message_unknown_message),
         ]
     },
     fallbacks=[
-        CommandHandler('cancel', on_cancel)
+        CommandHandler(Command.CANCEL, on_cancel)
     ]
 ))
