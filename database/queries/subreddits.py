@@ -41,6 +41,7 @@ def avg_value(column_name, round_by=0):
     items = [int(s.name) for s in query]
 
     average = sum(items) / len(items)
+    print(average, u.proper_round(average))
     return u.proper_round(average, round_by)
 
 
