@@ -28,6 +28,10 @@ def enabled_count():
     return Subreddit.select().where(Subreddit.enabled == True).count()
 
 
+def enabled_subreddits():
+    return [s for s in Subreddit.select().where(Subreddit.enabled == True)]
+
+
 def avg_value(column_name, round_by=0):
     if column_name == 'max_frequency':
         column = Subreddit.max_frequency

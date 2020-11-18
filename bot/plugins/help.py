@@ -33,6 +33,7 @@ there some commands can be used to edit its settings
 
 *Other operations with subreddits*
 /subs: list all subreddits
+/dailyposts: list all subreddits sorted by number of daily posts
 /links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \

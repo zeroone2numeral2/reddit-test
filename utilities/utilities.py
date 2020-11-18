@@ -349,7 +349,7 @@ def message_link(message):
         return 'https://t.me/c/{}/{}'.format(str(message.chat.id)[3:], message.message_id)
 
 
-def split_text(strings_list, join_by: str=False):
+def split_text(strings_list, join_by: str = False):
     avg_string_len = sum(map(len, strings_list)) / len(strings_list)
     list_items_per_message = int(MAX_MESSAGE_LENGTH / avg_string_len)
 
