@@ -350,7 +350,9 @@ def message_link(message):
 
 
 def split_text(strings_list, join_by: str = False):
-    avg_string_len = sum(map(len, strings_list)) / len(strings_list)
+    total_len = sum(map(len, strings_list))
+    avg_string_len = total_len / len(strings_list)
+
     list_items_per_message = int(MAX_MESSAGE_LENGTH / avg_string_len)
 
     for i in range(0, len(strings_list), list_items_per_message):
@@ -358,6 +360,22 @@ def split_text(strings_list, join_by: str = False):
             yield strings_list[i:i + list_items_per_message]
         else:
             yield join_by.join(strings_list[i:i + list_items_per_message])
+
+
+def split_text_2(strings_list, join_by: str = '\n'):
+    text_chunk = ''
+    for i in range(0, len(strings_list)):
+        new_text_chunk = '{}{}{}'.format(text_chunk, join_by, strings_list[i])
+
+        if len(new_text_chunk) < MAX_MESSAGE_LENGTH:
+            # if the new chunk is shorter, approve it and continue with the next item
+            text_chunk = new_text_chunk
+            continue
+        else:
+            # if the new chunk is longer, return the previous text chunk and use the new item as the beginning of
+            # another text chunk
+            yield text_chunk
+            text_chunk = strings_list[i]
 
 
 def media_size(messages) -> [int, None]:
