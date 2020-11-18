@@ -33,8 +33,8 @@ def subs_daily_posts_list(update: Update, _):
         )
         strings.append(string)
 
-    for text in u.split_text(strings, join_by='\n'):
-        update.message.reply_html(text)
+    for texts in u.text_messages_from_list(strings):
+        update.message.reply_html('\n'.join(texts))
 
 
 mainbot.add_handler(CommandHandler(['dailyposts'], subs_daily_posts_list))
