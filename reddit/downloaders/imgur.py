@@ -16,8 +16,14 @@ class MediaTooMuch(Exception):
     pass
 
 
+class FakeImgur:
+    def __init__(self, *args, **kwargs):
+        self.fake = True
+
+
 class Imgur(ImgurClient):
     def __init__(self, keys_from_config=False, *args, **kwargs):
+        self.fake = False
 
         try:
             if not keys_from_config:

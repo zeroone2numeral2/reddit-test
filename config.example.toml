@@ -14,13 +14,6 @@ workers = 0
 api_id = 12345 # CHANGEME
 api_hash = "" # CHANGEME
 
-[[reddit]]
-client_id = "" # CHANGEME
-client_secret = "" # CHANGEME
-user_agent = "" # CHANGEME
-username = "" # CHANGEME
-password = "" # CHANGEME
-
 [jobs]
 posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
 
@@ -36,6 +29,8 @@ default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
 
 [imgur]
+# get your secret keys from here: https://api.imgur.com/oauth2/addclient
+# more info: https://github.com/faustocarrera/imgur-python/wiki
 id = "" # CHANGEME
 secret = "" # CHANGEME
 

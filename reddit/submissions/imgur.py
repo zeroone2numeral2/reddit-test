@@ -6,6 +6,7 @@ from telegram import ParseMode
 from imgurpython.helpers.error import ImgurClientError
 
 from ..downloaders import Imgur as ImgurDownloader
+from ..downloaders import FakeImgur as FakeImgurDownloader
 from .base_submission import BaseSenderType
 from .image import ImageHandler
 from .gif import GifHandler
@@ -14,7 +15,11 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
-imgur = ImgurDownloader(config.imgur.id, config.imgur.secret)
+if all([config.imgur.id, config.imgur.secret]):
+    imgur = ImgurDownloader(config.imgur.id, config.imgur.secret)
+else:
+    logger.info('imgur credentials not set in config.toml')
+    imgur = FakeImgurDownloader()
 
 
 class ImgurGalleryHandler(BaseSenderType):
@@ -26,6 +31,9 @@ class ImgurGalleryHandler(BaseSenderType):
 
     @staticmethod
     def test(submission):
+        if isinstance(imgur, FakeImgurDownloader):
+            return False
+
         url_lower = submission.url.lower()
         if 'imgur.com/gallery' in url_lower or 'imgur.com/a/' in url_lower:
             return True
@@ -84,6 +92,9 @@ class ImgurNonDirectUrl:
 
     @classmethod
     def test(cls, submission):
+        if isinstance(imgur, FakeImgurDownloader):
+            return False
+
         url = submission.url
         url_lower = url.lower()
         if re.search(ImgurNonDirectUrlImageHandler.NON_DIRECT_URL_PATTERN, url_lower):

@@ -1,6 +1,7 @@
 from .generic import Downloader
 from .generic import FileTooBig
 from .imgur import Imgur
+from .imgur import FakeImgur
 from .vreddit import VRedditDownloader
 from .gfycat import GfycatDownloader
 from .image import ImageDownloader
