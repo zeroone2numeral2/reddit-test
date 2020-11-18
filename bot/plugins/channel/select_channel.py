@@ -30,3 +30,16 @@ def channel_selection_handler(update: Update, context: CallbackContext):
     update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
 
     return Status.CHANNEL_SELECTED
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_waiting_channel_selection_unknown_message(update: Update, context: CallbackContext):
+    logger.info('WAITING_CHANNEL_SELECTION: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel to cancel the operation"
+    )
+
+    return Status.WAITING_CHANNEL_SELECTION
