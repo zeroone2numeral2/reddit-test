@@ -43,13 +43,13 @@ def creds_stats(update, context):
         int(actual_total / reddit.general.stress_threshold_hours / 60),
     )
 
-    text += '\n<b>Actual job time</b>: {} (requests: {}/hour, {}/minute)'.format(
+    text += '\n\n<b>Actual job time</b>: {} (requests: {}/hour, {}/minute)'.format(
         u.pretty_seconds(total_duration),
         int(actual_total / (total_duration / 60**2)),
         int(actual_total / (total_duration / 60)),
     )
 
-    text += '\n<b>Enabled subreddits</b>: {ec}\n  avg frequency: {freq}\n  avg limit: {lim}\n  avg number of msgs to post: {nop}\n  avg number of daily posts: {tnop}\n  avg fetched submissions (daily): {dfs}'.format(
+    text += '\n\n<b>Enabled subreddits</b>: {ec}\n  avg frequency: {freq}\n  avg limit: {lim}\n  avg number of msgs to post: {nop}\n  avg number of daily posts: {tnop}\n  avg fetched submissions (daily): {dfs}'.format(
         ec=subreddits.enabled_count(),
         freq=u.elapsed_smart_compact(subreddits.avg_value('max_frequency') * 60),
         lim=subreddits.avg_limit(),
