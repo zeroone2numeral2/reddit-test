@@ -4,7 +4,6 @@ from peewee import Case
 
 from ..models import Subreddit
 from ..models import Channel
-from utilities import u
 
 
 def subreddits_invite_link() -> [Channel]:
@@ -41,8 +40,7 @@ def avg_value(column_name, round_by=0):
     items = [int(s.name) for s in query]
 
     average = sum(items) / len(items)
-    print(average, u.proper_round(average))
-    return u.proper_round(average, round_by)
+    return round(average, round_by)
 
 
 def avg_limit():
@@ -64,4 +62,4 @@ def avg_daily_fetched_submissions(round_by=2):
     items = [s.daily_fetched_submissions for s in query]
 
     average = sum(items) / len(items)
-    return u.proper_round(average, round_by)
+    return round(average, round_by)
