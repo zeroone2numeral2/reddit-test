@@ -9,6 +9,7 @@ from telegram.ext import ConversationHandler
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.plugins.commands import Command
 from bot.customfilters import CustomFilters
 from database.models import Subreddit
 from bot.markups import Keyboard
@@ -260,13 +261,13 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 
 
 mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler(['sub', 'subreddit'], on_sub_command)],
+    entry_points=[CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command)],
     states={
         Status.SUBREDDIT_SELECT: [
             MessageHandler(Filters.text & Filters.regex(r'^(\d+).*') & ~Filters.command, on_subreddit_selected),
             MessageHandler(Filters.text & ~Filters.command, on_subreddit_selected_wrong),
-            CommandHandler(['cancel'], on_cancel_command),
-            MessageHandler(Filters.all, on_subreddit_select_unknown_message),
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_subreddit_select_unknown_message),
         ],
         Status.WAITING_SUBREDDIT_CONFIG_ACTION: [
             MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, subconfig_on_entry_change),
@@ -285,27 +286,27 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['cancel'], on_fake_cancel_command),
-            MessageHandler(Filters.all, on_waiting_subreddit_config_action_unknown_message),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_subreddit_config_action_unknown_message),
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_channel_wrong),
-            CommandHandler(['cancel'], on_cancel_command),
-            MessageHandler(Filters.all, on_setchannel_waiting_channel_unknown_message),
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_setchannel_waiting_channel_unknown_message),
         ],
         Status.SUBREDDIT_WAITING_STYLE: [
             MessageHandler(Filters.text & ~Filters.command, subconfig_on_style_selected),
-            CommandHandler(['cancel'], on_cancel_command),
-            MessageHandler(Filters.all, on_subreddit_waiting_style_unknown_message),
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_subreddit_waiting_style_unknown_message),
         ],
         Status.CLONE_WAITING_ORIGIN_SUBREDDIT: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_origin_subreddit_selected),
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_subreddit_wrong),
-            CommandHandler(['cancel'], on_cancel_command),
-            MessageHandler(Filters.all, on_clone_waiting_origin_subreddit_unknown_message),
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_clone_waiting_origin_subreddit_unknown_message),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },
-    fallbacks=[CommandHandler(['exit'], on_exit_command)],
+    fallbacks=[CommandHandler(Command.EXIT, on_exit_command)],
     conversation_timeout=15 * 60
 ))
