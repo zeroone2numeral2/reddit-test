@@ -28,7 +28,7 @@ def channel_selection_handler(update: Update, context: CallbackContext):
     reply_markup = Keyboard.from_list(channels_list)
     update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
 
-    return Status.CHANNEL_SELECTED
+    return Status.WAITING_CHANNEL_SELECTION
 
 
 @d.restricted

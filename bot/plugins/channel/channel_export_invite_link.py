@@ -17,7 +17,7 @@ from bot.plugins.commands import Command
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
-from .select_channel import channel_selection_handler
+from .select_channel import channel_selection_handler, on_waiting_channel_selection_unknown_message
 from utilities import u
 from utilities import d
 
@@ -100,20 +100,7 @@ def on_export_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
-    return Status.CHANNEL_SELECTED
-
-
-@d.restricted
-@d.failwithmessage
-@d.logconversation
-def on_channel_selected_unknown_message(update: Update, context: CallbackContext):
-    logger.info('CHANNEL_SELECTED: unknown action')
-
-    update.message.reply_html(
-        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel to cancel the operation"
-    )
-
-    return Status.CHANNEL_SELECTED
+    return Status.WAITING_CHANNEL_SELECTION
 
 
 @d.restricted
@@ -130,10 +117,10 @@ mainbot.add_handler(CallbackQueryHandler(on_link_revoke_button, pattern=r'linkre
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['exportlink'], callback=channel_selection_handler)],
     states={
-        Status.CHANNEL_SELECTED: [
+        Status.WAITING_CHANNEL_SELECTION: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), callback=on_export_channel_selected),
             MessageHandler(~Filters.command & Filters.all, callback=on_export_channel_selected_incorrect),
-            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_channel_selected_unknown_message),
+            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_channel_selection_unknown_message),
         ]
     },
     fallbacks=[

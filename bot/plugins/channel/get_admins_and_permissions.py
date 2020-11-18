@@ -11,7 +11,7 @@ from bot.conversation import Status
 from bot.customfilters import CustomFilters
 from bot.plugins.commands import Command
 from bot.markups import Keyboard
-from .select_channel import channel_selection_handler
+from .select_channel import channel_selection_handler, on_waiting_channel_selection_unknown_message
 from utilities import u
 from utilities import d
 
@@ -53,19 +53,6 @@ def on_channel_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
-def on_channel_selected_unknown_message(update: Update, context: CallbackContext):
-    logger.info('CHANNEL_SELECTED: unknown action')
-
-    update.message.reply_html(
-        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel to cancel the operation"
-    )
-
-    return Status.CHANNEL_SELECTED
-
-
-@d.restricted
-@d.failwithmessage
 def on_cancel(update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
@@ -76,9 +63,9 @@ def on_cancel(update, _):
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler(command=['getadmins'], callback=channel_selection_handler)],
     states={
-        Status.CHANNEL_SELECTED: [
+        Status.WAITING_CHANNEL_SELECTION: [
             MessageHandler(Filters.text & ~Filters.command, callback=on_channel_selected),
-            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_channel_selected_unknown_message),
+            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_channel_selection_unknown_message),
         ]
     },
     fallbacks=[

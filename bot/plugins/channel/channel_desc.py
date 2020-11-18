@@ -19,7 +19,7 @@ from bot.markups import InlineKeyboard
 from database.models import Channel
 from database.models import Subreddit
 from reddit import Reddit, creds
-from .select_channel import channel_selection_handler
+from .select_channel import channel_selection_handler, on_waiting_channel_selection_unknown_message
 from utilities import u
 from utilities import d
 from config import config
@@ -266,20 +266,7 @@ def on_setdesc_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
-    return Status.CHANNEL_SELECTED
-
-
-@d.restricted
-@d.failwithmessage
-@d.logconversation
-def on_channel_selected_unknown_message(update: Update, context: CallbackContext):
-    logger.info('CHANNEL_SELECTED: unknown action')
-
-    update.message.reply_html(
-        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel to cancel the operation"
-    )
-
-    return Status.CHANNEL_SELECTED
+    return Status.WAITING_CHANNEL_SELECTION
 
 
 @d.restricted
@@ -294,10 +281,10 @@ def on_setdesc_cancel(update, _):
 mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler('updatepin', channel_selection_handler)],
     states={
-        Status.CHANNEL_SELECTED: [
+        Status.WAITING_CHANNEL_SELECTION: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_setdesc_channel_selected),
             MessageHandler(~Filters.command & Filters.all, on_setdesc_channel_selected_incorrect),
-            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_channel_selected_unknown_message),
+            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_channel_selection_unknown_message),
         ]
     },
     fallbacks=[
