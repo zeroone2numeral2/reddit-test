@@ -147,13 +147,16 @@ class Subreddit(peewee.Model):
     def daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
         n = 0
 
+        quiet_hours_start = self.quiet_hours_start or Subreddit.quiet_hours_start.default
+        quiet_hours_end = self.quiet_hours_end or Subreddit.quiet_hours_end.default
+
         hours_of_reduced_frequency = 0
         if self.quiet_hours_demultiplier != 1.0:
-            if self.quiet_hours_start > self.quiet_hours_end:
-                hours_of_reduced_frequency += 24 - self.quiet_hours_start
-                hours_of_reduced_frequency += self.quiet_hours_end + 1
-            elif self.quiet_hours_start < self.quiet_hours_end:
-                hours_of_reduced_frequency += self.quiet_hours_end - self.quiet_hours_start + 1
+            if quiet_hours_start > quiet_hours_end:
+                hours_of_reduced_frequency += 24 - quiet_hours_start
+                hours_of_reduced_frequency += quiet_hours_end + 1
+            elif quiet_hours_start < quiet_hours_end:
+                hours_of_reduced_frequency += quiet_hours_end - quiet_hours_start + 1
 
         hours_of_normal_frequency = 24 - hours_of_reduced_frequency
 
