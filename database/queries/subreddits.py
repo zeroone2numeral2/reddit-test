@@ -4,6 +4,7 @@ from peewee import Case
 
 from ..models import Subreddit
 from ..models import Channel
+from utilities import u
 
 
 def subreddits_invite_link() -> [Channel]:
@@ -28,7 +29,7 @@ def enabled_count():
     return Subreddit.select().where(Subreddit.enabled == True).count()
 
 
-def avg_value(column_name):
+def avg_value(column_name, round_by=0):
     if column_name == 'max_frequency':
         column = Subreddit.max_frequency
     elif column_name == 'number_of_posts':
@@ -40,22 +41,26 @@ def avg_value(column_name):
     items = [int(s.name) for s in query]
 
     average = sum(items) / len(items)
-    return int(average)
+    return u.proper_round(average, round_by)
 
 
 def avg_limit():
-    column = Case(None, [((Subreddit.limit == None), Subreddit.limit.default)], Subreddit.limit)
-
-    query = Subreddit.select(column).where(Subreddit.enabled == True)
-    items = [int(s.name) for s in query]
+    query = (
+        Subreddit.select(
+            Subreddit.limit,
+            Case(None, [((Subreddit.limit == None), Subreddit.limit.default)], Subreddit.limit).alias('actual_limit')
+        )
+        .where(Subreddit.enabled == True)
+    )
+    items = [s.actual_limit for s in query]
 
     average = sum(items) / len(items)
     return int(average)
 
 
-def avg_daily_fetched_submissions():
+def avg_daily_fetched_submissions(round_by=2):
     query = Subreddit.select().where(Subreddit.enabled == True)
     items = [s.daily_fetched_submissions for s in query]
 
     average = sum(items) / len(items)
-    return int(average)
+    return u.proper_round(average, round_by)
