@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 if all([config.imgur.id, config.imgur.secret]):
     imgur = ImgurDownloader(config.imgur.id, config.imgur.secret)
 else:
-    logger.info('imgur credentials not set in config.toml')
+    logger.warning('imgur credentials not set in config.toml')
     imgur = FakeImgurDownloader()
 
 
