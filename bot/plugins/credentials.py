@@ -54,7 +54,7 @@ def creds_stats(update, context):
         u.elapsed_smart_compact(subreddits.avg_value('max_frequency') * 60),
         subreddits.avg_limit(),
         subreddits.avg_daily_fetched_submissions(),
-        subreddits.avg_value('number_of_posts'),
+        subreddits.avg_value('number_of_posts', 2),
     )
 
     update.message.reply_html(text)
