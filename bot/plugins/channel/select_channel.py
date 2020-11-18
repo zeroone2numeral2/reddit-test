@@ -3,7 +3,6 @@ import logging
 from telegram import Update
 from telegram.ext import ConversationHandler, CallbackContext
 
-from bot import mainbot
 from bot.conversation import Status
 from bot.markups import Keyboard
 from database.models import Channel
