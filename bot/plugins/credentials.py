@@ -33,7 +33,7 @@ def creds_stats(update, context):
     actual_total = total * 2  # submission + comments
     total_duration = jobs.total_duration(['stream'], hours=reddit.general.stress_threshold_hours)
 
-    text += '\n\n<b>Total</b>: {}*2: {}'.format(
+    text += '\n\n<b>Total requests</b>: {}*2: {}'.format(
         total,
         actual_total
     )
