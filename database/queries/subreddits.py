@@ -57,9 +57,9 @@ def avg_limit():
     return int(average)
 
 
-def avg_daily_fetched_submissions(round_by=2):
+def avg_int_property(property_name, round_by=2):
     query = Subreddit.select().where(Subreddit.enabled == True)
-    items = [s.daily_fetched_submissions for s in query]
+    items = [getattr(s, property_name) for s in query]
 
     average = sum(items) / len(items)
     return round(average, round_by)

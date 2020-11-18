@@ -144,7 +144,7 @@ class Subreddit(peewee.Model):
         except peewee.DoesNotExist:
             return None
 
-    def daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
+    def expected_number_of_daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
         n = 0
 
         quiet_hours_start = self.quiet_hours_start or Subreddit.quiet_hours_start.default
@@ -199,15 +199,23 @@ class Subreddit(peewee.Model):
 
     @property
     def daily_fetched_submissions(self):
+        """number of submissions we expect to fetch every day based on the frequency and limit"""
+
         limit = self.limit or Subreddit.limit.default
 
         # daily_posts: how many times we are supposed to fetch the subreddit's frontepage
-        daily_fetches = self.daily_posts(days=1, ignore_number_of_posts=True)
+        daily_fetches = self.expected_number_of_daily_posts(days=1, ignore_number_of_posts=True)
 
         # this number actually might be lower in some cases (eg. no new submissions to post)
         # requests_number = daily_fetches * self.number_of_posts  # submissions * comments
 
         return daily_fetches * limit
+
+    @property
+    def daily_posts(self):
+        """number of submissions we expect to post eevry day"""
+
+        return self.expected_number_of_daily_posts(days=1)
 
     @classmethod
     def set_field(cls, field, value):
