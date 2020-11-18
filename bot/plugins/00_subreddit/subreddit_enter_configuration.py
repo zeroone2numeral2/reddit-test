@@ -163,10 +163,76 @@ def on_fake_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
+def on_waiting_subreddit_config_action_unknown_message(update: Update, context: CallbackContext):
+    logger.info('WAITING_SUBREDDIT_CONFIG_ACTION: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Use /exit to exit the subreddit configuration mode",
+        # reply_markup=Keyboard.REMOVE
+    )
+
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_subreddit_select_unknown_message(update: Update, context: CallbackContext):
+    logger.info('SUBREDDIT_SELECT: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a subreddit or use /cancel"
+    )
+
+    return Status.SUBREDDIT_SELECT
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_setchannel_waiting_channel_unknown_message(update: Update, context: CallbackContext):
+    logger.info('SETCHANNEL_WAITING_CHANNEL: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel"
+    )
+
+    return Status.SETCHANNEL_WAITING_CHANNEL
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_subreddit_waiting_style_unknown_message(update: Update, context: CallbackContext):
+    logger.info('SUBREDDIT_WAITING_STYLE: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a style or use /cancel"
+    )
+
+    return Status.SUBREDDIT_WAITING_STYLE
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_clone_waiting_origin_subreddit_unknown_message(update: Update, context: CallbackContext):
+    logger.info('CLONE_WAITING_ORIGIN_SUBREDDIT: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select an origin subreddit or use /cancel"
+    )
+
+    return Status.CLONE_WAITING_ORIGIN_SUBREDDIT
+
+
+@d.restricted
+@d.failwithmessage
 @d.pass_subreddit
 @d.logconversation
 def on_exit_command(update: Update, context: CallbackContext, subreddit=None):
-    logger.debug('/end command')
+    logger.debug('/exit command')
 
     text = 'Exited configuration mode for {s.r_name} (channel: {s.ch_title})'.format(s=subreddit)
 
@@ -200,6 +266,7 @@ mainbot.add_handler(ConversationHandler(
             MessageHandler(Filters.text & Filters.regex(r'^(\d+).*') & ~Filters.command, on_subreddit_selected),
             MessageHandler(Filters.text & ~Filters.command, on_subreddit_selected_wrong),
             CommandHandler(['cancel'], on_cancel_command),
+            MessageHandler(Filters.all, on_subreddit_select_unknown_message),
         ],
         Status.WAITING_SUBREDDIT_CONFIG_ACTION: [
             MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, subconfig_on_entry_change),
@@ -218,20 +285,24 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['cancel'], on_fake_cancel_command),
+            MessageHandler(Filters.all, on_waiting_subreddit_config_action_unknown_message),
         ],
         Status.SETCHANNEL_WAITING_CHANNEL: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_selected_channel),
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_channel_wrong),
             CommandHandler(['cancel'], on_cancel_command),
+            MessageHandler(Filters.all, on_setchannel_waiting_channel_unknown_message),
         ],
         Status.SUBREDDIT_WAITING_STYLE: [
             MessageHandler(Filters.text & ~Filters.command, subconfig_on_style_selected),
             CommandHandler(['cancel'], on_cancel_command),
+            MessageHandler(Filters.all, on_subreddit_waiting_style_unknown_message),
         ],
         Status.CLONE_WAITING_ORIGIN_SUBREDDIT: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+'), subconfig_on_origin_subreddit_selected),
             MessageHandler(~Filters.command & Filters.all, subconfig_on_selected_subreddit_wrong),
             CommandHandler(['cancel'], on_cancel_command),
+            MessageHandler(Filters.all, on_clone_waiting_origin_subreddit_unknown_message),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)]
     },
