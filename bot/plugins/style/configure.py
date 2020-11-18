@@ -9,6 +9,8 @@ from peewee import IntegrityError
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.plugins.commands import Command
+from bot.customfilters import CustomFilters
 from database.models import Subreddit
 from database.models import Style
 from database.queries import styles
@@ -340,6 +342,33 @@ def on_entry_change(update: Update, _, style: Style):
     return Status.WAITING_STYLE_CONFIG_ACTION
 
 
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_waiting_style_config_action_unknown_message(update: Update, context: CallbackContext):
+    logger.info('WAITING_STYLE_CONFIG_ACTION: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Use /exit to exit the style configuration mode",
+        # reply_markup=Keyboard.REMOVE
+    )
+
+    return Status.WAITING_STYLE_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+def on_style_select_unknown_message(update: Update, context: CallbackContext):
+    logger.info('STYLE_SELECT: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a style or use /exit to exit the style configuration mode"
+    )
+
+    return Status.STYLE_SELECT
+
+
 mainbot.add_handler(ConversationHandler(
     entry_points=[
         CommandHandler(['style'], on_style_command),
@@ -348,7 +377,8 @@ mainbot.add_handler(ConversationHandler(
     states={
         Status.STYLE_SELECT: [
             MessageHandler(Filters.text & ~Filters.command, on_style_selected),
-            CommandHandler(['cancel'], on_cancel_command)
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_style_select_unknown_message),
         ],
         Status.WAITING_STYLE_CONFIG_ACTION: [
             CommandHandler(['remove', 'rem'], on_remove_command),
@@ -358,11 +388,12 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['style'], on_style_command),
             CommandHandler(['newstyle'], on_newstyle_command),
             CommandHandler(['rename'], on_rename_command),
-            CommandHandler(['cancel'], on_fake_cancel_command),
+            CommandHandler(Command.CANCEL, on_fake_cancel_command),
             MessageHandler(Filters.text & ~Filters.command, on_entry_change),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_style_config_action_unknown_message),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)],
     },
-    fallbacks=[CommandHandler(['exit'], on_exit_command)],
+    fallbacks=[CommandHandler(Command.EXIT, on_exit_command)],
     conversation_timeout=15 * 60
 ))
