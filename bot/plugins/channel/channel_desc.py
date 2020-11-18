@@ -12,6 +12,8 @@ from telegram.error import TelegramError
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.customfilters import CustomFilters
+from bot.plugins.commands import Command
 from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
@@ -269,6 +271,19 @@ def on_setdesc_channel_selected_incorrect(update, _):
 
 @d.restricted
 @d.failwithmessage
+@d.logconversation
+def on_channel_selected_unknown_message(update: Update, context: CallbackContext):
+    logger.info('CHANNEL_SELECTED: unknown action')
+
+    update.message.reply_html(
+        "Sorry, I don't understand what you're trying to do. Select a channel or use /cancel to cancel the operation"
+    )
+
+    return Status.CHANNEL_SELECTED
+
+
+@d.restricted
+@d.failwithmessage
 def on_setdesc_cancel(update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
@@ -282,9 +297,10 @@ mainbot.add_handler(ConversationHandler(
         Status.CHANNEL_SELECTED: [
             MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_setdesc_channel_selected),
             MessageHandler(~Filters.command & Filters.all, on_setdesc_channel_selected_incorrect),
+            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_channel_selected_unknown_message),
         ]
     },
     fallbacks=[
-        CommandHandler('cancel', on_setdesc_cancel)
+        CommandHandler(Command.CANCEL, on_setdesc_cancel)
     ]
 ))
