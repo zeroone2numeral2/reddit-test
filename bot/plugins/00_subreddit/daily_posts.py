@@ -26,10 +26,12 @@ def subs_daily_posts_list(update: Update, _):
 
     strings = list()
     for i, sub in enumerate(enabled_subreddits):
-        string = '{}. {} ({})'.format(
-            i + 1,
-            sub.r_name_with_id,
-            sub.daily_posts
+        string = '{i}. {name} ({posts}, freq: {freq}, limit: {limit})'.format(
+            i=i + 1,
+            name=sub.r_name_with_id,
+            posts=sub.daily_posts,
+            freq=u.elapsed_smart_compact(sub.max_frequency),
+            limit=sub.limit or Subreddit.limit.default
         )
         strings.append(string)
 
