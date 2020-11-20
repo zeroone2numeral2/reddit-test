@@ -379,13 +379,4 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
 
 
 def stream_job(context) -> JobResult:
-    print('DIO BOIA LADRO CANE')
     logger.info('entering job callback')
-
-    while True:
-        yield check_posts(context)
-        time.sleep(3)
-
-        while settings.jobs_locked():
-            logger.info('jobs are locked, sleeping for 20 seconds...')
-            time.sleep(20)
