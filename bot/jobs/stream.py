@@ -357,7 +357,10 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
                 logger.info('still %d active pools', executor.get_pool_usage())
             except TimeoutError:
                 subreddit_task.request_interrupt()
-                future.cancel()  # doesn't work apparently, the callback can't be stopped. We can only request its interruption
+
+                # future.cancel() doesn't work apparently, the callback can't be stopped. We can only request
+                # its interruption. future.cancelled() will be False even after calling future.cancel()
+                future.cancel()
 
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
 
