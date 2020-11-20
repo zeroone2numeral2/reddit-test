@@ -324,6 +324,8 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
     max_workers = (os.cpu_count() or 1) * 2
     logger.info('max_workers: %d', max_workers)
 
+    executor_timeout = config.jobs.stream.interval * 60
+
     stream_job_result = JobResult()
 
     with MonitoredThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -349,7 +351,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
             try:
                 logger.info('waiting result for %s (id: %d)...', future.subreddit.name, future.subreddit.id)
 
-                subreddit_job_result = future.result(timeout=10 * 60)
+                subreddit_job_result = future.result(timeout=executor_timeout)
                 stream_job_result += subreddit_job_result
 
                 logger.info('still %d active pools', executor.get_pool_usage())
@@ -359,7 +361,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
 
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
 
-                text = '{} - pool executor timeout - {} seconds'.format(error_hashtag, 10 * 60)
+                text = '{} - pool executor timeout - {} seconds'.format(error_hashtag, executor_timeout)
                 bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
             except Exception:
                 error_description = future.exception()
