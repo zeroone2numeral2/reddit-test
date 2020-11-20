@@ -359,7 +359,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
 
                 logger.error('r/%s: processing took more than the job interval (cancelled: %s)', future.subreddit.name, future.cancelled())
 
-                text = '{} - pool executor timeout - %d seconds'.format(error_hashtag, 10 * 60)
+                text = '{} - pool executor timeout - {} seconds'.format(error_hashtag, 10 * 60)
                 bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
             except Exception:
                 error_description = future.exception()
