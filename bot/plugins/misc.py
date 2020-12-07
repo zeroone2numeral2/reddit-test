@@ -12,6 +12,7 @@ from database.models import PostResume
 from database.models import Job
 from database.models import SubredditJob
 from database.models import RedditRequest
+from database.queries import settings
 from database.queries.channels import get_channels
 from utilities import u
 from utilities import d
@@ -82,7 +83,9 @@ def json_command(update, _):
 def cleandb_command(update, _):
     logger.info('/cleandb command')
 
-    update.message.reply_text('This operation might take some time...')
+    update.message.reply_text('This operation might take some time (jobs will be locked)...')
+
+    settings.lock_jobs()
 
     days = 31
 
@@ -101,6 +104,9 @@ def cleandb_command(update, _):
 
     lines = ['{}: {}'.format(k, v) for k, v in deleted_records.items()]
     update.message.reply_html('Days: {}\n<code>{}</code>'.format(days, '\n'.join(lines)))
+
+    settings.unlock_jobs()
+    update.message.reply_text('Jobs unlocked')
 
 
 mainbot.add_handler(CommandHandler(['getconfig'], getconfig_command))
