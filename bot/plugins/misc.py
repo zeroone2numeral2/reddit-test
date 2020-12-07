@@ -82,6 +82,8 @@ def json_command(update, _):
 def cleandb_command(update, _):
     logger.info('/cleandb command')
 
+    update.message.reply_text('This operation might take some time...')
+
     days = 31
 
     deleted_records = dict(
