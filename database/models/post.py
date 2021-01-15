@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 from playhouse.shortcuts import model_to_dict
 
@@ -8,10 +10,11 @@ from .channel import Channel
 
 class Post(peewee.Model):
     submission_id = peewee.CharField(null=False)
-    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts')
-    channel = peewee.ForeignKeyField(Channel, backref='posts')
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts', on_delete='NO ACTION')
+    channel = peewee.ForeignKeyField(Channel, backref='posts', on_delete='NO ACTION')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
+    uploaded_bytes = peewee.IntegerField(null=True)
     sent_message = peewee.CharField(null=True)
 
     class Meta:
@@ -44,6 +47,10 @@ class Post(peewee.Model):
             return None
 
     @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.posted_at < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows
+
+    def to_dict(self):
+        return model_to_dict(self)
 

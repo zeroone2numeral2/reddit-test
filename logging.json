@@ -12,6 +12,11 @@
             "formatter": "subreddit",
             "level": "DEBUG"
         },
+        "console_info": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "INFO"
+        },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "standard",
@@ -27,7 +32,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/conversations.log",
+            "filename": "logs/conversations/conversations.log",
             "backupCount": 20
         },
         "file_dispatcher_handlers": {
@@ -36,8 +41,35 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/handlers.log",
+            "filename": "logs/handlers/handlers.log",
             "backupCount": 20
+        },
+        "file_youtube_dl": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/youtubedl/youtubedl.log",
+            "backupCount": 30
+        },
+        "file_reddit_galleries": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/reddit_galleries.log",
+            "backupCount": 30
+        },
+        "file_prawcore": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "encoding": "utf8",
+            "maxBytes": 1048576,
+            "filename": "logs/praw/praw.log",
+            "backupCount": 25
         },
         "file_jobs": {
             "class": "logging.handlers.RotatingFileHandler",
@@ -45,7 +77,7 @@
             "level": "DEBUG",
             "encoding": "utf8",
             "maxBytes": 1048576,
-            "filename": "logs/jobs.log",
+            "filename": "logs/jobs/jobs.log",
             "backupCount": 20
         },
         "timed_file_test": {
@@ -80,6 +112,21 @@
             "propagate": false,
             "level": "DEBUG"
         },
+        "ytdl": {
+            "handlers": ["console", "file_youtube_dl"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
+        "reddit_galleries": {
+            "handlers": ["console", "file_reddit_galleries"],
+            "propagate": false,
+            "level": "INFO"
+        },
+        "prawcore": {
+            "handlers": ["console_info", "file_prawcore"],
+            "propagate": false,
+            "level": "DEBUG"
+        },
         "": {
             "handlers": [
                 "console",
@@ -98,9 +145,6 @@
             "level": "WARNING"
         },
         "peewee": {
-            "level": "WARNING"
-        },
-        "prawcore": {
             "level": "WARNING"
         },
         "PIL": {

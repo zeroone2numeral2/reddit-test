@@ -1,20 +1,37 @@
-from utilities import u
+
+from math import floor
 
 
 def main():
-    class s:
-        enabled = True
-        enabled_resume = False
+    def elapsed_smart_compact(seconds):
+        if seconds < 1:
+            return '{}s'.format(seconds)
 
-        quiet_hours_start = 22
-        quiet_hours_end = 6
-        quiet_hours_demultiplier = 0.0
+        string = ''
 
-        number_of_posts = 1
+        days = seconds // (3600 * 24)
+        seconds %= 3600 * 24
+        print('', 'days', days, 'seconds', seconds)
+        if days:
+            string += '{}d'.format(days)
 
-        max_frequency = 115
+        hours = seconds // 3600
+        seconds %= 3600
+        print('', 'hours', hours, 'seconds', seconds)
+        if hours:
+            string += '{}h'.format(hours)
 
-    u.number_of_daily_posts(s, print_debug=True)
+        minutes = seconds // 60
+        seconds %= 60
+        print('', 'minutes', minutes, 'seconds', seconds)
+        if minutes:
+            string += '{}m'.format(minutes)
+
+        return string
+
+    print(elapsed_smart_compact(2 * 60))
+    print(elapsed_smart_compact(61 * 60))
+    print(elapsed_smart_compact(2981 * 60))
 
 
 if __name__ == '__main__':

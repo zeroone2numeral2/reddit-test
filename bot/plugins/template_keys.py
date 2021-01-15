@@ -23,7 +23,7 @@ def on_placeholders_command(update, context):
     sender = None
     subreddit = Subreddit.select().get()
     slogger.set_subreddit(subreddit)
-    for submission in reddit.iter_submissions(subreddit.name, limit=1):
+    for position, submission in reddit.iter_submissions(subreddit.name, limit=1):
         sender = Sender(context.bot, subreddit, submission, slogger)
         break
     

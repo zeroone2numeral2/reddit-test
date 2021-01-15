@@ -25,5 +25,3 @@ class Ignored(peewee.Model):
             return True
         except peewee.DoesNotExist:
             return False
-    
-

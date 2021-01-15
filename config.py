@@ -8,3 +8,4 @@ class AttrDict(dict):
 
 
 config = toml.load('config.toml', AttrDict)
+reddit = toml.load('reddit.toml', AttrDict)

@@ -1,3 +1,5 @@
+import datetime
+
 import peewee
 
 from database import db
@@ -6,17 +8,17 @@ from .channel import Channel
 
 
 class PostResume(peewee.Model):
-    submission_id = peewee.CharField(null=False)
-    subreddit = peewee.ForeignKeyField(Subreddit, backref='posts')
-    channel = peewee.ForeignKeyField(Channel, backref='posts')
+    submission_id = peewee.CharField(null=False, primary_key=True)
+    subreddit = peewee.ForeignKeyField(Subreddit, backref='resume_posts', on_delete='NO ACTION')
+    channel = peewee.ForeignKeyField(Channel, backref='resume_posts', on_delete='NO ACTION')
     message_id = peewee.IntegerField(null=True)
     posted_at = peewee.DateTimeField(null=True)
+    uploaded_bytes = peewee.IntegerField(null=True)
     sent_message = peewee.CharField(null=True)
 
     class Meta:
         table_name = 'resume_posts'
         database = db
-        primary_key = peewee.CompositeKey('submission_id', 'subreddit')
         indexes = (
             (('submission_id', 'subreddit_id', 'channel'), True),
         )
@@ -34,4 +36,9 @@ class PostResume(peewee.Model):
             return bool(cls.get(cls.subreddit == subreddit, cls.submission_id == submission_id))
         except peewee.DoesNotExist:
             return False
+
+    @classmethod
+    def delete_old(cls, days=31):
+        query = cls.delete().where(cls.posted_at < (datetime.datetime.utcnow() - datetime.timedelta(days=days)))
+        return query.execute()  # returns the number of deleted rows
 

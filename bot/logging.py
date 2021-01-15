@@ -2,11 +2,34 @@ import json
 from logging.handlers import RotatingFileHandler
 import logging.config
 import os
+import pytz
+import datetime
 
-with open('logging.json', 'r') as f:
-    logging_config = json.load(f)
+from config import config
 
-logging.config.dictConfig(logging_config)
+
+class TIMEZONE:
+    europe_rome = pytz.timezone('Europe/Rome')
+
+
+def load_logging_config(config_file='logging.json', set_rome_timezone=bool(config.get('europe_rome_timezone', True))):
+    with open(config_file, 'r') as f:
+        logging_config = json.load(f)
+
+    logging.config.dictConfig(logging_config)
+
+    def custom_timezone_converter(*args):
+        utc_dt = pytz.utc.localize(datetime.datetime.utcnow())
+        converted = utc_dt.astimezone(TIMEZONE.europe_rome)
+        return converted.timetuple()
+
+    if set_rome_timezone:
+        logging.Formatter.converter = custom_timezone_converter
+
+    return logging_config
+
+
+logging_config = load_logging_config()
 
 
 def get_subreddit_logger(subreddit, dir_path='logs/subreddits/'):
@@ -117,7 +140,7 @@ class SubredditLog:
 
 
 class SubredditLogNoAdapter(logging.Logger):
-    def __init__(self, dir_path='logs/subreddits/', subreddit=None):
+    def __init__(self, subreddit=None, dir_path='logs/subreddits/'):
         super(SubredditLogNoAdapter, self).__init__('subreddit')
 
         # NOT NEEDED ANYMORE
@@ -136,7 +159,7 @@ class SubredditLogNoAdapter(logging.Logger):
 
         self._rotating_file_handler_kwargs = dict(
             maxBytes=1048576,
-            backupCount=10,
+            backupCount=20,
             encoding="utf8"
         )
 
@@ -177,6 +200,8 @@ class SubredditLogNoAdapter(logging.Logger):
 
         self.subreddit_id = subreddit.id
         self.subreddit_name = subreddit.name
+        self._dir_path = os.path.join(self._dir_path, '{}_{}'.format(subreddit.name, subreddit.id))
+        self._ensure_dir(self._dir_path)
         self._file_path = os.path.join(self._dir_path, '{s.subreddit_name}_{s.subreddit_id}.log'.format(s=self))
 
         self._extra = {'sub_id': subreddit.id, 'sub_name': subreddit.name}
@@ -193,6 +218,11 @@ class SubredditLogNoAdapter(logging.Logger):
             kwargs["extra"] = self._extra
 
         super()._log(*args, **kwargs)  # noqa
+
+    @staticmethod
+    def _ensure_dir(dir_path):
+        if not os.path.isdir(dir_path):
+            os.mkdir(dir_path)
 
 
 slogger = SubredditLogNoAdapter()

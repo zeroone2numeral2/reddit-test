@@ -6,11 +6,81 @@ from pathlib import Path
 
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, ConversationHandler
+from telegram import BotCommand
 
 logger = logging.getLogger(__name__)
 
 
+class DummyJob:
+    def __init__(self, name):
+        self.name = name
+
+
+class DummyContext:
+    def __init__(self, updater, job_name):
+        self.updater = updater
+        self.job = DummyJob(job_name)
+
+
 class RedditBot(Updater):
+    COMMANDS_LIST = [
+        BotCommand('help', 'see help message'),
+        BotCommand('addchannel', 'add a channel'),
+        BotCommand('remchannel', 'remove a channel'),
+        BotCommand('updatechannels', 'update the channels metadata'),
+        BotCommand('updatepin', 'update a channel pinned message'),
+        BotCommand('members', 'top 25 channels by members count'),
+        BotCommand('exit', 'exit from a configuration mode'),
+        BotCommand('updatelist', 'update the list of channels in the main channel'),
+        BotCommand('addsub', 'add a subreddit'),
+        BotCommand('addmulti', 'add a multireddit'),
+        BotCommand('sub', 'manage a subreddit'),
+        BotCommand('subs', 'list the subreddits'),
+        BotCommand('dailyposts', 'list the subreddits sorted by daily posts'),
+        BotCommand('submissions', 'see the current sub frontpage based on its settings'),
+        BotCommand('sdict', 'get the submission dict of the last post in that subreddit'),
+        BotCommand('links', 'get a list of channels with their invite link'),
+        BotCommand('icon', 'get a subreddit icon'),
+        BotCommand('dailyavg', 'last weeks average number of posts/day'),
+        BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
+        BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
+        BotCommand('remlogs', 'remove all log files'),
+        BotCommand('duration', 'show average stats for recent jobs'),
+        BotCommand('lastjob', 'see when each job ran for the last time'),
+        BotCommand('ph', 'list template placeholders'),
+        BotCommand('getconfig', 'get the current config'),
+        BotCommand('remdl', 'empty the downloads directory'),
+        BotCommand('db', 'get the db file'),
+        BotCommand('now', 'see the current server time'),
+        BotCommand('try', 'try to post a submission by id'),
+        BotCommand('updateytdl', 'update youtubedl'),
+        BotCommand('info', 'get all the subreddit properties'),
+        BotCommand('remove', 'remove the subreddit'),
+        BotCommand('setchannel', 'set the subreddit channel'),
+        BotCommand('clonefrom', 'set the subreddit db values by copying them from another subreddit'),
+        BotCommand('setchannelicon', 'set the subreddit channel icon using the sub icon'),
+        BotCommand('disable', 'disable the subreddit (all jobs)'),
+        BotCommand('savetop', 'save the top posts based on the current sorting and limit'),
+        BotCommand('removetop', 'remove the saved top submissions'),
+        BotCommand('gettop', 'see what we have currently saved as top submission'),
+        BotCommand('cleandb', 'delete old rows from some tables'),
+        BotCommand('newstyle', 'create a new style'),
+        BotCommand('style', 'manage styles (or a subreddit style)'),
+        BotCommand('setstyle', 'set the subreddit style'),
+        BotCommand('default', 'make a style the default style'),
+        BotCommand('exportlink', 'revoke and regenerate a channel invite link'),
+        BotCommand('subreddits', 'get the subreddit using a style'),
+        BotCommand('getstyle', 'see the current subreddit style'),
+        BotCommand('rename', 'rename a style'),
+        BotCommand('lockstatus', 'see whether jobs are locked or not'),
+        BotCommand('lock', 'lock jobs'),
+        BotCommand('unlock', 'unlock jobs'),
+        BotCommand('freq', 'change a subreddit frequency'),
+        BotCommand('getadmins', 'get the admins list of a channel and the bot permissions'),
+        BotCommand('credstats', 'get the usage of each account/client credentials'),
+        BotCommand('credsusagemode', 'get or change the usage mode'),
+    ]
+
     @staticmethod
     def _load_manifest(manifest_path):
         if not manifest_path:
@@ -81,7 +151,14 @@ class RedditBot(Updater):
             logger.debug('importing module: %s', import_path)
             importlib.import_module(import_path)
 
-    def run(self, *args, **kwargs):
+    def set_commands(self):
+        self.bot.set_my_commands(self.COMMANDS_LIST)
+
+    def run(self, *args, set_commands=True, **kwargs):
+        if set_commands:
+            logger.info('updating commands list...')
+            self.set_commands()
+
         logger.info('running as @%s', self.bot.username)
         self.start_polling(*args, **kwargs)
         self.idle()

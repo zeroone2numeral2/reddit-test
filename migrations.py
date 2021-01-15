@@ -8,6 +8,7 @@ import sqlite3
 from playhouse.migrate import *
 
 from const import *
+from database.models import Style
 from config import config
 
 logging.basicConfig(format='[%(asctime)s][%(name)s] %(message)s', level=logging.INFO)
@@ -42,9 +43,28 @@ def main(database_path):
     public = peewee.BooleanField(default=True)
     is_multireddit = peewee.BooleanField(default=False)
     multireddit_owner = peewee.CharField(null=True)
-    url_button = peewee.BooleanField(default=False)
-    comments_button = peewee.BooleanField(default=False)
-    template_no_url = peewee.CharField(null=True)
+    youtube_download = peewee.BooleanField(default=False)
+    youtube_download_max_duration = peewee.IntegerField(default=180)
+    notified_on = peewee.DateTimeField(null=True)
+    min_upvote_perc = peewee.IntegerField(null=True)
+    uploaded_bytes = peewee.IntegerField(null=True)
+    reddit_account = peewee.CharField(null=True)
+    reddit_client = peewee.CharField(null=True)
+    ignore_flairless = peewee.BooleanField(default=False, null=True)
+    style = peewee.ForeignKeyField(Style, backref='subreddit', on_delete='RESTRICT', null=True)
+    template_resume = peewee.CharField(null=True)
+    template_caption = peewee.CharField(null=True)
+    default = peewee.BooleanField(default=False)
+    template_override = peewee.CharField(null=True)
+    canceled = peewee.BooleanField(default=False)
+    subreddits_count = peewee.IntegerField(null=True)
+    subreddits_progress = peewee.IntegerField(null=True)
+    template_no_url_for_captions = peewee.BooleanField(default=True)
+    force_text = peewee.BooleanField(default=False, null=True)
+    respect_external_content_flag = peewee.BooleanField(default=False, null=True)
+    ignore_if_older_than = peewee.IntegerField(default=3 * 24 * 60, null=True)
+    weight = peewee.IntegerField(default=1)
+    description = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -72,8 +92,6 @@ def main(database_path):
         migrator.add_column('subreddits', 'resume_template', resume_template),
         # 20190404 (resume_last_posted_submission_dt)
         migrator.add_column('subreddits', 'resume_last_posted_submission_dt', resume_last_posted_submission_dt),
-        # 20190410 (rename resume_template to template_resume)
-        migrator.rename_column('subreddits', 'resume_template', 'template_resume'),
         # 20190411 (drop not null)
         migrator.drop_not_null('subreddits', 'template_matrix'),
         # 20190430
@@ -99,13 +117,59 @@ def main(database_path):
         # 20190923
         migrator.add_column('subreddits', 'is_multireddit', is_multireddit),
         migrator.add_column('subreddits', 'multireddit_owner', multireddit_owner),
-        # 20191121
-        migrator.add_column('subreddits', 'url_button', url_button),
-        migrator.add_column('subreddits', 'comments_button', comments_button),
-        # 20200228
-        migrator.add_column('subreddits', 'template_no_url', template_no_url),
         # 20200428
         migrator.drop_not_null('subreddits', 'channel_id'),
+        # 20200513
+        migrator.add_column('subreddits', 'youtube_download', youtube_download),
+        migrator.add_column('subreddits', 'youtube_download_max_duration', youtube_download_max_duration),
+        # 20200520
+        migrator.add_column('channels', 'notified_on', notified_on),
+        # 20200617
+        migrator.add_column('subreddits', 'min_upvote_perc', min_upvote_perc),
+        # 20200618
+        migrator.add_column('jobs', 'uploaded_bytes', uploaded_bytes),
+        migrator.add_column('posts', 'uploaded_bytes', uploaded_bytes),
+        migrator.add_column('resume_posts', 'uploaded_bytes', uploaded_bytes),
+        # 20200619
+        migrator.add_column('subreddits', 'reddit_account', reddit_account),
+        migrator.add_column('subreddits', 'reddit_client', reddit_client),
+        # 20200714 ignore_flairless
+        migrator.add_column('subreddits', 'ignore_flairless', ignore_flairless),
+        # 20200715
+        migrator.add_column('subreddits', 'style', style),
+        migrator.add_column('subreddits', 'style_id', peewee.IntegerField(null=True)),  # workaround, line above doesn't work
+        migrator.add_column('styles', 'template_resume', template_resume),
+        migrator.add_column('styles', 'template_caption', template_caption),
+        migrator.add_column('styles', 'default', default),
+        migrator.drop_column('subreddits', 'template_resume'),
+        migrator.drop_column('subreddits', 'template'),
+        migrator.drop_column('subreddits', 'template_no_url'),
+        migrator.drop_column('subreddits', 'url_button'),
+        migrator.drop_column('subreddits', 'url_button_template'),
+        migrator.drop_column('subreddits', 'comments_button'),
+        migrator.drop_column('subreddits', 'comments_button_template'),
+        migrator.drop_column('subreddits', 'send_medias'),
+        migrator.drop_column('subreddits', 'webpage_preview'),
+        # 20200716
+        migrator.add_column('subreddits', 'template_override', template_override),
+        # 20200910
+        migrator.add_column('jobs', 'canceled', canceled),
+        migrator.add_column('jobs', 'subreddits_count', subreddits_count),
+        migrator.add_column('jobs', 'subreddits_progress', subreddits_progress),
+        # 20200911
+        migrator.add_column('styles', 'template_no_url_for_captions', template_no_url_for_captions),
+        # 20201015
+        migrator.drop_column('styles', 'send_medias', template_no_url_for_captions),
+        migrator.add_column('subreddits', 'force_text', force_text),
+        migrator.add_column('subreddits', 'respect_external_content_flag', respect_external_content_flag),
+        # 20201020
+        migrator.rename_column('subreddits', 'last_posted_submission_dt', 'last_post_datetime'),
+        # 20201106
+        migrator.add_column('subreddits', 'ignore_if_older_than', ignore_if_older_than),
+        # 20201113
+        migrator.add_column('reddit_requests', 'weight', weight),
+        # 20201116
+        migrator.add_column('reddit_requests', 'description', description),
     ]
 
     logger.info('Starting migration....')

@@ -12,7 +12,7 @@ class FileTooBig(Exception):
 
 
 class Downloader:
-    def __init__(self, url, thumbnail_url='', identifier=random.randint(1, 10000), max_size=MaxSize.BOT_API):
+    def __init__(self, url, thumbnail_url='', identifier=random.randint(1, 10000), max_size=MaxSize.BOT_API, logger=None):
         self._url = url
         self._identifier = identifier
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
@@ -21,6 +21,7 @@ class Downloader:
         self._thumbnail_path = ''
         self._thumbnail_bo = None
         self._max_size = max_size
+        self.subreddit_logger = logger
 
         if self._thumbnail_url == 'nsfw':
             self._thumbnail_url = 'https://t3.ftcdn.net/jpg/01/77/29/28/240_F_177292812_asUGEDiieLfHjKx9DxTBI50vsS9iZwi0.jpg '

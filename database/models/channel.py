@@ -13,6 +13,7 @@ class Channel(peewee.Model):
     added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     invite_link = peewee.CharField(null=True)
     public = peewee.BooleanField(default=True)  # non-public channels are not posted with /updatelist
+    notified_on = peewee.DateTimeField(null=True)  # when the channel has been posted in the index channel
 
     class Meta:
         table_name = 'channels'
@@ -21,9 +22,8 @@ class Channel(peewee.Model):
     def __repr__(self):
         return '<Channel {}: {}>'.format(self.channel_id, self.title)
 
-    @classmethod
-    def to_dict(cls):
-        return model_to_dict(cls)
+    def to_dict(self):
+        return model_to_dict(self)
 
     @classmethod
     def exists(cls, channel_id):

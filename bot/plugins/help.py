@@ -9,14 +9,15 @@ logger = logging.getLogger('handler')
 
 HELP_STRING = """\
 *Adding and removing channels*
-/addchannel: save a channel (if already saved: updates its info)
+/addchannel `<username>`: save a channel (if already saved: updates its info)
 /remchannel: remove a channel
 
 *Managing channels*
-/updatetitles: update all the chat titles in the database
-/setdesc: pin a pre-formatted message that describes the channel
+/updatechannels: update all the channels (ttitle, username, invite link) in the database
+/updatepin: pin a pre-formatted message that describes the channel
 /members: top 25 channels by number of members
 /exportlink: revoke and regenerate the invite link of a channel
+/getadmins: get the admins list of a channel, and the bot permissions in that channel
 
 *Managing the channels catalogue*
 /updatelist: update the catalogue channel's subreddits list
@@ -32,22 +33,23 @@ there some commands can be used to edit its settings
 
 *Other operations with subreddits*
 /subs: list all subreddits
-/d `[subreddit name] [hot|top|new]`: get the last n submission from the subreddit, sorted by hot/top/new
-/sdict `[subreddit]`: get the submission dict of the last post in that subreddit
+/dailyposts: list all subreddits sorted by number of daily posts
 /links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
 
 *Logs*
-/getlog `<log number>`: get the main log file. Pass a number as argument if you want to get an archived log file
-/loglines: get the date of the first line of every log file in the logs directory
 /remffmpeglogs: remove ffmpeg log files
-/remsubslogs: remove the single subreddits' log files
+/remlogs: remove log files
 
 *Jobs*
-/force `[job name]`: force that job
-/duration `<job name>`: show the duration of the most recent 100 jobs executed. Can be filtered by job name
+/duration `<hours>`: show the average data of all jobs in the last week (or hours, if passed)
+/lastjob: see when each job has ended the last time
+
+*Styles*
+/newstyle `[name]`: create a new style
+/style `<filter>`: configure a style
 
 *Misc*
 /ph: list template's placeholders
@@ -57,7 +59,12 @@ subreddit name
 /now `<utc hour>`: get current UTC time and its localizations. If an hour is passed, times will be \
 calculated at that UTC hour
 /try `[submission id]`: get the submission with that id (the subreddit doesn't need to be saved in the db)
+/sdict `[submission id]`: get the submission dict of the submission (the subreddit doesn't need to be saved in the db)
 forward a message posted by the bot in a channel: get that submission's dict
+/credstats: get the usage of each account/client credentials
+/credsusagemode: get (or change by passing a number) the usage mode of accounts and clients. Accepted values: 1, 2, 3, 0
+/updateytdl: update the youtube-dl package using pip
+/cleandb: delete old rows from some tables
 """
 
 

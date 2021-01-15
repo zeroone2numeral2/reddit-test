@@ -5,6 +5,7 @@ log = -1001141547703 # CHANGEME
 admins = [23646077] # CHANGEME
 index = "reddit_mirrors" # telegram channel with the channels index
 send_images_by_url = true # true: always try to send images by url first, download them only when sendign by url fails
+testing = false # subreddit added when this is 'true' will be considered testing subreddits (the bot won't save posted submissions)
 
 [pyrogram]
 enabled = true
@@ -18,19 +19,7 @@ posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
 
 [jobs.stream] # in minutes
 interval = 10
-first = 0
-
-[jobs.resume] # in minutes
-interval = 50
-first = 0
-
-[praw]
-client_id = "" # CHANGEME
-client_secret = "" # CHANGEME
-user_agent = "" # CHANGEME
-username = "" # CHANGEME, only needed for private and quarantined subs
-password = "" # CHANGEME, only needed for private and quarantined subs
-submissions_limit = 25
+first = 0.5 # 0: "interval" will be used instead
 
 [sqlite]
 filename = "db.sqlite"
@@ -39,14 +28,14 @@ filename = "db.sqlite"
 default_max_frequency = 115 # minutes (one post every two hours)
 default_sorting = "hot"
 
-[quiet_hours]
-start = 21 # in UTC. Rome: UTC + 1/2
-end = 6 # in UTC. Rome: UTC + 1/2
-
 [imgur]
+# get your secret keys from here: https://api.imgur.com/oauth2/addclient
+# more info: https://github.com/faustocarrera/imgur-python/wiki
 id = "" # CHANGEME
 secret = "" # CHANGEME
 
 [ffmpeg]
 cmd_path = "ffmpeg"
 cmd_path_windows = "ffmpeg.exe" # needs the .exe binary file in the main project directory
+
+europe_rome_timezone = false

@@ -3,12 +3,14 @@ import re
 import time
 from functools import wraps
 
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import ConversationHandler, CallbackContext
 
 from bot.conversation import get_status_description
+from bot.jobs.common.jobresult import JobResult
 from database.models import Subreddit
 from database.models import Job
+from database.models import SubredditJob
 from database import db
 from sqlite3 import OperationalError
 from utilities import u
@@ -53,7 +55,11 @@ def failwithmessage(func):
             Log.handler.error('error during handler execution: %s', str(e), exc_info=exc_info)
             # logger.error('error during handler execution: %s', str(e), exc_info=exc_info)  # also log to main log file
             text = 'An error occurred while processing the message: <code>{}</code>'.format(u.escape(str(e)))
-            update.message.reply_html(text)
+
+            if update.callback_query:
+                update.callback_query.message.reply_html(text)
+            else:
+                update.message.reply_html(text)
 
     return wrapped
 
@@ -90,38 +96,45 @@ def knownsubreddit(func):
 def log_start_end_dt(func):
     @wraps(func)
     def wrapped(context: CallbackContext, *args, **kwargs):
-        job_start_dt = u.now()
+        job_start_dt = u.now(utc=False)
         Log.job.info('%s job started at %s', context.job.name, job_start_dt.strftime(READABLE_TIME_FORMAT))
 
         with db.atomic():
             job_row = Job(name=context.job.name, start=job_start_dt)
+            job_row.save()
 
-        job_result = func(context, *args, **kwargs)
-        job_row.posted_messages = int(job_result)
+        job_result: JobResult = func(context, job_row, *args, **kwargs)  # (posted_messages, uploaded_bytes)
+        job_row.posted_messages = job_result.posted_messages
+        job_row.uploaded_bytes = job_result.posted_bytes
+        job_row.canceled = job_result.canceled
 
-        job_end_dt = u.now()
+        job_end_dt = u.now(utc=False)
         job_row.end = job_end_dt
 
         elapsed_seconds = (job_end_dt - job_start_dt).total_seconds()
-        job_row.duration = elapsed_seconds
+        job_row.duration = int(elapsed_seconds)
 
         with db.atomic():
             job_row.save()
 
         Log.job.info(
-            '%s job ended at %s (elapsed seconds: %d (%s))',
+            '%s job ended at %s (elapsed seconds: %d (%s), posted messages: %d, uploaded data: %s)',
             context.job.name,
             job_start_dt.strftime(READABLE_TIME_FORMAT),
             elapsed_seconds,
-            u.pretty_seconds(elapsed_seconds)
+            u.pretty_seconds(elapsed_seconds),
+            job_row.posted_messages,
+            u.human_readable_size(job_row.uploaded_bytes)
         )
 
         if elapsed_seconds > (config.jobs[context.job.name].interval * 60):
-            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}))'.format(
+            text = '#maxfreq <{}> took more than its interval (frequency: {} min, elapsed: {} sec ({}), posted {} messages and uploaded {})'.format(
                 context.job.name,
                 config.jobs[context.job.name].interval,
                 round(elapsed_seconds, 2),
-                u.pretty_seconds(elapsed_seconds)
+                u.pretty_seconds(elapsed_seconds),
+                job_row.posted_messages,
+                u.human_readable_size(job_row.uploaded_bytes)
             )
             Log.job.warning(text)
             context.bot.send_message(config.telegram.log, text)
@@ -129,6 +142,44 @@ def log_start_end_dt(func):
         return job_result
 
     return wrapped
+
+
+def time_subreddit_processing(job_name=None):
+    def real_decorator(func):
+        @wraps(func)
+        def wrapped(task, subreddit: Subreddit, bot: Bot, *args, **kwargs):
+            processing_start_dt = u.now(utc=False)
+
+            with db.atomic():
+                job_row = SubredditJob(subreddit=subreddit, subreddit_name=subreddit.name, job_name=job_name, start=processing_start_dt)
+                job_row.save()
+
+            result: JobResult = func(task, subreddit, bot, *args, **kwargs)
+
+            processing_end_dt = u.now(utc=False)
+            job_row.end = processing_end_dt
+
+            job_row.posted_messages = result.posted_messages
+            job_row.uploaded_bytes = result.posted_bytes
+
+            elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
+            job_row.duration = elapsed_seconds
+
+            with db.atomic():
+                job_row.save()
+
+            Log.job.info(
+                'processing time for %s : %d seconds (%s)',
+                subreddit.r_name_with_id,
+                elapsed_seconds,
+                u.pretty_seconds(round(elapsed_seconds, 2))
+            )
+
+            return result
+
+        return wrapped
+
+    return real_decorator
 
 
 def deferred_handle_lock(func):
@@ -159,7 +210,7 @@ def deferred_handle_lock(func):
     return wrapped
 
 
-def pass_subreddit(answer=False):
+def pass_subreddit_old(answer=False):
     def real_decorator(func):
         @wraps(func)
         def wrapped(update, context, *args, **kwargs):
@@ -179,6 +230,24 @@ def pass_subreddit(answer=False):
         return wrapped
 
     return real_decorator
+
+
+def pass_subreddit(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        subreddit = context.user_data['data']['subreddit']
+        return func(update, context, subreddit=subreddit, *args, **kwargs)
+
+    return wrapped
+
+
+def pass_style(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        style = context.user_data['data']['style']
+        return func(update, context, style=style, *args, **kwargs)
+
+    return wrapped
 
 
 def logconversation(func):

@@ -4,7 +4,6 @@ import subprocess
 import urllib.request
 import urllib.error
 
-from bot.logging import slogger
 from reddit.downloaders import Downloader
 from utilities import u
 from config import config
@@ -23,12 +22,13 @@ class FfmpegTimeoutError(Exception):
     pass
 
 
-class VReddit(Downloader):
+class VRedditDownloader(Downloader):
     def __init__(self, url, *args, **kwargs):
         Downloader.__init__(self, url, *args, **kwargs)
         self._file_path = os.path.join('downloads', '{}.mp4'.format(self._identifier))
 
-        self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
+        # self._url_audio = re.sub(r'\/DASH_.*$', '/audio', self._url)
+        self._url_audio = re.sub(r'/DASH_.*$', '/DASH_audio.mp4', self._url)
         self._audio_size = 0
         self._audio_path = os.path.normpath(os.path.join('downloads', '{}.mp3'.format(self._identifier)))
         self._video_path = self._file_path
@@ -62,7 +62,7 @@ class VReddit(Downloader):
             urllib.request.urlopen(self._url_audio)
             return False
         except urllib.error.HTTPError as e:
-            slogger.error('audio url validity check: the url is forbidden (%s)', str(e))
+            self.subreddit_logger.error('audio url validity check: the url is forbidden (%s)', str(e))
             return True
 
     def remove(self, keep_thumbnail=False):
@@ -81,12 +81,12 @@ class VReddit(Downloader):
             paths.append(self._thumbnail_path)
 
         for file_path in paths:
-            slogger.info('removing %s...', file_path)
+            self.subreddit_logger.info('removing %s...', file_path)
             try:
                 os.remove(file_path)
-                slogger.info('...%s removed', file_path)
+                self.subreddit_logger.info('...%s removed', file_path)
             except FileNotFoundError:
-                slogger.error('...%s not removed: FileNotFoundError', file_path)
+                self.subreddit_logger.error('...%s not removed: FileNotFoundError', file_path)
 
     def download_audio(self):
         u.download_file_stream(self._url_audio, self._audio_path)
@@ -103,8 +103,8 @@ class VReddit(Downloader):
         )
 
         dt_filename = u.now(string='%Y%m%d_%H%M')
-        stdout_filepath = os.path.join('logs', 'ffmpeg', 'ffmpeg_stdout_{}.log'.format(dt_filename))
-        stderr_filepath = os.path.join('logs', 'ffmpeg', 'ffmpeg_stderr_{}.log'.format(dt_filename))
+        stdout_filepath = os.path.join('logs', 'ffmpeg', '{}_ffmpeg_stdout_{}.log'.format(self._identifier, dt_filename))
+        stderr_filepath = os.path.join('logs', 'ffmpeg', '{}_ffmpeg_stderr_{}.log'.format(self._identifier, dt_filename))
 
         stdout_file = open(stdout_filepath, 'wb')
         stderr_file = open(stderr_filepath, 'wb')
@@ -115,15 +115,15 @@ class VReddit(Downloader):
         sp = subprocess.Popen(cmd, shell=True, stdout=stdout_file, stderr=stderr_file)
         try:
             ffmpeg_start = u.now()
-            slogger.debug('ffmpeg command execution started: %s', u.now(string=TIME_FORMAT))
+            self.subreddit_logger.debug('ffmpeg command execution started: %s', u.now(string=TIME_FORMAT))
 
             sp.communicate(timeout=timeout)
 
             ffmpeg_end = u.now()
             ffmpeg_elapsed_seconds = (ffmpeg_end - ffmpeg_start).seconds
-            slogger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
+            self.subreddit_logger.debug('ffmpeg command execution ended: %s (elapsed time (seconds): %d)', u.now(string=TIME_FORMAT), ffmpeg_elapsed_seconds)
         except subprocess.TimeoutExpired:
-            slogger.error(
+            self.subreddit_logger.error(
                 'subprocess.TimeoutExpired (%d seconds) error during ffmpeg command execution (see %s, %s)',
                 timeout,
                 str(stdout_filepath),
@@ -132,7 +132,7 @@ class VReddit(Downloader):
 
             # we have to kill the subprocess, otherwise ffmpeg will keep the file open and we will not be able to delete it
             # https://docs.python.org/3/library/subprocess.html#subprocess.Popen.communicate
-            slogger.info('killing subprocess (pid: %d)...', sp.pid)
+            self.subreddit_logger.info('killing subprocess (pid: %d)...', sp.pid)
             sp.kill()
 
             stdout_file.close()

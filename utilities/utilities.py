@@ -19,13 +19,15 @@ from PIL import Image
 from playhouse.shortcuts import model_to_dict
 from telegram import MAX_MESSAGE_LENGTH
 
-from database.models import Subreddit
+from config import config
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_FORMAT = '%d/%m/%Y %H:%M'
 VALID_SUB_REGEX = r'(?:\/?r\/)?([\w-]{3,22})'
 STRING_TO_MINUTES_REGEX = re.compile(r'(?:(?P<hours>\d+)\s*h)?\s*(?:(?P<minutes>\d+)\s*m?)?$', re.I)
+
+tz_DEFAULT = pytz.timezone('Europe/Rome')
 
 
 def html_escape(string):
@@ -36,15 +38,14 @@ def now(string=False, utc=True):
     """Return a datetime object or a string
 
     :param string: True -> returns current datetime as a string (default format), str -> use the passed string as format
-    :param timezone_aware: 'Europe/Rome' time
-    :param utc: UTC time. Has the priority over 'timezone_aware'
+    :param utc: UTC time
     :return: datetime/string
     """
 
     if utc:
         now = datetime.datetime.utcnow()
     else:
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz_DEFAULT)
 
     if not string:
         return now
@@ -68,8 +69,12 @@ def dotted(number):
     return re.sub(r'(\d)(?=(\d{3})+(?!\d))', r'\1.', '{}'.format(number))
 
 
-def model_dict(model_instance, plain_formatted_string=False):
+def model_dict(model_instance, plain_formatted_string=False, ignore_keys: [list, tuple] = None):
     model_instance_dict = model_to_dict(model_instance)
+    if ignore_keys:
+        for key in ignore_keys:
+            model_instance_dict.pop(key, None)
+
     model_instance_dict = OrderedDict(sorted(model_instance_dict.items()))
     if not plain_formatted_string:
         return model_instance_dict
@@ -127,24 +132,57 @@ def pretty_seconds(n_seconds):
     return string
 
 
-def elapsed_time_smart(seconds):
+def elapsed_time_smart(seconds, compact=False):
+    if compact:
+        days_string = 'd'
+        hours_string = 'h'
+        minutes_string = 'm'
+    else:
+        days_string = ' day'
+        hours_string = ' hour'
+        minutes_string = ' minute'
+
     elapsed_minutes = seconds / 60
     elapsed_hours = elapsed_minutes / 60
     elapsed_days = elapsed_hours / 24
 
     # "n hours ago" if hours > 0, else "n minutes ago"
     if elapsed_days >= 1:
-        string = '{} day'.format(floor(elapsed_days))
-        if elapsed_days >= 2:
+        string = '{}{}'.format(floor(elapsed_days), days_string)
+        if elapsed_days >= 2 and not compact:
             string += 's'
     elif elapsed_hours >= 1:
-        string = '{} hour'.format(floor(elapsed_hours))
-        if elapsed_hours >= 2:
+        string = '{}{}'.format(floor(elapsed_hours), hours_string)
+        if elapsed_hours >= 2 and not compact:
             string += 's'
     else:
-        string = '{} minute'.format(floor(elapsed_minutes))
-        if elapsed_minutes >= 2:
+        string = '{}{}'.format(floor(elapsed_minutes), minutes_string)
+        if elapsed_minutes >= 2 and not compact:
             string += 's'
+
+    return string
+
+
+def elapsed_smart_compact(seconds):
+    if seconds < 1:
+        return '{}s'.format(seconds)
+
+    string = ''
+
+    days = seconds // (3600 * 24)
+    seconds %= 3600 * 24
+    if days:
+        string += '{}d'.format(int(days))
+
+    hours = seconds // 3600
+    seconds %= 3600
+    if hours:
+        string += '{}h'.format(int(hours))
+
+    minutes = seconds // 60
+    seconds %= 60
+    if minutes:
+        string += '{}m'.format(int(minutes))
 
     return string
 
@@ -211,6 +249,7 @@ def resize_thumbnail(image_path):
 
 
 def remove_file_safe(file_path):
+    # noinspection PyBroadException
     try:
         os.remove(file_path)
     except:
@@ -238,6 +277,39 @@ def guess_mimetype(file_path):
     result = guess_type(file_path, strict=True)
     
     return result[0]
+
+
+def to_ascii(string, replace_spaces=False, lowercase=False):
+    # return string.encode("ascii", errors="ignore").decode()
+    result_string = re.sub(r'[^\w]', '', string)
+
+    if replace_spaces:
+        result_string = result_string.replace(' ', '_')
+
+    if lowercase:
+        result_string = result_string.lower()
+
+    return result_string
+
+
+def string_to_python_val(value):
+    if value in ('true', 'True'):
+        logger.info('value is True')
+        value = True
+    elif value in ('false', 'False'):
+        logger.info('value is False')
+        value = False
+    elif value in ('none', 'None'):
+        logger.info('value is None')
+        value = None
+    elif re.search(r'^\d+$', value, re.I):
+        logger.info('value is int')
+        value = int(value)
+    elif re.search(r'^\d+\.\d+$', value, re.I):
+        logger.info('value is float')
+        value = float(value)
+
+    return value
 
 
 class FileWriter:
@@ -277,8 +349,10 @@ def message_link(message):
         return 'https://t.me/c/{}/{}'.format(str(message.chat.id)[3:], message.message_id)
 
 
-def split_text(strings_list, join_by: str=False):
-    avg_string_len = sum(map(len, strings_list)) / len(strings_list)
+def split_text(strings_list, join_by: str = False):
+    total_len = sum(map(len, strings_list))
+    avg_string_len = total_len / len(strings_list)
+
     list_items_per_message = int(MAX_MESSAGE_LENGTH / avg_string_len)
 
     for i in range(0, len(strings_list), list_items_per_message):
@@ -288,51 +362,77 @@ def split_text(strings_list, join_by: str=False):
             yield join_by.join(strings_list[i:i + list_items_per_message])
 
 
-def number_of_daily_posts(s: Subreddit, print_debug=False):
-    n = 0
+def split_text_2(strings_list, join_by: str = '\n'):
+    text_chunk = ''
+    for i in range(0, len(strings_list)):
+        new_text_chunk = '{}{}{}'.format(text_chunk, join_by, strings_list[i])
 
-    if s.enabled:
-        hours_of_reduced_frequency = 0
-        if s.quiet_hours_demultiplier != 1.0:
-            if s.quiet_hours_start > s.quiet_hours_end:
-                hours_of_reduced_frequency += 24 - s.quiet_hours_start
-                hours_of_reduced_frequency += s.quiet_hours_end + 1
-            elif s.quiet_hours_start < s.quiet_hours_end:
-                hours_of_reduced_frequency += s.quiet_hours_end - s.quiet_hours_start + 1
+        if len(new_text_chunk) < MAX_MESSAGE_LENGTH:
+            # if the new chunk is shorter, approve it and continue with the next item
+            text_chunk = new_text_chunk
+            continue
+        else:
+            # if the new chunk is longer, return the previous text chunk and use the new item as the beginning of
+            # another text chunk
+            yield text_chunk
+            text_chunk = strings_list[i]
 
-        hours_of_normal_frequency = 24 - hours_of_reduced_frequency
 
-        minutes_of_normal_frequencies = hours_of_normal_frequency * 60
-        minutes_of_reduced_frequency = hours_of_reduced_frequency * 60
+def media_size(messages) -> [int, None]:
+    # media.file_size is ok for pyrogram types too
+    if not isinstance(messages, list):
+        messages = [messages]
 
-        # number of messages during normal hours
-        n_during_normal_hours = (minutes_of_normal_frequencies / s.max_frequency) * s.number_of_posts
+    size = 0
+    for message in messages:
+        if message.video:
+            size += message.video.file_size
+        elif message.document:
+            size += message.document.file_size
+        elif message.animation:
+            size += message.animation.file_size
+        elif message.audio:
+            size += message.audio.file_size
+        elif message.photo:
+            size += message.photo[-1].file_size
 
-        n_during_quiet_hours = 0
-        if minutes_of_reduced_frequency:
-            # number of messages during quiet hours
-            if s.quiet_hours_demultiplier != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
-                reduced_frequency = s.max_frequency * s.quiet_hours_demultiplier
-                n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency) * s.number_of_posts
+    return size
 
-        n += n_during_normal_hours + n_during_quiet_hours
 
-    if s.enabled_resume:
-        n += s.number_of_posts
+def channel_invite_link(channel, return_on_no_link=None, hyperlink_html: [str, None] = None):
+    if channel.username:
+        channel_url = 'https://t.me/' + channel.username
+    elif channel.invite_link:
+        channel_url = channel.invite_link
+    else:
+        return return_on_no_link
 
-    n_rounded = round(n)
+    if not hyperlink_html:
+        return channel_url
+    else:
+        return '<a href="{}">{}</a>'.format(channel_url, html_escape(hyperlink_html))
 
-    if print_debug:
-        print('hours_of_normal_frequency', hours_of_normal_frequency)
-        print('minutes_of_normal_frequencies', minutes_of_normal_frequencies)
-        print()
-        print('hours_of_reduced_frequency', hours_of_reduced_frequency)
-        print('minutes_of_reduced_frequency', minutes_of_reduced_frequency)
-        print()
-        print('n_during_normal_hours', n_during_normal_hours)
-        print('n_during_quiet_hours', n_during_quiet_hours)
-        print()
-        print('n', n)
-        print('n_rounded', n_rounded)
 
-    return n_rounded
+def get_subreddit_from_userdata(user_data: dict):
+    if not user_data.get('data', None):
+        return
+    else:
+        return user_data['data'].get('subreddit', None)
+
+
+def proper_round(num, dec=0):
+    num = str(num)[:str(num).index('.') + dec + 2]
+
+    if num[-1] >= '5':
+        return float(num[:-2 - (not dec)] + str(int(num[-2 - (not dec)]) + 1))
+
+    return float(num[:-1])
+
+
+def text_messages_from_list(strings_list: list):
+    total_len = sum(map(len, strings_list))
+    avg_len = total_len / len(strings_list)
+    elements_per_msg = int(MAX_MESSAGE_LENGTH / avg_len)
+
+    for i in range(0, len(strings_list), elements_per_msg):
+        yield strings_list[i:i + elements_per_msg]

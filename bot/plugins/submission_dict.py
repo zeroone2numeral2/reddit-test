@@ -6,27 +6,45 @@ from telegram.ext import CommandHandler
 from telegram import MAX_MESSAGE_LENGTH
 
 from bot import mainbot
-from bot.logging import slogger
 from utilities import d
-from database.models import Subreddit
+from database.models import Subreddit, Style
+from database.models import Channel
 from reddit import Sender
-from reddit import reddit
+from reddit import Reddit, creds
 
 logger = logging.getLogger('handler')
 
 
 @d.restricted
 @d.failwithmessage
-@d.knownsubreddit
+# @d.knownsubreddit
 def on_sdict_command(update, context):
     logger.info('/sdict command')
-    
-    sender = None
-    subreddit = Subreddit.fetch(context.args[0])
-    slogger.set_subreddit(subreddit)
-    for submission in reddit.iter_submissions(subreddit.name, limit=1):
-        sender = Sender(context.bot, subreddit, submission, slogger)
-        break
+
+    account = creds.default_account
+    reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
+
+    submission_id = context.args[0].strip()
+    submission = reddit.submission(id=submission_id)
+
+    # pick a random channel to pass to Sender
+    tmp_channel = Channel.select().order_by(Channel.channel_id.desc()).get()
+
+    # try to get the real subreddit if we have it saved in the db
+    sub_id = submission.subreddit.name
+    if Subreddit.get_safe(subreddit_id=sub_id):
+        tmp_subreddit = Subreddit.get_safe(subreddit_id=sub_id)
+    else:
+        tmp_subreddit = Subreddit(
+            subreddit_id=submission.subreddit.id,
+            channel=tmp_channel,
+            name=str(submission.subreddit),
+            style=Style.get_default()
+        )
+        update.message.reply_text('"{}" not in the db, using fake subreddit object...'.format(sub_id))
+
+    tmp_subreddit.logger = logger
+    sender = Sender(context.bot, tmp_subreddit, submission, skip_sender_type_detection=True)
     
     text = pformat(sender.submission_dict)
     if len(text) < MAX_MESSAGE_LENGTH:
