@@ -106,7 +106,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
     subreddits = Subreddit.select().join(Channel).where(Channel.channel_id == channel_id, (Subreddit.enabled == True | Subreddit.enabled_resume == True))
 
     if not subreddits:
-        update.message.reply_text('No subreddit in this channel')
+        update.message.reply_text('No subreddit in this channel', reply_markup=Keyboard.REMOVE)
         return ConversationHandler.END
 
     subs_info_list = []
