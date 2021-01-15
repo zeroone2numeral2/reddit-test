@@ -32,6 +32,7 @@ from .subreddit_configuration.style import subconfig_on_getstyle_command
 from .subreddit_configuration.style import subconfig_on_setstyle_command
 from .subreddit_configuration.style import subconfig_on_style_selected
 from .subreddit_configuration.see_submissions import subconfig_on_submissions_command
+from .subreddit_configuration.daily_posts_avg import subconfig_on_avgdaily_command
 from utilities import u
 from utilities import d
 
@@ -48,6 +49,7 @@ link: {s.channel_link})
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /style (change this subreddit's style), \
 /getstyle (see the current style), \
+/avgdaily (past 7 days avg number of posts/day), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /freq (set the posting frequency), \
@@ -305,6 +307,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['clonefrom'], subconfig_on_clonefrom_command),
             CommandHandler(['getstyle'], subconfig_on_getstyle_command),
             CommandHandler(['submissions'], subconfig_on_submissions_command),
+            CommandHandler(['dailyavg'], subconfig_on_avgdaily_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['cancel'], on_fake_cancel_command),
