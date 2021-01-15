@@ -49,7 +49,7 @@ link: {s.channel_link})
 /clonefrom (override the settings of the current subreddit with those from another one), \
 /style (change this subreddit's style), \
 /getstyle (see the current style), \
-/avgdaily (past 7 days avg number of posts/day), \
+/dailyavg (past 7 days avg number of posts/day), \
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /freq (set the posting frequency), \
