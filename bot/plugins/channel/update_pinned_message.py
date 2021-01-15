@@ -99,7 +99,7 @@ def pretty_time(total_minutes, sep=', ', round_by=10):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_channel_selected(update, context: CallbackContext):
+def on_updatepin_channel_selected(update, context: CallbackContext):
     logger.info('setdesc command channel selected: %s', update.message.text)
 
     channel_id = u.expand_channel_id(update.message.text)
@@ -262,7 +262,7 @@ def on_setdesc_channel_selected(update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-def on_setdesc_channel_selected_incorrect(update, _):
+def on_updatepin_channel_selected_incorrect(update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')
 
@@ -282,8 +282,8 @@ mainbot.add_handler(ConversationHandler(
     entry_points=[CommandHandler('updatepin', channel_selection_handler)],
     states={
         Status.WAITING_CHANNEL_SELECTION: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_setdesc_channel_selected),
-            MessageHandler(~Filters.command & Filters.all, on_setdesc_channel_selected_incorrect),
+            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_updatepin_channel_selected),
+            MessageHandler(~Filters.command & Filters.all, on_updatepin_channel_selected_incorrect),
             MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_channel_selection_unknown_message),
         ]
     },
