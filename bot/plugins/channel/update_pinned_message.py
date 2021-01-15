@@ -193,7 +193,7 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
         subs_info_list.append(BASE_POST.format(**format_dict))
 
         try:
-            total_number_of_daily_posts += subreddit.daily_posts()
+            total_number_of_daily_posts += subreddit.daily_posts
         except Exception as e:
             logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e), exc_info=True)
 
