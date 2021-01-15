@@ -198,6 +198,7 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
             logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e), exc_info=True)
 
         if subreddit.style.name.startswith('short_'):
+            # this will let us decide whether to add the abbreviations legend at the bottom
             include_short_template_legend_footer = True
 
     subs_text = '\n\n'.join(subs_info_list)
