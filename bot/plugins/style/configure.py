@@ -245,7 +245,6 @@ def on_remove_command(update: Update, context: CallbackContext, style: Style):
         return Status.WAITING_STYLE_CONFIG_ACTION
 
     if styles.is_used(style):
-        # for some reason sometime external keys checks don't work
         update.message.reply_text('You cannot delete a style which is used by some subreddits (see /subreddits)')
         return Status.WAITING_STYLE_CONFIG_ACTION
 
