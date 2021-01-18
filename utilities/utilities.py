@@ -436,3 +436,10 @@ def text_messages_from_list(strings_list: list):
 
     for i in range(0, len(strings_list), elements_per_msg):
         yield strings_list[i:i + elements_per_msg]
+
+
+def remove_duplicates(origin_list):
+    res = []
+    [res.append(x) for x in origin_list if x not in res]
+
+    return res
