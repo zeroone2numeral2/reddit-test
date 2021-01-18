@@ -30,7 +30,8 @@ from utilities import d
 
 logger = logging.getLogger('handler')
 
-CHANNEL_SELECTED_TEXT = """Now you can configure {c.title}.
+CHANNEL_SELECTED_TEXT = """Now you can configure "{c.title}".
+
 You can use the following commands: \
 /unlinksubs (unlink the channel's subreddits from the channel), \
 /remove (remove the channel from teh database, will not delete the linked subreddits), \
