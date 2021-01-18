@@ -21,7 +21,7 @@ from utilities import d
 logger = logging.getLogger('handler')
 
 STYLE_SELECTED_TEXT = """Now you can configure <code>{s.name}</code>.
-You can use the following commands: /info, /remove, /default, /subreddits, /rename
+You can use the following commands: /info, /remove, /default, /subreddits, /rename, /clone
 
 Pass any field to get its current value, or a field followed by the new value to change it.
 
@@ -73,7 +73,7 @@ def on_rename_command(update: Update, context: CallbackContext, style: Style):
     logger.info('/rename command')
 
     if not context.args:
-        update.message.reply_text('Please provide the new style name')
+        update.message.reply_text('Please provide the new name')
         return Status.WAITING_STYLE_CONFIG_ACTION
 
     new_name = u.to_ascii(context.args[0].lower())
@@ -89,6 +89,45 @@ def on_rename_command(update: Update, context: CallbackContext, style: Style):
         return Status.WAITING_STYLE_CONFIG_ACTION
 
     update.message.reply_html('Style renamed to <code>{}</code>'.format(new_name))
+
+    return Status.WAITING_STYLE_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+@d.pass_style
+def on_clone_command(update: Update, context: CallbackContext, style: Style):
+    logger.info('/clone command')
+
+    if not context.args:
+        update.message.reply_text("Please provide the new style's name")
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    style_name = u.to_ascii(context.args[0].lower())
+    if not style_name:
+        update.message.reply_text('Invalid name')
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    original_style_name = style.name
+
+    style.style_id = None  # this will make peewee create a new instance
+    style.name = style_name
+    style.created = u.now()
+    style.updated = u.now()
+    try:
+        style.save()
+    except IntegrityError:
+        update.message.reply_html('There\'s already a style named <code>{}</code>'.format(style_name))
+        return Status.WAITING_STYLE_CONFIG_ACTION
+
+    update.message.reply_html('Style <code>{}</code> created from <code>{}</code>'.format(style_name, original_style_name))
+
+    text = STYLE_SELECTED_TEXT.format(s=style)
+    update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
+
+    context.user_data['data'] = dict()
+    context.user_data['data']['style'] = style
 
     return Status.WAITING_STYLE_CONFIG_ACTION
 
@@ -388,6 +427,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['style'], on_style_command),
             CommandHandler(['newstyle'], on_newstyle_command),
             CommandHandler(['rename'], on_rename_command),
+            CommandHandler(['clone'], on_clone_command),
             CommandHandler(Command.CANCEL, on_fake_cancel_command),
             MessageHandler(Filters.text & ~Filters.command, on_entry_change),
             MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_style_config_action_unknown_message),

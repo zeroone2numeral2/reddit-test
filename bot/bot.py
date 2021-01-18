@@ -69,6 +69,7 @@ class RedditBot(Updater):
         BotCommand('style', 'manage styles (or a subreddit style)'),
         BotCommand('setstyle', 'set the subreddit style'),
         BotCommand('default', 'make a style the default style'),
+        BotCommand('clone', 'clone the current style'),
         BotCommand('exportlink', 'revoke and regenerate a channel invite link'),
         BotCommand('subreddits', 'get the subreddit using a style'),
         BotCommand('getstyle', 'see the current subreddit style'),
