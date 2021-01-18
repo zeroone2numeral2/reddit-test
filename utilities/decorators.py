@@ -250,6 +250,15 @@ def pass_style(func):
     return wrapped
 
 
+def pass_channel(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        channel = context.user_data['data']['channel']
+        return func(update, context, channel=channel, *args, **kwargs)
+
+    return wrapped
+
+
 def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):

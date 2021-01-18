@@ -2,25 +2,16 @@ import logging
 
 # noinspection PyPackageRequirements
 from telegram import ParseMode, Update
-from telegram.ext import ConversationHandler, CallbackContext
-from telegram.ext import MessageHandler
-from telegram.ext import CommandHandler
-from telegram.ext import CallbackQueryHandler
-from telegram.ext import Filters
+from telegram.ext import CallbackContext
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 
-from bot import mainbot
 from bot.conversation import Status
-from bot.customfilters import CustomFilters
-from bot.plugins.commands import Command
 from bot.markups import Keyboard
-from bot.markups import InlineKeyboard
 from database.models import Channel
 from database.models import Subreddit
 from database.queries import flairs
 from reddit import Reddit, creds
-from .select_channel import channel_selection_handler, on_waiting_channel_selection_unknown_message
 from utilities import u
 from utilities import d
 from config import config
@@ -103,15 +94,17 @@ def pretty_time(total_minutes, sep=', ', round_by=10):
 
 @d.restricted
 @d.failwithmessage
-def on_updatepin_channel_selected(update, context: CallbackContext):
-    logger.info('setdesc command channel selected: %s', update.message.text)
+@d.logconversation
+@d.pass_channel
+def channelconfig_on_updatepin_command(update: Update, context: CallbackContext, channel: Channel):
+    logger.info("/updatepin")
 
-    channel_id = u.expand_channel_id(update.message.text)
-    subreddits = Subreddit.select().join(Channel).where(Channel.channel_id == channel_id, (Subreddit.enabled == True | Subreddit.enabled_resume == True))
+    channel_id = channel.channel_id
+    subreddits = Subreddit.select().join(Channel).where(Channel.channel_id == channel_id, Subreddit.enabled == True)
 
     if not subreddits:
-        update.message.reply_text('No subreddit in this channel', reply_markup=Keyboard.REMOVE)
-        return ConversationHandler.END
+        update.message.reply_text('No subreddit for this channel')
+        return Status.WAITING_CHANNEL_CONFIG_ACTION
 
     subs_info_list = []
     flairs_list = []
@@ -247,7 +240,7 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
             channel_obj.pinned_message.edit_text(text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
             update.message.reply_markdown('[Message edited]({})'.format(u.message_link(channel_obj.pinned_message)),
                                           reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
-            return ConversationHandler.END
+            return Status.WAITING_CHANNEL_CONFIG_ACTION
         except (TelegramError, BadRequest) as e:
             update.message.reply_text('Failed: {}'.format(str(e)))
 
@@ -256,7 +249,7 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('Error while posting: {}'.format(e.message))
         update.message.reply_text(text, disable_web_page_preview=True)
-        return ConversationHandler.END
+        return Status.WAITING_CHANNEL_CONFIG_ACTION
 
     update.message.reply_markdown('[Message sent]({}), pinning...'.format(u.message_link(sent_message)),
                                   reply_markup=Keyboard.REMOVE, disable_web_page_preview=True)
@@ -280,37 +273,4 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
     except (BadRequest, TelegramError) as e:
         update.message.reply_text('...message not pinned: {}'.format(e.message))
 
-    return ConversationHandler.END
-
-
-@d.restricted
-@d.failwithmessage
-def on_updatepin_channel_selected_incorrect(update, _):
-    logger.info('unexpected message while selecting channel')
-    update.message.reply_text('Select a channel, or /cancel')
-
-    return Status.WAITING_CHANNEL_SELECTION
-
-
-@d.restricted
-@d.failwithmessage
-def on_setdesc_cancel(update, _):
-    logger.info('conversation canceled with /cancel')
-    update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)
-
-    return ConversationHandler.END
-
-
-mainbot.add_handler(ConversationHandler(
-    entry_points=[CommandHandler('updatepin', channel_selection_handler)],
-    states={
-        Status.WAITING_CHANNEL_SELECTION: [
-            MessageHandler(Filters.text & Filters.regex(r'\d+\.\s.+') & ~Filters.command, on_updatepin_channel_selected),
-            MessageHandler(~Filters.command & Filters.all, on_updatepin_channel_selected_incorrect),
-            MessageHandler(CustomFilters.all_but_regex(Command.CANCEL_RE), on_waiting_channel_selection_unknown_message),
-        ]
-    },
-    fallbacks=[
-        CommandHandler(Command.CANCEL, on_setdesc_cancel)
-    ]
-))
+    return Status.WAITING_CHANNEL_CONFIG_ACTION
