@@ -8,32 +8,24 @@ from utilities import d
 logger = logging.getLogger('handler')
 
 HELP_STRING = """\
-*Adding and removing channels*
-/addchannel `<username>`: save a channel (if already saved: updates its info)
-/remchannel: remove a channel
-
 *Managing channels*
+/addchannel `<username>`: save a channel (if already saved: updates its info)
 /channel `<filter>`: manage a channel. The bot will list the available commands once a channel is selected
 /updatechannels: update all the channels (title, username, invite link) in the database
 /members: top 25 channels by number of members
 
-*Managing the channels catalogue*
-/updatelist: update the catalogue channel's subreddits list
-
-*Adding a subreddit/multireddit*
+*Managing subreddits/multireddits*
 /addsub `[subreddit name] <channel title filter>`: register a subreddit
-/addmulti `[creator] [multireddit name] <channel title filter>`: add a multireddit to a channel 
-
-*Managing a subreddit's settings*
+/addmulti `[creator] [multireddit name] <channel title filter>`: add a multireddit to a channel
 /sub `<filter>`: change a subreddit configuration. The bot will list the available commands once a channel is selected
-
-*Other operations with subreddits*
 /subs: list all subreddits
 /dailyposts: list all subreddits sorted by number of daily posts
-/links: get a list of channels plus their links, if available
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \
 subreddit name
+
+*Managing the channels catalogue*
+/updatelist: update the catalogue channel's subreddits list
 
 *Logs*
 /remffmpeglogs: remove ffmpeg log files

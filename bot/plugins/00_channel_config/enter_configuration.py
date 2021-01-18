@@ -31,8 +31,16 @@ from utilities import d
 logger = logging.getLogger('handler')
 
 CHANNEL_SELECTED_TEXT = """Now you can configure {c.title}.
-You can use the following commands: /unlinksubs, /remove, /avgdaily, /updatepin, /updatepic, /exportlink, /updatechat, \
-/getadmins, /subs
+You can use the following commands: \
+/unlinksubs (unlink the channel's subreddits from the channel), \
+/remove (remove the channel from teh database, will not delete the linked subreddits), \
+/avgdaily (number of average daily posts in the channel), \
+/updatepin (update the channel pinned message), \
+/updatepic (update the channel icon, using the icon of the first sub with one set), \
+/exportlink (export and save the channel invite link), \
+/updatechat (update the channel data), \
+/getadmins (see the admins list and the bot permissions), \
+/subs (list linked subreddits)
 
 Use /exit to exit the configuration, or /channel to change the channel to configure"""
 
