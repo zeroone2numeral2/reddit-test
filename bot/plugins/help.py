@@ -13,11 +13,9 @@ HELP_STRING = """\
 /remchannel: remove a channel
 
 *Managing channels*
-/updatechannels: update all the channels (ttitle, username, invite link) in the database
-/updatepin: pin a pre-formatted message that describes the channel
+/channel `<filter>`: manage a channel. The bot will list the available commands once a channel is selected
+/updatechannels: update all the channels (title, username, invite link) in the database
 /members: top 25 channels by number of members
-/exportlink: revoke and regenerate the invite link of a channel
-/getadmins: get the admins list of a channel, and the bot permissions in that channel
 
 *Managing the channels catalogue*
 /updatelist: update the catalogue channel's subreddits list
@@ -27,9 +25,7 @@ HELP_STRING = """\
 /addmulti `[creator] [multireddit name] <channel title filter>`: add a multireddit to a channel 
 
 *Managing a subreddit's settings*
-/sub `<filter>`: change a subreddit configuration. Optional filter to filter by subreddit's name the keyboard to \
-select the subreddit from. When you use this command you'll enter the configuration mode of a subreddit, from \
-there some commands can be used to edit its settings
+/sub `<filter>`: change a subreddit configuration. The bot will list the available commands once a channel is selected
 
 *Other operations with subreddits*
 /subs: list all subreddits
