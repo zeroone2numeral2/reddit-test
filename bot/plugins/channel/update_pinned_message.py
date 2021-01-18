@@ -53,7 +53,7 @@ ADDITIONAL_FOOTER_SHORT_INFO_LEGEND = """<b>Legend</b>:
 <code>%</code>: upvotes ratio
 <code>d/h/m</code>: thread age"""
 
-ADDITIONAL_FOOTER_FLAIRS = """Flairs:
+ADDITIONAL_FOOTER_FLAIRS = """<b>Flairs</b>:
 {}"""
 
 WEEKDAYS = (
