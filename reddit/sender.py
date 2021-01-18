@@ -24,7 +24,7 @@ from .submissions import YouTubeHandler
 from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
-from database.models import Flair
+from database.queries import flairs
 from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
@@ -37,6 +37,8 @@ KEY_MAPPER_DICT = dict(
 )
 
 HIDDEN_CHAR = u'\u200B'
+
+DEFAULT_FLAIR = "no_flair"
 
 DEFAULT_THUMBNAILS = {
     # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
@@ -66,7 +68,7 @@ class Sender:
         self.submission_handler = TextHandler(**sender_kwargs)
 
         self._submission.flair_normalized = ''  # ascii flair
-        self._submission.ascii_flair = 'no_flair'  # ascii flair, will be "no_flair" when submission doesn't have a falir
+        self._submission.ascii_flair = DEFAULT_FLAIR  # ascii flair, will be "no_flair" when submission doesn't have a falir
         self._submission.nsfw = self._submission.over_18
         self._submission.sorting = self._subreddit.sorting or 'hot'
         self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
@@ -171,6 +173,7 @@ class Sender:
         # u.print_submission(self._s)
 
         self.gen_submission_dict()
+        self.save_flair()
 
     def _detect_sender_type(self, sender_kwargs):
         if ImageHandler.test(self._submission):
@@ -383,6 +386,12 @@ class Sender:
         # logger.debug('registering we sent %d bytes (%s)', uploaded_bytes, u.human_readable_size(uploaded_bytes))
 
         self._uploaded_bytes += uploaded_bytes
+
+    def save_flair(self):
+        if self._submission.ascii_flair == DEFAULT_FLAIR:
+            return
+
+        return flairs.save_flair(self._subreddit.name, self._submission.ascii_flair)
 
     def register_post(self, test=False):
         if test:
