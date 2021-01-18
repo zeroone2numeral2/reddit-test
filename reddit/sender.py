@@ -24,6 +24,7 @@ from .submissions import YouTubeHandler
 from bot.markups import InlineKeyboard
 from database.models import Post
 from database.models import Subreddit
+from database.models import Flair
 from const import DEFAULT_TEMPLATE
 from utilities import u
 from config import config
