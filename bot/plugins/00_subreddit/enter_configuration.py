@@ -33,6 +33,7 @@ from .subreddit_configuration.style import subconfig_on_setstyle_command
 from .subreddit_configuration.style import subconfig_on_style_selected
 from .subreddit_configuration.see_submissions import subconfig_on_submissions_command
 from .subreddit_configuration.daily_posts_avg import subconfig_on_avgdaily_command
+from .subreddit_configuration.flairs import subconfig_on_flairs_command
 from utilities import u
 from utilities import d
 
@@ -53,6 +54,7 @@ link: {s.channel_link})
 /setchannelicon (use this subreddit's icon as channel icon), \
 /disable (disable the subreddit), \
 /freq (set the posting frequency), \
+/flairs (see the sub's flairs), \
 /savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
 /removetop (remove the saved top posts for this subreddit with the current sorting), \
 /gettop (see how many top posts we have saved for the current sorting)
@@ -308,6 +310,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['getstyle'], subconfig_on_getstyle_command),
             CommandHandler(['submissions'], subconfig_on_submissions_command),
             CommandHandler(['dailyavg'], subconfig_on_avgdaily_command),
+            CommandHandler(['flairs'], subconfig_on_flairs_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['cancel'], on_fake_cancel_command),

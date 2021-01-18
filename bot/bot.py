@@ -42,6 +42,7 @@ class RedditBot(Updater):
         BotCommand('links', 'get a list of channels with their invite link'),
         BotCommand('icon', 'get a subreddit icon'),
         BotCommand('dailyavg', 'last weeks average number of posts/day'),
+        BotCommand('flairs', 'list the subreddit flairs'),
         BotCommand('optin', 'allow the current account to interact with a quarantined subreddit'),
         BotCommand('remffmpeglogs', 'remove ffmpeg logs'),
         BotCommand('remlogs', 'remove all log files'),
