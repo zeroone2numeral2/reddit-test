@@ -24,14 +24,20 @@ def channelconfig_on_avgdaily_command(update: Update, _, channel: Channel):
         return Status.WAITING_CHANNEL_CONFIG_ACTION
 
     subs_count = len(channel_subreddits)
+    subs_list = []
     total = 0.0
     for subreddit in channel_subreddits:
         daily_average = subreddit_job.average_daily_posts(subreddit)
+        subs_list.append("{}: {}".format(subreddit.r_name, daily_average))
         total += daily_average
 
     avg = round(total / subs_count, 1)
     update.message.reply_html(
-        "Average daily posts during the past week ({} subreddits): {}".format(subs_count, avg)
+        "Average daily posts during the past week ({} subreddits): {}\n\nBreakdown:\n{}".format(
+            subs_count,
+            avg,
+            "\n".join(subs_list)
+        )
     )
 
     return Status.WAITING_CHANNEL_CONFIG_ACTION
