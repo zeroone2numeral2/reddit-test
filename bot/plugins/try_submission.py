@@ -24,6 +24,8 @@ def try_submission(update, context):
     account = creds.default_account
     reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
     submission = reddit.submission(id=submission_id)
+    if not hasattr(submission, 'current_position'):
+        submission.current_position = 1
 
     # pick a random channel to pass to Sender
     tmp_channel = Channel.select().order_by(Channel.channel_id.desc()).get()

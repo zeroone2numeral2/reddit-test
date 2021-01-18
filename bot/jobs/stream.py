@@ -174,7 +174,7 @@ def fetch_submissions(subreddit: Subreddit, reddit):
             # this is when we first send the request to fetch the comments: accessing a submission property
             # makes praw populate its attributes, and to do that it sends a request to the 'comments' endpoint
             if not hasattr(submission, 'current_position'):
-                submission.current_position = position
+                submission.current_position = position  # "position" starts from 1 and not 0
 
             yield submission
 
