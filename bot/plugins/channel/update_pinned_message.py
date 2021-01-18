@@ -18,6 +18,7 @@ from bot.markups import Keyboard
 from bot.markups import InlineKeyboard
 from database.models import Channel
 from database.models import Subreddit
+from database.queries import flairs
 from reddit import Reddit, creds
 from .select_channel import channel_selection_handler, on_waiting_channel_selection_unknown_message
 from utilities import u
@@ -51,6 +52,9 @@ ADDITIONAL_FOOTER_SHORT_INFO_LEGEND = """<b>Legend</b>:
 <code>c</code>: number of comments
 <code>%</code>: upvotes ratio
 <code>d/h/m</code>: thread age"""
+
+ADDITIONAL_FOOTER_FLAIRS = """Flairs:
+{}"""
 
 WEEKDAYS = (
     'Monday',
@@ -110,6 +114,7 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
         return ConversationHandler.END
 
     subs_info_list = []
+    flairs_list = []
     total_number_of_daily_posts = 0
     include_short_template_legend_footer = False
     for i, subreddit in enumerate(subreddits):
@@ -201,6 +206,10 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
             # this will let us decide whether to add the abbreviations legend at the bottom
             include_short_template_legend_footer = True
 
+        if subreddit.template_has_hashtag("#{ascii_flair}"):
+            subreddit_flairs = flairs.get_flairs(subreddit.name)  # duplicates are removed
+            flairs_list.extend(subreddit_flairs)
+
     subs_text = '\n\n'.join(subs_info_list)
 
     channel_obj = context.bot.get_chat(channel_id)
@@ -217,6 +226,12 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
 
     if include_short_template_legend_footer:
         text += '\n\n{}'.format(ADDITIONAL_FOOTER_SHORT_INFO_LEGEND)
+
+    if flairs_list:
+        flairs_list = u.remove_duplicates(flairs_list)
+        flairs_list_hashtags = ["#" + flair for flair in flairs_list]
+        flairs_list_text = "\n".join(flairs_list_hashtags)
+        text += '\n\n{}'.format(ADDITIONAL_FOOTER_FLAIRS.format(flairs_list_text))
 
     if channel_obj.pinned_message:
         # do not try to edit the pinned message if the channel doesn't have one

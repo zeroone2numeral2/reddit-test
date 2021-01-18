@@ -19,3 +19,17 @@ def save_flair(subreddit, flair):
     flair.save()
 
     return created
+
+
+def get_flairs(subreddit_name):
+    subreddit_name = subreddit_name.lower()
+
+    query = (
+        Flair.select(Flair.flair)
+        .where(Flair.subreddit_name == subreddit_name)
+    )
+
+    if not query:
+        return []
+
+    return u.remove_duplicates([r.flair for r in query])
