@@ -2,7 +2,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from config import config
 
-db = SqliteExtDatabase(config.sqlite.filename, pragmas={'journal_mode': 'wal', 'foreign_keys': 1})
+db = SqliteExtDatabase(config.sqlite.filename, pragmas={'journal_mode': 'wal', 'foreign_keys': 0})
 
 
 @db.func()
