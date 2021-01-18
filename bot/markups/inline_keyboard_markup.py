@@ -48,6 +48,12 @@ class InlineKeyboard:
         return InlineKeyboardMarkup(keyboard)
 
     @staticmethod
+    def forget_channel(channel_id):
+        return InlineKeyboardMarkup([[
+            InlineKeyboardButton("remove from database", callback_data="delchannel:{}".format(channel_id))
+        ]])
+
+    @staticmethod
     def post_buttons_with_labels(
             url_button_url=None,
             url_button_label=None,
