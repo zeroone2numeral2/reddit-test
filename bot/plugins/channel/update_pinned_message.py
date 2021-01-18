@@ -209,6 +209,10 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
         if subreddit.template_has_hashtag("#{ascii_flair}"):
             subreddit_flairs = flairs.get_flairs(subreddit.name)  # duplicates are removed
             flairs_list.extend(subreddit_flairs)
+            logger.debug("%s template has flair hashtag (flairs number: %d)", subreddit.r_name, len(subreddit_flairs))
+            logger.debug("%s", flairs_list)
+        else:
+            logger.debug("%s template doesn't have flair hashtag", subreddit.r_name)
 
     subs_text = '\n\n'.join(subs_info_list)
 
@@ -228,10 +232,13 @@ def on_updatepin_channel_selected(update, context: CallbackContext):
         text += '\n\n{}'.format(ADDITIONAL_FOOTER_SHORT_INFO_LEGEND)
 
     if flairs_list:
+        logger.debug("%d flairs", len(flairs_list))
         flairs_list = u.remove_duplicates(flairs_list)
         flairs_list_hashtags = ["#" + flair for flair in flairs_list]
         flairs_list_text = "\n".join(flairs_list_hashtags)
         text += '\n\n{}'.format(ADDITIONAL_FOOTER_FLAIRS.format(flairs_list_text))
+    else:
+        logger.debug("no flairs")
 
     if channel_obj.pinned_message:
         # do not try to edit the pinned message if the channel doesn't have one
