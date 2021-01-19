@@ -23,6 +23,7 @@ class DummyContext:
 
 
 class RedditBot(Updater):
+    COMMANDS_LIST_DETECTED = []
     COMMANDS_LIST = [
         BotCommand('help', 'see help message'),
         BotCommand('addchannel', 'command'),
@@ -158,10 +159,20 @@ class RedditBot(Updater):
 
         for import_path in paths_to_import:
             logger.debug('importing module: %s', import_path)
-            importlib.import_module(import_path)
+            m = importlib.import_module(import_path)
+            if not hasattr(m, "_COMMANDS"):
+                continue
+
+            logger.debug("importing commands: %s", m._COMMANDS)
+            for command in m._COMMANDS:
+                command_lower = command.lower()
+                if command_lower not in cls.COMMANDS_LIST_DETECTED:
+                    cls.COMMANDS_LIST_DETECTED.append(command_lower)
 
     def set_commands(self):
-        self.bot.set_my_commands(self.COMMANDS_LIST)
+        # self.bot.set_my_commands(self.COMMANDS_LIST)
+        commands_list = [BotCommand(command, "command") for command in self.COMMANDS_LIST_DETECTED]
+        self.bot.set_my_commands(commands_list)
 
     def run(self, *args, set_commands=True, **kwargs):
         if set_commands:

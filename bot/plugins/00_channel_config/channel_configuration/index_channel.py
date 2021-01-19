@@ -54,3 +54,6 @@ def channelconfig_on_public_command(update: Update, _, channel: Channel):
     update.message.reply_html("Channel marked as public (will be posted in the index channel)")
 
     return Status.WAITING_CHANNEL_CONFIG_ACTION
+
+
+_COMMANDS = ["public", "private", "unposted"]
