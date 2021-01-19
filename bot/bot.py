@@ -85,6 +85,9 @@ class RedditBot(Updater):
         BotCommand('updateicon', 'command'),
         BotCommand('updatechat', 'command'),
         BotCommand('channel', 'command'),
+        BotCommand('private', 'command'),
+        BotCommand('public', 'command'),
+        BotCommand('unposted', 'command'),
     ]
 
     @staticmethod

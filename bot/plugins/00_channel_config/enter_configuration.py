@@ -25,6 +25,9 @@ from .channel_configuration.unlink_subs import channelconfig_on_unlinksubs_comma
 from .channel_configuration.avgdaily import channelconfig_on_avgdaily_command
 from .channel_configuration.seticon import channelconfig_on_seticon_command
 from .channel_configuration.subreddits_list import channelconfig_on_subs_command
+from .channel_configuration.index_channel import channelconfig_on_unposted_command
+from .channel_configuration.index_channel import channelconfig_on_private_command
+from .channel_configuration.index_channel import channelconfig_on_public_command
 from utilities import u
 from utilities import d
 
@@ -41,7 +44,9 @@ You can use the following commands: \
 /exportlink (export and save the channel invite link), \
 /updatechat (update the channel data), \
 /getadmins (see the admins list and the bot permissions), \
-/subs (list linked subreddits)
+/subs (list linked subreddits), \
+/public or /private (post/don't post the channel in the index channel), \
+/unposted (mark the channel as not posted in the index channel)
 
 Use /exit to exit the configuration, or /channel to change the channel to configure"""
 
@@ -203,6 +208,9 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler('avgdaily', channelconfig_on_avgdaily_command),
             CommandHandler(['updatepic', 'updateicon', 'seticon'], channelconfig_on_seticon_command),
             CommandHandler(['subs', 'subreddits'], channelconfig_on_subs_command),
+            CommandHandler(['private'], channelconfig_on_private_command),
+            CommandHandler(['public'], channelconfig_on_public_command),
+            CommandHandler(['unposted'], channelconfig_on_unposted_command),
 
             CommandHandler(Command.CANCEL, on_fake_cancel_command),
             MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_channel_config_action_unknown_message),
