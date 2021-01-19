@@ -39,6 +39,7 @@ FOOTER = """- number of daily posts: <b>~{}</b>
 ADDITIONAL_FOOTER_PRIVATE_CHANNEL = """- this channel's invite link <a href="{}">here</a>"""
 
 ADDITIONAL_FOOTER_SHORT_INFO_LEGEND = """<b>Legend</b>:
+<code>#</code>: current position on the sub's frontpage (<i>hot</i>)
 <code>v</code>: current score (upvotes)
 <code>c</code>: number of comments
 <code>%</code>: upvotes ratio
