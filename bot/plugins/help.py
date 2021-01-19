@@ -25,7 +25,8 @@ HELP_STRING = """\
 subreddit name
 
 *Managing the channels catalogue*
-/updatelist: update the catalogue channel's subreddits list
+/postinindex: post in the index channel subreddits that have not been posted yet
+/markallasposted: mark all channels as already posted
 
 *Logs*
 /remffmpeglogs: remove ffmpeg log files
