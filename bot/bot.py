@@ -169,32 +169,38 @@ class RedditBot(Updater):
                 if command_lower not in cls.COMMANDS_LIST_DETECTED:
                     cls.COMMANDS_LIST_DETECTED.append(command_lower)
 
-    def set_commands(self, load_from=3):
+    def set_commands(self, load_from=3, sort_alphabetically=False):
+        commands = []
         if load_from == 1:
-            commands_list = [BotCommand(command, "command") for command in self.COMMANDS_LIST_DETECTED]
-            self.bot.set_my_commands(commands_list)
+            commands = self.COMMANDS_LIST_DETECTED
         elif load_from == 2:
-            self.bot.set_my_commands(self.COMMANDS_LIST)
+            commands = self.COMMANDS_LIST
         elif load_from == 3:
-            commands_from_handlers = []
             for group, handlers in self.dispatcher.handlers.items():
                 for handler in handlers:
                     if isinstance(handler, CommandHandler):
-                        commands_from_handlers.extend(handler.command)
+                        commands.extend(handler.command)
                     elif isinstance(handler, ConversationHandler):
                         for entry_point_handler in handler.entry_points:
                             if isinstance(entry_point_handler, CommandHandler):
-                                commands_from_handlers.extend(entry_point_handler.command)
+                                commands.extend(entry_point_handler.command)
+
                         for state, state_handlers in handler.states.items():
                             for state_handler in state_handlers:
                                 if isinstance(state_handler, CommandHandler):
-                                    commands_from_handlers.extend(state_handler.command)
+                                    commands.extend(state_handler.command)
+
                         for fallback_handler in handler.fallbacks:
                             if isinstance(fallback_handler, CommandHandler):
-                                commands_from_handlers.extend(fallback_handler.command)
+                                commands.extend(fallback_handler.command)
 
-            commands_list = [BotCommand(command, "command") for command in commands_from_handlers]
-            self.bot.set_my_commands(commands_list)
+            commands = list(set(commands))  # remove duplicates
+
+        if sort_alphabetically:
+            commands.sort()
+
+        commands_list = [BotCommand(command, "command placeholder") for command in commands]
+        self.bot.set_my_commands(commands_list)
 
     def run(self, *args, set_commands=True, **kwargs):
         if set_commands:
