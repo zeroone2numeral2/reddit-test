@@ -37,8 +37,12 @@ def on_postinindex_command(update, context: CallbackContext):
 
     channels_list = channels.get_channels()
     index_username = '@' + config.telegram.index
+    posted_channels = 0
     for channel in channels_list:
         if channel.notified_on:
+            continue
+
+        if not channel.public:
             continue
 
         logger.info("posting channel: %s", channel.title)
@@ -56,9 +60,11 @@ def on_postinindex_command(update, context: CallbackContext):
         channel.notified_on = u.now()
         channel.save()
 
+        posted_channels += 1
+
         time.sleep(3)
 
-    update.message.reply_text("New channels posted in {}".format(index_username))
+    update.message.reply_text("New channels posted in {} (total: {})".format(index_username, posted_channels))
 
 
 mainbot.add_handler(CommandHandler('markallasposted', on_markallasposted_command))
