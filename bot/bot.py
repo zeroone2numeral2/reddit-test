@@ -160,6 +160,7 @@ class RedditBot(Updater):
         for import_path in paths_to_import:
             logger.debug('importing module: %s', import_path)
             m = importlib.import_module(import_path)
+            """
             if not hasattr(m, "_COMMANDS"):
                 continue
 
@@ -168,33 +169,29 @@ class RedditBot(Updater):
                 command_lower = command.lower()
                 if command_lower not in cls.COMMANDS_LIST_DETECTED:
                     cls.COMMANDS_LIST_DETECTED.append(command_lower)
+            """
 
-    def set_commands(self, load_from=3, sort_alphabetically=False):
+    def set_commands(self, sort_alphabetically=False):
         commands = []
-        if load_from == 1:
-            commands = self.COMMANDS_LIST_DETECTED
-        elif load_from == 2:
-            commands = self.COMMANDS_LIST
-        elif load_from == 3:
-            for group, handlers in self.dispatcher.handlers.items():
-                for handler in handlers:
-                    if isinstance(handler, CommandHandler):
-                        commands.extend(handler.command)
-                    elif isinstance(handler, ConversationHandler):
-                        for entry_point_handler in handler.entry_points:
-                            if isinstance(entry_point_handler, CommandHandler):
-                                commands.extend(entry_point_handler.command)
+        for group, handlers in self.dispatcher.handlers.items():
+            for handler in handlers:
+                if isinstance(handler, CommandHandler):
+                    commands.extend(handler.command)
+                elif isinstance(handler, ConversationHandler):
+                    for entry_point_handler in handler.entry_points:
+                        if isinstance(entry_point_handler, CommandHandler):
+                            commands.extend(entry_point_handler.command)
 
-                        for state, state_handlers in handler.states.items():
-                            for state_handler in state_handlers:
-                                if isinstance(state_handler, CommandHandler):
-                                    commands.extend(state_handler.command)
+                    for state, state_handlers in handler.states.items():
+                        for state_handler in state_handlers:
+                            if isinstance(state_handler, CommandHandler):
+                                commands.extend(state_handler.command)
 
-                        for fallback_handler in handler.fallbacks:
-                            if isinstance(fallback_handler, CommandHandler):
-                                commands.extend(fallback_handler.command)
+                    for fallback_handler in handler.fallbacks:
+                        if isinstance(fallback_handler, CommandHandler):
+                            commands.extend(fallback_handler.command)
 
-            commands = list(set(commands))  # remove duplicates
+        commands = list(set(commands))  # remove duplicates
 
         if sort_alphabetically:
             commands.sort()
