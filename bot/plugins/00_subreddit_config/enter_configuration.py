@@ -1,7 +1,6 @@
 import logging
 import re
 
-from playhouse.shortcuts import model_to_dict
 from telegram import Update, ParseMode
 from telegram.ext import MessageHandler, CommandHandler, CallbackContext, CallbackQueryHandler
 from telegram.ext import Filters

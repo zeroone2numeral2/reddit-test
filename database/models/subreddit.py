@@ -117,11 +117,26 @@ class Subreddit(peewee.Model):
 
     @property
     def r_name(self):
-        return '/r/{}'.format(self.name)
+        prefix = "r"
+        if self.is_multireddit:
+            prefix = "m"
+
+        return '/{}/{}'.format(prefix, self.name)
+
+    @property
+    def r_inline_link(self):
+        return '<a href="{}">{}</a>'.format(self.link, self.r_name)
 
     @property
     def r_name_with_id(self):
-        return '[{}] /r/{}'.format(self.id, self.name)
+        return '[{}] {}'.format(self.id, self.r_name)
+
+    @property
+    def link(self):
+        if self.is_multireddit:
+            return "https://reddit.com/user/{}/m/{}".format(self.multireddit_owner, self.name)
+        else:
+            return "https://reddit.com/r/{}".format(self.name)
 
     @property
     def ch_title(self):
