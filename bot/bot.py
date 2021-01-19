@@ -169,10 +169,12 @@ class RedditBot(Updater):
                 if command_lower not in cls.COMMANDS_LIST_DETECTED:
                     cls.COMMANDS_LIST_DETECTED.append(command_lower)
 
-    def set_commands(self):
-        # self.bot.set_my_commands(self.COMMANDS_LIST)
-        commands_list = [BotCommand(command, "command") for command in self.COMMANDS_LIST_DETECTED]
-        self.bot.set_my_commands(commands_list)
+    def set_commands(self, load_detected=False):
+        if load_detected:
+            commands_list = [BotCommand(command, "command") for command in self.COMMANDS_LIST_DETECTED]
+            self.bot.set_my_commands(commands_list)
+        else:
+            self.bot.set_my_commands(self.COMMANDS_LIST)
 
     def run(self, *args, set_commands=True, **kwargs):
         if set_commands:
