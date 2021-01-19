@@ -200,7 +200,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             # this will let us decide whether to add the abbreviations legend at the bottom
             include_short_template_legend_footer = True
 
-        if subreddit.template_has_hashtag("#{ascii_flair}"):
+        if subreddit.template_has_hashtag(["#{ascii_flair}", "#{flair_normalized}"]):
             subreddit_flairs = flairs.get_flairs(subreddit.name)  # duplicates are removed
             flairs_list.extend(subreddit_flairs)
             logger.debug("%s template has flair hashtag (flairs number: %d)", subreddit.r_name, len(subreddit_flairs))

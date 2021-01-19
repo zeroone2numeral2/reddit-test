@@ -1,5 +1,5 @@
 import datetime
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Union
 
 import peewee
 from playhouse.shortcuts import model_to_dict
@@ -298,17 +298,21 @@ class Subreddit(peewee.Model):
 
         return [row for row in rows]
 
-    def template_has_hashtag(self, hashtag_placeholder="#{subreddit}"):
-        if self.template_override and hashtag_placeholder in self.template_override:
-            return True
+    def template_has_hashtag(self, hashtag_placeholder: Union[list, str] = "#{subreddit}"):
+        if isinstance(hashtag_placeholder, str):
+            hashtag_placeholder = [hashtag_placeholder]
 
-        if self.style.template and hashtag_placeholder in self.style.template:
-            return True
+        for placeholder in hashtag_placeholder:
+            if self.template_override and placeholder in self.template_override:
+                return True
 
-        if self.style.template_no_url and hashtag_placeholder in self.style.template_no_url:
-            return True
+            if self.style.template and placeholder in self.style.template:
+                return True
 
-        if self.style.template_caption and hashtag_placeholder in self.style.template_caption:
-            return True
+            if self.style.template_no_url and placeholder in self.style.template_no_url:
+                return True
+
+            if self.style.template_caption and placeholder in self.style.template_caption:
+                return True
 
         return False
