@@ -28,14 +28,18 @@ from .channel_configuration.subreddits_list import channelconfig_on_subs_command
 from .channel_configuration.index_channel import channelconfig_on_unposted_command
 from .channel_configuration.index_channel import channelconfig_on_private_command
 from .channel_configuration.index_channel import channelconfig_on_public_command
+from .channel_configuration.disable import channelconfig_on_enable_command
+from .channel_configuration.disable import channelconfig_on_disable_command
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
 
-CHANNEL_SELECTED_TEXT = """Now you can configure "{c.title}".
+CHANNEL_SELECTED_TEXT = """Now you can configure "{c.title}"
 
 You can use the following commands: \
+/info (see the channel db row), \
+/enable or /disable (enable/disable the channel), \
 /unlinksubs (unlink the channel's subreddits from the channel), \
 /remove (remove the channel from teh database, will not delete the linked subreddits), \
 /avgdaily (number of average daily posts in the channel), \
@@ -211,6 +215,8 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['private'], channelconfig_on_private_command),
             CommandHandler(['public'], channelconfig_on_public_command),
             CommandHandler(['unposted'], channelconfig_on_unposted_command),
+            CommandHandler(['enable'], channelconfig_on_enable_command),
+            CommandHandler(['disable'], channelconfig_on_disable_command),
 
             CommandHandler(Command.CANCEL, on_fake_cancel_command),
             MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_channel_config_action_unknown_message),

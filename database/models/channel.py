@@ -14,6 +14,7 @@ class Channel(peewee.Model):
     invite_link = peewee.CharField(null=True)
     public = peewee.BooleanField(default=True)  # non-public channels are not posted with /updatelist
     notified_on = peewee.DateTimeField(null=True)  # when the channel has been posted in the index channel
+    enabled = peewee.BooleanField(default=True)
 
     class Meta:
         table_name = 'channels'
@@ -79,3 +80,11 @@ class Channel(peewee.Model):
             return cls.get(cls.channel_id == channel_id)
         except peewee.DoesNotExist:
             return None
+
+    def disable(self):
+        self.enabled = False
+        self.save()
+
+    def enable(self):
+        self.enabled = True
+        self.save()

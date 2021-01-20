@@ -297,7 +297,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
     with db.atomic():
         subreddits = (
             Subreddit.select()
-            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False))
+            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False), Subreddit.channel.enabled == True)
         )
 
     subreddits_to_process = list()

@@ -65,6 +65,7 @@ def main(database_path):
     ignore_if_older_than = peewee.IntegerField(default=3 * 24 * 60, null=True)
     weight = peewee.IntegerField(default=1)
     description = peewee.CharField(null=True)
+    enabled = peewee.BooleanField(default=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -170,6 +171,8 @@ def main(database_path):
         migrator.add_column('reddit_requests', 'weight', weight),
         # 20201116
         migrator.add_column('reddit_requests', 'description', description),
+        # 20210120
+        migrator.add_column('channels', 'enabled', enabled),
     ]
 
     logger.info('Starting migration....')
