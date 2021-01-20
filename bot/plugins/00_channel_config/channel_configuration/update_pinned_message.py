@@ -22,12 +22,12 @@ SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
 
 MULTIREDDIT_URL = 'https://old.reddit.com/user/{redditor}/m/{name}/'
 
-BASE_POST = """••• <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+BASE_POST = """••• <a href="{url}">{name}</a>{multi_subs}{hashtag_placeholder}
 • {number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>\
 {quiet_block}\
 {ignored_block}"""
 
-BASE_RESUME = """••• <a href="{url}">/{sub_multi_prefix}/{name}</a>{multi_subs}{hashtag_placeholder}
+BASE_RESUME = """••• <a href="{url}">{name}</a>{multi_subs}{hashtag_placeholder}
 •️ top {number_of_posts} {posts_string} from <code>/{sorting}/</code> every {period} at {hour} UTC{weekday_block}\
 {ignored_block}"""
 
@@ -116,11 +116,13 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             continue
 
         format_dict = dict(
-            name=subreddit.name,
+            name=subreddit.r_name,
             number_of_posts=subreddit.number_of_posts if subreddit.number_of_posts > 1 else 'one',
             posts_string='post' if subreddit.number_of_posts == 1 else 'posts',
             pretty_time=pretty_time(subreddit.max_frequency),
-            sorting=subreddit.sorting,
+            sorting=subreddit.sorting_pretty,
+            url=subreddit.link,
+            sub_multi_prefix=subreddit.prefix,
             hashtag_placeholder='',
             ignored_block='',
             quiet_block='',
@@ -132,9 +134,6 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
         )
 
         if subreddit.is_multireddit:
-            format_dict['sub_multi_prefix'] = 'm'
-            format_dict['url'] = MULTIREDDIT_URL.format(redditor=subreddit.multireddit_owner, name=subreddit.name)
-
             if subreddit.template_has_hashtag():
                 # decide how to prefix the multireddit's subreddits list
                 sub_prefix = '#'
@@ -143,13 +142,11 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
 
             account = creds.default_account
             reddit = Reddit(**account.creds_dict(), **account.default_client.creds_dict())
+            multireddit_subreddits = reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name)
             format_dict['multi_subs'] = ' ({first_sub_prefix}{subs_list})'.format(
                 first_sub_prefix=sub_prefix,
-                subs_list=', {}'.format(sub_prefix).join(reddit.multi_subreddits(subreddit.multireddit_owner, subreddit.name))
+                subs_list=', {}'.format(sub_prefix).join(multireddit_subreddits)
             )
-        else:
-            format_dict['sub_multi_prefix'] = 'r'
-            format_dict['url'] = SUBREDDIT_URL.format(name=subreddit.name)
 
         # this is done both for posts jobs and resume jobs
         if subreddit.allow_nsfw == False or subreddit.hide_spoilers or subreddit.ignore_if_newer_than or subreddit.min_score:
@@ -167,15 +164,6 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             if subreddit.min_upvote_perc:
                 ignored_list.append('submissions with an upvotes ratio lower than {}%'.format(subreddit.min_upvote_perc))
             format_dict['ignored_block'] = '\n• ignored submissions: {}'.format(', '.join(ignored_list))
-
-        if subreddit.sorting in ('top', 'day'):
-            format_dict['sorting'] = 'top/day'
-        elif subreddit.sorting == 'week':
-            format_dict['sorting'] = 'top/week'
-        elif subreddit.sorting == 'month':
-            format_dict['sorting'] = 'top/month'
-        elif subreddit.sorting == 'all':
-            format_dict['sorting'] = 'top/alltime'
 
         if not subreddit.is_multireddit and subreddit.template_has_hashtag():
             # we do not do this with multireddits because we decide whether to use

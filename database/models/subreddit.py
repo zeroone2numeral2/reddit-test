@@ -116,12 +116,19 @@ class Subreddit(peewee.Model):
         return self.get_channel_invite_link()
 
     @property
-    def r_name(self):
-        prefix = "r"
+    def prefix(self):
         if self.is_multireddit:
-            prefix = "m"
+            return "m"
+        else:
+            return "r"
 
-        return '/{}/{}'.format(prefix, self.name)
+    @property
+    def prefix_with_slashes(self):
+        return "/{}/".format(self.prefix)
+
+    @property
+    def r_name(self):
+        return '/{}/{}'.format(self.prefix, self.name)
 
     @property
     def link(self):
@@ -133,6 +140,17 @@ class Subreddit(peewee.Model):
     @property
     def r_inline_link(self):
         return '<a href="{}">{}</a>'.format(self.link, self.r_name)
+
+    @property
+    def sorting_pretty(self):
+        if self.sorting in ('top', 'day'):
+            return 'top/day'
+        elif self.sorting == 'week':
+            return 'top/week'
+        elif self.sorting == 'month':
+            return 'top/month'
+        elif self.sorting == 'all':
+            return 'top/alltime'
 
     @property
     def r_name_with_id(self):
