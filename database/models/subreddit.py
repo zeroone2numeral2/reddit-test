@@ -131,7 +131,7 @@ class Subreddit(peewee.Model):
         return '/{}/{}'.format(self.prefix, self.name)
 
     @property
-    def link(self):
+    def subreddit_link(self):
         if self.is_multireddit:
             return "https://reddit.com/user/{}/m/{}".format(self.multireddit_owner, self.name)
         else:
@@ -139,7 +139,7 @@ class Subreddit(peewee.Model):
 
     @property
     def r_inline_link(self):
-        return '<a href="{}">{}</a>'.format(self.link, self.r_name)
+        return '<a href="{}">{}</a>'.format(self.subreddit_link, self.r_name)
 
     @property
     def sorting_pretty(self):
