@@ -17,7 +17,7 @@ from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
 from utilities import u
 from utilities import d
-from database.models import Subreddit, Job
+from database.models import Subreddit, Job, Channel
 from database.models import Post
 from database.models import InitialTopPost
 from database.models import RedditRequest
@@ -297,7 +297,8 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
     with db.atomic():
         subreddits = (
             Subreddit.select()
-            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False), Subreddit.channel.enabled == True)
+            .join(Channel)
+            .where(Subreddit.enabled == True, Subreddit.channel.is_null(False), Channel.enabled == True)
         )
 
     subreddits_to_process = list()
