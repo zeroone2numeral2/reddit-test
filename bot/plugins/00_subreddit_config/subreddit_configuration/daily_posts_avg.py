@@ -18,7 +18,7 @@ logger = logging.getLogger('handler')
 def subconfig_on_avgdaily_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/avgdaily command')
 
-    daily_average = subreddit_job.average_daily_posts(subreddit)
+    daily_average, _ = subreddit_job.average_daily_posts(subreddit)
     update.message.reply_text("Last 7 days' average daily posts: {}".format(daily_average))
 
     return Status.WAITING_SUBREDDIT_CONFIG_ACTION

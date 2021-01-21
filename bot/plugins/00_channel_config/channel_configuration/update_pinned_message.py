@@ -11,6 +11,7 @@ from bot.markups import Keyboard
 from database.models import Channel
 from database.models import Subreddit
 from database.queries import flairs
+from database.queries import subreddit_job
 from reddit import Reddit, creds
 from utilities import u
 from utilities import d
@@ -109,7 +110,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
 
     subs_info_list = []
     flairs_list = []
-    total_number_of_daily_posts = 0
+    total_number_of_daily_posts = 0.0
     include_short_template_legend_footer = False
     for i, subreddit in enumerate(subreddits):
         if not subreddit.enabled:
@@ -179,10 +180,15 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
 
         subs_info_list.append(BASE_POST.format(**format_dict))
 
-        try:
-            total_number_of_daily_posts += subreddit.daily_posts
-        except Exception as e:
-            logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e), exc_info=True)
+        average_daily_posts, partial = subreddit_job.average_daily_posts(subreddit)
+        if partial:  # use the average if we have a full week of data, otherwise calculate it
+            try:
+                total_number_of_daily_posts += subreddit.daily_posts
+            except Exception as e:
+                logger.error('error while calculating number of daily posts for subreddit %s: %s', subreddit.name, str(e), exc_info=True)
+                total_number_of_daily_posts += average_daily_posts  # use the average anyway if calculation fails
+        else:
+            total_number_of_daily_posts += average_daily_posts
 
         if subreddit.style.name.startswith('short_'):
             # this will let us decide whether to add the abbreviations legend at the bottom
