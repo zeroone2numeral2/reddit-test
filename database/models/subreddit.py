@@ -177,6 +177,12 @@ class Subreddit(peewee.Model):
         except peewee.DoesNotExist:
             return None
 
+    def is_enabled(self, check_channel=False):
+        if not check_channel:
+            return self.enabled
+
+        return self.enabled and self.channel and self.channel.enabled
+
     def expected_number_of_daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
         n = 0
 
