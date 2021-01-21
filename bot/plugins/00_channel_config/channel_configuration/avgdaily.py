@@ -31,11 +31,10 @@ def channelconfig_on_avgdaily_command(update: Update, _, channel: Channel):
         subs_list.append("{}: {} (partial: {})".format(subreddit.r_name, daily_average, partial))
         total += daily_average
 
-    avg = round(total / subs_count, 1)
     update.message.reply_html(
         "Average daily posts during the past week ({} subreddits): {}\n\nBreakdown:\n{}".format(
             subs_count,
-            avg,
+            total,
             "\n".join(subs_list)
         )
     )
