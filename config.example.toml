@@ -26,7 +26,6 @@ filename = "db.sqlite"
 
 [submissions]
 default_max_frequency = 115 # minutes (one post every two hours)
-default_sorting = "hot"
 
 [imgur]
 # get your secret keys from here: https://api.imgur.com/oauth2/addclient

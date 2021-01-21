@@ -34,7 +34,7 @@ class Subreddit(peewee.Model):
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
     quiet_hours_end = peewee.IntegerField(null=True, default=6)
     # HOW TO FETCH SUBMISSIONS
-    sorting = peewee.CharField(default=config.submissions.default_sorting)
+    sorting = peewee.CharField(default="hot")
     limit = peewee.IntegerField(null=True, default=25)
     number_of_posts = peewee.IntegerField(default=1)
     # PER-RECORD STYLE
@@ -151,6 +151,8 @@ class Subreddit(peewee.Model):
             return 'top/month'
         elif self.sorting == 'all':
             return 'top/alltime'
+
+        return 'hot'
 
     @property
     def r_name_with_id(self):
