@@ -108,6 +108,12 @@ class Sender:
             self._submission.gallery_data = self._submission.crosspost_parent_list[0].get('gallery_data', None)
             self._submission.media_metadata = self._submission.crosspost_parent_list[0].get('media_metadata', None)
 
+            if self._submission.url.startswith("/r/"):
+                # for xposts to a reddit TEXTUAL thread, the "url" property is the xposted
+                # thread link without the "https://reddit.com/"
+                # in this case, we add the "https://reddit.com/" part and link the thread
+                self._submission.url = "https://reddit.com/" + self._submission.url
+
         if self._submission.thumbnail and self._submission.thumbnail.lower() in DEFAULT_THUMBNAILS:
             # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
             self._submission.thumbnail = DEFAULT_THUMBNAILS[self._submission.thumbnail.lower()]
