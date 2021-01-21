@@ -27,8 +27,8 @@ def channelconfig_on_avgdaily_command(update: Update, _, channel: Channel):
     subs_list = []
     total = 0.0
     for subreddit in channel_subreddits:
-        daily_average, _ = subreddit_job.average_daily_posts(subreddit)
-        subs_list.append("{}: {}".format(subreddit.r_name, daily_average))
+        daily_average, partial = subreddit_job.average_daily_posts(subreddit)
+        subs_list.append("{}: {} (partial: {})".format(subreddit.r_name, daily_average, partial))
         total += daily_average
 
     avg = round(total / subs_count, 1)
