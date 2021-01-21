@@ -74,7 +74,6 @@ class Sender:
         self._submission.comments_url = 'https://www.reddit.com{}'.format(self._submission.permalink)
         self._submission.hidden_char = HIDDEN_CHAR  # we might need it for some templates
         self._submission.hidden_url_comments = '<a href="{}">{}</a>'.format(self._submission.comments_url, HIDDEN_CHAR)
-        self._submission.hidden_url = '<a href="{}">{}</a>'.format(self._submission.url, HIDDEN_CHAR)
         self._submission.score_dotted = u.dotted(self._submission.score or 0)
         self._submission.num_comments = int(self._submission.num_comments)
         self._submission.num_comments_dotted = u.dotted(self._submission.num_comments or 0)
@@ -112,7 +111,11 @@ class Sender:
                 # for xposts to a reddit TEXTUAL thread, the "url" property is the xposted
                 # thread link without the "https://reddit.com/"
                 # in this case, we add the "https://reddit.com/" part and link the thread
-                self._submission.url = "https://reddit.com/" + self._submission.url
+                self.log.info("submission is an x-post of a textual reddit post")
+                self._submission.url = "https://reddit.com" + self._submission.url
+
+        # we need to do this after we check if the post is an x-post
+        self._submission.hidden_url = '<a href="{}">{}</a>'.format(self._submission.url, HIDDEN_CHAR)
 
         if self._submission.thumbnail and self._submission.thumbnail.lower() in DEFAULT_THUMBNAILS:
             # https://old.reddit.com/r/redditdev/comments/2wwuje/what_does_it_mean_when_the_thumbnail_field_has/
