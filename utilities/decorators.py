@@ -275,6 +275,9 @@ def logconversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         step_returned = func(update, context, *args, **kwargs) or -10
+
+        context.user_data["_last_returned_step"] = step_returned
+
         Log.conv.debug(
             'user %d: function <%s> returned step %d (%s)',
             update.effective_user.id,
