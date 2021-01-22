@@ -241,6 +241,18 @@ def pass_subreddit(func):
     return wrapped
 
 
+def no_ongoing_conversation(func):
+    @wraps(func)
+    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        if "data" in context.user_data:
+            # what to do? There should be a way to retrun the previous conversation status (Status)
+            pass
+        subreddit = context.user_data['data']['subreddit']
+        return func(update, context, subreddit=subreddit, *args, **kwargs)
+
+    return wrapped
+
+
 def pass_style(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
