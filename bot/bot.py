@@ -134,6 +134,37 @@ class RedditBot(Updater):
         commands_list = [BotCommand(command, "command placeholder") for command in commands]
         self.bot.set_my_commands(commands_list)
 
+    def restrict_entry_points(self):
+        raise NotImplementedError
+
+        def dummy_callback(a, b):
+            pass
+
+        # first, we collect all the entry_point that are a CommandHandler, and creatue a dummy CommandHandler that
+        # will later be added to all ConversationHandler
+        handlers_to_inject = []
+        for group, handlers in self.dispatcher.handlers.items():
+            for handler in handlers:
+                if not isinstance(handler, ConversationHandler):
+                    continue
+
+                for entry_point_handler in handler.entry_points:
+                    if isinstance(entry_point_handler, CommandHandler):
+                        dummy_handler = CommandHandler(entry_point_handler.command, dummy_callback)
+                        handlers_to_inject.extend(dummy_handler)
+
+        # we loop the list again so we can inject the handlers
+        # problems:
+        # - we have no idea to which state to bind the dummy handlers
+        # - we only have to iject the handlers associated with the entry point of OTHER conversations, so we do not
+        #   have to add the CommandHandler entry point of the current ConversationHandler
+        for group, handlers in self.dispatcher.handlers.items():
+            for handler in handlers:
+                if not isinstance(handler, ConversationHandler):
+                    continue
+
+
+
     def run(self, *args, set_commands=True, **kwargs):
         if set_commands:
             logger.info('updating commands list...')
