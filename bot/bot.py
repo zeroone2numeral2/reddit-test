@@ -134,7 +134,7 @@ class RedditBot(Updater):
         commands_list = [BotCommand(command, "command placeholder") for command in commands]
         self.bot.set_my_commands(commands_list)
 
-    def ongoing_conversation(self, user_id, chat_id):
+    def ongoing_conversation(self, chat_id, user_id):
         for group, handlers in self.dispatcher.handlers.items():
             for handler in handlers:
                 if not isinstance(handler, ConversationHandler):

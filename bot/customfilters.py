@@ -3,7 +3,7 @@ import re
 # noinspection PyPackageRequirements
 from typing import Union, Pattern, cast
 
-from telegram.ext import MessageFilter
+from telegram.ext import MessageFilter, UpdateFilter
 
 from bot import mainbot as updater
 from bot.plugins.commands import Command
@@ -43,7 +43,13 @@ class AllButRegex(MessageFilter):
         return True
 
 
+class OgnoingConversation(UpdateFilter):
+    def filter(self, update):
+        return updater.ongoing_conversation(update.effective_chat.id, update.effective_user.id)
+
+
 class CustomFilters:
     subreddit_set = SubredditSet()
     all_but_exit = AllButExit()
     all_but_regex = AllButRegex
+    ongoing_conversation = OgnoingConversation()
