@@ -286,6 +286,15 @@ def logconversation(func):
             get_status_description(step_returned)
         )
 
+        if step_returned == -1:
+            # -1 --> ConversationHandler.END
+            # clean up temporrary data when the conversation ends
+            # should be a decorator parameter
+            tmp_keys = ["_last_returned_step", "data"]
+            Log.conv.debug("conversation end: cleaning up temporary data: %s", ", ".join(tmp_keys))
+            for key in tmp_keys:
+                context.user_data.pop(key, None)
+
         return step_returned
 
     return wrapped
