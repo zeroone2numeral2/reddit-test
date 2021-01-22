@@ -244,11 +244,15 @@ def pass_subreddit(func):
 def no_ongoing_conversation(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+        # the idea doesn't work, see https://github.com/RememberTheAir/reddit-test/issues/180#issuecomment-765367068
         if "data" in context.user_data:
             # what to do? There should be a way to retrun the previous conversation status (Status)
-            pass
-        subreddit = context.user_data['data']['subreddit']
-        return func(update, context, subreddit=subreddit, *args, **kwargs)
+            Log.conv.debug("entry point <%s> triggered, but we are already inside a conversation", func.__name__)
+            update.message.reply_text("This message triggers an entry point, but you cannot start another conversation. Use /exit to exit this one")
+            previous_step = context.user_data["_last_returned_step"]
+            return previous_step
+
+        return func(update, context, *args, **kwargs)
 
     return wrapped
 
