@@ -289,7 +289,7 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 mainbot.add_handler(ConversationHandler(
     name="subreddit_config",
     entry_points=[
-        CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command),
+        CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command, filters=~CustomFilters.ongoing_conversation),
         CallbackQueryHandler(on_configure_inline_button, pattern=r'configsub:(\d+)', pass_groups=True)
     ],
     states={
