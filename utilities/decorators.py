@@ -280,6 +280,18 @@ def logconversation(func):
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         step_returned = func(update, context, *args, **kwargs) or -10
 
+        """
+        from bot import mainbot
+        for group, handlers in mainbot.dispatcher.handlers.items():
+            for handler in handlers:
+                if not isinstance(handler, ConversationHandler):
+                    continue
+
+                user_key = (update.effective_user.id, update.effective_chat.id)
+                user_step = handler.conversations.get(user_key, 'not available')
+                print(handler.name, '::', user_step, get_status_description(user_step))
+        """
+
         context.user_data["_last_returned_step"] = step_returned
 
         Log.conv.debug(
