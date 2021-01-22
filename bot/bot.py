@@ -163,8 +163,6 @@ class RedditBot(Updater):
                 if not isinstance(handler, ConversationHandler):
                     continue
 
-
-
     def run(self, *args, set_commands=True, **kwargs):
         if set_commands:
             logger.info('updating commands list...')
