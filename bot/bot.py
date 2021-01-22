@@ -134,6 +134,22 @@ class RedditBot(Updater):
         commands_list = [BotCommand(command, "command placeholder") for command in commands]
         self.bot.set_my_commands(commands_list)
 
+    def ongoing_conversation(self, user_id, chat_id):
+        for group, handlers in self.dispatcher.handlers.items():
+            for handler in handlers:
+                if not isinstance(handler, ConversationHandler):
+                    continue
+
+                # this is the key format of the ConversationHandler.conevrsations dict
+                # https://github.com/python-telegram-bot/python-telegram-bot/blob/0c9915243df7fabe70d827250118a975d705fc6b/telegram/ext/conversationhandler.py#L392
+                user_key = (chat_id, user_id)
+
+                user_step = handler.conversations.get(user_key, None)
+                if user_step is not None:
+                    return True
+
+                # print(handler.name, '::', user_step, get_status_description(user_step))
+
     def restrict_entry_points(self):
         raise NotImplementedError
 
