@@ -51,7 +51,7 @@ def on_addchannel_command(update: Update, context: CallbackContext):
 
         return Status.WAITING_FORWARDED_MESSAGE
 
-    username = context.args[0].replace('@', '')
+    username = context.args[0].replace('@', '').replace('https://t.me/', '')
     logger.info('username: @%s', username)
 
     try:
