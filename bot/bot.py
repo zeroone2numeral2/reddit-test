@@ -6,7 +6,7 @@ from pathlib import Path
 
 # noinspection PyPackageRequirements
 from telegram.ext import Updater, CommandHandler, ConversationHandler
-from telegram import BotCommand
+from telegram import BotCommand, Update
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ class RedditBot(Updater):
         commands_list = [BotCommand(command, "command placeholder") for command in commands]
         self.bot.set_my_commands(commands_list)
 
-    def ongoing_conversation(self, chat_id, user_id):
+    def ongoing_conversation(self, update: Update):
         for group, handlers in self.dispatcher.handlers.items():
             for handler in handlers:
                 if not isinstance(handler, ConversationHandler):
@@ -142,7 +142,8 @@ class RedditBot(Updater):
 
                 # this is the key format of the ConversationHandler.conevrsations dict
                 # https://github.com/python-telegram-bot/python-telegram-bot/blob/0c9915243df7fabe70d827250118a975d705fc6b/telegram/ext/conversationhandler.py#L392
-                user_key = (chat_id, user_id)
+                # user_key = (chat_id, user_id)
+                user_key = handler._get_key(update)
 
                 user_step = handler.conversations.get(user_key, None)
                 if user_step is not None:

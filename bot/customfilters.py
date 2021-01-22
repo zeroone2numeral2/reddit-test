@@ -45,7 +45,8 @@ class AllButRegex(MessageFilter):
 
 class OgnoingConversation(UpdateFilter):
     def filter(self, update):
-        return updater.ongoing_conversation(update.effective_chat.id, update.effective_user.id)
+        # return updater.ongoing_conversation(update.effective_chat.id, update.effective_user.id)
+        return updater.ongoing_conversation(update)
 
 
 class CustomFilters:
