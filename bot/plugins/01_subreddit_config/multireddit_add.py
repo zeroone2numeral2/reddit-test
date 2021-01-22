@@ -121,6 +121,7 @@ def on_cancel(update: Update, _):
 
 
 mainbot.add_handler(ConversationHandler(
+    name="multireddit_add",
     entry_points=[
         CommandHandler(['addmulti'], on_addmulti_command)],
     states={

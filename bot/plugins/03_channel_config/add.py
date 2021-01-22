@@ -131,6 +131,7 @@ def on_cancel(update, _):
 
 
 mainbot.add_handler(ConversationHandler(
+    name="channel_add",
     entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
     states={
         Status.WAITING_FORWARDED_MESSAGE: [

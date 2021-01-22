@@ -140,6 +140,7 @@ def on_cancel(update: Update, _):
 
 
 mainbot.add_handler(ConversationHandler(
+    name="subreddit_add",
     entry_points=[
         CommandHandler(['addsub'], on_addsub_command)],
     states={

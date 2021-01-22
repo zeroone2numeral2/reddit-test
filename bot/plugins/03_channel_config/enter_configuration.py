@@ -188,6 +188,7 @@ def on_waiting_channel_selection_unknown_message(update: Update, context: Callba
 
 
 mainbot.add_handler(ConversationHandler(
+    name="channel_config",
     entry_points=[
         CommandHandler(['ch', 'channel'], on_channel_command)
     ],

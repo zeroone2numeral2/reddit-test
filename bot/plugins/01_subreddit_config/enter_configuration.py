@@ -148,10 +148,14 @@ def on_cancel_command(update: Update, context: CallbackContext):
     logger.info('/cancel command')
 
     if context.user_data.get('data', None):
+        keys_to_pop = []
         for k, v in context.user_data['data'].items():
             if k.lower() != 'subreddit':
                 # remove every temporary data that is NOT the subreddit object
-                context.user_data['data'].pop(k)
+                keys_to_pop.append(k)
+
+        for key in keys_to_pop:
+            context.user_data['data'].pop(key)
 
     if u.get_subreddit_from_userdata(context.user_data):
         # it might be that we do not have a subreddit saved in user_data yet (for example: user uses /sub and
@@ -283,6 +287,7 @@ def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
 
 
 mainbot.add_handler(ConversationHandler(
+    name="subreddit_config",
     entry_points=[
         CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command),
         CallbackQueryHandler(on_configure_inline_button, pattern=r'configsub:(\d+)', pass_groups=True)
