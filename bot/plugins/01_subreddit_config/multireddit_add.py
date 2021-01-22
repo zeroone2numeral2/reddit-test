@@ -9,6 +9,7 @@ from telegram import Update
 
 from bot import mainbot
 from bot.conversation import Status
+from bot.customfilters import CustomFilters
 from bot.markups import Keyboard, InlineKeyboard
 from database.models import Channel, Style
 from database.models import Subreddit
@@ -123,7 +124,7 @@ def on_cancel(update: Update, _):
 mainbot.add_handler(ConversationHandler(
     name="multireddit_add",
     entry_points=[
-        CommandHandler(['addmulti'], on_addmulti_command)],
+        CommandHandler(['addmulti'], on_addmulti_command, filters=~CustomFilters.ongoing_conversation)],
     states={
         Status.CHANNEL_SELECT: [
             MessageHandler(Filters.regex(r'^\d+') | Filters.regex(r'^/skip$'), on_channel_selected)

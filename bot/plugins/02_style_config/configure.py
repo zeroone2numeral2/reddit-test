@@ -410,8 +410,8 @@ def on_style_select_unknown_message(update: Update, context: CallbackContext):
 mainbot.add_handler(ConversationHandler(
     name="style_add_config",
     entry_points=[
-        CommandHandler(['style'], on_style_command),
-        CommandHandler(['newstyle'], on_newstyle_command),
+        CommandHandler(['style'], on_style_command, filters=~CustomFilters.ongoing_conversation),
+        CommandHandler(['newstyle'], on_newstyle_command, filters=~CustomFilters.ongoing_conversation),
     ],
     states={
         Status.STYLE_SELECT: [

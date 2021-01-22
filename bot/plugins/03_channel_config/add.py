@@ -132,7 +132,7 @@ def on_cancel(update, _):
 
 mainbot.add_handler(ConversationHandler(
     name="channel_add",
-    entry_points=[CommandHandler(command=['addchannel'], callback=on_addchannel_command)],
+    entry_points=[CommandHandler(['addchannel'], on_addchannel_command, filters=~CustomFilters.ongoing_conversation)],
     states={
         Status.WAITING_FORWARDED_MESSAGE: [
             MessageHandler(Filters.forwarded & ~Filters.command, callback=on_forwarded_message),
