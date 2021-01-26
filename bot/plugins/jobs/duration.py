@@ -55,27 +55,29 @@ def lastjob_command(update: Update, _):
 
         ended = "running"
         if job_duration.end:
-            now = u.now(utc=False)
-            end_localized = u.replace_timezone(job_duration.end_dt, u.tz_DEFAULT)
+            ended = job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S')
 
-            delta = now - end_localized
-            diff_seconds = (10 * 60) + delta.total_seconds()  # I'm crying. It works only if I substract the timedelta from 10 minutes
+        now = u.now(utc=False)
+        start_localized = u.replace_timezone(job_duration.start_dt, u.tz_DEFAULT)
 
-            u.print_dt(now)
-            u.print_dt(end_localized)
-            print(diff_seconds)
-            print(u.pretty_seconds(diff_seconds))
+        delta = now - start_localized
+        diff_seconds = (10 * 60) + delta.total_seconds()  # I'm crying. It works only if I substract the timedelta from 10 minutes
 
-            # print(now.tzinfo, job_duration.end_dt.tzinfo, diff_seconds)
+        u.print_dt(now)
+        u.print_dt(start_localized)
+        print(diff_seconds)
+        print(u.pretty_seconds(diff_seconds))
 
-            ended = "{} ({} ago)".format(
-                job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S'),
-                u.pretty_seconds(int(diff_seconds))
-            )
+        # print(now.tzinfo, job_duration.end_dt.tzinfo, diff_seconds)
+
+        started = "{} ({} ago)".format(
+            job_duration.start_dt.strftime('%d/%m/%Y %H:%M:%S'),
+            u.pretty_seconds(int(diff_seconds))
+        )
 
         text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total}'.format(
             name=job_name,
-            started=job_duration.start_dt.strftime('%d/%m/%Y %H:%M:%S'),
+            started=started,
             ended=ended,
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration is not None else 'running',
             interval=job_info['interval'],
