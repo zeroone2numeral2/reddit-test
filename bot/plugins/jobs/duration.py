@@ -1,4 +1,5 @@
 import datetime
+import pytz
 import logging
 
 from telegram import Update
@@ -54,7 +55,15 @@ def lastjob_command(update: Update, _):
 
         ended = "running"
         if job_duration.end:
-            diff_seconds = (u.now(utc=False) - job_duration.end_dt).total_seconds()
+            now = u.now(utc=False)
+            end_localized = u.replace_timezone(job_duration.end_dt, u.tz_DEFAULT)
+            diff_seconds = (now - end_localized).total_seconds()
+
+            # u.print_dt(now)
+            # u.print_dt(end_localized)
+            # print(diff_seconds)
+
+            # print(now.tzinfo, job_duration.end_dt.tzinfo, diff_seconds)
 
             ended = "{} ({} ago)".format(
                 job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S'),

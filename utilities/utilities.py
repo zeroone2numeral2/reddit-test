@@ -34,7 +34,7 @@ def html_escape(string):
     return escape(string)
 
 
-def now(string=False, utc=True):
+def now(string=False, utc=True, tz=None):
     """Return a datetime object or a string
 
     :param string: True -> returns current datetime as a string (default format), str -> use the passed string as format
@@ -42,19 +42,29 @@ def now(string=False, utc=True):
     :return: datetime/string
     """
 
+    if utc and tz:
+        raise ValueError("pass either tc or a timezone")
+
+    if not tz or tz is True:
+        tz = tz_DEFAULT
+
     if utc:
         now = datetime.datetime.utcnow()
     else:
-        now = datetime.datetime.now(tz_DEFAULT)
+        now = datetime.datetime.now(tz)
 
     if not string:
         return now
-    elif string == True:
+    elif string is True:
         return now.strftime(DEFAULT_TIME_FORMAT)
     elif isinstance(string, str):
         return now.strftime(string)
     else:
         return now
+
+
+def print_dt(dt_obj):
+    print(dt_obj.strftime('%d/%m/%Y %H:%M:%S') + " " + str(dt_obj.tzinfo))
 
 
 def localize_utc(utc_time, pytz_timezone):
@@ -63,6 +73,13 @@ def localize_utc(utc_time, pytz_timezone):
 
     # https://stackoverflow.com/questions/25264811/pytz-converting-utc-and-timezone-to-local-time
     return pytz.utc.localize(utc_time, is_dst=None).astimezone(pytz_timezone)
+
+
+def replace_timezone(dt_object, pytz_timezone):
+    if not isinstance(pytz_timezone, DstTzInfo):
+        raise ValueError('pytz_timezone must be of type pytz.timezone')
+
+    return dt_object.replace(tzinfo=pytz_timezone)
 
 
 def dotted(number):
@@ -112,6 +129,9 @@ def pretty_minutes(n_minutes):
 
 
 def pretty_seconds(n_seconds):
+    if n_seconds < 0:
+        n_seconds = n_seconds * -1
+
     if n_seconds < 60:
         return '{}s'.format(n_seconds)
 
