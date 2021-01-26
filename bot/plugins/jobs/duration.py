@@ -59,7 +59,7 @@ def lastjob_command(update: Update, _):
             end_localized = u.replace_timezone(job_duration.end_dt, u.tz_DEFAULT)
 
             delta = now - end_localized
-            diff_seconds = (10 * 60) + delta.total_seconds()  # I'm crying
+            diff_seconds = (10 * 60) + delta.total_seconds()  # I'm crying. It works only if I substract the timedelta from 10 minutes
 
             u.print_dt(now)
             u.print_dt(end_localized)
