@@ -57,11 +57,14 @@ def lastjob_command(update: Update, _):
         if job_duration.end:
             now = u.now(utc=False)
             end_localized = u.replace_timezone(job_duration.end_dt, u.tz_DEFAULT)
-            diff_seconds = (now - end_localized).total_seconds()
 
-            # u.print_dt(now)
-            # u.print_dt(end_localized)
-            # print(diff_seconds)
+            delta = now - end_localized
+            diff_seconds = (10 * 60) + delta.total_seconds()  # I'm crying
+
+            u.print_dt(now)
+            u.print_dt(end_localized)
+            print(diff_seconds)
+            print(u.pretty_seconds(diff_seconds))
 
             # print(now.tzinfo, job_duration.end_dt.tzinfo, diff_seconds)
 
