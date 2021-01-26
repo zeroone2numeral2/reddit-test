@@ -54,7 +54,7 @@ def lastjob_command(update: Update, _):
 
         ended = "running"
         if job_duration.end:
-            diff_seconds = (datetime.datetime.now() - job_duration.end_dt).total_seconds()
+            diff_seconds = (u.now(utc=False) - job_duration.end_dt).total_seconds()
 
             ended = "{} ({} ago)".format(
                 job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S'),
