@@ -70,7 +70,7 @@ def lastjob_command(update: Update, _):
 
             ended = "{} ({} ago)".format(
                 job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S'),
-                u.pretty_seconds(diff_seconds)
+                u.pretty_seconds(int(diff_seconds))
             )
 
         text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total}'.format(
