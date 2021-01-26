@@ -294,7 +294,11 @@ def on_subreddits_command(update: Update, _, style: Style):
         update.message.reply_text('No subreddit is using this style')
         return Status.WAITING_STYLE_CONFIG_ACTION
 
-    lines = ['{s.name} ({s.id})'.format(s=s) for s in subs]
+    lines = []
+    for sub in subs:
+        line = '{s.name} ({s.id}{override})'.format(s=sub, override=", ovverrides style" if sub.template_override else "")
+        lines.append(line)
+
     text = '<code>{}</code>'.format('\n'.join(lines))
 
     update.message.reply_html(text)
