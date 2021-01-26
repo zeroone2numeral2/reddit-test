@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from telegram import Update
@@ -51,10 +52,19 @@ def lastjob_command(update: Update, _):
         if not job_duration:
             continue
 
+        ended = "running"
+        if job_duration.end:
+            diff_seconds = (datetime.datetime.now() - job_duration.end_dt).total_seconds()
+
+            ended = "{} ({} ago)".format(
+                job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S'),
+                u.pretty_seconds(diff_seconds)
+            )
+
         text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total}'.format(
             name=job_name,
             started=job_duration.start_dt.strftime('%d/%m/%Y %H:%M:%S'),
-            ended=job_duration.end_dt.strftime('%d/%m/%Y %H:%M:%S') if job_duration.end else 'running',
+            ended=ended,
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration is not None else 'running',
             interval=job_info['interval'],
             current=job_duration.subreddits_progress,
