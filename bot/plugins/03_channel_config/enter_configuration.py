@@ -30,27 +30,37 @@ from .channel_configuration.index_channel import channelconfig_on_private_comman
 from .channel_configuration.index_channel import channelconfig_on_public_command
 from .channel_configuration.disable import channelconfig_on_enable_command
 from .channel_configuration.disable import channelconfig_on_disable_command
+from .channel_configuration.style import channelconfig_on_style_command
+from .channel_configuration.style import channelconfig_on_style_selected
+from .channel_configuration.style import channelconfig_waiting_style_unknown_message
 from utilities import u
 from utilities import d
 
 logger = logging.getLogger('handler')
 
-CHANNEL_SELECTED_TEXT = """Now you can configure "{c.title}"
+HELP_TEXT = """<b>Available commands</b>
+/info: see the channel db row
+/enable or /disable: enable/disable the channel
+/unlinksubs: unlink the channel's subreddits from the channel
+/remove: remove the channel from teh database, will not delete the linked subreddits
+/avgdaily: number of average daily posts in the channel
+/updatepin: update the channel pinned message
+/updatepic: update the channel icon, using the icon of the first sub with one set
+/exportlink: export and save the channel invite link
+/updatechat: update the channel data
+/getadmins: see the admins list and the bot permissions
+/subs: list linked subreddits
+/public or /private: post/don't post the channel in the index channel
+/unposted: mark the channel as not posted in the index channel
+/style: select a style for all the channel's subreddits
 
-You can use the following commands: \
-/info (see the channel db row), \
-/enable or /disable (enable/disable the channel), \
-/unlinksubs (unlink the channel's subreddits from the channel), \
-/remove (remove the channel from teh database, will not delete the linked subreddits), \
-/avgdaily (number of average daily posts in the channel), \
-/updatepin (update the channel pinned message), \
-/updatepic (update the channel icon, using the icon of the first sub with one set), \
-/exportlink (export and save the channel invite link), \
-/updatechat (update the channel data), \
-/getadmins (see the admins list and the bot permissions), \
-/subs (list linked subreddits), \
-/public or /private (post/don't post the channel in the index channel), \
-/unposted (mark the channel as not posted in the index channel)
+Use /exit to exit the configuration, or /channel to change the channel to configure"""
+
+CHANNEL_SELECTED_TEXT = """Now you can configure "{c.title}"
+- <a href="{c.link}">link</a>
+- ID: {c.channel_id}
+
+Use /help to see the available commands/actions
 
 Use /exit to exit the configuration, or /channel to change the channel to configure"""
 
@@ -74,6 +84,18 @@ def on_channel_command(update: Update, context: CallbackContext):
     update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
 
     return Status.WAITING_CHANNEL_SELECTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
+@d.pass_channel
+def channelconfig_on_help_command(update: Update, _, channel: Channel):
+    logger.info('/help command')
+
+    update.message.reply_html(HELP_TEXT, disable_web_page_preview=True)
+
+    return Status.WAITING_CHANNEL_CONFIG_ACTION
 
 
 @d.restricted
@@ -200,6 +222,7 @@ mainbot.add_handler(ConversationHandler(
         ],
         Status.WAITING_CHANNEL_CONFIG_ACTION: [
             CommandHandler(['ch', 'channel'], on_channel_command),
+            CommandHandler(['help'], channelconfig_on_help_command),
             CommandHandler(['info'], channelconfig_on_info_command),
             CommandHandler(['remove', 'rem'], channelconfig_on_remove_command),
             CallbackQueryHandler(channelconfig_on_confirm_delete_callbackquery, pattern=r"delchannel:(.*)"),
@@ -216,11 +239,17 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['private'], channelconfig_on_private_command),
             CommandHandler(['public'], channelconfig_on_public_command),
             CommandHandler(['unposted'], channelconfig_on_unposted_command),
+            CommandHandler(['style'], channelconfig_on_style_command),
             CommandHandler(['enable'], channelconfig_on_enable_command),
             CommandHandler(['disable'], channelconfig_on_disable_command),
 
             CommandHandler(Command.CANCEL, on_fake_cancel_command),
             MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_channel_config_action_unknown_message),
+        ],
+        Status.CHANNEL_WAITING_STYLE: [
+            MessageHandler(Filters.text & ~Filters.command, channelconfig_on_style_selected),
+            CommandHandler(Command.CANCEL, on_cancel_command),
+            MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), channelconfig_waiting_style_unknown_message),
         ],
         ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, on_timeout)],
     },

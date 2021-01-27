@@ -26,6 +26,19 @@ class Channel(peewee.Model):
     def to_dict(self):
         return model_to_dict(self)
 
+    @property
+    def link(self):
+        return self.get_invite_link()
+
+    def get_invite_link(self, ignore_public_username=False, default=None):
+        if not self.username or ignore_public_username:
+            if self.invite_link:
+                return self.invite_link
+            else:
+                return default
+        else:
+            return 'https://t.me/' + self.username
+
     @classmethod
     def exists(cls, channel_id):
         try:
