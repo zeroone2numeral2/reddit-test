@@ -103,12 +103,16 @@ def channelconfig_on_help_command(update: Update, _, channel: Channel):
 @d.restricted
 @d.failwithmessage
 @d.logconversation
-def on_exit_command(update: Update, context: CallbackContext):
+@d.pass_channel
+def on_exit_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/exit command')
 
     context.user_data.pop('data', None)
 
-    update.message.reply_html('Exited configuration', reply_markup=Keyboard.REMOVE)
+    update.message.reply_html(
+        'Exited configuration mode for channel "{}"'.format(channel.title),
+        reply_markup=Keyboard.REMOVE
+    )
 
     return ConversationHandler.END
 
