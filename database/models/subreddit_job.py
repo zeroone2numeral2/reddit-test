@@ -16,7 +16,7 @@ class SubredditJob(peewee.Model):
     duration = peewee.IntegerField(null=True)
     posted_messages = peewee.IntegerField(null=True)
     uploaded_bytes = peewee.IntegerField(null=True)
-    frontpage_max_depth = peewee.IntegerField(null=True)  # the submission with the highest index the job used
+    frontpage_max_depth = peewee.IntegerField(null=True)  # the submission the most far in the frontpage the job used
 
     class Meta:
         table_name = 'subreddit_jobs'
