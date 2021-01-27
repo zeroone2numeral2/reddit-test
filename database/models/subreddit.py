@@ -152,7 +152,7 @@ class Subreddit(peewee.Model):
         elif self.sorting == 'all':
             return 'top/alltime'
 
-        return 'hot'
+        return self.sorting  # might be "hot" or "new" or "controversial"
 
     @property
     def r_name_with_id(self):
