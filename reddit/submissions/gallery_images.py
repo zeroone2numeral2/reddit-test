@@ -45,7 +45,6 @@ class GalleryImagesHandler(BaseSenderType):
         # this dict will contain the urls properly sorted as specified in gallery_data
         # it will already contain the first "limit" items
         urls = {item['media_id']: '' for item in gallery_data['items'][:limit]}
-        # urls = list()
         for media_id, media_metadata in media_metadata.items():
             rg_logger.debug('media_id (status: %s): %s', media_metadata['status'], media_id)
             if media_metadata['status'] == 'failed':
@@ -61,7 +60,6 @@ class GalleryImagesHandler(BaseSenderType):
                 image_url = media_metadata['p'][-1]['u']
 
             rg_logger.debug('image url: %s', image_url)
-            # urls.append(image_url)
 
             if urls.get(media_id, None) is None:
                 # media_id not in the urls dict: maybe this media_id was not in the first "limit" items of the album,
