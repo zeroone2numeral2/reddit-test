@@ -36,10 +36,16 @@ class GalleryImagesHandler(BaseSenderType):
         return has_valid_medias  # if there is no valid media, fail the test
 
     @staticmethod
-    def _fetch_urls(media_metadata, use_largest_preview=False, limit=10):
+    def _fetch_urls(media_metadata, gallery_data, use_largest_preview=False, limit=10):
         rg_logger.debug('fetching urls (use_largest_preview: %s)', use_largest_preview)
 
-        urls = list()
+        # media_metadata: the actual container of the data we are going to use to send the photo
+        # gallery_data: we use this just to properly sort the album
+
+        # this dict will contain the urls properly sorted as specified in gallery_data
+        # it will already contain the first "limit" items
+        urls = {item['media_id']: '' for item in gallery_data['items'][:limit]}
+        # urls = list()
         for media_id, media_metadata in media_metadata.items():
             rg_logger.debug('media_id (status: %s): %s', media_metadata['status'], media_id)
             if media_metadata['status'] == 'failed':
@@ -55,10 +61,16 @@ class GalleryImagesHandler(BaseSenderType):
                 image_url = media_metadata['p'][-1]['u']
 
             rg_logger.debug('image url: %s', image_url)
-            urls.append(image_url)
+            # urls.append(image_url)
 
-            if limit and len(urls) == limit:
-                break
+            if urls.get(media_id, None) is None:
+                # media_id not in the urls dict: maybe this media_id was not in the first "limit" items of the album,
+                # and thus is not in this dict
+                continue
+
+            urls[media_id] = image_url
+
+        urls = list(urls.values())  # convert the dict vals to list
 
         return urls
 
@@ -96,7 +108,7 @@ class GalleryImagesHandler(BaseSenderType):
     def _entry_point(self, caption, reply_markup=None):
         self.log.info('sending gallery of images by url (gallery url: %s)', self._submission.url)
 
-        urls = self._fetch_urls(self._submission.media_metadata)
+        urls = self._fetch_urls(self._submission.media_metadata, self._submission.gallery_data)
         media_group = [InputMediaPhoto(media=url, caption=None if i != 0 else caption, parse_mode=ParseMode.HTML) for
                        i, url in enumerate(urls)]
 
