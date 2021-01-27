@@ -26,7 +26,7 @@ def subconfig_on_fpmaxdepth_command(update: Update, context: CallbackContext, su
     depths_strings = []
     max_depth = 0
     for row in depths:
-        print('day:', row['day'], 'depth:', row['depth'], 'times:', row['times'])
+        # print('day:', row['day'], 'depth:', row['depth'], 'times:', row['times'])
         string = "day {day}: <b>{depth}</b> x{times} times".format(**row)
         depths_strings.append(string)
 
