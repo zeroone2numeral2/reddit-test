@@ -18,24 +18,30 @@ logger = logging.getLogger('handler')
 def subconfig_on_fpmaxdepth_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/fpmaxdepth command')
 
-    depths = subreddit_job.top_fontpage_depth(subreddit)
+    days = 7
+
+    if context.args and context.args[0].isdigit():
+        days = int(context.args[0])
+
+    depths = subreddit_job.top_fontpage_depth(subreddit, days)
     if not depths:
-        update.message.reply_text("Not enough data")
+        update.message.reply_text("No data for this sub")
         return Status.WAITING_SUBREDDIT_CONFIG_ACTION
 
     depths_strings = []
     max_depth = 0
     for row in depths:
         # print('day:', row['day'], 'depth:', row['depth'], 'times:', row['times'])
-        string = "day {day}: <b>{depth}</b> x{times} times".format(**row)
+        string = "<b>{depth}</b>, x{times} times".format(**row)
         depths_strings.append(string)
 
         if row['depth'] > max_depth:
             max_depth = row['depth']
 
-    text = "Max frontpage depth reached while processing the subreddit's submissions:\n\n{}\n\nMax: <b>{}</b>".format(
+    text = "Max frontpage depth reached while processing the subreddit's submissions:\n\n{}\n\nMax: <b>{}</b>\nDuring: {} days".format(
         "\n".join(depths_strings),
-        max_depth
+        max_depth,
+        days
     )
     update.message.reply_html(text)
 
