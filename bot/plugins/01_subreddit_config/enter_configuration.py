@@ -39,30 +39,37 @@ from utilities import d
 
 logger = logging.getLogger('handler')
 
-TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">{s.r_name}</a> (channel: {s.ch_title}, \
-link: {s.channel_link})
-
-<b>Available commands</b>: \
-/info, \
-/remove (remove the subreddit from the db), \
-/setchannel (set the subreddit's channel), \
-/submissions (get the sub's frontpage based on the current sorting/limit, and see what has been already posted), \
-/clonefrom (override the settings of the current subreddit with those from another one), \
-/style (change this subreddit's style), \
-/getstyle (see the current style), \
-/dailyavg (past 7 days avg number of posts/day), \
-/setchannelicon (use this subreddit's icon as channel icon), \
-/disable (disable the subreddit), \
-/freq (set the posting frequency), \
-/flairs (see the sub's flairs), \
-/fpmaxdepth (see to which depth we go through a subreddit's frontpage when processing it), \
-/savetop (save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"), \
-/removetop (remove the saved top posts for this subreddit with the current sorting), \
-/gettop (see how many top posts we have saved for the current sorting)
+HELP_TEXT = """<b>Available commands</b>:
+/info: see the subreddit db row
+/remove: remove the subreddit from the db
+/setchannel: set the subreddit's channel
+/submissions: get the sub's frontpage based on the current sorting/limit, and see what has been already posted
+/clonefrom: override the settings of the current subreddit with those from another one
+/style: change this subreddit's style
+/getstyle: see the current style
+/dailyavg: past 7 days avg number of posts/day
+/setchannelicon: use this subreddit's icon as channel icon
+/disable: disable the subreddit
+/freq <code>[frequency]</code>: set the posting frequency
+/flairs: see the sub's flairs
+/fpmaxdepth <code>&lt;days&gt;</code>: see to which depth we go through a subreddit's frontpage when processing it. \
+Pass the number of days to change the timespan this data is returned
+/savetop: save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all")
+/removetop: remove the saved top posts for this subreddit with the current sorting
+/gettop: see how many top posts we have saved for the current sorting
 
 You can also pass one of the subreddit's properties to see or change them, for example:
 • "<code>template</code>" will show the current template
 • "<code>max_frequency 295</code>" will change <code>max_frequency</code> to 295
+
+Use /exit when you are done, or /sub to change subreddit\
+"""
+
+TEXT = """You are configuring <a href="https://reddit.com/r/{s.name}">{s.r_name}</a>
+- channel: {s.ch_title} (<a href="{s.channel_link}">link</a>)
+- ID: {s.id}
+
+Use /help to see the available commands and actions
 
 Use /exit when you are done, or /sub to change subreddit\
 """
@@ -207,6 +214,18 @@ def on_waiting_subreddit_config_action_unknown_message(update: Update, context: 
 @d.restricted
 @d.failwithmessage
 @d.logconversation
+@d.pass_subreddit
+def subconfig_on_help_command(update: Update, _, subreddit: Subreddit):
+    logger.info('/help command')
+
+    update.message.reply_html(HELP_TEXT, disable_web_page_preview=True)
+
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation
 def on_subreddit_select_unknown_message(update: Update, context: CallbackContext):
     logger.info('SUBREDDIT_SELECT: unknown action')
 
@@ -320,6 +339,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['fpmaxdepth'], subconfig_on_fpmaxdepth_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
+            CommandHandler(['help'], subconfig_on_help_command),
             CommandHandler(['cancel'], on_fake_cancel_command),
             MessageHandler(CustomFilters.all_but_regex(Command.EXIT_RE), on_waiting_subreddit_config_action_unknown_message),
         ],
