@@ -39,10 +39,10 @@ def average_daily_posts(subreddit: Subreddit, days=7) -> [float, bool]:
 def top_fontpage_depth(subreddit: Subreddit, days=7):
     delta: datetime = datetime.datetime.utcnow() - datetime.timedelta(hours=days * 24)
     query = (
-        SubredditJob.select(fn.day_part(SubredditJob.start).alias('day'), SubredditJob.frontpage_max_index.alias('depth'), fn.COUNT(SubredditJob.frontpage_max_index).alias('times'))
-        .where(SubredditJob.start > delta, SubredditJob.subreddit == subreddit, SubredditJob.frontpage_max_index.is_null(False))
-        .group_by(fn.day_part(SubredditJob.start), SubredditJob.frontpage_max_index)
-        .order_by(fn.day_part(SubredditJob.start).desc(), SubredditJob.frontpage_max_index.desc())
+        SubredditJob.select(fn.day_part(SubredditJob.start).alias('day'), SubredditJob.frontpage_max_depth.alias('depth'), fn.COUNT(SubredditJob.frontpage_max_depth).alias('times'))
+        .where(SubredditJob.start > delta, SubredditJob.subreddit == subreddit, SubredditJob.frontpage_max_depth.is_null(False))
+        .group_by(fn.day_part(SubredditJob.start), SubredditJob.frontpage_max_depth)
+        .order_by(fn.day_part(SubredditJob.start).desc(), SubredditJob.frontpage_max_depth.desc())
     ).dicts()
 
     if not query:
