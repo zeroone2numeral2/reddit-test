@@ -234,6 +234,10 @@ class SubredditTask(Task):
                 subreddit.logger.warning('received cancel request: aborting subreddit processing')
                 return job_result
 
+            # we save this so we can understand how far in the frontpage we usually look through
+            # the method will increase it only if needed
+            job_result.save_submission_max_index(sender.submission.current_position)
+
             subreddit.logger.info('submission url: %s', sender.submission.url)
             subreddit.logger.info('submission title: %s', sender.submission.title)
 
