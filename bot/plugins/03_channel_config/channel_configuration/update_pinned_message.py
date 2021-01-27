@@ -207,7 +207,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
     channel_obj = context.bot.get_chat(channel_id)
 
     footer = FOOTER.format(
-        total_number_of_daily_posts,
+        round(total_number_of_daily_posts, 1),  # for some reasons this includes too many decimals if we don't round it
         config.telegram.index
     )
     if not channel_obj.username:
