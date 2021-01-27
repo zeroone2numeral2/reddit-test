@@ -33,6 +33,7 @@ from .channel_configuration.disable import channelconfig_on_disable_command
 from .channel_configuration.style import channelconfig_on_style_command
 from .channel_configuration.style import channelconfig_on_style_selected
 from .channel_configuration.style import channelconfig_waiting_style_unknown_message
+from .channel_configuration.subs_property import channelconfig_on_sproperty_command
 from utilities import u
 from utilities import d
 
@@ -53,6 +54,7 @@ HELP_TEXT = """<b>Available commands</b>
 /public or /private: post/don't post the channel in the index channel
 /unposted: mark the channel as not posted in the index channel
 /style: select a style for all the channel's subreddits
+/sproperty <code>[property]</code>: show the value of that property for every subreddit of the channel
 
 Use /exit to exit the configuration, or /channel to change the channel to configure"""
 
@@ -241,6 +243,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['unposted'], channelconfig_on_unposted_command),
             CommandHandler(['style'], channelconfig_on_style_command),
             CommandHandler(['enable'], channelconfig_on_enable_command),
+            CommandHandler(['sproperty', 'prop'], channelconfig_on_sproperty_command),
             CommandHandler(['disable'], channelconfig_on_disable_command),
 
             CommandHandler(Command.CANCEL, on_fake_cancel_command),
