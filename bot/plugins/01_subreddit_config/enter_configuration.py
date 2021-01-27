@@ -54,7 +54,7 @@ HELP_TEXT = """<b>Available commands</b>:
 /flairs: see the sub's flairs
 /fpmaxdepth <code>&lt;days&gt;</code>: see to which depth we go through a subreddit's frontpage when processing it. \
 Pass the number of days to change the timespan this data is returned
-/savetop: save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all")
+/savetop: save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"
 /removetop: remove the saved top posts for this subreddit with the current sorting
 /gettop: see how many top posts we have saved for the current sorting
 
