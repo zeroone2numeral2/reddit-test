@@ -279,7 +279,7 @@ class SubredditTask(Task):
 def is_time_to_process(subreddit: Subreddit):
     quiet_hours_demultiplier = calculate_quiet_hours_demultiplier(subreddit)
     if quiet_hours_demultiplier == 0:  # 0: do not post anything if we are in the quiet hours timeframe
-        subreddit.logger.info('quiet hours demultiplier of r/%s is 0: skipping posting during quiet hours', subreddit.name)
+        subreddit.logger.info('quiet hours demultiplier of %s is 0: skipping posting during quiet hours', subreddit.r_name)
         return False
 
     if not time_to_post(subreddit, quiet_hours_demultiplier):
