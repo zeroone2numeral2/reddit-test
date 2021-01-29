@@ -31,6 +31,13 @@ def subconfig_on_fpmaxdepth_command(update: Update, context: CallbackContext, su
     depths_strings = []
     max_depth = 0
     for row in depths:
+        if row['depth'] == 0:
+            # skip the row with "0". The index count starts from 1
+            # This is just for legacy support: rows with 0 are simply JobResult
+            # objects of jobs that did not result in any submission to post
+            # also now when a job did result in nothing to post, the JobResult row will show NULL as depth
+            continue
+
         # print('day:', row['day'], 'depth:', row['depth'], 'times:', row['times'])
         string = "<b>{depth}</b>, x{times} times".format(**row)
         depths_strings.append(string)

@@ -161,7 +161,7 @@ def time_subreddit_processing(job_name=None):
 
             job_row.posted_messages = result.posted_messages
             job_row.uploaded_bytes = result.posted_bytes
-            job_row.frontpage_max_depth = result.submissions_max_index
+            job_row.frontpage_max_depth = result.submissions_max_index if result.submissions_max_index else None
 
             elapsed_seconds = (processing_end_dt - processing_start_dt).total_seconds()
             job_row.duration = elapsed_seconds
