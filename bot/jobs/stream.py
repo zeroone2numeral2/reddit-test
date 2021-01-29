@@ -236,7 +236,7 @@ class SubredditTask(Task):
 
             # we save this so we can understand how far in the frontpage we usually look through (max frontpage depth)
             # the method will increase it only if needed
-            job_result.save_submission_max_index(sender.submission.current_position)
+            job_result.save_submission_max_index(sender.submission.current_position + 1)
 
             subreddit.logger.info('submission url: %s', sender.submission.url)
             subreddit.logger.info('submission title: %s', sender.submission.title)
