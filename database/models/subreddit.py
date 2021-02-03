@@ -28,8 +28,8 @@ class Subreddit(peewee.Model):
     channel: Channel = peewee.ForeignKeyField(Channel, backref='subreddits', on_delete='RESTRICT', null=True)
     # PROPERTIES THAT DICTATE WHETHER TO POST OR NOT AT A GIVEN TIME
     enabled = peewee.BooleanField(default=True)
-    last_post_datetime = peewee.DateTimeField(null=True)
-    last_job_datetime = peewee.DateTimeField(null=True)
+    last_post_datetime = peewee.DateTimeField(null=True)  # last time we posted a message for the sub
+    last_job_datetime = peewee.DateTimeField(null=True)  # last time the subreddit has been processed by a job
     max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency)  # in minutes
     quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)  # 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
