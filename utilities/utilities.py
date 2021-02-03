@@ -466,3 +466,37 @@ def remove_duplicates(origin_list, sort=True):
         result_list.sort()
 
     return result_list
+
+
+def pretty_time(total_minutes, sep=', ', round_by=10):
+    """Pretty string representation of minutes
+
+    :param total_minutes: time in minutes
+    :param sep: string that separates hours and minutes (if both present)
+    :param round_by: round minutes to the highest multiple of 'round_by' possible
+    :return: string
+    """
+
+    hours = int(total_minutes / 60)
+    minutes = total_minutes - (hours * 60)
+
+    if (minutes % round_by) != 0:
+        minutes = minutes + (round_by - (minutes % round_by))
+        if minutes == 60:
+            minutes = 0
+            hours += 1
+
+    string = ''
+    if hours > 0:
+        if hours > 1:
+            string += '{} hours'.format(hours)
+        else:
+            string += 'one hour'
+
+    if minutes > 0:
+        if hours > 0:
+            string += sep
+
+        string += '{} minutes'.format(minutes)
+
+    return string

@@ -60,40 +60,6 @@ WEEKDAYS = (
 )
 
 
-def pretty_time(total_minutes, sep=', ', round_by=10):
-    """Pretty string representation of minutes
-
-    :param total_minutes: time in minutes
-    :param sep: string that separates hours and minutes (if both present)
-    :param round_by: round minutes to the highest multiple of 'round_by' possible
-    :return: string
-    """
-
-    hours = int(total_minutes / 60)
-    minutes = total_minutes - (hours * 60)
-
-    if (minutes % round_by) != 0:
-        minutes = minutes + (round_by - (minutes % round_by))
-        if minutes == 60:
-            minutes = 0
-            hours += 1
-
-    string = ''
-    if hours > 0:
-        if hours > 1:
-            string += '{} hours'.format(hours)
-        else:
-            string += 'one hour'
-
-    if minutes > 0:
-        if hours > 0:
-            string += sep
-
-        string += '{} minutes'.format(minutes)
-
-    return string
-
-
 @d.restricted
 @d.failwithmessage
 @d.logconversation
@@ -120,7 +86,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             name=subreddit.r_name,
             number_of_posts=subreddit.number_of_posts if subreddit.number_of_posts > 1 else 'one',
             posts_string='post' if subreddit.number_of_posts == 1 else 'posts',
-            pretty_time=pretty_time(subreddit.max_frequency),
+            pretty_time=u.pretty_time(subreddit.max_frequency),
             sorting=subreddit.sorting_pretty,
             url=subreddit.subreddit_link,
             sub_multi_prefix=subreddit.prefix,
@@ -157,7 +123,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             if subreddit.hide_spoilers:
                 ignored_list.append('spoilers')
             if subreddit.ignore_if_newer_than:
-                ignored_list.append('submissions newer than ' + pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
+                ignored_list.append('submissions newer than ' + u.pretty_time(subreddit.ignore_if_newer_than, sep=' and '))
             if subreddit.min_score:
                 ignored_list.append('submissions with less than {} votes'.format(subreddit.min_score))
             if subreddit.ignore_flairless:
