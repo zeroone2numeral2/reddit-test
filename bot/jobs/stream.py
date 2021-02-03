@@ -15,6 +15,7 @@ from .common.task import Task
 from .common.threadpoolexecutor import MonitoredThreadPoolExecutor
 from .common.jobresult import JobResult
 from bot.logging import SubredditLogNoAdapter
+from bot import botutils
 from utilities import u
 from utilities import d
 from database.models import Subreddit, Job, Channel
@@ -236,7 +237,7 @@ class SubredditTask(Task):
                     Subreddit.limit.default
                 )
 
-                bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+                botutils.log(text=text, parse_mode=ParseMode.HTML)
 
         if not senders:
             subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
@@ -396,7 +397,7 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
 
                 text = '{} - {} - <code>{}</code>'.format(error_hashtag, future.subreddit.name, u.escape(str(error_description)))
-                bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
+                botutils.log(text=text, parse_mode=ParseMode.HTML)
 
             jobs_log_row.subreddits_progress += 1
             jobs_log_row.save()
