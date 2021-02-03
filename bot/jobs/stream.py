@@ -156,7 +156,7 @@ def get_reddit_instance(subreddit):
 def fetch_submissions(subreddit: Subreddit, reddit):
     subreddit.logger.info('fetching submissions (sorting: %s, is_multireddit: %s)', subreddit.sorting, str(subreddit.is_multireddit))
 
-    limit = subreddit.limit or 25
+    limit = subreddit.limit or Subreddit.limit.default
     sorting = subreddit.sorting.lower()
 
     for position, submission in reddit.iter_submissions(subreddit.name, multireddit_owner=subreddit.multireddit_owner, sorting=sorting, limit=limit):
