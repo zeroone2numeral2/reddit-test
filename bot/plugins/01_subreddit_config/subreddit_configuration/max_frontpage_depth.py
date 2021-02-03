@@ -45,8 +45,9 @@ def subconfig_on_fpmaxdepth_command(update: Update, context: CallbackContext, su
         if row['depth'] > max_depth:
             max_depth = row['depth']
 
-    text = "Max frontpage depth reached while processing the subreddit's submissions:\n\n{}\n\nMax: <b>{}</b>\nDuring: {} days".format(
+    text = "Max frontpage depth reached while processing the subreddit's submissions:\n\n{}\n\nLimit: <b>{}</b>\nMax: <b>{}</b>\nDuring: {} days".format(
         "\n".join(depths_strings),
+        subreddit.limit,
         max_depth,
         days
     )
