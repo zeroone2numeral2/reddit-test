@@ -49,4 +49,3 @@ def top_fontpage_depth(subreddit: Subreddit, days=7):
         return
 
     return list(query)
-

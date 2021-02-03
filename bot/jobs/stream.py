@@ -194,7 +194,7 @@ class SubredditTask(Task):
         reddit_request.save_request(subreddit, account_name, client_name, description='submissions')
 
         senders = list()
-        comments_requests_count = 0  # we keep track of how many requests to fetch the comments we are going to send
+        comments_requests_count = non_posted_submissions = 0  # we keep track of how many requests to fetch the comments we are going to send
         for submission in fetch_submissions(subreddit, reddit):
             comments_requests_count += 1  # we send it when we create the submission's 'current_position' attribute
 
@@ -217,6 +217,26 @@ class SubredditTask(Task):
                 subreddit.logger.info('submission di NOT pass filters, continuing to next one...')
                 sender = None  # avoid to use a Sender that did not pass the filters
                 continue
+
+        if non_posted_submissions < subreddit.number_of_posts:
+            # we've been able to collect less submission than the number of possible posts
+            # this means that after fetching all the possible submission for the sub (based on Subreddit.limit) and
+            # after filtering out a-ready posted submissions, we still weren't able to find enough submissions to
+            # test and possibly send
+
+            subreddit.logger.warning("unable to collect enough submissions to post: %d collected, %d required", non_posted_submissions, subreddit.number_of_posts)
+            if subreddit.limit < Subreddit.limit.default:
+                subreddit.logger.warning("subreddit's limit is lower than default, might want to adjust that")
+
+                warning_hashtag = '#mirrorbot_warning_{}'.format(bot.username)
+                text = '{} - {}: unable to fetch enough submissions to post (subreddit limit: {}, default limit: {})'.format(
+                    warning_hashtag,
+                    subreddit.r_name_with_id,
+                    subreddit.limit,
+                    Subreddit.limit.default
+                )
+
+                bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
 
         if not senders:
             subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
