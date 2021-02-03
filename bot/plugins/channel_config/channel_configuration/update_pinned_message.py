@@ -137,9 +137,9 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             # hashtags or not to list its subreddit above
             format_dict['hashtag_placeholder'] = ' (#{})'.format(subreddit.name)
 
-        if subreddit.quiet_hours_demultiplier > 1 or subreddit.quiet_hours_demultiplier == 0:
+        if subreddit.quiet_hours_cooldown_factor > 1 or subreddit.quiet_hours_cooldown_factor == 0:
             format_dict['quiet_block'] = '\n• less frequent posts (frequency x{}) from {} to {} UTC'.format(
-                subreddit.quiet_hours_demultiplier,
+                subreddit.quiet_hours_cooldown_factor,
                 subreddit.quiet_hours_start or config.quiet_hours.start,
                 subreddit.quiet_hours_end or config.quiet_hours.end
             )

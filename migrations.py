@@ -179,6 +179,7 @@ def main(database_path):
         migrator.add_column('subreddit_jobs', 'frontpage_max_depth', frontpage_max_depth),
         # 20210203
         migrator.add_column('subreddits', 'last_job_datetime', last_job_datetime),
+        migrator.rename_column('subreddits', 'quiet_hours_demultiplier', 'quiet_hours_cooldown_factor'),
     ]
 
     logger.info('Starting migration....')

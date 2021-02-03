@@ -31,7 +31,7 @@ class Subreddit(peewee.Model):
     last_post_datetime = peewee.DateTimeField(null=True)  # last time we posted a message for the sub
     last_job_datetime = peewee.DateTimeField(null=True)  # last time the subreddit has been processed by a job
     max_frequency = peewee.IntegerField(default=115)  # in minutes
-    quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)  # 0 -> do not post during quiet hours, 1 -> same frequency as normal period
+    quiet_hours_cooldown_factor = peewee.FloatField(null=False, default=1.0)  # 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
     quiet_hours_end = peewee.IntegerField(null=True, default=6)
     # HOW TO FETCH SUBMISSIONS
@@ -193,7 +193,7 @@ class Subreddit(peewee.Model):
         quiet_hours_end = self.quiet_hours_end or Subreddit.quiet_hours_end.default
 
         hours_of_reduced_frequency = 0
-        if self.quiet_hours_demultiplier != 1.0:
+        if self.quiet_hours_cooldown_factor != 1.0:
             if quiet_hours_start > quiet_hours_end:
                 hours_of_reduced_frequency += 24 - quiet_hours_start
                 hours_of_reduced_frequency += quiet_hours_end + 1
@@ -213,8 +213,8 @@ class Subreddit(peewee.Model):
         n_during_quiet_hours = 0
         if minutes_of_reduced_frequency:
             # number of messages during quiet hours
-            if self.quiet_hours_demultiplier != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
-                reduced_frequency = self.max_frequency * self.quiet_hours_demultiplier
+            if self.quiet_hours_cooldown_factor != 0.0:  # keep n_during_quiet_hours to 0 when quiet_hours_demultiplier is 0
+                reduced_frequency = self.max_frequency * self.quiet_hours_cooldown_factor
                 n_during_quiet_hours = (minutes_of_reduced_frequency / reduced_frequency)
 
                 if not ignore_number_of_posts:

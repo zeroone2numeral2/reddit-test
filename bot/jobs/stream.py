@@ -57,13 +57,13 @@ def its_quiet_hours(subreddit: Subreddit):
 
 
 def calculate_quiet_hours_demultiplier(subreddit: Subreddit):
-    if subreddit.quiet_hours_demultiplier == 1:
+    if subreddit.quiet_hours_cooldown_factor == 1:
         # if the multiplier is 1, no need to do other checks, the frequency is the same during quiet hours
         subreddit.logger.info('subreddit quiet hours demultiplier is 1: posts frequency is unchanged, no need to check if we are in quiet hours')
         return 1
     elif its_quiet_hours(subreddit):
         # if it's quiet hours: return the demultiplier
-        return subreddit.quiet_hours_demultiplier
+        return subreddit.quiet_hours_cooldown_factor
     else:
         subreddit.logger.info('we are not into the quiet hours timeframe: frequency multiplier is 1')
         return 1
