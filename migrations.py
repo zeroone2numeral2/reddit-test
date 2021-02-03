@@ -67,6 +67,7 @@ def main(database_path):
     description = peewee.CharField(null=True)
     enabled = peewee.BooleanField(default=True)
     frontpage_max_depth = peewee.IntegerField(null=True)
+    last_job_datetime = peewee.DateTimeField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -176,6 +177,8 @@ def main(database_path):
         migrator.add_column('channels', 'enabled', enabled),
         # 20210127
         migrator.add_column('subreddit_jobs', 'frontpage_max_depth', frontpage_max_depth),
+        # 20210203
+        migrator.add_column('subreddits', 'last_job_datetime', last_job_datetime),
     ]
 
     logger.info('Starting migration....')
