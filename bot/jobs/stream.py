@@ -236,12 +236,12 @@ class SubredditTask(Task):
                 subreddit.logger.warning("subreddit's limit is lower than default, might want to adjust that")
 
                 warning_hashtag = '#mirrorbot_warning_{}'.format(bot.username)
-                text = '{} - {}: unable to fetch enough submissions to post (subreddit limit: {}, default limit: {}, collected Sender objects: {}, number of posts: {})'.format(
+                text = '{} - {}: unable to fetch enough submissions to post (subreddit limit: {}, default limit: {}, non-posted submissions available from the frontpage: {}, number of posts: {})'.format(
                     warning_hashtag,
                     subreddit.r_name_with_id,
                     subreddit.limit,
                     Subreddit.limit.default,
-                    len(senders),
+                    non_posted_submissions,
                     subreddit.number_of_posts
                 )
 
