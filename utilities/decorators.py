@@ -169,6 +169,9 @@ def time_subreddit_processing(job_name=None):
             with db.atomic():
                 job_row.save()
 
+                subreddit.last_job_datetime = u.now()
+                subreddit.save()
+
             Log.job.info(
                 'processing time for %s : %d seconds (%s)',
                 subreddit.r_name_with_id,

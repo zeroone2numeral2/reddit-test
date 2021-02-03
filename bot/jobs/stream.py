@@ -302,10 +302,6 @@ class SubredditTask(Task):
 
             # time.sleep(1)
 
-        subreddit.last_job_datetime = u.now()
-        with db.atomic():
-            subreddit.save()
-
         return job_result
 
 
