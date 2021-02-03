@@ -219,9 +219,9 @@ class SubredditTask(Task):
                 continue
 
         if non_posted_submissions < subreddit.number_of_posts:
-            # we've been able to collect less submission than the number of possible posts
-            # this means that after fetching all the possible submission for the sub (based on Subreddit.limit) and
-            # after filtering out a-ready posted submissions, we still weren't able to find enough submissions to
+            # we've been able to collect less submission than the number of required posts to post on each job.
+            # This means that after fetching all the possible submission for the sub (based on Subreddit.limit) and
+            # after filtering out already-posted submissions, we still weren't able to find enough submissions to
             # test and possibly send
 
             subreddit.logger.warning("unable to collect enough submissions to post: %d collected, %d required", non_posted_submissions, subreddit.number_of_posts)
