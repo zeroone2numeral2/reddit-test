@@ -194,14 +194,20 @@ class SubredditTask(Task):
         # one reddit.iter_submissions() -> one request
         reddit_request.save_request(subreddit, account_name, client_name, description='submissions')
 
+        job_result = JobResult()
+
         senders = list()
         comments_requests_count = non_posted_submissions = 0  # we keep track of how many requests to fetch the comments we are going to send
         for submission in fetch_submissions(subreddit, reddit):
             comments_requests_count += 1  # we send it when we create the submission's 'current_position' attribute
 
+            # we save this so we can understand how far in the frontpage we usually look through (max frontpage depth)
+            # the method will increase it only if needed
+            job_result.save_submission_max_index(submission.current_position + 1)
+
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
-                return JobResult()
+                return job_result
 
             sender = Sender(bot, subreddit, submission)
             if sender.test_filters():
@@ -242,22 +248,17 @@ class SubredditTask(Task):
         if not senders:
             subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
                                   subreddit.name)
-            return JobResult()
+            return job_result
 
         # for each submission fetched, we have executed an additional request to fetch the comments
         reddit_request.save_request(subreddit, account_name, client_name, weight=comments_requests_count, description='comments')
 
         subreddit.logger.info('we collected %d/%d submissions to post', len(senders), subreddit.number_of_posts)
 
-        job_result = JobResult()
         for sender in senders:
             if self.interrupt_request:
                 subreddit.logger.warning('received cancel request: aborting subreddit processing')
                 return job_result
-
-            # we save this so we can understand how far in the frontpage we usually look through (max frontpage depth)
-            # the method will increase it only if needed
-            job_result.save_submission_max_index(sender.submission.current_position + 1)
 
             subreddit.logger.info('submission url: %s', sender.submission.url)
             subreddit.logger.info('submission title: %s', sender.submission.title)
