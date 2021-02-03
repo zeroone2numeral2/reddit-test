@@ -225,6 +225,11 @@ class SubredditTask(Task):
                 sender = None  # avoid to use a Sender that did not pass the filters
                 continue
 
+        if non_posted_submissions == 0:
+            # if we haven't found any submission that hasn't been posted yet, but we went through the whole frontpage,
+            # we save as max depth the subreddit's limit
+            job_result.save_submission_max_index(subreddit.limit)
+
         if non_posted_submissions < subreddit.number_of_posts:
             # we've been able to collect less submission than the number of required posts to post on each job.
             # This means that after fetching all the possible submission for the sub (based on Subreddit.limit) and
