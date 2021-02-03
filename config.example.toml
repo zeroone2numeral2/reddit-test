@@ -24,9 +24,6 @@ first = 0.5 # 0: "interval" will be used instead
 [sqlite]
 filename = "db.sqlite"
 
-[submissions]
-default_max_frequency = 115 # minutes (one post every two hours)
-
 [imgur]
 # get your secret keys from here: https://api.imgur.com/oauth2/addclient
 # more info: https://github.com/faustocarrera/imgur-python/wiki

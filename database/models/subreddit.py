@@ -30,7 +30,7 @@ class Subreddit(peewee.Model):
     enabled = peewee.BooleanField(default=True)
     last_post_datetime = peewee.DateTimeField(null=True)  # last time we posted a message for the sub
     last_job_datetime = peewee.DateTimeField(null=True)  # last time the subreddit has been processed by a job
-    max_frequency = peewee.IntegerField(default=config.submissions.default_max_frequency)  # in minutes
+    max_frequency = peewee.IntegerField(default=115)  # in minutes
     quiet_hours_demultiplier = peewee.FloatField(null=False, default=1.0)  # 0 -> do not post during quiet hours, 1 -> same frequency as normal period
     quiet_hours_start = peewee.IntegerField(null=True, default=21)
     quiet_hours_end = peewee.IntegerField(null=True, default=6)
