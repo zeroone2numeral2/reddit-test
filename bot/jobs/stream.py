@@ -393,10 +393,14 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
                 text = '{} - pool executor timeout - {} seconds'.format(error_hashtag, executor_timeout)
                 bot.send_message(config.telegram.log, text, parse_mode=ParseMode.HTML)
             except Exception:
-                error_description = future.exception()
+                error_description = str(future.exception())
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
 
-                text = '{} - {} - <code>{}</code>'.format(error_hashtag, future.subreddit.name, u.escape(str(error_description)))
+                text = '{} - {} - <code>{}</code>'.format(
+                    error_hashtag,
+                    future.subreddit.r_name_with_id,
+                    u.escape(error_description)
+                )
                 botutils.log(text=text, parse_mode=ParseMode.HTML)
 
             jobs_log_row.subreddits_progress += 1
