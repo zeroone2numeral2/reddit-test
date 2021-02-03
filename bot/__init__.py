@@ -4,7 +4,7 @@ import database.database   # we need it to initialize the package as soon as pos
 from .logging import logging_config
 from .bot import RedditBot
 from .bot import DummyContext
-from .jobs.stream import check_posts, stream_job
+from .jobs.stream import check_posts
 from config import config
 
 # from apscheduler.schedulers.background import BackgroundScheduler
