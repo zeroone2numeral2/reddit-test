@@ -197,9 +197,11 @@ class SubredditTask(Task):
         job_result = JobResult()
 
         senders = list()
-        comments_requests_count = non_posted_submissions = 0  # we keep track of how many requests to fetch the comments we are going to send
+        comments_requests_count = 0  # we keep track of how many requests to fetch the comments we are going to send
+        non_posted_submissions = 0
         for submission in fetch_submissions(subreddit, reddit):
             comments_requests_count += 1  # we send it when we create the submission's 'current_position' attribute
+            non_posted_submissions += 1
 
             # we save this so we can understand how far in the frontpage we usually look through (max frontpage depth)
             # the method will increase it only if needed
@@ -211,11 +213,10 @@ class SubredditTask(Task):
 
             sender = Sender(bot, subreddit, submission)
             if sender.test_filters():
-                subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:12])
+                subreddit.logger.info('submission %s ("%s") passed filters', submission.id, submission.title[:24])
                 senders.append(sender)
                 if len(senders) >= subreddit.number_of_posts:
-                    subreddit.logger.info('we collected enough posts to post (number_of_posts: %d)',
-                                          subreddit.number_of_posts)
+                    subreddit.logger.info('we collected enough posts to post (number_of_posts: %d)', subreddit.number_of_posts)
                     break
             else:
                 # no need to save ignored submissions in the database, because the next time
@@ -224,6 +225,8 @@ class SubredditTask(Task):
                 subreddit.logger.info('submission di NOT pass filters, continuing to next one...')
                 sender = None  # avoid to use a Sender that did not pass the filters
                 continue
+
+        logger.debug("senders: %d, non_posted_submissions: %d", len(senders), non_posted_submissions)
 
         if non_posted_submissions == 0:
             # if we haven't found any submission that hasn't been posted yet, but we went through the whole frontpage,
@@ -253,8 +256,8 @@ class SubredditTask(Task):
                 botutils.log(text=text, parse_mode=ParseMode.HTML)
 
         if not senders:
-            subreddit.logger.info('no (valid) submission returned for r/%s, continuing to next subreddit/channel...',
-                                  subreddit.name)
+            subreddit.logger.info('no (valid) submission returned for %s, continuing to next subreddit/channel...',
+                                  subreddit.r_name)
             return job_result
 
         # for each submission fetched, we have executed an additional request to fetch the comments
