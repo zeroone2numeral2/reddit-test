@@ -237,7 +237,7 @@ class SubredditTask(Task):
             # test and possibly send
 
             subreddit.logger.warning("unable to collect enough submissions to post: %d collected, %d required", non_posted_submissions, subreddit.number_of_posts)
-            if subreddit.sorting != "new" and subreddit.limit < Subreddit.limit.default:
+            if subreddit.sorting == "hot" and subreddit.limit < Subreddit.limit.default:
                 subreddit.logger.warning("subreddit's limit is lower than default, might want to adjust that")
 
                 warning_hashtag = '#mirrorbot_warning_{}'.format(bot.username)
