@@ -409,7 +409,3 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
         # time.sleep(1)
 
     return stream_job_result
-
-
-def stream_job(context) -> JobResult:
-    logger.info('entering job callback')
