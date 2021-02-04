@@ -205,7 +205,7 @@ class SubredditTask(Task):
 
             # we save this so we can understand how far in the frontpage we usually look through (max frontpage depth)
             # the method will increase it only if needed
-            job_result.save_submission_max_index(submission.current_position + 1)
+            job_result.save_submission_max_index(submission.current_position)
 
             if self.interrupt_request:
                 subreddit.logger.warning('received interrupt request: aborting subreddit processing')
