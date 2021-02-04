@@ -27,11 +27,16 @@ def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     limit = subreddit.limit or 25
     sorting = subreddit.sorting.lower()
 
-    update.message.reply_text('Fetching submissions ({} from {})...'.format(limit, sorting))
-
     account = creds.default_account
     client = account.default_client
     reddit = Reddit(**account.creds_dict(), **client.creds_dict())
+
+    update.message.reply_text('Fetching submissions ({} from {}, account: {}, client: {})...'.format(
+        limit,
+        sorting,
+        account.username,
+        client.name
+    ))
 
     reddit_request.save_request(subreddit, account.username, client.name, description='submissions')
 
