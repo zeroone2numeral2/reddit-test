@@ -26,6 +26,8 @@ class ImageHandler(BaseSenderType):
             return True
         elif 'images-wixmp' in url_lower:
             return True
+        elif 'imgflip.com/i/' in url_lower:
+            return True
         elif 'i.reddituploads.com' in url_lower:
             return True
         else:
