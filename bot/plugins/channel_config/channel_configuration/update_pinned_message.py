@@ -24,7 +24,7 @@ SUBREDDIT_URL = 'https://reddit.com/r/{name}/'
 MULTIREDDIT_URL = 'https://old.reddit.com/user/{redditor}/m/{name}/'
 
 BASE_POST = """••• <a href="{url}">{name}</a>{multi_subs}{hashtag_placeholder}
-• {number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>\
+• {number_of_posts} {posts_string} every ~{pretty_time} from <code>/{sorting}/</code>'s first {limit} submissions\
 {quiet_block}\
 {ignored_block}"""
 
@@ -88,6 +88,7 @@ def channelconfig_on_updatepin_command(update: Update, context: CallbackContext,
             posts_string='post' if subreddit.number_of_posts == 1 else 'posts',
             pretty_time=u.pretty_time(subreddit.max_frequency),
             sorting=subreddit.sorting_pretty,
+            limit=subreddit.limit or Subreddit.limit.default,
             url=subreddit.subreddit_link,
             sub_multi_prefix=subreddit.prefix,
             hashtag_placeholder='',
