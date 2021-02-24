@@ -34,6 +34,7 @@ from .subreddit_configuration.see_submissions import subconfig_on_submissions_co
 from .subreddit_configuration.daily_posts_avg import subconfig_on_avgdaily_command
 from .subreddit_configuration.flairs import subconfig_on_flairs_command
 from .subreddit_configuration.max_frontpage_depth import subconfig_on_fpmaxdepth_command
+from .subreddit_configuration.users_blacklist import subconfig_on_ubl_command
 from utilities import u
 from utilities import d
 
@@ -52,6 +53,8 @@ HELP_TEXT = """<b>Available commands</b>:
 /disable: disable the subreddit
 /freq <code>[frequency]</code>: set the posting frequency
 /flairs: see the sub's flairs
+/ubl: see the users blacklist
+/ubl <code>[username]</code>: add/remove the user from the blacklist
 /fpmaxdepth <code>&lt;days&gt;</code>: see to which depth we go through a subreddit's frontpage when processing it. \
 Pass the number of days to change the timespan this data is returned
 /savetop: save the current top posts of the subreddit, so we won't post them if the sorting is "month" or "all"
@@ -337,6 +340,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['dailyavg'], subconfig_on_avgdaily_command),
             CommandHandler(['flairs'], subconfig_on_flairs_command),
             CommandHandler(['fpmaxdepth'], subconfig_on_fpmaxdepth_command),
+            CommandHandler(['ubl'], subconfig_on_ubl_command),
             CommandHandler(['style'], subconfig_on_setstyle_command),
             CommandHandler(['sub', 'subreddit'], on_sub_command),
             CommandHandler(['help'], subconfig_on_help_command),

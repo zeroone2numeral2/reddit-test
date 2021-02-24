@@ -87,6 +87,7 @@ class Sender:
         self._submission.video_size = (None, None)
         self._submission.video_duration = 0
         self._submission.upvote_perc = int(self._submission.upvote_ratio * 100)
+        self._submission.author_username_lower = str(self._submission.author).lower()
         self._submission_dict = dict()
 
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
@@ -436,6 +437,7 @@ class Sender:
             )
 
     def test_filters(self):
+        print(self._submission.author_username_lower, self._subreddit.get_users_blacklist())
         if self._subreddit.ignore_stickied and self._submission.stickied:
             self.log.info('tests failed: sticked submission')
             return False
@@ -460,6 +462,9 @@ class Sender:
                 self._subreddit.min_upvote_perc,
                 self._submission.upvote_perc
             )
+            return False
+        elif self._subreddit.users_blacklist and self._submission.author_username_lower in self._subreddit.get_users_blacklist():
+            self.log.info('tests failed: u/%s is blacklisted in this subreddit', self._submission.author_username_lower)
             return False
         elif self._subreddit.ignore_if_newer_than \
                 and isinstance(self._subreddit.ignore_if_newer_than, int) \

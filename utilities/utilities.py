@@ -500,3 +500,18 @@ def pretty_time(total_minutes, sep=', ', round_by=10):
         string += '{} minutes'.format(minutes)
 
     return string
+
+
+def username_to_link(username, html=False):
+    url = "https://reddit.com/user/{}".format(username)
+
+    if not html:
+        return url
+
+    return '<a href="{}">/u/{}</a>'.format(url, username)
+
+
+def username_to_link_but_cool(username):
+    url = "https://reddit.com/user/{}".format(username)
+
+    return '<a href="{}">/u/</a><code>{}</code>'.format(url, username)
