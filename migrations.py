@@ -68,6 +68,7 @@ def main(database_path):
     enabled = peewee.BooleanField(default=True)
     frontpage_max_depth = peewee.IntegerField(null=True)
     last_job_datetime = peewee.DateTimeField(null=True)
+    users_blacklist = peewee.CharField(null=True)
 
     migrations = [
         # 20190318 pt. 1
@@ -180,6 +181,8 @@ def main(database_path):
         # 20210203
         migrator.add_column('subreddits', 'last_job_datetime', last_job_datetime),
         migrator.rename_column('subreddits', 'quiet_hours_demultiplier', 'quiet_hours_cooldown_factor'),
+        # 20210224
+        migrator.add_column('subreddits', 'users_blacklist', users_blacklist),
     ]
 
     logger.info('Starting migration....')

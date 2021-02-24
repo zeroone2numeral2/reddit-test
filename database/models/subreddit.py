@@ -1,4 +1,5 @@
 import datetime
+import json
 from typing import TypeVar, Type, Union
 
 import peewee
@@ -62,6 +63,7 @@ class Subreddit(peewee.Model):
     medias_only = peewee.BooleanField(default=False, null=True)
     min_upvote_perc = peewee.IntegerField(default=False, null=True)
     ignore_flairless = peewee.BooleanField(default=False, null=True)
+    users_blacklist = peewee.CharField(null=True)  # JSON string
     # RESUME FIELDS
     enabled_resume = peewee.BooleanField(default=False)
     hour = peewee.IntegerField(default=22)
@@ -343,3 +345,39 @@ class Subreddit(peewee.Model):
                 return True
 
         return False
+
+    def get_users_blacklist(self, ensure_lowercase=True):
+        blacklisted_users = []
+        if self.users_blacklist:
+            blacklisted_users = json.loads(self.users_blacklist)
+
+        if ensure_lowercase:
+            blacklisted_users = [u.lower() for u in blacklisted_users]
+
+        return blacklisted_users
+
+    def blacklist_user(self, username: str, add: bool = None, remove: bool = None, save=True):
+        if add is not None and remove is not None:
+            raise ValueError("only one between 'add' and 'remove' must be passed")
+
+        blacklisted_users = self.get_users_blacklist()
+
+        username = username.lower()
+
+        if (not remove and username in blacklisted_users) or (remove and username not in blacklisted_users):
+            # user to add already in the blacklist, or user to remove not in the blacklist
+            return False
+
+        if not remove:
+            # add the user to the blacklist
+            blacklisted_users.append(username)
+        else:
+            # rebuild blacklist without user to remove
+            blacklisted_users = [u for u in blacklisted_users if u.lower() != username]
+
+        self.users_blacklist = json.dumps(blacklisted_users)
+
+        if save:
+            self.save()
+
+        return True
