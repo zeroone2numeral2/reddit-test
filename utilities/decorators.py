@@ -47,6 +47,9 @@ def failwithmessage(func):
     def wrapped(update, context, *args, **kwargs):
         try:
             return func(update, context, *args, **kwargs)
+        except DispatcherHandlerStop as dhs_error:
+            # make sure to re-raise it
+            raise DispatcherHandlerStop(dhs_error.state)
         except Exception as e:
             exc_info = True
             if 'database is locked' in str(e).lower():
@@ -279,7 +282,10 @@ def pass_channel(func):
     return wrapped
 
 
-def logconversation(stop_propagation=True, cleanup_data_on_end=True):
+def logconversation(stop_propagation=False, cleanup_data_on_end=True):
+    """stop_propagation should be used only with handler inside a ConversationHandler that might trigger other "external"
+    handlers"""
+
     def real_decorator(func):
         @wraps(func)
         def wrapped(update: Update, context: CallbackContext, *args, **kwargs):

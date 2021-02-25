@@ -216,7 +216,7 @@ def on_waiting_subreddit_config_action_unknown_message(update: Update, context: 
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation()
+@d.logconversation(stop_propagation=True)
 @d.pass_subreddit
 def subconfig_on_help_command(update: Update, _, subreddit: Subreddit):
     logger.info('/help command')

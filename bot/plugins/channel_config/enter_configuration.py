@@ -90,7 +90,7 @@ def on_channel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation()
+@d.logconversation(stop_propagation=True)
 @d.pass_channel
 def channelconfig_on_help_command(update: Update, _, channel: Channel):
     logger.info('/help command')
