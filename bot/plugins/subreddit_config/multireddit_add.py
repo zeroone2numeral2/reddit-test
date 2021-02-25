@@ -133,4 +133,4 @@ mainbot.add_handler(ConversationHandler(
     fallbacks=[
         CommandHandler('cancel', on_cancel)
     ]
-))
+), group=-1)

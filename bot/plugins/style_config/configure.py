@@ -440,4 +440,4 @@ mainbot.add_handler(ConversationHandler(
     },
     fallbacks=[CommandHandler(Command.EXIT, on_exit_command)],
     conversation_timeout=15 * 60
-))
+), group=-1)
