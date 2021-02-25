@@ -283,8 +283,8 @@ def pass_channel(func):
 
 
 def logconversation(stop_propagation=True, cleanup_data_on_end=True):
-    """stop_propagation should be used only with handler inside a ConversationHandler that might trigger other "external"
-    handlers"""
+    """stop_propagation is suggested to be always True, otherwise messages that trigger both
+    a ConversationHandler handler and other "external" handlers will be executed"""
 
     def real_decorator(func):
         @wraps(func)
