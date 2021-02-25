@@ -13,7 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_ubl_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/ubl command')

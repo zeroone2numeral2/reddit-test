@@ -16,7 +16,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_getadmins_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info("/getadmins")

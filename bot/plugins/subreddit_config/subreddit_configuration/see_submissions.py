@@ -19,7 +19,7 @@ BASE_STRING = '<a href="{shortlink}">{i}</a>. [{posted}][<code>{id}</code>] {tit
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_submissions_command(update: Update, _, subreddit: Subreddit):
     logger.info('/submissions command')

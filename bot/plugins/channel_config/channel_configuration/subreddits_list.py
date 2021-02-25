@@ -12,7 +12,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_subs_command(update: Update, _, channel: Channel):
     logger.info('/subs command')

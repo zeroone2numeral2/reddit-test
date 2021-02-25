@@ -12,7 +12,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_enable_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/enable command')
@@ -30,7 +30,7 @@ def channelconfig_on_enable_command(update: Update, context: CallbackContext, ch
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_disable_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/disable command')

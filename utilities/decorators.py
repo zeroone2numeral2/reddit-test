@@ -4,7 +4,7 @@ import time
 from functools import wraps
 
 from telegram import Update, Bot
-from telegram.ext import ConversationHandler, CallbackContext
+from telegram.ext import ConversationHandler, CallbackContext, DispatcherHandlerStop
 
 from bot.conversation import get_status_description
 from bot.jobs.common.jobresult import JobResult
@@ -279,42 +279,49 @@ def pass_channel(func):
     return wrapped
 
 
-def logconversation(func):
-    @wraps(func)
-    def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
-        step_returned = func(update, context, *args, **kwargs) or -10
+def logconversation(stop_propagation=True):
+    def real_decorator(func):
+        @wraps(func)
+        def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
+            step_returned = func(update, context, *args, **kwargs) or -10
 
-        """
-        from bot import mainbot
-        for group, handlers in mainbot.dispatcher.handlers.items():
-            for handler in handlers:
-                if not isinstance(handler, ConversationHandler):
-                    continue
+            """
+            from bot import mainbot
+            for group, handlers in mainbot.dispatcher.handlers.items():
+                for handler in handlers:
+                    if not isinstance(handler, ConversationHandler):
+                        continue
+    
+                    user_key = (update.effective_user.id, update.effective_chat.id)
+                    user_step = handler.conversations.get(user_key, 'not available')
+                    print(handler.name, '::', user_step, get_status_description(user_step))
+            """
 
-                user_key = (update.effective_user.id, update.effective_chat.id)
-                user_step = handler.conversations.get(user_key, 'not available')
-                print(handler.name, '::', user_step, get_status_description(user_step))
-        """
+            context.user_data["_last_returned_step"] = step_returned
 
-        context.user_data["_last_returned_step"] = step_returned
+            Log.conv.debug(
+                'user %d: function <%s> returned step %d (%s)',
+                update.effective_user.id,
+                func.__name__,
+                step_returned,
+                get_status_description(step_returned)
+            )
 
-        Log.conv.debug(
-            'user %d: function <%s> returned step %d (%s)',
-            update.effective_user.id,
-            func.__name__,
-            step_returned,
-            get_status_description(step_returned)
-        )
+            if step_returned == -1:
+                # -1 --> ConversationHandler.END
+                # clean up temporrary data when the conversation ends
+                # should be a decorator parameter
+                tmp_keys = ["_last_returned_step", "data"]
+                Log.conv.debug("conversation end: cleaning up temporary data: %s", ", ".join(tmp_keys))
+                for key in tmp_keys:
+                    context.user_data.pop(key, None)
 
-        if step_returned == -1:
-            # -1 --> ConversationHandler.END
-            # clean up temporrary data when the conversation ends
-            # should be a decorator parameter
-            tmp_keys = ["_last_returned_step", "data"]
-            Log.conv.debug("conversation end: cleaning up temporary data: %s", ", ".join(tmp_keys))
-            for key in tmp_keys:
-                context.user_data.pop(key, None)
+            if stop_propagation:
+                Log.conv.info("update propagation to higher handlers groups stopped")
+                raise DispatcherHandlerStop(step_returned)
 
-        return step_returned
+            return step_returned
 
-    return wrapped
+        return wrapped
+
+    return real_decorator

@@ -14,7 +14,7 @@ IGNORE_KEYS = ('style',)
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_info_command(update: Update, _, subreddit: Subreddit):
     logger.info('/info command')

@@ -16,7 +16,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def subconfig_on_setstyle_command(update: Update, context: CallbackContext):
     logger.info('/setstyle command, args: %s', str(context.args))
 
@@ -38,7 +38,7 @@ def subconfig_on_setstyle_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_style_selected(update: Update, _, subreddit: Subreddit):
     logger.info('/style command: style selected (%s)', update.message.text)
@@ -62,7 +62,7 @@ def subconfig_on_style_selected(update: Update, _, subreddit: Subreddit):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_getstyle_command(update: Update, _, subreddit: Subreddit):
     logger.info('/getstyle command')

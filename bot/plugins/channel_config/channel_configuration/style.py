@@ -17,7 +17,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def channelconfig_on_style_command(update: Update, context: CallbackContext):
     logger.info('/style command, args: %s', str(context.args))
 
@@ -42,7 +42,7 @@ def channelconfig_on_style_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_style_selected(update: Update, _, channel: Channel):
     logger.info('/style command: style selected (%s)', update.message.text)
@@ -73,7 +73,7 @@ def channelconfig_on_style_selected(update: Update, _, channel: Channel):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def channelconfig_waiting_style_unknown_message(update: Update, context: CallbackContext):
     logger.info('CHANNEL_WAITING_STYLE: unknown action')
 

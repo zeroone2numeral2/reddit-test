@@ -106,7 +106,7 @@ VALIDATORS = dict(
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_entry_change(update: Update, _, subreddit: Subreddit):
     logger.info('changed subreddit property: %s', update.message.text)

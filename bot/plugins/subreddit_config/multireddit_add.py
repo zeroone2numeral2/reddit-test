@@ -25,7 +25,7 @@ VALID_SUB_REGEX = r'(?:\/?r\/?)?([\w-]{3,22})'
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_addmulti_command(update: Update, context: CallbackContext):
     logger.info('/addmultib command, args: %s', str(context.args))
     if len(context.args) < 2:
@@ -75,7 +75,7 @@ def on_addmulti_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('channel selected: %s', update.message.text)
 
@@ -113,7 +113,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_cancel(update: Update, _):
     logger.info('conversation canceled with /cancel')
     update.message.reply_text('Operation aborted', reply_markup=Keyboard.REMOVE)

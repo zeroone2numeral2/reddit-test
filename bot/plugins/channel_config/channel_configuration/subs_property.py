@@ -13,7 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_sproperty_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/sproperty command, args: %s', context.args)

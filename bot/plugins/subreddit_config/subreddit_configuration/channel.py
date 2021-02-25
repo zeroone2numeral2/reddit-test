@@ -15,7 +15,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def subconfig_on_setchannel_command(update: Update, context: CallbackContext):
     logger.info('setchannel callback: %s', update.message.text)
 
@@ -39,7 +39,7 @@ def subconfig_on_setchannel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_selected_channel(update: Update, _, subreddit: Subreddit):
     logger.info('channel selected: %s', update.message.text)
@@ -57,7 +57,7 @@ def subconfig_on_selected_channel(update: Update, _, subreddit: Subreddit):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def subconfig_on_selected_channel_wrong(update: Update, _):
     logger.info('unexpected message while selecting channel')
     update.message.reply_text('Select a channel, or /cancel')

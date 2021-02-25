@@ -34,7 +34,7 @@ class TimeParser:
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_freq_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/freq command')

@@ -80,7 +80,7 @@ Use /exit when you are done, or /sub to change subreddit\
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_sub_command(update: Update, context: CallbackContext):
     logger.debug('/sub: selecting subreddit, text: %s', update.message.text)
 
@@ -100,7 +100,7 @@ def on_sub_command(update: Update, context: CallbackContext):
 
 
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_configure_inline_button(update, context: CallbackContext):
     logger.info('configure inline button')
 
@@ -122,7 +122,7 @@ def on_configure_inline_button(update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_subreddit_selected_wrong(update: Update, _):
     logger.debug('/sub: subreddit regex failed, text: %s', update.message.text)
 
@@ -133,7 +133,7 @@ def on_subreddit_selected_wrong(update: Update, _):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -154,7 +154,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_cancel_command(update: Update, context: CallbackContext):
     # this is used only for sub-conversations
     logger.info('/cancel command')
@@ -188,7 +188,7 @@ def on_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_fake_cancel_command(update: Update, context: CallbackContext):
     logger.info('fake /cancel command')
 
@@ -202,7 +202,7 @@ def on_fake_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_waiting_subreddit_config_action_unknown_message(update: Update, context: CallbackContext):
     logger.info('WAITING_SUBREDDIT_CONFIG_ACTION: unknown action')
 
@@ -216,7 +216,7 @@ def on_waiting_subreddit_config_action_unknown_message(update: Update, context: 
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_help_command(update: Update, _, subreddit: Subreddit):
     logger.info('/help command')
@@ -228,7 +228,7 @@ def subconfig_on_help_command(update: Update, _, subreddit: Subreddit):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_subreddit_select_unknown_message(update: Update, context: CallbackContext):
     logger.info('SUBREDDIT_SELECT: unknown action')
 
@@ -241,7 +241,7 @@ def on_subreddit_select_unknown_message(update: Update, context: CallbackContext
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_setchannel_waiting_channel_unknown_message(update: Update, context: CallbackContext):
     logger.info('SETCHANNEL_WAITING_CHANNEL: unknown action')
 
@@ -254,7 +254,7 @@ def on_setchannel_waiting_channel_unknown_message(update: Update, context: Callb
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_subreddit_waiting_style_unknown_message(update: Update, context: CallbackContext):
     logger.info('SUBREDDIT_WAITING_STYLE: unknown action')
 
@@ -267,7 +267,7 @@ def on_subreddit_waiting_style_unknown_message(update: Update, context: Callback
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_clone_waiting_origin_subreddit_unknown_message(update: Update, context: CallbackContext):
     logger.info('CLONE_WAITING_ORIGIN_SUBREDDIT: unknown action')
 
@@ -281,7 +281,7 @@ def on_clone_waiting_origin_subreddit_unknown_message(update: Update, context: C
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit
-@d.logconversation
+@d.logconversation()
 def on_exit_command(update: Update, context: CallbackContext, subreddit=None):
     logger.debug('/exit command')
 
@@ -297,7 +297,7 @@ def on_exit_command(update: Update, context: CallbackContext, subreddit=None):
 @d.restricted
 @d.failwithmessage
 @d.pass_subreddit
-@d.logconversation
+@d.logconversation()
 def on_timeout(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.debug('conversation timeout')
 

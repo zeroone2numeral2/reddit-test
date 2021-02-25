@@ -14,7 +14,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_confirm_delete_callbackquery(update: Update, context: CallbackContext, channel: Channel):
     logger.debug("deletion confirmed, %s", context.matches)
@@ -45,7 +45,7 @@ def channelconfig_on_confirm_delete_callbackquery(update: Update, context: Callb
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_remove_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/remove')

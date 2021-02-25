@@ -31,7 +31,7 @@ style to configure"""
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_newstyle_command(update: Update, context: CallbackContext):
     logger.info('/newstyle command')
 
@@ -67,7 +67,7 @@ def on_newstyle_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_rename_command(update: Update, context: CallbackContext, style: Style):
     logger.info('/rename command')
@@ -95,7 +95,7 @@ def on_rename_command(update: Update, context: CallbackContext, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_clone_command(update: Update, context: CallbackContext, style: Style):
     logger.info('/clone command')
@@ -134,7 +134,7 @@ def on_clone_command(update: Update, context: CallbackContext, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_style_command(update: Update, context: CallbackContext):
     logger.debug('/style: selecting style, text: %s', update.message.text)
 
@@ -155,7 +155,7 @@ def on_style_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_exit_command(update: Update, context: CallbackContext):
     logger.info('/exit command')
 
@@ -168,7 +168,7 @@ def on_exit_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_cancel_command(update: Update, context: CallbackContext):
     logger.info('/cancel command')
 
@@ -188,7 +188,7 @@ def on_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_fake_cancel_command(update: Update, context: CallbackContext):
     logger.info('fake /cancel command')
 
@@ -202,7 +202,7 @@ def on_fake_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_timeout(update: Update, context: CallbackContext):
     logger.debug('conversation timeout')
 
@@ -215,7 +215,7 @@ def on_timeout(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_style_selected(update: Update, context: CallbackContext):
     logger.info('/style command: style selected (%s)', update.message.text)
 
@@ -235,7 +235,7 @@ def on_style_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_remove_command(update: Update, context: CallbackContext, style: Style):
     logger.info('/remove command')
@@ -265,7 +265,7 @@ def on_remove_command(update: Update, context: CallbackContext, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_makedefault_command(update: Update, _, style: Style):
     logger.info('/default command')
@@ -284,7 +284,7 @@ def on_makedefault_command(update: Update, _, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_subreddits_command(update: Update, _, style: Style):
     logger.info('/subreddits command')
@@ -308,7 +308,7 @@ def on_subreddits_command(update: Update, _, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_info_command(update: Update, _, style: Style):
     logger.info('/info command')
@@ -321,7 +321,7 @@ def on_info_command(update: Update, _, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_style
 def on_entry_change(update: Update, _, style: Style):
     logger.info('changed style property: %s', update.message.text)
@@ -386,7 +386,7 @@ def on_entry_change(update: Update, _, style: Style):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_waiting_style_config_action_unknown_message(update: Update, context: CallbackContext):
     logger.info('WAITING_STYLE_CONFIG_ACTION: unknown action')
 
@@ -400,7 +400,7 @@ def on_waiting_style_config_action_unknown_message(update: Update, context: Call
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_style_select_unknown_message(update: Update, context: CallbackContext):
     logger.info('STYLE_SELECT: unknown action')
 

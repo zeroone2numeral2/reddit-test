@@ -13,7 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_unposted_command(update: Update, _, channel: Channel):
     logger.info('/unposted command')
@@ -28,7 +28,7 @@ def channelconfig_on_unposted_command(update: Update, _, channel: Channel):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_private_command(update: Update, _, channel: Channel):
     logger.info('/private command')
@@ -43,7 +43,7 @@ def channelconfig_on_private_command(update: Update, _, channel: Channel):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_public_command(update: Update, _, channel: Channel):
     logger.info('/public command')

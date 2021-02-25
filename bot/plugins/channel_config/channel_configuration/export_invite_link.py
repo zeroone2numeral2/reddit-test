@@ -14,7 +14,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_linkkeep_callbackquery(update, context: CallbackContext, channel: Channel):
     logger.info('linkkeep inline button')
@@ -25,7 +25,7 @@ def channelconfig_on_linkkeep_callbackquery(update, context: CallbackContext, ch
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_linkrevoke_callbackquery(update, context: CallbackContext, channel: Channel):
     logger.info('linkrevoke inline button')
@@ -51,7 +51,7 @@ def channelconfig_on_linkrevoke_callbackquery(update, context: CallbackContext, 
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_exportlink_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/exportlink command')

@@ -11,7 +11,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_subreddit
 def subconfig_on_remove_command(update: Update, context: CallbackContext, subreddit: Subreddit):
     logger.info('/remove command')

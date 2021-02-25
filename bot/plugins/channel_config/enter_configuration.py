@@ -69,7 +69,7 @@ Use /exit to exit the configuration, or /channel to change the channel to config
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_channel_command(update: Update, context: CallbackContext):
     logger.debug('/channel: selecting channel, text: %s', update.message.text)
 
@@ -90,7 +90,7 @@ def on_channel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def channelconfig_on_help_command(update: Update, _, channel: Channel):
     logger.info('/help command')
@@ -102,7 +102,7 @@ def channelconfig_on_help_command(update: Update, _, channel: Channel):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 @d.pass_channel
 def on_exit_command(update: Update, context: CallbackContext, channel: Channel):
     logger.info('/exit command')
@@ -119,7 +119,7 @@ def on_exit_command(update: Update, context: CallbackContext, channel: Channel):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_cancel_command(update: Update, context: CallbackContext):
     logger.info('/cancel command')
 
@@ -139,7 +139,7 @@ def on_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_fake_cancel_command(update: Update, context: CallbackContext):
     logger.info('fake /cancel command')
 
@@ -153,7 +153,7 @@ def on_fake_cancel_command(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_timeout(update: Update, context: CallbackContext):
     logger.debug('conversation timeout')
 
@@ -166,7 +166,7 @@ def on_timeout(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('/channel command: channel selected (%s)', update.message.text)
 
@@ -190,7 +190,7 @@ def on_channel_selected(update: Update, context: CallbackContext):
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_waiting_channel_config_action_unknown_message(update: Update, context: CallbackContext):
     logger.info('WAITING_CHANNEL_CONFIG_ACTION: unknown action')
 
@@ -204,7 +204,7 @@ def on_waiting_channel_config_action_unknown_message(update: Update, context: Ca
 
 @d.restricted
 @d.failwithmessage
-@d.logconversation
+@d.logconversation()
 def on_waiting_channel_selection_unknown_message(update: Update, context: CallbackContext):
     logger.info('WAITING_CHANNEL_SELECTION: unknown action')
 
