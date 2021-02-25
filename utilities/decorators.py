@@ -48,7 +48,7 @@ def failwithmessage(func):
         try:
             return func(update, context, *args, **kwargs)
         except DispatcherHandlerStop as dhs_error:
-            # make sure to re-raise it
+            # make sure to re-raise it so it can be catched by the dispatcher
             raise DispatcherHandlerStop(dhs_error.state)
         except Exception as e:
             exc_info = True
