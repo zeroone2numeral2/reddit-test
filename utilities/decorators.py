@@ -279,7 +279,7 @@ def pass_channel(func):
     return wrapped
 
 
-def logconversation(stop_propagation=True):
+def logconversation(stop_propagation=True, cleanup_data_on_end=True):
     def real_decorator(func):
         @wraps(func)
         def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
@@ -307,17 +307,16 @@ def logconversation(stop_propagation=True):
                 get_status_description(step_returned)
             )
 
-            if step_returned == -1:
+            if step_returned == -1 and cleanup_data_on_end:
                 # -1 --> ConversationHandler.END
                 # clean up temporrary data when the conversation ends
-                # should be a decorator parameter
                 tmp_keys = ["_last_returned_step", "data"]
                 Log.conv.debug("conversation end: cleaning up temporary data: %s", ", ".join(tmp_keys))
                 for key in tmp_keys:
                     context.user_data.pop(key, None)
 
             if stop_propagation:
-                Log.conv.info("update propagation to higher handlers groups stopped")
+                Log.conv.info("update propagation to higher level handlers groups stopped")
                 raise DispatcherHandlerStop(step_returned)
 
             return step_returned
