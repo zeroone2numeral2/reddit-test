@@ -245,7 +245,7 @@ def pass_subreddit(func):
     return wrapped
 
 
-def no_ongoing_conversation(func):
+def no_ongoing_conversation_deprecated(func):
     @wraps(func)
     def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
         # the idea doesn't work, see https://github.com/RememberTheAir/reddit-test/issues/180#issuecomment-765367068
