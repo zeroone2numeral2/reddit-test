@@ -65,6 +65,7 @@ class Sender:
         self._sent_messages = []
         self._uploaded_bytes = 0
         sender_kwargs = dict(submission=self._submission, subreddit=self._subreddit, bot=self._bot)
+        self.submission_handler_fallback = TextHandler(**sender_kwargs)
         self.submission_handler = TextHandler(**sender_kwargs)
 
         self._submission.flair_normalized = ''  # ascii flair
@@ -387,7 +388,7 @@ class Sender:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
 
         self.log.info('posting a text...')
-        self._sent_messages = self.submission_handler.post(text, reply_markup=reply_markup)
+        self._sent_messages = self.submission_handler_fallback.post(text, reply_markup=reply_markup)
 
         return self._sent_messages
 
