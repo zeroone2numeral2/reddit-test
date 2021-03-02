@@ -51,7 +51,7 @@ DEFAULT_THUMBNAILS = {
 
 class Sender:
     __slots__ = ['_bot', '_subreddit', '_submission', '_sent_messages', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
-                 'submission_handler']
+                 'submission_handler', 'submission_handler_fallback']
 
     def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
         self._bot: Bot = bot
