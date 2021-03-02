@@ -21,11 +21,19 @@ class GfycatHandler(BaseSenderType):
 
         return self._bot.send_video(**request_kwargs)
 
-    def _send_by_file_path(self, file_path, request_kwargs):
+    def _send_by_file_path(self, file_path, size, request_kwargs):
 
-        with open(file_path, 'rb') as f:
-            request_kwargs["video"] = f
-            sent_message = self._bot.send_video(**request_kwargs)
+        chat_id = request_kwargs.pop("chat_id")
+        request_kwargs.pop("video", None)  # no idea why it ends up here
+
+        request_kwargs["thumb_bo"] = request_kwargs["thumb"]  # _upload_video wants it there
+
+        sent_message = self._upload_video(
+            chat_id=chat_id,
+            file_path=file_path,
+            file_size=size,
+            **request_kwargs
+        )
 
         return sent_message
 
@@ -56,7 +64,8 @@ class GfycatHandler(BaseSenderType):
             self.log.info('sending by url failed (%s), downloading and uploading as video...', e.message)
             gfycat.download()
 
-            sent_message = self._send_by_file_path(gfycat.file_path, request_kwargs)
+            gfycat.ensure_size_from_file(override=True)  # make sure we have a size
+            sent_message = self._send_by_file_path(gfycat.file_path, gfycat.size, request_kwargs)
 
         gfycat.remove()
 

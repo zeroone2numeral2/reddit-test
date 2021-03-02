@@ -63,6 +63,10 @@ class Downloader:
     def __repr__(self):
         return '<Downloaded content {} ({})>'.format(self._url, self.size_readable)
 
+    def ensure_size_from_file(self, override=False):
+        if not self._size or override:
+            self._size = os.path.getsize(self._file_path)
+
     def check_size(self, raise_exception=True):
         if self._size > self._max_size:
             if raise_exception:

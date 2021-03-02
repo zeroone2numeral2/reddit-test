@@ -364,6 +364,7 @@ class Sender:
         if chat_id:
             self.log.info('overriding target chat id (%d) with %d', self.submission_handler.chat_id, chat_id)
             self.submission_handler.chat_id = chat_id
+            self.submission_handler_text.chat_id = chat_id
 
         # generate two texts: one to be used in case we will send the media as caption,
         # the other one for when we send the media as text (or if sending as media fails)
@@ -383,7 +384,7 @@ class Sender:
                 return self._sent_messages
             except Exception as e:
                 self.log.error('exeption during the sending of a media, sending as text. Error: %s', str(e),
-                               exc_info=False)
+                               exc_info=True)
         else:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
 
