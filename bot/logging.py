@@ -154,6 +154,7 @@ class SubredditLogNoAdapter(logging.Logger):
         self._dir_path = dir_path
         self._file_path = None
         self._formatter_name = 'subreddit'
+        self.init_time_str = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         self._extra = dict()
         self._generic_logger = logging.getLogger(__name__)
 
@@ -202,7 +203,10 @@ class SubredditLogNoAdapter(logging.Logger):
         self.subreddit_name = subreddit.name
         self._dir_path = os.path.join(self._dir_path, '{}_{}'.format(subreddit.name, subreddit.id))
         self._ensure_dir(self._dir_path)
-        self._file_path = os.path.join(self._dir_path, '{s.subreddit_name}_{s.subreddit_id}.log'.format(s=self))
+        self._file_path = os.path.join(
+            self._dir_path,
+            '{s.subreddit_name}_{s.subreddit_id}_{s.init_time_str}.log'.format(s=self)
+        )
 
         self._extra = {'sub_id': subreddit.id, 'sub_name': subreddit.name}
 

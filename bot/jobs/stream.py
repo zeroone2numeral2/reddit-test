@@ -184,6 +184,7 @@ class SubredditTask(Task):
     # noinspection DuplicatedCode
     @d.time_subreddit_processing(job_name='stream')
     def __call__(self, subreddit: Subreddit, bot: Bot) -> JobResult:
+
         if self.interrupt_request:
             subreddit.logger.warning('received interrupt request: aborting subreddit processing')
             return JobResult()
