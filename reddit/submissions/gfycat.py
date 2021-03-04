@@ -35,6 +35,8 @@ class GfycatHandler(BaseSenderType):
             **request_kwargs
         )
 
+        self._sum_uploaded_bytes(sent_message)
+
         return sent_message
 
     def _entry_point(self, caption, reply_markup=None):
