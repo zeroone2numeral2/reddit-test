@@ -28,7 +28,7 @@ def channelconfig_on_getadmins_command(update: Update, context: CallbackContext,
         if admin.status == ChatMember.CREATOR:
             users.insert(0, 'owner: ' + admin.user.mention_html())
         else:
-            users.append(admin.user.mention_html())
+            users.append('admin: ' + admin.user.mention_html())
 
         if admin.user.id == mainbot.bot.id:
             bot_chat_member_dict = admin.to_dict()
