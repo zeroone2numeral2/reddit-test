@@ -4,6 +4,7 @@ import re
 from math import floor
 import urllib.request as urllib
 from mimetypes import guess_type
+from typing import Tuple, List
 
 import pytz
 from pytz.tzinfo import DstTzInfo
@@ -109,7 +110,7 @@ def normalize_sub_name(name):
 
 
 def expand_channel_id(channel_id_str):
-    return int('100' + re.search(r'(\d+)\.\s.+', channel_id_str).group(1)) * -1
+    return int('100' + re.search(r'^(\d+).*', channel_id_str).group(1)) * -1
 
 
 def pretty_minutes(n_minutes):
@@ -515,3 +516,22 @@ def username_to_link_but_cool(username):
     url = "https://reddit.com/user/{}".format(username)
 
     return '<a href="{}">/u/</a><code>{}</code>'.format(url, username)
+
+
+def id_match_from_list(provided_id: [int, str], ids_list: list) -> Tuple[bool, List[str]]:
+    """returns two values: first value is a bool that will be true if there's a perfect match, the second one is a list
+    of matches"""
+    provided_id = str(provided_id)
+    ids_list = [str(_id) for _id in ids_list]
+
+    # check for perfect match first
+    for _id in ids_list:
+        if provided_id == _id:
+            return True, [_id]
+
+    matches = []
+    for _id in ids_list:
+        if _id.startswith(provided_id):
+            matches.append(_id)
+
+    return False, matches

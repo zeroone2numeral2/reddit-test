@@ -91,6 +91,13 @@ def on_sub_command(update: Update, context: CallbackContext):
         update.message.reply_text('Cannot find any subreddit (filter: {})'.format(name_filter))
         return ConversationHandler.END
 
+    # we temporarily store the list of subreddits id we showed the user and from which he can pick a subreddit.
+    # it can be used later in case we want to implement a "smart selection", for exmample:
+    # - user is shown a list of subreddits: 123. r/aaa; 344. r/bbb; 345. r/ccc
+    # - the user sends "1"
+    # - we assume he wanted to select "123. r/aaa" because it's the only one which id starts by "1"
+    context.user_data["__list_selection"] = [str(s.id) for s in subreddits]
+
     buttons_list = ['{}. /{}/{} ({})'.format(s.id, 'm' if s.is_multireddit else 'r', s.name, s.channel.title if s.channel else 'no channel') for s in subreddits]
     reply_markup = Keyboard.from_list(buttons_list)
 
@@ -141,7 +148,21 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     subreddit_key = int(re.search(r'^(\d+).*', update.message.text, re.I).group(1))
     logger.debug('subreddit id: %d', subreddit_key)
 
+    _, matches = u.id_match_from_list(subreddit_key, context.user_data["__list_selection"])
+    if not matches:
+        update.message.reply_text("No match for <{}>, pick another subreddit".format(subreddit_key))
+        return Status.SUBREDDIT_SELECT
+    elif len(matches) > 1:
+        update.message.reply_text("Multiple matches for <{}>, pick another one".format(subreddit_key))
+        return Status.SUBREDDIT_SELECT
+
+    logger.debug("matches: %s", matches)
+
+    subreddit_key = int(matches[0])
     subreddit = Subreddit.get(Subreddit.id == subreddit_key)
+
+    # remove the temporary key
+    context.user_data.pop("__list_selection", None)
 
     context.user_data['data'] = dict()
     context.user_data['data']['subreddit'] = subreddit

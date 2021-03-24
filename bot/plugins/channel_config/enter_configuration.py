@@ -1,4 +1,5 @@
 import logging
+import re
 
 import peewee
 from telegram import Update
@@ -75,16 +76,22 @@ Use /exit to exit the configuration, or /channel to change the channel to config
 def on_channel_command(update: Update, context: CallbackContext):
     logger.debug('/channel: selecting channel, text: %s', update.message.text)
 
-    channels_list = Channel.get_list()
+    title_filter = context.args[0] if context.args else None
+    channels_list: [Channel] = Channel.get_list_2(title_filter=title_filter)
     if not channels_list:
         update.message.reply_text('No saved channel. Use /addchannel to add a channel')
         return ConversationHandler.END
 
-    if len(context.args) > 0:
-        channel_title_filter = context.args[0].lower()
-        channels_list = [c for c in channels_list if channel_title_filter in c.lower()]
+    context.user_data["__list_selection"] = []
 
-    reply_markup = Keyboard.from_list(channels_list)
+    buttons_list = []
+    for channel in channels_list:
+        channel_id = str(channel.channel_id).replace('-100', '')
+        buttons_list.append('{}. {}'.format(channel_id, channel.title))
+
+        context.user_data["__list_selection"].append(channel_id)  # also happend the formatted id here
+
+    reply_markup = Keyboard.from_list(buttons_list)
     update.message.reply_text('Select the channel (or /cancel):', reply_markup=reply_markup)
 
     return Status.WAITING_CHANNEL_SELECTION
@@ -173,14 +180,30 @@ def on_timeout(update: Update, context: CallbackContext, channel: Channel):
 def on_channel_selected(update: Update, context: CallbackContext):
     logger.info('/channel command: channel selected (%s)', update.message.text)
 
-    channel_id = u.expand_channel_id(update.message.text)
-    logger.info('channel_id: %d', channel_id)
+    channel_key = int(re.search(r'^(\d+).*', update.message.text, re.I).group(1))
+    logger.info('channel_id: %d', channel_key)
+
+    _, matches = u.id_match_from_list(channel_key, context.user_data["__list_selection"])
+    if not matches:
+        update.message.reply_text("No match for <{}>, pick another subreddit".format(channel_key))
+        return Status.WAITING_CHANNEL_SELECTION
+    elif len(matches) > 1:
+        update.message.reply_text("Multiple matches for <{}>, pick another one".format(channel_key))
+        return Status.WAITING_CHANNEL_SELECTION
+
+    logger.debug("matches: %s", matches)
+
+    # we have to expand it to add the -100
+    channel_id = u.expand_channel_id(matches[0])
 
     try:
         channel = Channel.get(Channel.channel_id == channel_id)
     except peewee.DoesNotExist:
         update.message.reply_text('No channel found for "{}", try again or /cancel'.format(update.message.text))
         return Status.WAITING_CHANNEL_SELECTION
+
+    # remove the temporary key
+    context.user_data.pop("__list_selection", None)
 
     context.user_data['data'] = dict()
     context.user_data['data']['channel'] = channel

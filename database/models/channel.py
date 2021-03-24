@@ -79,6 +79,20 @@ class Channel(peewee.Model):
         return return_list
 
     @classmethod
+    def get_list_2(cls, title_filter=None):
+        channels = (
+            cls.select()
+                # .order_by(peewee.fn.lower(cls.name))
+                .order_by(cls.added)
+        )
+
+        if not title_filter:
+            return [channel for channel in channels]
+        else:
+            title_filter_lower = title_filter.lower()
+            return [channel for channel in channels if title_filter_lower in channel.title.lower()]
+
+    @classmethod
     def get_all(cls):
         all_channels = (
             cls.select()
