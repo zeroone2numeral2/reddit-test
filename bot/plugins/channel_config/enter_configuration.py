@@ -30,6 +30,7 @@ from .channel_configuration.index_channel import channelconfig_on_private_comman
 from .channel_configuration.index_channel import channelconfig_on_public_command
 from .channel_configuration.disable import channelconfig_on_enable_command
 from .channel_configuration.disable import channelconfig_on_disable_command
+from .channel_configuration.postmsg import channelconfig_on_postmsg_command
 from .channel_configuration.style import channelconfig_on_style_command
 from .channel_configuration.style import channelconfig_on_style_selected
 from .channel_configuration.style import channelconfig_waiting_style_unknown_message
@@ -50,6 +51,7 @@ HELP_TEXT = """<b>Available commands</b>
 /exportlink: export and save the channel invite link
 /updatechat: update the channel data
 /getadmins: see the admins list and the bot permissions
+/postmsg <code>[text]</code>: post a message in the channel (link preview disabled) 
 /subs: list linked subreddits
 /public or /private: post/don't post the channel in the index channel
 /unposted: mark the channel as not posted in the index channel
@@ -246,6 +248,7 @@ mainbot.add_handler(ConversationHandler(
             CommandHandler(['private'], channelconfig_on_private_command),
             CommandHandler(['public'], channelconfig_on_public_command),
             CommandHandler(['unposted'], channelconfig_on_unposted_command),
+            CommandHandler(['postmsg'], channelconfig_on_postmsg_command),
             CommandHandler(['style'], channelconfig_on_style_command),
             CommandHandler(['enable'], channelconfig_on_enable_command),
             CommandHandler(['sproperty', 'prop'], channelconfig_on_sproperty_command),
