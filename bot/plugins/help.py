@@ -18,7 +18,7 @@ HELP_STRING = """\
 /addsub `[subreddit name] <channel title filter>`: register a subreddit
 /addmulti `[creator] [multireddit name] <channel title filter>`: add a multireddit to a channel
 /sub `<filter>`: change a subreddit configuration. The bot will list the available commands once a channel is selected
-/subs: list all subreddits
+/subs: list all subreddits (flags: `-d`: list only disabled subreddits)
 /dailyposts: list all subreddits sorted by number of daily posts
 /icon `[subreddit]`: get that subreddit icon as a file (works with non saved subreddits)
 /optin `[subreddit]`: allow the current account to use the API to interact to a quarantined subreddit. Accepts any \

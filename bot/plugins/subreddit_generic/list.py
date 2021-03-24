@@ -20,9 +20,16 @@ def subs_list(update: Update, _):
     if not subreddits:
         update.message.reply_text('The list is empty')
         return
+
+    disabled_only = False
+    if update.message.text.endswith("-d"):
+        disabled_only = True
     
     strings = list()
     for i, sub in enumerate(subreddits):
+        if disabled_only and sub.enabled:
+            continue
+
         string = '{}. <code>{}</code> ({}, {})'.format(
             i + 1,
             sub.name,
