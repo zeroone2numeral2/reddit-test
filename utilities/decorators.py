@@ -316,7 +316,7 @@ def logconversation(stop_propagation=True, cleanup_data_on_end=True):
             if step_returned == -1 and cleanup_data_on_end:
                 # -1 --> ConversationHandler.END
                 # clean up temporrary data when the conversation ends
-                tmp_keys = ["_last_returned_step", "data"]
+                tmp_keys = ["_last_returned_step", "data", "_list_selection"]
                 Log.conv.debug("conversation end: cleaning up temporary data: %s", ", ".join(tmp_keys))
                 for key in tmp_keys:
                     context.user_data.pop(key, None)
