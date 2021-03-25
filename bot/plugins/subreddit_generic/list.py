@@ -31,12 +31,13 @@ def subs_list(update: Update, context: CallbackContext):
         if disabled_only and sub.enabled:
             continue
 
-        string = '{}. <code>{}</code> ({}, {})'.format(
+        string = '{}. {} <code>{}</code> ({}, {})'.format(
             i + 1,
+            sub.id,
             sub.name,
             # sub.added.strftime('%d/%m/%Y') if sub.added else '??/??/????',
-            sub.html_deeplink(context.bot.username, "⚙️"),
-            sub.channel.title if sub.channel else 'no channel'
+            sub.channel.title if sub.channel else 'no channel',
+            sub.html_deeplink(context.bot.username, "⚙️")
         )
         strings.append(string)
 
