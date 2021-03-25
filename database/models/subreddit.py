@@ -191,6 +191,11 @@ class Subreddit(peewee.Model):
     def deeplink(self, bot_username):
         return "https://t.me/{}?start=sub_config_id_{}".format(bot_username, self.id)
 
+    def html_deeplink(self, bot_username, text):
+        deeplink = self.deeplink(bot_username)
+
+        return '<a href="{}">{}</a>'.format(deeplink, text)
+
     def expected_number_of_daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
         n = 0
 

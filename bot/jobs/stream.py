@@ -408,10 +408,11 @@ def check_posts(context: CallbackContext, jobs_log_row: Job = None) -> JobResult
                 error_description = str(future.exception())
                 future.subreddit.logger.error('error while processing subreddit r/%s: %s', future.subreddit.name, error_description, exc_info=True)
 
-                text = '{} - {} - <code>{}</code>'.format(
-                    error_hashtag,
-                    future.subreddit.r_name_with_id,
-                    u.escape(error_description)
+                text = '{hashtag} - {sub_name} ({config_deeplink}) - <code>{error_desc}</code>'.format(
+                    hashtag=error_hashtag,
+                    sub_name=future.subreddit.r_name_with_id,
+                    config_deeplink=future.subreddit.html_deeplink(context.bot.username, "config"),
+                    error_desc=u.escape(error_description)
                 )
                 botutils.log(text=text, parse_mode=ParseMode.HTML)
 
