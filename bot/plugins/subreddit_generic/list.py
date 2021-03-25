@@ -1,7 +1,7 @@
 import logging
 
 from telegram import Update
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, CallbackContext
 
 from bot import mainbot
 from database.models import Subreddit
@@ -13,7 +13,7 @@ logger = logging.getLogger('handler')
 
 @d.restricted
 @d.failwithmessage
-def subs_list(update: Update, _):
+def subs_list(update: Update, context: CallbackContext):
     logger.info('/subs command')
 
     subreddits = Subreddit.get_list()
@@ -26,6 +26,7 @@ def subs_list(update: Update, _):
         disabled_only = True
     
     strings = list()
+    sub: Subreddit
     for i, sub in enumerate(subreddits):
         if disabled_only and sub.enabled:
             continue
@@ -33,7 +34,8 @@ def subs_list(update: Update, _):
         string = '{}. <code>{}</code> ({}, {})'.format(
             i + 1,
             sub.name,
-            sub.added.strftime('%d/%m/%Y') if sub.added else '??/??/????',
+            # sub.added.strftime('%d/%m/%Y') if sub.added else '??/??/????',
+            sub.html_deeplink(context.bot.username, "⚙️"),
             sub.channel.title if sub.channel else 'no channel'
         )
         strings.append(string)
