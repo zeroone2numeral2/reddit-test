@@ -1,6 +1,7 @@
 import logging
 import re
 
+from peewee import DoesNotExist
 from telegram import Update, ParseMode
 from telegram.ext import MessageHandler, CommandHandler, CallbackContext, CallbackQueryHandler
 from telegram.ext import Filters
@@ -96,7 +97,7 @@ def on_sub_command(update: Update, context: CallbackContext):
     # - user is shown a list of subreddits: 123. r/aaa; 344. r/bbb; 345. r/ccc
     # - the user sends "1"
     # - we assume he wanted to select "123. r/aaa" because it's the only one which id starts by "1"
-    context.user_data["__list_selection"] = [str(s.id) for s in subreddits]
+    context.user_data["_list_selection"] = [str(s.id) for s in subreddits]
 
     buttons_list = ['{}. /{}/{} ({})'.format(s.id, 'm' if s.is_multireddit else 'r', s.name, s.channel.title if s.channel else 'no channel') for s in subreddits]
     reply_markup = Keyboard.from_list(buttons_list)
@@ -141,6 +142,28 @@ def on_subreddit_selected_wrong(update: Update, _):
 @d.restricted
 @d.failwithmessage
 @d.logconversation()
+def on_subreddit_deeplink(update: Update, context: CallbackContext):
+    logger.debug("subreddit deeplink, matches: %s", context.matches)
+
+    subreddit_id = int(context.matches[0].group(1))
+    try:
+        subreddit = Subreddit.get(Subreddit.id == subreddit_id)
+    except DoesNotExist:
+        update.message.reply_html("Invalid deeplink: subreddit with id {} does not exist".format(subreddit_id))
+        return ConversationHandler.END
+
+    context.user_data['data'] = dict()
+    context.user_data['data']['subreddit'] = subreddit
+
+    text = TEXT.format(s=subreddit)
+    update.message.reply_html(text, disable_web_page_preview=True, reply_markup=Keyboard.REMOVE)
+
+    return Status.WAITING_SUBREDDIT_CONFIG_ACTION
+
+
+@d.restricted
+@d.failwithmessage
+@d.logconversation()
 def on_subreddit_selected(update: Update, context: CallbackContext):
     logger.info('/sub command: subreddit selected (%s)', update.message.text)
 
@@ -148,7 +171,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     subreddit_key = int(re.search(r'^(\d+).*', update.message.text, re.I).group(1))
     logger.debug('subreddit id: %d', subreddit_key)
 
-    _, matches = u.id_match_from_list(subreddit_key, context.user_data["__list_selection"])
+    _, matches = u.id_match_from_list(subreddit_key, context.user_data["_list_selection"])
     if not matches:
         update.message.reply_text("No match for <{}>, pick another subreddit".format(subreddit_key))
         return Status.SUBREDDIT_SELECT
@@ -162,7 +185,7 @@ def on_subreddit_selected(update: Update, context: CallbackContext):
     subreddit = Subreddit.get(Subreddit.id == subreddit_key)
 
     # remove the temporary key
-    context.user_data.pop("__list_selection", None)
+    context.user_data.pop("_list_selection", None)
 
     context.user_data['data'] = dict()
     context.user_data['data']['subreddit'] = subreddit
@@ -335,6 +358,7 @@ mainbot.add_handler(ConversationHandler(
     name="subreddit_config",
     entry_points=[
         CommandHandler(['sub', 'subreddit', 'subconfig'], on_sub_command, filters=~CustomFilters.ongoing_conversation),
+        CommandHandler(["start"], on_subreddit_deeplink, filters=~CustomFilters.ongoing_conversation & Filters.regex(r"sub_config_id_(\d+)")),
         CallbackQueryHandler(on_configure_inline_button, pattern=r'configsub:(\d+)', pass_groups=True)
     ],
     states={
