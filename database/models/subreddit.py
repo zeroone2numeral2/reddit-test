@@ -188,6 +188,9 @@ class Subreddit(peewee.Model):
 
         return self.enabled and self.channel and self.channel.enabled
 
+    def deeplink(self, bot_username):
+        return "https://t.me/{}?start=sub_config_id_{}".format(bot_username, self.id)
+
     def expected_number_of_daily_posts(self, days=1, ignore_number_of_posts=False, print_debug=False):
         n = 0
 

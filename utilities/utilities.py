@@ -5,7 +5,6 @@ from math import floor
 import urllib.request as urllib
 from mimetypes import guess_type
 from typing import Tuple, List
-
 import pytz
 from pytz.tzinfo import DstTzInfo
 import math
