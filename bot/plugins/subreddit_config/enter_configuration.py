@@ -16,6 +16,7 @@ from bot.markups import Keyboard, InlineKeyboard
 from .subreddit_configuration.dbentry import subconfig_on_entry_change
 from .subreddit_configuration.info import subconfig_on_info_command
 from .subreddit_configuration.disable import subconfig_on_disable_command
+from .subreddit_configuration.disable import subconfig_on_enable_command
 from .subreddit_configuration.remove import subconfig_on_remove_command
 from .subreddit_configuration.seticon import subconfig_on_setchannelicon_command
 from .subreddit_configuration.frequency import subconfig_on_freq_command
@@ -372,6 +373,7 @@ mainbot.add_handler(ConversationHandler(
             MessageHandler(Filters.text & CustomFilters.subreddit_set & ~Filters.command, subconfig_on_entry_change),
             CommandHandler(['info'], subconfig_on_info_command),
             CommandHandler(['disable'], subconfig_on_disable_command),
+            CommandHandler(['enable'], subconfig_on_enable_command),
             CommandHandler(['remove', 'rem'], subconfig_on_remove_command),
             CommandHandler(['freq'], subconfig_on_freq_command),
             CommandHandler(['setchannelicon'], subconfig_on_setchannelicon_command),
