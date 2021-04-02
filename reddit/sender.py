@@ -173,7 +173,13 @@ class Sender:
         self._submission.channel_username = self._subreddit.channel_username(default='')
 
         if not skip_sender_type_detection and not self._subreddit.force_text:
-            self._detect_sender_type(sender_kwargs)
+            try:
+                self._detect_sender_type(sender_kwargs)
+            except Exception as e:
+                # this function might raise an error during the initialization of a class. For example, the Imgur
+                # sender's __init__ method makes an API request that might raise an exception (eg. 404,
+                # see submission "mifqyq" for an example)
+                self.log.error("error while initializing the sender type: %s", str(e), exc_info=True)
         else:
             self.log.info(
                 'skipping sender type detection (skip_sender_type_detection: %s, self._subreddit.force_text: %s)',
