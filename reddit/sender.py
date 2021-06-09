@@ -48,6 +48,9 @@ DEFAULT_THUMBNAILS = {
     'spoiler': 'https://www.reddit.com/static/self_default2.png'  # this is actually not the correct icon
 }
 
+SUBSCRIPT = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")  # https://stackoverflow.com/a/24392215
+SUPERSCRIPT = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
+
 
 class Sender:
     __slots__ = ['_bot', '_subreddit', '_submission', '_sent_messages', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
@@ -88,6 +91,8 @@ class Sender:
         self._submission.video_size = (None, None)
         self._submission.video_duration = 0
         self._submission.upvote_perc = int(self._submission.upvote_ratio * 100)
+        self._submission.upvote_perc_subscript = str(self._submission.upvote_perc).translate(SUBSCRIPT)
+        self._submission.upvote_perc_superscript = str(self._submission.upvote_perc).translate(SUPERSCRIPT)
         self._submission.author_username_lower = str(self._submission.author).lower()
         self._submission_dict = dict()
 
