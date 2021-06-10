@@ -1,15 +1,22 @@
 [general]
 # preferred mode can be changed using /usagemode
 prefer_default_account = false # to execute requests, prefer the default account and its least used client
-prefer_least_used_account = false # to execute requests, prefere the least used account instead of the default one
-prefer_least_used_client = true # to execute requests, prefere the least used client(and its account) instead of the default one
+prefer_least_used_account = false # to execute requests, prefer the least used account instead of the default one
+prefer_least_used_client = true # to execute requests, prefer the least used client (and its account) instead of the default one
 stress_threshold_hours = 48 # when calculating the least used account, consider the requests sent in the past n hours
+
+
+########################
+### ACCOUNT NUMBER 1 ###
+########################
 
 [[accounts]]
 default = true
 username = ""
 password = ""
 
+### ACCOUNT NUMBER 1'S FIRST CLIENT
+
 [[accounts.clients]]
 default = true
 name = "unique-name-1"
@@ -17,17 +24,25 @@ client_id = ""
 client_secret = ""
 user_agent = ""
 
+### ACCOUNT NUMBER 1'S SECOND CLIENT
+
 [[accounts.clients]]
-name = "unique-name-1"
+name = "unique-name-2"
 client_id = ""
 client_secret = ""
 user_agent = ""
 
 
 
+########################
+### ACCOUNT NUMBER 2 ###
+########################
+
 [[accounts]]
 username = "username"
 password = ""
+
+### ACCOUNT NUMBER 2'S FIRST CLIENT
 
 [[accounts.clients]]
 name = "unique-name-1"

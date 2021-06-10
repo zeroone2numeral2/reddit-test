@@ -1,18 +1,18 @@
 [telegram]
 workers = 1
-token = "" #  # CHANGEME
-log = -1001141547703 # CHANGEME
-admins = [23646077] # CHANGEME
+token = ""  # CHANGEME: your bot API token from @botfather
+log = -1001141547703 # CHANGEME: the chat id where to post warnings and errors
+admins = [23646077] # CHANGEME: the user that can configure the bot
 index = "reddit_mirrors" # telegram channel with the channels index
 send_images_by_url = true # true: always try to send images by url first, download them only when sendign by url fails
-testing = false # subreddit added when this is 'true' will be considered testing subreddits (the bot won't save posted submissions)
+testing = false # subreddit added when this value is 'true' will be considered testing subreddits (the bot won't save posted submissions)
 
 [pyrogram]
 enabled = true
 session_name = "redditbot"
 workers = 0
-api_id = 12345 # CHANGEME
-api_hash = "" # CHANGEME
+api_id = 12345 # CHANGEME: your API id
+api_hash = "" # CHANGEME: your API hash
 
 [jobs]
 posts_cooldown = 1 # how much to sleep when a message is posted, in seconds
@@ -27,8 +27,8 @@ filename = "db.sqlite"
 [imgur]
 # get your secret keys from here: https://api.imgur.com/oauth2/addclient
 # more info: https://github.com/faustocarrera/imgur-python/wiki
-id = "" # CHANGEME
-secret = "" # CHANGEME
+id = "" # CHANGEME: your imgur client id
+secret = "" # CHANGEME: your imgur client secret
 
 [ffmpeg]
 cmd_path = "ffmpeg"
