@@ -1,4 +1,4 @@
-## Subreddits mirror bot
+# Subreddits mirror bot
 
 Stupidly simple bot horribly put together in a short time to provide a way to create Telegram channels that mirror one or more subreddits.
 
