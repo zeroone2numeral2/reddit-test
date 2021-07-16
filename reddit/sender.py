@@ -94,6 +94,7 @@ class Sender:
         self._submission.upvote_perc_subscript = str(self._submission.upvote_perc).translate(SUBSCRIPT)
         self._submission.upvote_perc_superscript = str(self._submission.upvote_perc).translate(SUPERSCRIPT)
         self._submission.author_username_lower = str(self._submission.author).lower()
+        self._submission.channel_username = self._subreddit.channel_username(default="")
         self._submission_dict = dict()
 
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
@@ -290,7 +291,7 @@ class Sender:
             val = getattr(self._subreddit, key)
             # try to stringify val, otherwise continue
             try:
-                str(val)  # no need to convert to string, we just have to try to
+                str(val)  # no need to convert to string, we just have to try to (str.format() will do it later)
             except ValueError:
                 continue
 
