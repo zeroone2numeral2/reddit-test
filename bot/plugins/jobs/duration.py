@@ -75,14 +75,16 @@ def lastjob_command(update: Update, _):
             u.pretty_seconds(int(diff_seconds))
         )
 
-        text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total}'.format(
+        text += '\n\n<b>{name}</b>:\n• started: {started}\n• ended: {ended}\n• lasted: {elapsed}\n• every {interval} minutes\n• progress: {current}/{total} ({messages} messages, {bytes} uploaded)'.format(
             name=job_name,
             started=started,
             ended=ended,
             elapsed=u.pretty_seconds(job_duration.duration) if job_duration.duration is not None else 'running',
             interval=job_info['interval'],
             current=job_duration.subreddits_progress,
-            total=job_duration.subreddits_count
+            total=job_duration.subreddits_count,
+            messages=job_duration.posted_messages or '-',
+            bytes=u.human_readable_size(job_duration.uploaded_bytes) or '-',
         )
 
     if not text:
