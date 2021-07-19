@@ -94,7 +94,7 @@ class Sender:
         self._submission.upvote_perc_subscript = str(self._submission.upvote_perc).translate(SUBSCRIPT)
         self._submission.upvote_perc_superscript = str(self._submission.upvote_perc).translate(SUPERSCRIPT)
         self._submission.author_username_lower = str(self._submission.author).lower()
-        self._submission.channel_username = self._subreddit.channel_username(default="")
+        self._submission.target_username = self._subreddit.channel_username(default="")
         self._submission_dict = dict()
 
         # for crossposts: only the reference to the original post contains the 'media' attribute of the submission.
@@ -451,7 +451,6 @@ class Sender:
             )
 
     def test_filters(self):
-        print(self._submission.author_username_lower, self._subreddit.get_users_blacklist())
         if self._subreddit.ignore_stickied and self._submission.stickied:
             self.log.info('tests failed: sticked submission')
             return False
