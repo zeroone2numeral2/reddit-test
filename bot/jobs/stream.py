@@ -278,7 +278,19 @@ class SubredditTask(Task):
                 time.sleep(config.jobs.posts_cooldown)  # sleep some seconds before posting
                 sent_messages = sender.post()
             except (BadRequest, TelegramError) as e:
-                subreddit.logger.error('Telegram error while posting the message: %s', str(e), exc_info=True)
+                error_description = str(e)
+                error_hashtag = '#mirrorbot_error_{}_posting'.format(bot.username)
+
+                subreddit.logger.error('Telegram error while posting the message: %s', error_description, exc_info=True)
+
+                text = '{hashtag} - {sub_name} ({config_deeplink}) - <code>{error_desc}</code>'.format(
+                    hashtag=error_hashtag,
+                    sub_name=subreddit.r_name_with_id,
+                    config_deeplink=subreddit.html_deeplink(bot.username, "config"),
+                    error_desc=u.escape(error_description)
+                )
+                botutils.log(text=text, parse_mode=ParseMode.HTML)
+
                 continue
             except Exception as e:
                 subreddit.logger.error('generic error while posting the message: %s', str(e), exc_info=True)
