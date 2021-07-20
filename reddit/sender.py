@@ -4,6 +4,7 @@ import datetime
 import os
 from collections import OrderedDict
 from pprint import pformat
+from typing import List, Tuple
 from urllib.parse import urlparse
 
 from telegram import Bot
@@ -54,7 +55,7 @@ SUPERSCRIPT = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
 
 class Sender:
     __slots__ = ['_bot', '_subreddit', '_submission', '_sent_messages', '_uploaded_bytes', '_chat_id', '_submission_dict', 'log',
-                 'submission_handler', 'submission_handler_text']
+                 'submission_handler', 'submission_handler_text', 'debug_text_to_post']
 
     def __init__(self, bot, subreddit, submission, skip_sender_type_detection=False):
         self._bot: Bot = bot
@@ -67,6 +68,7 @@ class Sender:
 
         self._sent_messages = []
         self._uploaded_bytes = 0
+        self.debug_text_to_post = None  # we set this just before posting. Needed for parse mode debug
         sender_kwargs = dict(submission=self._submission, subreddit=self._subreddit, bot=self._bot)
         self.submission_handler_text = TextHandler(**sender_kwargs)
         self.submission_handler = TextHandler(**sender_kwargs)
@@ -390,6 +392,7 @@ class Sender:
         if not isinstance(self.submission_handler, TextHandler) and not self._subreddit.force_text:
             self.log.info('post is a media, sending it as media...')
             try:
+                self.debug_text_to_post = caption
                 self._sent_messages = self.submission_handler.post(caption, reply_markup=reply_markup)
                 self._sum_uploaded_bytes(self._sent_messages)
 
@@ -401,6 +404,7 @@ class Sender:
             self.log.info('post is NOT a media (or sending medias is disabled for the sub), sending it as text')
 
         self.log.info('posting a text...')
+        self.debug_text_to_post = text
         self._sent_messages = self.submission_handler_text.post(text, reply_markup=reply_markup)
 
         return self._sent_messages

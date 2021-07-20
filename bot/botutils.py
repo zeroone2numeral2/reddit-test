@@ -6,7 +6,7 @@ def log(*args, raise_on_missing_logchat=False, **kwargs):
 
     if not config.telegram.get("log", None):
         if raise_on_missing_logchat:
-            raise KeyError("config.telegram.bot not filled")
+            raise KeyError("config.telegram.log not filled")
         else:
             return False
 

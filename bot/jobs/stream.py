@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import Future
 from concurrent.futures import TimeoutError
 
-from telegram import ParseMode, Bot
+from telegram import ParseMode, Bot, Message
 from telegram.error import BadRequest
 from telegram.error import TelegramError
 from telegram.ext import CallbackContext
@@ -283,13 +283,17 @@ class SubredditTask(Task):
 
                 subreddit.logger.error('Telegram error while posting the message: %s', error_description, exc_info=True)
 
-                text = '{hashtag} - {sub_name} ({config_deeplink}) - <code>{error_desc}</code>'.format(
+                error_text = '{hashtag} - {sub_name} ({config_deeplink}) - <code>{error_desc}</code>'.format(
                     hashtag=error_hashtag,
                     sub_name=subreddit.r_name_with_id,
                     config_deeplink=subreddit.html_deeplink(bot.username, "config"),
                     error_desc=u.escape(error_description)
                 )
-                botutils.log(text=text, parse_mode=ParseMode.HTML)
+
+                log_message: Message = botutils.log(text=error_text, parse_mode=ParseMode.HTML)
+                if "can't parse entities" in error_description.lower():
+                    # also post the text that caused the error
+                    log_message.reply_text(sender.debug_text_to_post, parse_mode=None, disable_web_page_preview=True)
 
                 continue
             except Exception as e:
