@@ -29,7 +29,7 @@ def remffmpeglogs_command(update, _):
 @d.restricted
 @d.failwithmessage
 def remalllogs_command(update, _):
-    logger.info('/remalllogs command')
+    logger.info('/remlogs command')
 
     count = 0
     for dir_path, dir_names, file_names in os.walk('logs'):
