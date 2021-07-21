@@ -291,9 +291,19 @@ class SubredditTask(Task):
                 )
 
                 log_message: Message = botutils.log(text=error_text, parse_mode=ParseMode.HTML)
-                if "can't parse entities" in error_description.lower():
+                error_description = error_description.lower()
+                if "can't parse entities" in error_description:
                     # also post the text that caused the error
                     log_message.reply_text(sender.debug_text_to_post, parse_mode=None, disable_web_page_preview=True)
+                elif "bot was kicked from the channel chat" in error_description:
+                    with db.atomic():
+                        # directly disable the channel, not just the subreddit
+                        subreddit.channel.disable()
+
+                    log_message.reply_text(f'Channel "{subreddit.channel.title}" disabled (#channel_disabled)\n'
+                                           f'Link: {subreddit.channel.get_invite_link(default="-")}', disable_web_page_preview=True)
+
+                    return job_result  # we don't need to process other Sender instances
 
                 continue
             except Exception as e:
