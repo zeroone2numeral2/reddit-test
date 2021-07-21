@@ -91,7 +91,8 @@ class ImageHandler(BaseSenderType):
             sent_message = self._send_image_base(image=self._url, caption=caption, reply_markup=reply_markup)
         except TelegramError as e:
             # if sending by url fails, try to download the image and post it
-            if 'failed to get http url content' not in e.message.lower() and 'wrong file identifier/http url specified' not in e.message.lower():
+            e_lower = e.message.lower()
+            if 'failed to get http url content' not in e_lower and 'wrong file identifier/http url specified' not in e_lower and 'wrong type of the web page content' not in e_lower:
                 raise e
 
             self.log.info('sending by url failed: trying to dowload image url')
