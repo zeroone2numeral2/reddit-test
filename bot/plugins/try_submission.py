@@ -47,13 +47,17 @@ def try_submission(update, context):
 
     tmp_subreddit.logger = logger
     sender = Sender(context.bot, tmp_subreddit, submission)
-    
-    file_path = sender.write_temp_submission_dict()
 
-    with open(file_path, 'rb') as f:
-        update.message.reply_document(f)
+    # noinspection PyBroadException
+    try:
+        file_path = sender.write_temp_submission_dict()
 
-    os.remove(file_path)
+        with open(file_path, 'rb') as f:
+            update.message.reply_document(f)
+
+        os.remove(file_path)
+    except Exception as e:
+        update.message.reply_text(f"failed to send submission_dict: {str(e)}")
     
     sender.post(chat_id=update.message.chat.id)
 
