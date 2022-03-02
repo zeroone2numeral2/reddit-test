@@ -10,7 +10,7 @@ from config import config
 # from apscheduler.schedulers.background import BackgroundScheduler
 
 
-mainbot = RedditBot(token=config.telegram.token, workers=1)
+mainbot = RedditBot(token=config.telegram.token, workers=0)
 
 # scheduler = BackgroundScheduler(daemon=True)
 
