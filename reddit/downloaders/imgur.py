@@ -1,7 +1,7 @@
 import re
 
 from imgurpython import ImgurClient
-from imgurpython.helpers.error import ImgurClientError
+from imgurpython.helpers.error import ImgurClientError, ImgurClientRateLimitError
 
 from config import config
 
@@ -30,7 +30,7 @@ class Imgur(ImgurClient):
                 ImgurClient.__init__(self, *args, **kwargs)
             else:
                 ImgurClient.__init__(self, config.imgur.id, config.imgur.secret, *args, **kwargs)
-        except ImgurClientError:
+        except (ImgurClientError, ImgurClientRateLimitError):
             pass
     
     def get_url(self, image_id):
